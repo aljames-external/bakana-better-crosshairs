@@ -16,6 +16,9 @@
     "esmodules": [
         "src/module.js"
     ],
+    "styles": [
+        "styles/bakana-crosshairs.css"
+    ],
     "languages": [
         {
             "lang": "en",

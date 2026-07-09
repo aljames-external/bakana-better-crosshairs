@@ -1,0 +1,172 @@
+<div class="bbc-autorec-container">
+    <header class="bbc-autorec-topbar">
+        <div class="bbc-search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="bbc-autorec-search" class="bbc-search-input" placeholder="Filter registered workflows (e.g. Fireball)..." autocomplete="off" />
+        </div>
+        <div class="bbc-count-badge">
+            <i class="fa-solid fa-list-check"></i>
+            <span>{{count}} Registered Workflows</span>
+        </div>
+    </header>
+
+    <div class="bbc-autorec-layout">
+        <!-- Left Sidebar: Registered Item Names -->
+        <aside class="bbc-sidebar">
+            {{#if isEmpty}}
+            <div class="bbc-sidebar-empty">
+                <i class="fa-solid fa-folder-open"></i>
+                <p>No crosshair animations registered yet.</p>
+            </div>
+            {{else}}
+            <div class="bbc-items-list">
+                {{#each entries}}
+                <div class="bbc-item-card" data-item-name="{{itemName}}">
+                    <div class="bbc-card-main">
+                        <i class="fa-solid fa-crosshairs bbc-item-icon"></i>
+                        <span class="bbc-item-name">{{itemName}}</span>
+                    </div>
+                    <div class="bbc-card-meta">
+                        <span class="bbc-type-badge {{typeKey}}">{{type}}</span>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+            {{/if}}
+        </aside>
+
+        <!-- Right Inspector: Comprehensive Configuration Sections -->
+        <main class="bbc-inspector">
+            <!-- Empty state when no item is selected -->
+            <div class="bbc-inspector-empty">
+                <div class="bbc-empty-card">
+                    <i class="fa-solid fa-wand-magic-sparkles bbc-empty-icon"></i>
+                    <h3>Select a Registered Workflow</h3>
+                    <p>Click on any item name in the sidebar to inspect its pre-animation, core animation, and post-animation configuration.</p>
+                </div>
+            </div>
+
+            <!-- Inspector detail panes for each item -->
+            {{#each entries}}
+            <div class="bbc-inspector-detail" data-item-name="{{itemName}}" style="display: none;">
+                <header class="bbc-detail-header">
+                    <div class="bbc-detail-title-row">
+                        <div class="bbc-title-left">
+                            <i class="fa-solid fa-crosshairs bbc-detail-icon"></i>
+                            <h2>{{itemName}}</h2>
+                        </div>
+                        <button type="button" class="bbc-copy-btn" data-copy-text="{{itemName}}" title="Copy Item Name">
+                            <i class="fa-solid fa-copy"></i> Copy Name
+                        </button>
+                    </div>
+                    <div class="bbc-detail-badges">
+                        <span class="bbc-type-badge {{typeKey}}"><i class="fa-solid fa-shapes"></i> {{type}} Crosshair</span>
+                        <span class="bbc-status-badge active"><i class="fa-solid fa-circle-check"></i> O(1) Indexed</span>
+                    </div>
+                </header>
+
+                <div class="bbc-sections-scroll">
+                    <!-- Section 1: Pre-Animation Configuration -->
+                    <section class="bbc-section-card">
+                        <div class="bbc-section-header">
+                            <div class="bbc-section-title">
+                                <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+                                <i class="fa-solid fa-play bbc-section-icon"></i>
+                                <h3>Pre-Animation Configuration</h3>
+                            </div>
+                            <span class="bbc-section-tag ready">Extensible Hook</span>
+                        </div>
+                        <div class="bbc-section-body">
+                            <p class="bbc-section-desc">Executes before the visual crosshair sequence initializes.</p>
+                            <table class="bbc-config-table">
+                                <tbody>
+                                    <tr>
+                                        <th>Trigger Tile Conditions</th>
+                                        <td>Preview intercept (Owner client drawing hook)</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Token Anchor Context</th>
+                                        <td>Automatic active token or controlled selection detection</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Preview Suppression</th>
+                                        <td>Default template shape &amp; ruler alpha set to 0 during interactive phase</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Section 2: Animation Configuration -->
+                    <section class="bbc-section-card">
+                        <div class="bbc-section-header">
+                            <div class="bbc-section-title">
+                                <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+                                <i class="fa-solid fa-film bbc-section-icon"></i>
+                                <h3>Animation Configuration</h3>
+                            </div>
+                            <span class="bbc-section-tag active">{{type}}</span>
+                        </div>
+                        <div class="bbc-section-body">
+                            <p class="bbc-section-desc">Sequencer crosshair graphic asset and interactive rendering properties.</p>
+                            <table class="bbc-config-table">
+                                <tbody>
+                                    <tr>
+                                        <th>Crosshair Shape Type</th>
+                                        <td><span class="bbc-pill">{{type}}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <th>Sequencer File Path</th>
+                                        <td>
+                                            <code class="bbc-code-pill">{{file}}</code>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Custom Function Handler</th>
+                                        <td>{{#if isCustomFunction}}<span class="bbc-pill yes">Yes (Custom Script)</span>{{else}}<span class="bbc-pill no">No (Declarative Config)</span>{{/if}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Interactive Rotation</th>
+                                        <td>Mousewheel (`Shift` for 1° fine step, 5° standard step)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Section 3: Post-Animation Configuration -->
+                    <section class="bbc-section-card">
+                        <div class="bbc-section-header">
+                            <div class="bbc-section-title">
+                                <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+                                <i class="fa-solid fa-flag-checkered bbc-section-icon"></i>
+                                <h3>Post-Animation Configuration</h3>
+                            </div>
+                            <span class="bbc-section-tag ready">Workflow Resume</span>
+                        </div>
+                        <div class="bbc-section-body">
+                            <p class="bbc-section-desc">Runs when the crosshair is placed (`CALLBACKS.PLACED`) or cancelled (`CALLBACKS.CANCEL`).</p>
+                            <table class="bbc-config-table">
+                                <tbody>
+                                    <tr>
+                                        <th>Placement Resolution</th>
+                                        <td>Insects coordinates &amp; rotation (`resolveCrosshairPlacement`)</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Target Document Injection</th>
+                                        <td>Updates `MeasuredTemplate` or Foundry V14 `Region` shape source</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Cleanup Lifecycle</th>
+                                        <td>Terminates local Sequencer effects (`Sequencer.EffectManager.endEffects`)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            {{/each}}
+        </main>
+    </div>
+</div>

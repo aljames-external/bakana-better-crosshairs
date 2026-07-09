@@ -523,6 +523,42 @@ function list() {
     return Array.from(registeredHandlers.keys());
 }
 
+/**
+ * Get all registered entries with structured metadata for UI inspection.
+ */
+function getAllEntries() {
+    const results = [];
+    for (const [itemName, handlerOrConfig] of registeredHandlers.entries()) {
+        let type = "circle";
+        let file = "";
+        let isCustomFunction = false;
+        let config = {};
+
+        if (typeof handlerOrConfig === "function") {
+            isCustomFunction = true;
+            type = "Custom Script";
+            file = "Function Handler";
+        } else if (typeof handlerOrConfig === "string") {
+            file = handlerOrConfig;
+            type = "circle";
+        } else if (typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
+            config = handlerOrConfig;
+            type = handlerOrConfig.type || "circle";
+            file = handlerOrConfig.file || handlerOrConfig.animationFile || "";
+        }
+
+        results.push({
+            itemName,
+            type: type.charAt(0).toUpperCase() + type.slice(1),
+            typeKey: type.toLowerCase(),
+            file: file || "Default Sequencer Asset",
+            isCustomFunction,
+            config,
+        });
+    }
+    return results.sort((a, b) => a.itemName.localeCompare(b.itemName));
+}
+
 export const template = {
     getPosition,
     register,
@@ -530,6 +566,7 @@ export const template = {
     has,
     get,
     list,
+    getAllEntries,
 };
 
 export const templates = template;

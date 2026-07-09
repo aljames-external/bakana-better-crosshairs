@@ -3,6 +3,7 @@ import { file, closest, absolutePath } from './lib/filemanager.js';
 import { log } from './lib/logger.js';
 import { template, templates } from './lib/templates.js';
 import { attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement, getTokenEdgePoint, snapCoordinates } from './crosshair/util.js';
+import { localize } from './lib/utils.js';
 import './settings.js';
 import { MODULE_ID } from './lib/constants.js';
 
@@ -21,6 +22,7 @@ Hooks.once('init', async () => {
         }
 
         const util = {
+            localize,
             file,
             closest,
             absolutePath,

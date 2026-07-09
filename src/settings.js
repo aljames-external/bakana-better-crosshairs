@@ -1,8 +1,18 @@
 import { MODULE_ID } from "./lib/constants.js";
 import { log } from './lib/logger.js';
+import { AutorecMenuApplication } from "./autorec/autorecMenu.js";
 
 Hooks.once('init', function() {
     log.info("Initializing Bakana's Better Crosshairs settings");
+
+    game.settings.registerMenu(MODULE_ID, 'autorecMenu', {
+        name: 'BBC.settings.autorecMenu.name',
+        label: 'BBC.settings.autorecMenu.label',
+        hint: 'BBC.settings.autorecMenu.hint',
+        icon: 'fa-solid fa-wand-magic-sparkles',
+        type: AutorecMenuApplication,
+        restricted: false
+    });
 
     game.settings.register(MODULE_ID, 'logVerbosity', {
         name: 'BBC.settings.logVerbosity.name',

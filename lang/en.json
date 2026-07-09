@@ -1,6 +1,11 @@
 {
     "BBC": {
         "settings": {
+            "autorecMenu": {
+                "name": "Autorecognition Menu",
+                "label": "View Autorecognition",
+                "hint": "Inspect and explore all registered crosshair animation workflows."
+            },
             "logVerbosity": {
                 "name": "Log Verbosity Level",
                 "hint": "Controls the level of detail printed to the browser console.",
@@ -11,6 +16,10 @@
                     "debug": "Debug (Everything)"
                 }
             }
+        },
+        "autorecMenu": {
+            "title": "Bakana's Better Crosshairs — Autorecognition Menu",
+            "menuHint": "Inspect registered crosshair animation workflows and their configuration."
         }
     }
 }
