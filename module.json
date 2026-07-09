@@ -1,0 +1,39 @@
+{
+    "id": "bakana-better-crosshairs",
+    "title": "Bakana's Better Crosshairs",
+    "description": "A Foundry VTT module to enhance crosshairs with Sequencer graphics.",
+    "version": "1.0.0",
+    "authors": [
+        {
+            "name": "Bakana!",
+            "url": "https://github.com/aljames-arctic"
+        }
+    ],
+    "compatibility": {
+        "minimum": "12",
+        "verified": "14"
+    },
+    "esmodules": [
+        "src/module.js"
+    ],
+    "languages": [
+        {
+            "lang": "en",
+            "name": "English",
+            "path": "lang/en.json"
+        }
+    ],
+    "url": "https://github.com/aljames-arctic/bakana-better-crosshairs",
+    "manifest": "https://github.com/aljames-arctic/bakana-better-crosshairs/releases/latest/download/module.json",
+    "download": "https://github.com/aljames-arctic/bakana-better-crosshairs/releases/latest/download/bakana-better-crosshairs.zip",
+    "license": "LICENSE",
+    "relationships": {
+        "requires": [
+            {
+                "id": "sequencer",
+                "type": "module",
+                "compatibility": {}
+            }
+        ]
+    }
+}
