@@ -2,6 +2,7 @@ import { log } from './logger.js';
 import { crosshair } from '../crosshair/_crosshairs.js';
 
 const registeredHandlers = new Map();
+const fastLookupMap = new Map();
 const pendingPlacements = new Map();
 let hooksInitialized = false;
 
@@ -36,58 +37,89 @@ function resolveItemAndActivity(target) {
     };
 }
 
+function indexRegistration(registeredKey, handler) {
+    let reqItem = registeredKey;
+    let reqActivity = handler?.activity;
+
+    if (registeredKey.includes("|")) {
+        const parts = registeredKey.split("|").map(p => p.trim());
+        reqItem = parts[0];
+        reqActivity = reqActivity || parts[1];
+    } else if (registeredKey.includes(":")) {
+        const parts = registeredKey.split(":").map(p => p.trim());
+        reqItem = parts[0];
+        reqActivity = reqActivity || parts[1];
+    }
+
+    const entry = { itemName: registeredKey, handler };
+
+    if (reqActivity) {
+        const iKeys = [reqItem, reqItem.toLowerCase()];
+        const aKeys = [reqActivity, reqActivity.toLowerCase()];
+        for (const ik of iKeys) {
+            for (const ak of aKeys) {
+                fastLookupMap.set(`${ik}|${ak}`, entry);
+                fastLookupMap.set(`${ik}:${ak}`, entry);
+            }
+        }
+    } else {
+        fastLookupMap.set(reqItem, entry);
+        fastLookupMap.set(reqItem.toLowerCase(), entry);
+    }
+}
+
+function rebuildFastLookupMap() {
+    fastLookupMap.clear();
+    for (const [key, handler] of registeredHandlers.entries()) {
+        indexRegistration(key, handler);
+    }
+}
+
 /**
- * Helper to match a template/region document or placeable to a registered item name.
+ * Helper to match a template/region document or placeable to a registered item name in O(1) time.
  * Supports:
  * - Item name or ID alone (e.g. "Longbow") -> matches all activities on Longbow
  * - Item and Activity name (e.g. "Longbow | Special Attack" or "Longbow: Special Attack") -> matches only that activity on Longbow
  */
 function getRegisteredEntry(target) {
-    const { item, itemName, itemId, activity, activityName, activityId } = resolveItemAndActivity(target);
+    if (!target) return null;
+    if (typeof target === "string") {
+        return fastLookupMap.get(target) || fastLookupMap.get(target.toLowerCase()) || null;
+    }
 
+    const { item, itemName, itemId, activity, activityName, activityId } = resolveItemAndActivity(target);
     if (!itemName && !itemId) return null;
 
-    let bestMatch = null;
-    let bestSpecificity = -1;
+    const lookupKeys = [];
 
-    for (const [registeredKey, handler] of registeredHandlers.entries()) {
-        let reqItem = registeredKey;
-        let reqActivity = handler?.activity;
-
-        if (registeredKey.includes("|")) {
-            const parts = registeredKey.split("|").map(p => p.trim());
-            reqItem = parts[0];
-            reqActivity = reqActivity || parts[1];
-        } else if (registeredKey.includes(":")) {
-            const parts = registeredKey.split(":").map(p => p.trim());
-            reqItem = parts[0];
-            reqActivity = reqActivity || parts[1];
-        }
-
-        const itemMatches = (reqItem.toLowerCase() === itemName?.toLowerCase()) || (reqItem === itemId);
-        if (!itemMatches) continue;
-
-        // 2. Check Activity match if requested
-        if (reqActivity) {
-            const activityMatches = (reqActivity.toLowerCase() === activityName?.toLowerCase()) || (reqActivity === activityId);
-            if (activityMatches && bestSpecificity < 2) {
-                bestMatch = { itemName: registeredKey, handler, item };
-                bestSpecificity = 2; // Specific item + activity match
-            }
-        } else {
-            // Item-only match (applies to all activities on that item)
-            if (bestSpecificity < 1) {
-                bestMatch = { itemName: registeredKey, handler, item };
-                bestSpecificity = 1;
+    // 1. Most specific: Item + Activity combinations
+    if (activityName || activityId) {
+        const iKeys = [itemId, itemName, itemName?.toLowerCase()].filter(Boolean);
+        const aKeys = [activityId, activityName, activityName?.toLowerCase()].filter(Boolean);
+        for (const ik of iKeys) {
+            for (const ak of aKeys) {
+                lookupKeys.push(`${ik}|${ak}`);
+                lookupKeys.push(`${ik}:${ak}`);
             }
         }
     }
 
-    if (bestMatch) {
-        log.debug(`getRegisteredEntry | Matched template handler "${bestMatch.itemName}" for "${itemName}"`);
+    // 2. Item-only combinations
+    if (itemId) lookupKeys.push(itemId);
+    if (itemName) {
+        lookupKeys.push(itemName);
+        lookupKeys.push(itemName.toLowerCase());
     }
 
-    return bestMatch;
+    for (const key of lookupKeys) {
+        const match = fastLookupMap.get(key);
+        if (match) {
+            log.debug(`getRegisteredEntry | Fast O(1) match "${match.itemName}" found for lookup key "${key}"`);
+            return { ...match, item };
+        }
+    }
+
+    return null;
 }
 
 /**
@@ -414,6 +446,7 @@ function register(itemName, handlerOrConfig = {}) {
         log.info(`Registering template sequence for item: ${itemName}`);
     }
     registeredHandlers.set(itemName, handlerOrConfig);
+    indexRegistration(itemName, handlerOrConfig);
 }
 
 /**
@@ -423,6 +456,7 @@ function register(itemName, handlerOrConfig = {}) {
  */
 function unregister(itemName) {
     if (registeredHandlers.delete(itemName)) {
+        rebuildFastLookupMap();
         log.info(`Unregistered template sequence for item: ${itemName}`);
         return true;
     }
@@ -469,6 +503,20 @@ async function getPosition(template, config = {}) {
 }
 
 /**
+ * Check if a registered template animation exists for a target document or item name in O(1) time.
+ */
+function has(targetOrName) {
+    return getRegisteredEntry(targetOrName) !== null;
+}
+
+/**
+ * Get the registered handler entry for a target document or item name in O(1) time.
+ */
+function get(targetOrName) {
+    return getRegisteredEntry(targetOrName);
+}
+
+/**
  * List all currently registered item names.
  */
 function list() {
@@ -479,6 +527,8 @@ export const template = {
     getPosition,
     register,
     unregister,
+    has,
+    get,
     list,
 };
 
