@@ -4,13 +4,28 @@ import { systemAdapter } from '../adapter/system/index.js';
 import { crosshairAdapter } from '../adapter/foundry/index.js';
 
 
+export const DEFAULT_AUTOREC_ENTRY = {
+    id: "DEFAULT",
+    itemName: "DEFAULT",
+    isDefault: true,
+    enabled: true,
+    stickToToken: false,
+    showLine: true,
+    borderColor: "#ffffff",
+    borderAlpha: 0,
+    fillColor: "#000000",
+    fillAlpha: 0
+};
+
 /**
  * AutorecManager manages automatic recognition (autorec) registrations for template/region items.
  * Encapsulated as a class instead of free-floating module-level functions.
  */
 export class AutorecManager {
     constructor() {
-        this.registeredHandlers = new Map();
+        this.registeredHandlers = new Map([
+            ["DEFAULT", { ...DEFAULT_AUTOREC_ENTRY }]
+        ]);
         this.fastLookupMap = new Map();
         this.persistedItemNames = new Set();
         this.readySyncInitialized = false;
@@ -197,6 +212,7 @@ export class AutorecManager {
         }
 
         for (const itemName of Array.from(this.persistedItemNames)) {
+            if (itemName === "DEFAULT") continue;
             if (!(itemName in savedRegistrations)) {
                 const current = this.registeredHandlers.get(itemName);
                 const isCurrentLocal = typeof current === "object" && current !== null && current.local === true;
@@ -215,6 +231,21 @@ export class AutorecManager {
                 this.register(itemName, config, { persist: false });
                 this.persistedItemNames.add(itemName);
             }
+        }
+
+        if (!this.registeredHandlers.has("DEFAULT")) {
+            this.registeredHandlers.set("DEFAULT", { ...DEFAULT_AUTOREC_ENTRY });
+            this.indexRegistration("DEFAULT", { ...DEFAULT_AUTOREC_ENTRY });
+        } else {
+            const currentDefault = this.registeredHandlers.get("DEFAULT") || {};
+            this.registeredHandlers.set("DEFAULT", {
+                ...DEFAULT_AUTOREC_ENTRY,
+                ...(typeof currentDefault === "object" ? currentDefault : {}),
+                id: "DEFAULT",
+                itemName: "DEFAULT",
+                isDefault: true
+            });
+            this.indexRegistration("DEFAULT", this.registeredHandlers.get("DEFAULT"));
         }
     }
 
@@ -236,6 +267,10 @@ export class AutorecManager {
             handlerOrConfig = { file: handlerOrConfig };
         }
         const isLocal = local || (typeof handlerOrConfig === "object" && handlerOrConfig !== null && handlerOrConfig.local === true);
+
+        if (itemName === "DEFAULT" && typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
+            handlerOrConfig = { ...DEFAULT_AUTOREC_ENTRY, ...handlerOrConfig, id: "DEFAULT", itemName: "DEFAULT", isDefault: true };
+        }
 
         if (this.registeredHandlers.has(itemName)) {
             log.info(`Re-registering template sequence for item: ${itemName}${isLocal ? " (local only)" : ""}`);
@@ -263,6 +298,10 @@ export class AutorecManager {
      * @param {boolean} [options.local=false] - If true, only unregister locally
      */
     unregister(itemName, { persist = true, local = false } = {}) {
+        if (itemName === "DEFAULT" || itemName === "default") {
+            log.warn("AutorecManager | Cannot delete non-deletable DEFAULT entry. You may disable it by setting enabled: false.");
+            return false;
+        }
         const deleted = this.registeredHandlers.delete(itemName);
         const wasPersisted = this.persistedItemNames.has(itemName);
         if (deleted) {
@@ -452,9 +491,14 @@ export class AutorecManager {
             const hasActivity = Boolean(activityId || activityName);
             const activityDisplay = activityName || activityId || "";
 
+            const isDefault = itemName === "DEFAULT" || config.isDefault === true;
+            const enabled = config.enabled !== false;
+
             results.push({
                 regKey: itemName,
-                itemName: cleanItemName,
+                itemName: isDefault ? "DEFAULT" : cleanItemName,
+                isDefault,
+                enabled,
                 activityId,
                 activityName,
                 hasActivity,
@@ -497,7 +541,11 @@ export class AutorecManager {
                 icon,
             });
         }
-        return results.sort((a, b) => a.itemName.localeCompare(b.itemName));
+        return results.sort((a, b) => {
+            if (a.isDefault && !b.isDefault) return -1;
+            if (!a.isDefault && b.isDefault) return 1;
+            return a.itemName.localeCompare(b.itemName);
+        });
     }
 
     broadcastSync() {

@@ -49,6 +49,7 @@ Bakana's Better Crosshairs supports two primary targeting modes configured per-i
 ## Automated Recognition (Autorec)
 
 The **Autorec Configuration Hub** allows you to define custom crosshair rules that automatically trigger whenever an item or spell is cast:
+- **Built-in `DEFAULT` Fallback Entry**: Includes a permanent, non-deletable `DEFAULT` workflow entry. Any template placeable drawn that lacks a specific item entry automatically adopts the animated crosshair configuration of `DEFAULT` (unless explicitly disabled via *Workflow Enabled: Disabled*).
 - **Item & Activity Matching**: Filter by exact Item Name/UUID or Activity Name/UUID (`e.g. Item: Longbow -> Activity: Cone Attack`).
 - **Shape Override**: Force an item to spawn a specific crosshair shape (`Circle`, `Cone`, `Ray`, `Square`).
 - **Animation Customization**: Select specific Sequencer database animations (`circleFile`, `coneFile`, `rayFile`, `squareFile`, `lineFile`).

@@ -40,10 +40,15 @@
             <div class="bbc-items-list">
                 {{#each entries}}
                 <div class="bbc-item-card" data-item-name="{{regKey}}">
+                    {{#unless isDefault}}
                     <input type="checkbox" class="bbc-item-select-checkbox edit-only" data-item-name="{{regKey}}" title="Select workflow to remove" />
+                    {{/unless}}
                     <div class="bbc-card-main">
                         <i class="fa-solid fa-crosshairs bbc-item-icon"></i>
                         <span class="bbc-item-name">{{itemName}}</span>
+                        {{#if isDefault}}
+                        <span class="bbc-type-badge default" title="Global Fallback Entry">DEFAULT</span>
+                        {{/if}}
                         {{#if ../supportsActivities}}
                         {{#if hasActivity}}
                         <span class="bbc-activity-pill" title="Activity: {{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
@@ -87,9 +92,11 @@
                         {{/if}}
                     </div>
                     <div class="bbc-detail-actions edit-only">
+                        {{#unless isDefault}}
                         <button type="button" class="bbc-delete-single-btn" data-item-name="{{regKey}}" title="Delete Workflow">
                             <i class="fa-solid fa-trash-can"></i> Remove
                         </button>
+                        {{/unless}}
                     </div>
                 </header>
 
@@ -135,13 +142,30 @@
                             <table class="bbc-config-table">
                                 <tbody>
                                     <tr>
+                                        <th>Workflow Enabled</th>
+                                        <td>
+                                            <span class="view-only">
+                                                {{#if enabled}}<span class="bbc-pill yes">Enabled</span>{{else}}<span class="bbc-pill no">Disabled</span>{{/if}}
+                                            </span>
+                                            <label class="bbc-toggle-label edit-only">
+                                                <input type="checkbox" class="bbc-edit-input" data-field="enabled" {{#if enabled}}checked{{/if}} />
+                                                <span>{{#if enabled}}Enabled{{else}}Disabled{{/if}}</span>
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <th>Calling Item Name</th>
                                         <td>
+                                            {{#if isDefault}}
+                                            <span><code>DEFAULT</code> <span class="bbc-type-badge default" style="margin-left:6px;">Global Fallback</span></span>
+                                            {{else}}
                                             <span class="view-only"><code>{{itemName}}</code></span>
                                             <input type="text" class="bbc-edit-input edit-only" data-field="itemName" value="{{itemName}}" placeholder="e.g. Longbow" />
+                                            {{/if}}
                                         </td>
                                     </tr>
                                     {{#if ../supportsActivities}}
+                                    {{#unless isDefault}}
                                     <tr>
                                         <th>Calling Activity ID / Name (DnD5e)</th>
                                         <td>
@@ -151,6 +175,7 @@
                                             <input type="text" class="bbc-edit-input edit-only" data-field="activityId" value="{{activityId}}" placeholder="e.g. Attack or Activity ID" />
                                         </td>
                                     </tr>
+                                    {{/unless}}
                                     {{/if}}
                                     <tr>
                                         <th>Registration Scope</th>

@@ -59,13 +59,24 @@ export class BaseFoundryVTTAdapter {
             entriesCount: entries.size
         });
 
-        for (const entry of entries.values()) {
+        // 1. First search for a specific item/activity match among non-default entries
+        for (const [key, entry] of entries.entries()) {
+            if (key === "DEFAULT" || entry.isDefault || entry.itemName === "DEFAULT") continue;
+            if (entry.enabled === false) continue;
             if (systemAdapter.shouldReplace(context, entry)) {
-                log.info(`matchAutorecEntry | [MATCH FOUND] Entry "${entry.itemName}" (activity: "${entry.activityName || 'ANY'}") matched calling item "${context.itemName}" (activity: "${context.activityName}")`);
+                log.info(`matchAutorecEntry | [MATCH FOUND] Specific entry "${entry.itemName}" (activity: "${entry.activityName || 'ANY'}") matched calling item "${context.itemName}" (activity: "${context.activityName}")`);
                 return { ...entry, item: context.item, activity: context.activity };
             }
         }
-        log.info(`matchAutorecEntry | [NO MATCH] No matching autorec entry for calling item "${context.itemName}" (activity: "${context.activityName}")`);
+
+        // 2. If no specific match was found, fall back to the DEFAULT entry if enabled
+        const defaultEntry = entries.get("DEFAULT");
+        if (defaultEntry && defaultEntry.enabled !== false) {
+            log.info(`matchAutorecEntry | [DEFAULT FALLBACK] No specific item match found for "${context.itemName}"; applying DEFAULT crosshair entry.`);
+            return { ...defaultEntry, item: context.item, activity: context.activity };
+        }
+
+        log.info(`matchAutorecEntry | [NO MATCH] No matching autorec entry or enabled DEFAULT entry for calling item "${context.itemName}" (activity: "${context.activityName}")`);
         return null;
     }
 
