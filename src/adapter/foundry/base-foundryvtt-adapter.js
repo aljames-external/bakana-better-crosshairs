@@ -14,38 +14,10 @@ export class BaseFoundryVTTAdapter {
     extractCallingContext(target) {
         if (!target) return { item: null, itemName: "", itemId: "", activity: null, activityName: "", activityId: "" };
         const document = target.document ?? target;
-        let itemObj = document.item || target.item;
-        let activityObj = null;
+        const itemObj = document.item || target.item || null;
+        const activityObj = document.activity || target.activity || null;
 
-        if (itemObj && (itemObj.item || (itemObj.parent && itemObj.parent.documentName === "Item"))) {
-            activityObj = itemObj;
-            itemObj = itemObj.item || itemObj.parent;
-        }
-
-        if (!itemObj && document.flags?.dnd5e?.origin && typeof fromUuidSync === "function") {
-            try { itemObj = fromUuidSync(document.flags.dnd5e.origin); } catch (e) {}
-        }
-        if (!itemObj && document.flags?.['midi-qol']?.itemUuid && typeof fromUuidSync === "function") {
-            try { itemObj = fromUuidSync(document.flags['midi-qol'].itemUuid); } catch (e) {}
-        }
-        if (!itemObj && document.flags?.core?.sourceId && typeof fromUuidSync === "function") {
-            try { itemObj = fromUuidSync(document.flags.core.sourceId); } catch (e) {}
-        }
-
-        if (itemObj && !activityObj) {
-            const actIdentifier = document.flags?.dnd5e?.activity || document.flags?.dnd5e?.activityUuid || document.flags?.dnd5e?.activityId || document.flags?.['midi-qol']?.activityId;
-            if (actIdentifier) {
-                if (typeof fromUuidSync === "function" && typeof actIdentifier === "string" && actIdentifier.includes(".")) {
-                    try { activityObj = fromUuidSync(actIdentifier); } catch (e) {}
-                }
-                if (!activityObj && itemObj.system?.activities) {
-                    activityObj = itemObj.system.activities.get?.(actIdentifier)
-                        || (typeof itemObj.system.activities.find === "function" ? itemObj.system.activities.find(a => a.id === actIdentifier || a._id === actIdentifier || a.uuid === actIdentifier || a.name === actIdentifier) : null);
-                }
-            }
-        }
-
-        return {
+        const baseContext = {
             item: itemObj,
             itemName: itemObj?.name || "",
             itemId: itemObj?.id || "",
@@ -53,6 +25,17 @@ export class BaseFoundryVTTAdapter {
             activityName: activityObj?.name || "",
             activityId: activityObj?.id || activityObj?._id || ""
         };
+
+        const result = systemAdapter.extractCallingContext(document, baseContext);
+
+        log.info("BaseFoundryVTTAdapter.extractCallingContext | Result from systemAdapter:", {
+            itemName: result.itemName,
+            itemId: result.itemId,
+            activityName: result.activityName,
+            activityId: result.activityId
+        });
+
+        return result;
     }
 
     /**
@@ -66,17 +49,23 @@ export class BaseFoundryVTTAdapter {
         if (!doc || !entries) return null;
         const context = this.extractCallingContext(doc);
         if (!context.itemName && !context.itemId) {
-            log.debug("matchAutorecEntry | Could not extract calling item context from document/placeable:", doc);
+            log.info("matchAutorecEntry | Could not extract calling item context (missing itemName and itemId) from document:", { doc, context });
             return null;
         }
 
+        log.info("matchAutorecEntry | Comparing calling context against registered entries:", {
+            callingItemName: context.itemName,
+            callingActivityName: context.activityName,
+            entriesCount: entries.size
+        });
+
         for (const entry of entries.values()) {
             if (systemAdapter.shouldReplace(context, entry)) {
-                log.debug(`matchAutorecEntry | Matched entry "${entry.itemName}" for calling item "${context.itemName}"`);
+                log.info(`matchAutorecEntry | [MATCH FOUND] Entry "${entry.itemName}" (activity: "${entry.activityName || 'ANY'}") matched calling item "${context.itemName}" (activity: "${context.activityName}")`);
                 return { ...entry, item: context.item, activity: context.activity };
             }
         }
-        log.debug(`matchAutorecEntry | No matching autorec entry for calling item "${context.itemName}"`);
+        log.info(`matchAutorecEntry | [NO MATCH] No matching autorec entry for calling item "${context.itemName}" (activity: "${context.activityName}")`);
         return null;
     }
 

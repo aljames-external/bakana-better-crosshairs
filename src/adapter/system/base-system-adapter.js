@@ -1,3 +1,5 @@
+import { log } from "../../lib/logger.js";
+
 /**
  * Base System Adapter for system-agnostic decision on whether to replace the default crosshair.
  * Makes no assumptions about placeable document types (template vs region).
@@ -6,6 +8,16 @@ export class BaseSystemAdapter {
     constructor() {
         this.systemId = "base";
         this.supportsActivities = false;
+    }
+
+    /**
+     * Extract or refine calling context for the specific system.
+     * @param {Document} document
+     * @param {Object} baseContext
+     * @returns {Object}
+     */
+    extractCallingContext(document, baseContext = {}) {
+        return baseContext;
     }
 
     /**
@@ -24,12 +36,15 @@ export class BaseSystemAdapter {
         const entryName = (entry.itemName || entry.name || "").trim().toLowerCase();
         const entryId = (entry.itemId || "").trim();
 
-        return Boolean(
+        const match = Boolean(
             (entryName && callingName && entryName === callingName) ||
             (entryId && callingId && entryId === callingId)
         );
+
+        if (!match) {
+            log.info(`BaseSystemAdapter.shouldReplace | Item match FAILED: calling ("${callingName}" / "${callingId}") vs entry ("${entryName}" / "${entryId}")`);
+        }
+        return match;
     }
 
 }
-
-
