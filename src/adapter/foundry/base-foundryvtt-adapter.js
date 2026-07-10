@@ -160,5 +160,15 @@ export class BaseFoundryVTTAdapter {
     formatDocumentUpdate(doc, coords, config) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement formatDocumentUpdate(doc, coords, config).");
     }
+
+    /**
+     * Resolve placement origin coordinates for a crosshair anchored/attached to a token.
+     */
+    resolveAnchoredPlacement(token, clickX, clickY, isRayOrCone, direction, _helpers = {}) {
+        if (!token) return { x: clickX, y: clickY, direction };
+        const x = token.center?.x ?? (token.x + (token.w || 0) / 2);
+        const y = token.center?.y ?? (token.y + (token.h || 0) / 2);
+        return { x, y, direction };
+    }
 }
 

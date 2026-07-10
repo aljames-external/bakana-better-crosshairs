@@ -1,5 +1,6 @@
 import { log } from "../lib/logger.js";
 import { Token, Ray } from "../lib/compat.js";
+import { crosshairAdapter } from "../adapter/foundry/index.js";
 
 let activeWheelHandler = null;
 let activePointerHandler = null;
@@ -243,27 +244,19 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     const isRayOrCone = config.type === "ray" || config.type === "cone" || config.t === "ray" || config.t === "cone";
     const isCone = config.type === "cone" || config.t === "cone";
     const isAnchored = shouldStickToToken(config, isCone) && Boolean(config.token);
-    const isV14 = typeof game !== "undefined" && typeof foundry !== "undefined" && foundry.utils.isNewerVersion(game.version, "14");
 
     let x = clickX;
     let y = clickY;
 
     if (isAnchored && config.token) {
-        if (!isRayOrCone) {
-            // Attached Circle / Square: centered directly on the token center
-            const tok = config.token;
-            x = tok.center?.x ?? (tok.x + (tok.w || 0) / 2);
-            y = tok.center?.y ?? (tok.y + (tok.h || 0) / 2);
-        } else if (!isV14) {
-            // Attached Ray / Cone: continuous perimeter intersection snapped to nearest grid vertex (corner)
-            // matching Sequencer's lockToEdge vertex steps on multi-grid tokens (1x1, 2x2, 4x4)
-            const edgePoint = getTokenEdgePoint(config.token, clickX, clickY, false);
-            const snappedEdge = snapCoordinates(edgePoint.x, edgePoint.y, "corner");
-            x = snappedEdge.x;
-            y = snappedEdge.y;
-            if (direction === undefined) direction = edgePoint.direction;
-        }
-        log.debug("resolveCrosshairPlacement | Token anchored placement ->", { x, y, direction, isV14 });
+        const anchored = crosshairAdapter.resolveAnchoredPlacement(config.token, clickX, clickY, isRayOrCone, direction, {
+            getTokenEdgePoint,
+            snapCoordinates
+        });
+        x = anchored.x;
+        y = anchored.y;
+        if (direction === undefined) direction = anchored.direction;
+        log.debug("resolveCrosshairPlacement | Token anchored placement via version adapter ->", { x, y, direction });
     } else {
         // Detached / free cursor placement: Origin is where the user clicked (clickX, clickY)
         x = clickX;

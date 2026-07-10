@@ -102,5 +102,18 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         if (coords.width !== undefined) shape.width = coords.width;
         return shape;
     }
+
+    /**
+     * Resolve placement origin coordinates for an anchored shape in Foundry V14+ Regions.
+     */
+    resolveAnchoredPlacement(token, clickX, clickY, isRayOrCone, direction) {
+        if (!token) return { x: clickX, y: clickY, direction };
+        if (!isRayOrCone) {
+            const x = token.center?.x ?? (token.x + (token.w || 0) / 2);
+            const y = token.center?.y ?? (token.y + (token.h || 0) / 2);
+            return { x, y, direction };
+        }
+        return { x: clickX, y: clickY, direction };
+    }
 }
 
