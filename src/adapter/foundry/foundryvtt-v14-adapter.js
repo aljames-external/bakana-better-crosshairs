@@ -22,6 +22,25 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}}
      */
     detectProperties(doc) {
+        if (doc.t) {
+            const shapeMap = {
+                circle: "circle",
+                cone: "cone",
+                ray: "ray",
+                rect: "square"
+            };
+            const distance = doc.distance || 0;
+            return {
+                type: shapeMap[doc.t] || "circle",
+                distance,
+                radius: distance,
+                width: doc.width || 5,
+                angle: doc.angle || 53.13,
+                x: doc.x || 0,
+                y: doc.y || 0
+            };
+        }
+
         const shape = doc.shapes?.[0] || {};
         let shapeType = "circle";
         if (shape.type === "circle") shapeType = "circle";
@@ -36,8 +55,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             type: shapeType,
             distance,
             radius: distance,
-            width: shape.width || 0,
-            angle: shape.angle || 0,
+            width: shape.width || 5,
+            angle: shape.angle || 53.13,
             x: shape.x || 0,
             y: shape.y || 0
         };

@@ -151,7 +151,11 @@ async function handleDrawPreview(placeable) {
                 activity: entryConfig.activity || entry.activity,
                 scope: autoConfig.scope
             };
-            const crosshairType = mergedConfig.type || "circle";
+            const explicitType = mergedConfig.type;
+            const isKnownType = ["circle", "cone", "ray", "square", "rect"].includes(String(explicitType || "").toLowerCase());
+            const crosshairType = isKnownType
+                ? (String(explicitType).toLowerCase() === "rect" ? "square" : String(explicitType).toLowerCase())
+                : (detected.type || "circle");
             const builder = crosshair[crosshairType] || crosshair.circle;
             log.debug(`handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}"`);
             await builder.play(token, mergedConfig);
