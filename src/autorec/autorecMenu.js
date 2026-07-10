@@ -171,22 +171,15 @@ export class AutorecMenuApplication extends BaseApplication {
         // 2. Sidebar Item Selection
         cards.forEach(card => {
             card.addEventListener("click", (ev) => {
-                const currentCard = ev.currentTarget;
-                const itemName = currentCard.dataset.itemName;
-
-                cards.forEach(c => c.classList.remove("active"));
-                currentCard.classList.add("active");
-
-                if (emptyState) emptyState.style.display = "none";
-                details.forEach(d => {
-                    if (d.dataset.itemName === itemName) {
-                        d.style.display = "flex";
-                    } else {
-                        d.style.display = "none";
-                    }
-                });
+                const itemName = ev.currentTarget.dataset.itemName;
+                this.selectItem(root, itemName);
             });
         });
+
+        // Restore previously selected item across re-renders (including leaving Edit Mode)
+        if (this._selectedItemName) {
+            this.selectItem(root, this._selectedItemName);
+        }
 
         // 3. Expandable Section Accordions
         root.querySelectorAll(".bbc-section-header").forEach(header => {
@@ -281,6 +274,32 @@ export class AutorecMenuApplication extends BaseApplication {
                 this.render(false);
             });
         });
+    }
+
+    selectItem(root, itemName) {
+        if (!root || !itemName) return;
+        this._selectedItemName = itemName;
+
+        const cards = root.querySelectorAll(".bbc-item-card");
+        const details = root.querySelectorAll(".bbc-inspector-detail");
+        const emptyState = root.querySelector(".bbc-inspector-empty");
+
+        let found = false;
+        cards.forEach(c => {
+            if (c.dataset.itemName === itemName) {
+                c.classList.add("active");
+                found = true;
+            } else {
+                c.classList.remove("active");
+            }
+        });
+
+        if (found) {
+            if (emptyState) emptyState.style.display = "none";
+            details.forEach(d => {
+                d.style.display = (d.dataset.itemName === itemName) ? "flex" : "none";
+            });
+        }
     }
 
     saveAllEditedConfigurations(root) {
