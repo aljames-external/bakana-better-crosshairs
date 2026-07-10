@@ -1,6 +1,6 @@
 import { MODULE_ID } from "../lib/constants.js";
-import { log } from "../lib/logger.js";
 import { autorecManager as manager } from "./autorecManager.js";
+
 
 import { localize } from "../lib/utils.js";
 
@@ -205,8 +205,7 @@ export class AutorecMenuApplication extends BaseApplication {
         // 1. Search Filter
         const searchInput = root.querySelector("#bbc-autorec-search");
         const cards = root.querySelectorAll(".bbc-item-card");
-        const details = root.querySelectorAll(".bbc-inspector-detail");
-        const emptyState = root.querySelector(".bbc-inspector-empty");
+
 
         if (searchInput) {
             searchInput.addEventListener("input", (ev) => {
@@ -348,7 +347,8 @@ export class AutorecMenuApplication extends BaseApplication {
         }
     }
 
-    async _updateObject(event, formData) {
+    async _updateObject() {
         return;
     }
+
 }

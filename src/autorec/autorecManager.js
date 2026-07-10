@@ -125,7 +125,8 @@ export class AutorecManager {
             return this.fastLookupMap.get(target) || this.fastLookupMap.get(target.toLowerCase()) || null;
         }
 
-        const { item, itemName, itemId, activity, activityName, activityId } = this.resolveItemAndActivity(target);
+        const { item, itemName, itemId, activityName, activityId } = this.resolveItemAndActivity(target);
+
         if (!itemName && !itemId) return null;
 
         const lookupKeys = [];
