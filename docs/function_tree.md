@@ -62,16 +62,30 @@ src/lib/templates.js
 │   ├── autorecManager.getRegisteredEntry(placeable)
 │   ├── crosshairAdapter.hidePreview(placeable)
 │   └── crosshairModule.create(token, handlerConfig)
+└── handlePreCreate(doc, _data, _options, userId)
+    └── crosshairAdapter.formatDocumentUpdate(doc, coords, config)
 
 src/autorec/autorecManager.js
-├── getRegisteredEntry(target)
-│   └── crosshairAdapter.matchAutorecEntry(target, registeredHandlers)
+├── getEntriesForItem(itemName)
+│   └── Prioritizes activity-named workflows over general item fallbacks
+└── getRegisteredEntry(target)
+    └── crosshairAdapter.matchAutorecEntry(target, registeredHandlers, this)
 
 src/adapter/foundry/base-foundryvtt-adapter.js
 ├── extractCallingContext(target)
 │   └── systemAdapter.extractCallingContext(document, baseContext)
-└── matchAutorecEntry(doc, entries)
+└── matchAutorecEntry(doc, entries, manager)
+    ├── Sort candidate entries: activity rules first, item fallback last
     └── systemAdapter.shouldReplace(context, entry)
+
+src/adapter/foundry/foundryvtt-v12-adapter.js
+├── formatDocumentUpdate(doc, coords, config) # Legacy MeasuredTemplate update
+└── getTemplatePixelFactor()                  # Returns { factor: 1, gridUnits: false }
+
+src/adapter/foundry/foundryvtt-v14-adapter.js
+├── formatDocumentUpdate(doc, coords, config) # V14 Region shape update
+├── _formatRegionShapeUpdate(shape, coords)   # Converts feet to canvas pixels (* pxPerFoot)
+└── getTemplatePixelFactor()                  # Returns { factor: 1 / gridSize, gridUnits: true }
 
 src/adapter/system/dnd5e-adapter.js
 ├── extractCallingContext(document, baseContext)

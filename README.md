@@ -50,9 +50,8 @@ Bakana's Better Crosshairs supports two primary targeting modes configured per-i
 
 The **Autorec Configuration Hub** allows you to define custom crosshair rules that automatically trigger whenever an item or spell is cast:
 - **Built-in `DEFAULT` Fallback Entry**: Includes a permanent, non-deletable `DEFAULT` workflow entry. Any template placeable drawn that lacks a specific item entry automatically adopts the animated crosshair configuration of `DEFAULT` (unless explicitly disabled via *Workflow Enabled: Disabled*).
-- **Item & Activity Matching**: Filter by exact Item Name/UUID or Activity Name/UUID (`e.g. Item: Longbow -> Activity: Cone Attack`).
-- **Shape Override**: Force an item to spawn a specific crosshair shape (`Circle`, `Cone`, `Ray`, `Square`).
-- **Animation Customization**: Select specific Sequencer database animations (`circleFile`, `coneFile`, `rayFile`, `squareFile`, `lineFile`).
+- **Multi-Activity Hierarchy & Priority Matching**: Define independent entries for each activity on an item (`e.g. Longbow > Line Fire`, `Longbow > Rapid Fire`, and `Longbow > <no activity named>`). Activity-specific workflows automatically take precedence over general item fallback workflows (`<no activity named>`), with stable front-to-back tiebreaking (`first registered matching rule wins`).
+- **Shape & Animation Override**: Force an item to spawn a specific crosshair shape (`Circle`, `Cone`, `Ray`, `Square`) and select specific Sequencer database animations (`circleFile`, `coneFile`, `rayFile`, `squareFile`, `lineFile`).
 - **Color & Border Themes**: Set custom fill colors, border colors, and opacity alphas per spell or weapon.
 
 ---
@@ -60,7 +59,9 @@ The **Autorec Configuration Hub** allows you to define custom crosshair rules th
 ## System & Module Support
 
 Bakana's Better Crosshairs uses a decoupled **System Adapter & Foundry Adapter** architecture:
-* **D&D 5e (`dnd5e` v3 / v4.x)**: Full support for native Activity workflows (`item.system.activities`), activity filters (`activityId` / `activityName`), and spell origin UUID lookup (`flags.dnd5e.origin`).
+* **Foundry VTT V14+ (`Region` Workflows)**: Intercepts targeting via `drawMeasuredTemplate` → `preCreateRegion` → `createRegion`, automatically converting game feet (`30 ft`) into exact canvas pixel dimensions (`* pxPerFoot`) and grid units (`{ gridUnits: true }`) for Sequencer effects.
+* **Foundry VTT V12 & V13 (`MeasuredTemplate` Workflows)**: Runs with version-isolated legacy pixel sizing (`{ factor: 1, gridUnits: false }`) and `MeasuredTemplate` lifecycle hooks (`drawMeasuredTemplate` → `preCreateMeasuredTemplate` → `createMeasuredTemplate`).
+* **D&D 5e (`dnd5e` v3 / v4.x)**: Full support for native Activity workflows (`item.system.activities`), multi-activity priority filtering (`activityId` / `activityName`), and spell origin UUID lookup (`flags.dnd5e.origin`).
 * **System Agnostic (`BaseSystemAdapter`)**: Automatically supports any system that spawns standard `MeasuredTemplate` or `Region` placeables.
 * **Midi-QOL & Item Workflows**: Seamlessly integrates with workflow automation modules (`midi-qol`) without interfering with automated template placement hooks.
 

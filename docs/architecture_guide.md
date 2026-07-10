@@ -31,14 +31,16 @@ Bakana's Better Crosshairs is designed around three foundational principles:
 src/
 ├── adapter/
 │   ├── foundry/
-│   │   ├── base-foundryvtt-adapter.js     # Extracts core Foundry context and hides live default previews
-│   │   └── index.js
+│   │   ├── base-foundryvtt-adapter.js     # Shared abstract Foundry context & lookup pipeline
+│   │   ├── foundryvtt-v12-adapter.js      # V12/V13 MeasuredTemplate adapter (pixel sizing)
+│   │   ├── foundryvtt-v14-adapter.js      # V14+ Region adapter (grid units & feet-to-pixel scaling)
+│   │   └── index.js                       # Auto-selects active Foundry version adapter
 │   └── system/
 │       ├── base-system-adapter.js         # Generic system fallback adapter
 │       ├── dnd5e-adapter.js               # D&D 5e v3/v4 activity & flag extraction
 │       └── index.js                       # Auto-selects active system adapter
 ├── autorec/
-│   ├── autorecManager.js                  # Stores and retrieves matched Autorec rules
+│   ├── autorecManager.js                  # Stores and retrieves prioritized Autorec rules
 │   └── autorecMenu.js                     # ApplicationV2 UI for Autorec rules
 ├── crosshair/
 │   ├── circle.js                          # Circle crosshair Sequencer builder
@@ -50,7 +52,7 @@ src/
 │   ├── compat.js                          # Safe Foundry version compatibility wrappers
 │   ├── filemanager.js                     # Sequencer database path/asset resolution
 │   ├── logger.js                          # Structured logging system
-│   └── templates.js                       # MeasuredTemplate preview interceptors
+│   └── templates.js                       # MeasuredTemplate & Region preview interceptors
 └── index.js                               # Main entrypoint & hook registration
 ```
 
@@ -58,14 +60,20 @@ src/
 
 ## Decoupled Adapter Pattern
 
-### Foundry Adapter (`BaseFoundryVTTAdapter`)
-Located in [`src/adapter/foundry/base-foundryvtt-adapter.js`](../src/adapter/foundry/base-foundryvtt-adapter.js), the Foundry adapter is responsible for:
-- Extracting base document properties (`document.item`, `document.activity`) without assuming a specific tabletop game system.
-- Delegating system-specific flag resolution to `systemAdapter.extractCallingContext`.
-- Suppressing default Foundry visual previews (`placeable.visible = false; placeable.renderable = false;`) when a Sequencer crosshair takes over.
+### Foundry Adapters (`BaseFoundryVTTAdapter` & Version Subclasses)
+Located in [`src/adapter/foundry/`](../src/adapter/foundry/), Foundry adapters isolate tabletop version differences:
+- **`BaseFoundryVTTAdapter`**: Implements shared lookup matching (`matchAutorecEntry`), candidate ordering, and live default preview hiding (`hidePreview`).
+- **`FoundryVTTV12Adapter`**: Handles V12 and V13 `MeasuredTemplate` placement hooks (`drawMeasuredTemplate` → `preCreateMeasuredTemplate` → `createMeasuredTemplate`) with legacy pixel sizing (`getTemplatePixelFactor` returning `{ factor: 1, gridUnits: false }`).
+- **`FoundryVTTV14Adapter`**: Handles V14+ `Region` placement hooks (`drawMeasuredTemplate` → `preCreateRegion` → `createRegion`). Converts game feet (`distance`, `width`) to canvas pixels (`* pxPerFoot`) inside `_formatRegionShapeUpdate` and returns `{ factor: 1 / gridSize, gridUnits: true }` so Sequencer effects render accurate grid unit dimensions.
+
+### Multi-Activity Priority Matching (`matchAutorecEntry` & `getEntriesForItem`)
+When a template or region for an item (`e.g. Longbow`) is drawn, `matchAutorecEntry` queries `autorecManager.getEntriesForItem(itemName)` to evaluate candidate workflows in strict priority order:
+1. **Activity-Specific Workflows (`Longbow > Rapid Fire`, `Longbow > Line Fire`)**: Grouped and sorted to the front (`aHasAct && !bHasAct`).
+2. **General Item Fallback Workflows (`Longbow > <no activity named>`)**: Sorted to the back.
+3. **Stable Front-to-Back Tiebreaking**: Evaluated iteratively (`for (const entry of candidateEntries)`); the first entry where `shouldReplace` matches wins (`first registered matching rule wins`).
 
 ### System Adapters (`BaseSystemAdapter` & Subclasses)
-Located in [`src/adapter/system/`](../src/adapter/system/), system adapters determine whether a pending placeable matches a registered Autorec entry:
+Located in [`src/adapter/system/`](../src/adapter/system/), system adapters determine whether a candidate Autorec entry matches the calling context:
 - **`BaseSystemAdapter`**: Checks generic `itemName` / `itemId` equality against registered rules.
 - **`Dnd5eSystemAdapter`**: Resolves D&D 5e origin UUIDs (`flags.dnd5e.origin`), extracts v4 Activity objects (`item.system.activities`), and matches both `activityId` and `activityName` case-insensitively.
 
