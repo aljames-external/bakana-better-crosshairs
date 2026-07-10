@@ -1,5 +1,8 @@
-export class FoundryVTTV12Adapter {
+import { BaseFoundryVTTAdapter } from "./base-foundryvtt-adapter.js";
+
+export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
     constructor() {
+        super();
         this.version = 12;
     }
 
@@ -11,32 +14,6 @@ export class FoundryVTTV12Adapter {
         Hooks.on("drawMeasuredTemplate", (template) => callbacks.onDrawPreview(template));
         Hooks.on("preCreateMeasuredTemplate", (doc, data, options, userId) => callbacks.onPreCreate(doc, data, options, userId));
         Hooks.on("createMeasuredTemplate", (doc, options, userId) => callbacks.onCreate(doc, options, userId));
-    }
-
-    /**
-     * Hide the default placeable preview graphic so custom Sequencer visuals take over.
-     * @param {PlaceableObject} placeable
-     */
-    hidePreview(placeable) {
-        placeable.visible = false;
-        placeable.renderable = false;
-        placeable.alpha = 0;
-        if (placeable.template) placeable.template.visible = false;
-        if (placeable.ruler) placeable.ruler.visible = false;
-        if (placeable.controlIcon) placeable.controlIcon.visible = false;
-
-        placeable.refresh = function() {
-            this.visible = false;
-            this.renderable = false;
-            if (this.ruler) {
-                this.ruler.visible = false;
-                this.ruler.text = "";
-            }
-            if (this.template) this.template.visible = false;
-            if (this.controlIcon) this.controlIcon.visible = false;
-            return this;
-        };
-        placeable.highlightGrid = function() {};
     }
 
     /**
@@ -98,20 +75,15 @@ export class FoundryVTTV12Adapter {
         if (coords.width !== undefined) updateData.width = coords.width;
         if (coords.t !== undefined) updateData.t = coords.t;
 
-        const placedFillColor = config.placedFillColor || config.templateFillColor;
-        const placedFillAlpha = config.placedFillAlpha !== undefined ? config.placedFillAlpha : config.templateFillAlpha;
-        const placedBorderColor = config.placedBorderColor || config.templateBorderColor;
-        const placedBorderAlpha = config.placedBorderAlpha !== undefined ? config.placedBorderAlpha : config.templateBorderAlpha;
+        const styling = this.extractPlacedStylingFlags(config);
 
-        if (placedFillColor) updateData.fillColor = placedFillColor;
-        if (placedBorderColor) updateData.borderColor = placedBorderColor;
-        if ("fillAlpha" in (doc._source || doc) && placedFillAlpha !== undefined) updateData.fillAlpha = placedFillAlpha;
-        if ("alpha" in (doc._source || doc) && placedFillAlpha !== undefined) updateData.alpha = placedFillAlpha;
+        if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
+        if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
+        if ("fillAlpha" in (doc._source || doc) && styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
+        if ("alpha" in (doc._source || doc) && styling.placedFillAlpha !== undefined) updateData.alpha = styling.placedFillAlpha;
 
-        if (placedFillColor || placedFillAlpha !== undefined || placedBorderColor || placedBorderAlpha !== undefined) {
-            updateData.flags = foundry.utils.mergeObject(doc.flags || {}, {
-                bbc: { placedFillColor, placedFillAlpha, placedBorderColor, placedBorderAlpha }
-            });
+        if (styling.placedFillColor || styling.placedFillAlpha !== undefined || styling.placedBorderColor || styling.placedBorderAlpha !== undefined) {
+            updateData.flags = foundry.utils.mergeObject(doc.flags || {}, styling.flags);
         }
         return updateData;
     }

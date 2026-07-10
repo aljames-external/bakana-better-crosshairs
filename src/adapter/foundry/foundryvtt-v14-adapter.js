@@ -1,5 +1,8 @@
-export class FoundryVTTV14Adapter {
+import { BaseFoundryVTTAdapter } from "./base-foundryvtt-adapter.js";
+
+export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     constructor() {
+        super();
         this.version = 14;
     }
 
@@ -11,32 +14,6 @@ export class FoundryVTTV14Adapter {
         Hooks.on("drawRegion", (region) => callbacks.onDrawPreview(region));
         Hooks.on("preCreateRegion", (doc, data, options, userId) => callbacks.onPreCreate(doc, data, options, userId));
         Hooks.on("createRegion", (doc, options, userId) => callbacks.onCreate(doc, options, userId));
-    }
-
-    /**
-     * Hide the Region preview graphic during mouse placement.
-     * @param {PlaceableObject} placeable
-     */
-    hidePreview(placeable) {
-        placeable.visible = false;
-        placeable.renderable = false;
-        placeable.alpha = 0;
-        if (placeable.template) placeable.template.visible = false;
-        if (placeable.ruler) placeable.ruler.visible = false;
-        if (placeable.controlIcon) placeable.controlIcon.visible = false;
-
-        placeable.refresh = function() {
-            this.visible = false;
-            this.renderable = false;
-            if (this.ruler) {
-                this.ruler.visible = false;
-                this.ruler.text = "";
-            }
-            if (this.template) this.template.visible = false;
-            if (this.controlIcon) this.controlIcon.visible = false;
-            return this;
-        };
-        placeable.highlightGrid = function() {};
     }
 
     /**
@@ -105,17 +82,10 @@ export class FoundryVTTV14Adapter {
             updateData.shapes = [newShape];
         }
 
-        const placedFillColor = config.placedFillColor || config.templateFillColor;
-        if (placedFillColor) updateData.color = placedFillColor;
+        const styling = this.extractPlacedStylingFlags(config);
+        if (styling.placedFillColor) updateData.color = styling.placedFillColor;
 
-        updateData.flags = foundry.utils.mergeObject(doc.flags || {}, {
-            bbc: {
-                placedFillColor: config.placedFillColor || config.templateFillColor,
-                placedFillAlpha: config.placedFillAlpha !== undefined ? config.placedFillAlpha : config.templateFillAlpha,
-                placedBorderColor: config.placedBorderColor || config.templateBorderColor,
-                placedBorderAlpha: config.placedBorderAlpha !== undefined ? config.placedBorderAlpha : config.templateBorderAlpha
-            }
-        });
+        updateData.flags = foundry.utils.mergeObject(doc.flags || {}, styling.flags);
         return updateData;
     }
 
