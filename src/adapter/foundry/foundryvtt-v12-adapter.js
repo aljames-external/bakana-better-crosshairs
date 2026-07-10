@@ -41,6 +41,16 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
         };
     }
 
+    formatPlacementCoordinates(x, y, direction, config = {}) {
+        return {
+            x,
+            y,
+            direction,
+            distance: config.distance,
+            width: config.width
+        };
+    }
+
     formatGraphicSize(distance = 30, widthOrAngle = 5, shapeType = "ray") {
         const gridDist = canvas?.dimensions?.distance || 5;
         const gridSize = canvas?.dimensions?.size || 100;

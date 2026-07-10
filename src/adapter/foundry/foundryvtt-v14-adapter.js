@@ -153,6 +153,16 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         }
         return updateData;
     }
+    formatPlacementCoordinates(x, y, direction, config = {}) {
+        return {
+            x,
+            y,
+            rotation: direction,
+            radius: config.radius,
+            width: config.width
+        };
+    }
+
     /**
      * Format a Region shape update based on drag destination coordinates.
      * @private
@@ -163,11 +173,9 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
         if (coords.x !== undefined) shape.x = coords.x;
         if (coords.y !== undefined) shape.y = coords.y;
-        if (coords.direction !== undefined || coords.rotation !== undefined) {
-            shape.rotation = coords.direction ?? coords.rotation;
-        }
-        if (coords.distance !== undefined || coords.radius !== undefined) {
-            const rawRadius = coords.distance ?? coords.radius;
+        if (coords.rotation !== undefined) shape.rotation = coords.rotation;
+        if (coords.radius !== undefined) {
+            const rawRadius = coords.radius;
             shape.radius = rawRadius <= 1000 ? Math.round(rawRadius * pxPerFoot) : rawRadius;
         }
         if (coords.width !== undefined) {

@@ -274,18 +274,9 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
         direction = direction % 360;
     }
 
-    const result = {
-        x,
-        y,
-        direction: direction ?? 0,
-        rotation: direction ?? 0
-    };
-    if (typeof config.width === "number") result.width = config.width;
-    if (typeof config.distance === "number" || typeof config.radius === "number") {
-        result.distance = config.distance ?? config.radius;
-    }
+    const result = crosshairAdapter.formatPlacementCoordinates(x, y, typeof direction === "number" ? direction : 0, config);
 
-    log.debug("resolveCrosshairPlacement | Resolved placement coordinates:", result);
+    log.debug("resolveCrosshairPlacement | Resolved and formatted placement coordinates:", result);
 
     if (config.context) {
         config.context.resolve(result);

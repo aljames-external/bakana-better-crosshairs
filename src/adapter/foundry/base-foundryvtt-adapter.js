@@ -191,6 +191,18 @@ export class BaseFoundryVTTAdapter {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement detectProperties(doc).");
     }
 
+    /**
+     * Format placement coordinates into a version-specific schema data structure.
+     * @param {number} x
+     * @param {number} y
+     * @param {number} direction
+     * @param {Object} [config={}]
+     * @returns {Object}
+     */
+    formatPlacementCoordinates(x, y, direction, config = {}) {
+        return { x, y, direction };
+    }
+
     updatePreviewShape(previewDoc, coords) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement updatePreviewShape(previewDoc, coords).");
     }
