@@ -683,6 +683,78 @@ function unregister(itemName, { persist = true, local = false } = {}) {
     return deleted;
 }
 
+async function unregisterMany(itemNames, { persist = true, local = false } = {}) {
+    if (!Array.isArray(itemNames)) return;
+    const namesToPersist = [];
+    for (const itemName of itemNames) {
+        const deleted = registeredHandlers.delete(itemName);
+        const wasPersisted = persistedItemNames.has(itemName);
+        if (deleted) {
+            log.info(`Unregistered template sequence for item: ${itemName}`);
+        }
+        if (persist && !local && (wasPersisted || typeof itemName === "string")) {
+            namesToPersist.push(itemName);
+        }
+    }
+    rebuildFastLookupMap();
+
+    if (persist && !local && namesToPersist.length > 0) {
+        if (game.user?.isGM) {
+            try {
+                const saved = foundry.utils.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") || {});
+                let modified = false;
+                for (const itemName of namesToPersist) {
+                    if (itemName in saved) {
+                        delete saved[itemName];
+                        persistedItemNames.delete(itemName);
+                        modified = true;
+                    }
+                }
+                if (modified) {
+                    await game.settings.set(MODULE_ID, "registeredTemplates", saved);
+                    broadcastSync();
+                }
+            } catch (e) {
+                log.warn(`Failed to batch unpersist template settings:`, e);
+            }
+        } else if (game.socket) {
+            for (const itemName of namesToPersist) {
+                game.socket.emit(`module.${MODULE_ID}`, { type: "UNREGISTER_TEMPLATE", itemName });
+            }
+        }
+    }
+}
+
+async function registerMany(entries, { persist = true } = {}) {
+    if (!Array.isArray(entries)) return;
+    const toPersist = {};
+    for (const { itemName, config, local } of entries) {
+        registeredHandlers.set(itemName, config);
+        indexRegistration(itemName, config);
+        if (persist && !local && typeof config !== "function") {
+            toPersist[itemName] = config;
+            persistedItemNames.add(itemName);
+        }
+    }
+
+    if (persist && Object.keys(toPersist).length > 0) {
+        if (game.user?.isGM) {
+            try {
+                const saved = foundry.utils.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") || {});
+                Object.assign(saved, toPersist);
+                await game.settings.set(MODULE_ID, "registeredTemplates", saved);
+                broadcastSync();
+            } catch (e) {
+                log.warn("Failed to batch persist template registrations:", e);
+            }
+        } else if (game.socket) {
+            for (const [itemName, config] of Object.entries(toPersist)) {
+                game.socket.emit(`module.${MODULE_ID}`, { type: "REGISTER_TEMPLATE", itemName, config });
+            }
+        }
+    }
+}
+
 async function getPosition(template, config = {}) {
     let position;
     if (template) {
@@ -885,7 +957,9 @@ function broadcastSync() {
 export const manager = {
     getPosition,
     register,
+    registerMany,
     unregister,
+    unregisterMany,
     has,
     get,
     list,

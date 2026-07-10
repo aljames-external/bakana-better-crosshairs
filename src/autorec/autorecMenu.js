@@ -174,7 +174,7 @@ export class AutorecMenuApplication extends BaseApplication {
         // Batch Remove Selected Workflows
         const removeSelectedBtn = root.querySelector(".bbc-remove-selected-btn");
         if (removeSelectedBtn) {
-            removeSelectedBtn.addEventListener("click", () => {
+            removeSelectedBtn.addEventListener("click", async () => {
                 const checked = root.querySelectorAll(".bbc-item-select-checkbox:checked");
                 if (checked.length === 0) {
                     ui.notifications?.warn("Please select one or more workflows to remove.");
@@ -182,10 +182,7 @@ export class AutorecMenuApplication extends BaseApplication {
                 }
                 const names = [];
                 checked.forEach(el => names.push(el.dataset.itemName));
-                for (const itemName of names) {
-                    manager.unregister(itemName, { persist: true });
-                }
-                manager.broadcastSync();
+                await manager.unregisterMany(names, { persist: true });
                 ui.notifications?.info(`Removed ${names.length} workflow(s).`);
                 this.render(false);
             });
@@ -354,8 +351,8 @@ export class AutorecMenuApplication extends BaseApplication {
         }
     }
 
-    saveAllEditedConfigurations(root) {
-        let savedCount = 0;
+    async saveAllEditedConfigurations(root) {
+        const entriesToSave = [];
         root.querySelectorAll(".bbc-inspector-detail").forEach(detailEl => {
             const itemName = detailEl.dataset.itemName;
             if (!itemName) return;
@@ -378,10 +375,6 @@ export class AutorecMenuApplication extends BaseApplication {
                 } else {
                     val = inputEl.value;
                     if (val === "") val = undefined;
-                }
-
-                if (field === "type" && val === "Auto-Detect") {
-                    val = undefined;
                 }
 
                 if (config[field] !== val) {
@@ -415,15 +408,13 @@ export class AutorecMenuApplication extends BaseApplication {
             });
 
             if (modified) {
-                const persist = !config.local;
-                manager.register(itemName, config, { persist, local: Boolean(config.local) });
-                savedCount++;
+                entriesToSave.push({ itemName, config, local: Boolean(config.local) });
             }
         });
 
-        if (savedCount > 0) {
-            manager.broadcastSync();
-            ui.notifications?.info(`Saved ${savedCount} workflow configuration(s) and synced across all clients.`);
+        if (entriesToSave.length > 0) {
+            await manager.registerMany(entriesToSave, { persist: true });
+            ui.notifications?.info(`Saved ${entriesToSave.length} workflow configuration(s) and synced across all clients.`);
             this.render(false);
         }
     }
