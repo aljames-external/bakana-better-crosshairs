@@ -11,11 +11,10 @@ export class BaseFoundryVTTAdapter {
      * @param {Document} doc - The template or region document
      * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}}
      */
-    extractCallingContext(target) {
-        if (!target) return { item: null, itemName: "", itemId: "", activity: null, activityName: "", activityId: "" };
-        const document = target.document ?? target;
-        const itemObj = document.item ?? target.item ?? null;
-        const activityObj = document.activity ?? target.activity ?? null;
+    extractCallingContext(doc) {
+        if (!doc) return { item: null, itemName: "", itemId: "", activity: null, activityName: "", activityId: "" };
+        const itemObj = doc.item ?? null;
+        const activityObj = doc.activity ?? null;
 
         const baseContext = {
             item: itemObj,
@@ -23,10 +22,10 @@ export class BaseFoundryVTTAdapter {
             itemId: itemObj?.id ?? "",
             activity: activityObj,
             activityName: activityObj?.name ?? "",
-            activityId: activityObj?.id ?? activityObj?._id ?? ""
+            activityId: activityObj?.id ?? ""
         };
 
-        const result = systemAdapter.extractCallingContext(document, baseContext);
+        const result = systemAdapter.extractCallingContext(doc, baseContext);
 
         log.info("BaseFoundryVTTAdapter.extractCallingContext | Result from systemAdapter:", {
             itemName: result.itemName,
@@ -41,12 +40,13 @@ export class BaseFoundryVTTAdapter {
     /**
      * Filter and match autorec candidates for a Foundry document (MeasuredTemplate / Region)
      * by calling the system adapter to decide whether an entry should replace the default crosshair.
-     * @param {Document} doc - The template or region document
+     * @param {Document|PlaceableObject} target - The template or region document (or placeable)
      * @param {Map<string, Object>} entries - Registered autorec entries map
      * @returns {Object|null} The matching autorec entry or null
      */
-    matchAutorecEntry(doc, entries) {
-        if (!doc || !entries) return null;
+    matchAutorecEntry(target, entries) {
+        if (!target || !entries) return null;
+        const doc = target instanceof foundry.abstract.Document ? target : target.document;
         const context = this.extractCallingContext(doc);
         if (!context.itemName && !context.itemId) {
             log.info("matchAutorecEntry | Could not extract calling item context (missing itemName and itemId) from document:", { doc, context });
