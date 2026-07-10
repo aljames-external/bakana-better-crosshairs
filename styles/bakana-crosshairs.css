@@ -405,7 +405,7 @@
 
 .bbc-section-body {
     padding: 10px 12px;
-    max-height: 280px;
+    max-height: 135px;
     overflow-y: auto;
     overscroll-behavior: contain;
 }
