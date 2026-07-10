@@ -406,6 +406,9 @@
 
 .bbc-section-body {
     padding: 10px 12px;
+    max-height: 380px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .bbc-section-body::-webkit-scrollbar,
