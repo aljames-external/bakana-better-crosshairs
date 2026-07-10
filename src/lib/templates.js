@@ -1,6 +1,7 @@
 import { MODULE_ID } from './constants.js';
 import { log } from './logger.js';
 import { crosshair } from '../crosshair/_crosshairs.js';
+import { Token } from './compat.js';
 
 const registeredHandlers = new Map();
 const fastLookupMap = new Map();
@@ -209,7 +210,8 @@ async function handleDrawPreview(placeable) {
     placeable.highlightGrid = function() {};
 
     // 2. Resolve token context
-    const token = entry.item?.parent?.getActiveTokens?.()[0] || doc.item?.parent?.getActiveTokens?.()[0] || canvas.tokens?.controlled?.[0] || undefined;
+    let rawToken = entry.item?.parent?.getActiveTokens?.()[0] || doc.item?.parent?.getActiveTokens?.()[0] || canvas.tokens?.controlled?.[0] || undefined;
+    const token = rawToken instanceof Token ? rawToken : (rawToken?.object instanceof Token ? rawToken.object : rawToken);
     log.debug(`handleDrawPreview | Using token context:`, token?.name);
 
     const placementKey = `${entry.itemName}_${game.user.id}`;

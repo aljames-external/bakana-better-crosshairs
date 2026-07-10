@@ -1,4 +1,5 @@
 import { log } from "../lib/logger.js";
+import { Token } from "../lib/compat.js";
 
 let activeWheelHandler = null;
 let activePointerHandler = null;
@@ -296,7 +297,8 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
 /**
  * Calculate point on token boundary edge toward target position along with angle in degrees.
  */
-export function getTokenEdgePoint(token, targetX, targetY, sticky = true) {
+export function getTokenEdgePoint(tokenInput, targetX, targetY, sticky = true) {
+    const token = tokenInput instanceof Token ? tokenInput : (tokenInput?.object instanceof Token ? tokenInput.object : tokenInput);
     const cx = token.center?.x ?? (token.x + (token.w || 0) / 2);
     const cy = token.center?.y ?? (token.y + (token.h || 0) / 2);
     const hw = (token.w || canvas?.grid?.size || 100) / 2;
