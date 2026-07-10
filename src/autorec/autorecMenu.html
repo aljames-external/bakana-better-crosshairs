@@ -264,7 +264,59 @@
                         </div>
                     </section>
 
-                    <!-- Section 3: Post-Animation Configuration -->
+                    <!-- Section 3: Template Placement Configuration -->
+                    <section class="bbc-section-card">
+                        <div class="bbc-section-header">
+                            <div class="bbc-section-title">
+                                <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+                                <i class="fa-solid fa-layer-group bbc-section-icon"></i>
+                                <h3>Template Placement Configuration</h3>
+                            </div>
+                            <span class="bbc-section-tag ready">V13- Template / V14+ Region</span>
+                        </div>
+                        <div class="bbc-section-body">
+                            <p class="bbc-section-desc">Configures the fill color, border color, and alpha opacities of the final placed template or region document.</p>
+                            <table class="bbc-config-table">
+                                <tbody>
+                                    <tr class="{{#unless hasPlacedStyling}}edit-only{{/unless}}">
+                                        <th>Placed Fill Styling</th>
+                                        <td>
+                                            <span class="view-only">
+                                                <span class="bbc-color-swatch" data-color="{{placedFillColor}}"></span>
+                                                <code>{{placedFillColor}}</code> (Alpha: {{placedFillAlpha}})
+                                            </span>
+                                            <div class="bbc-edit-color-row edit-only">
+                                                <input type="color" class="bbc-edit-color" data-field="placedFillColor" value="{{placedFillColor}}" />
+                                                <label>Alpha: <input type="number" step="0.1" min="0" max="1" class="bbc-edit-input small" data-field="placedFillAlpha" value="{{placedFillAlpha}}" /></label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="{{#unless hasPlacedStyling}}edit-only{{/unless}}">
+                                        <th>Placed Border Styling</th>
+                                        <td>
+                                            <span class="view-only">
+                                                <span class="bbc-color-swatch" data-color="{{placedBorderColor}}"></span>
+                                                <code>{{placedBorderColor}}</code> (Alpha: {{placedBorderAlpha}})
+                                            </span>
+                                            <div class="bbc-edit-color-row edit-only">
+                                                <input type="color" class="bbc-edit-color" data-field="placedBorderColor" value="{{placedBorderColor}}" />
+                                                <label>Alpha: <input type="number" step="0.1" min="0" max="1" class="bbc-edit-input small" data-field="placedBorderAlpha" value="{{placedBorderAlpha}}" /></label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {{#unless hasPlacedStyling}}
+                                    <tr class="view-only">
+                                        <td colspan="2" style="text-align: center; color: #64748b; font-style: italic;">
+                                            Using default Foundry / Game System placement colors (Enable Edit Mode to customize).
+                                        </td>
+                                    </tr>
+                                    {{/unless}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Section 4: Post-Animation Configuration -->
                     <section class="bbc-section-card">
                         <div class="bbc-section-header">
                             <div class="bbc-section-title">

@@ -218,7 +218,8 @@ async function handleDrawPreview(placeable) {
         resolved: false,
         cancelled: false,
         coords: null,
-        originalTemplate: placeable
+        originalTemplate: placeable,
+        config: typeof entry.handler === "object" && entry.handler !== null ? entry.handler : {}
     };
     pendingPlacements.set(placementKey, pending);
 
@@ -401,6 +402,33 @@ function handlePreCreate(doc, data, options, userId) {
             if (pending.coords.direction !== undefined) updateData.direction = pending.coords.direction;
             if (pending.coords.width !== undefined) updateData.width = pending.coords.width;
             if (pending.coords.t !== undefined) updateData.t = pending.coords.t;
+        }
+
+        // Apply Placed Template (v13-) / Region (v14+) Styling if configured
+        const pConf = pending.config || {};
+        const placedFillColor = pConf.placedFillColor || pConf.templateFillColor;
+        const placedFillAlpha = pConf.placedFillAlpha !== undefined ? pConf.placedFillAlpha : pConf.templateFillAlpha;
+        const placedBorderColor = pConf.placedBorderColor || pConf.templateBorderColor;
+        const placedBorderAlpha = pConf.placedBorderAlpha !== undefined ? pConf.placedBorderAlpha : pConf.templateBorderAlpha;
+
+        if (doc.documentName === 'Region') {
+            if (placedFillColor || placedBorderColor) updateData.color = placedFillColor || placedBorderColor;
+        } else {
+            if (placedFillColor) updateData.fillColor = placedFillColor;
+            if (placedBorderColor) updateData.borderColor = placedBorderColor;
+            if ("fillAlpha" in (doc._source || doc) && placedFillAlpha !== undefined) updateData.fillAlpha = placedFillAlpha;
+            if ("alpha" in (doc._source || doc) && placedFillAlpha !== undefined) updateData.alpha = placedFillAlpha;
+        }
+
+        if (placedFillColor || placedFillAlpha !== undefined || placedBorderColor || placedBorderAlpha !== undefined) {
+            updateData.flags = foundry.utils.mergeObject(doc.flags || {}, {
+                bbc: {
+                    placedFillColor,
+                    placedFillAlpha,
+                    placedBorderColor,
+                    placedBorderAlpha
+                }
+            });
         }
 
         doc.updateSource(updateData);
@@ -719,10 +747,33 @@ function getAllEntries() {
         );
         const icon = config.icon || null;
 
+        const placedFillColor = config.placedFillColor || config.templateFillColor || "#0099ff";
+        const placedFillAlpha = config.placedFillAlpha !== undefined ? config.placedFillAlpha : (config.templateFillAlpha !== undefined ? config.templateFillAlpha : 0.25);
+        const placedBorderColor = config.placedBorderColor || config.templateBorderColor || "#000000";
+        const placedBorderAlpha = config.placedBorderAlpha !== undefined ? config.placedBorderAlpha : (config.templateBorderAlpha !== undefined ? config.templateBorderAlpha : 1);
+        const hasPlacedStyling = Boolean(
+            config.placedFillColor ||
+            config.placedFillAlpha !== undefined ||
+            config.templateFillColor ||
+            config.templateFillAlpha !== undefined ||
+            config.placedBorderColor ||
+            config.placedBorderAlpha !== undefined ||
+            config.templateBorderColor ||
+            config.templateBorderAlpha !== undefined
+        );
+
+        const knownKeys = new Set([
+            "type", "local", "file", "animationFile", "distance", "radius", "length", "width", "angle",
+            "stickToToken", "attachToToken", "lockToToken", "showLine", "lineFile",
+            "borderColor", "borderAlpha", "fillColor", "fillAlpha", "icon",
+            "placedFillColor", "placedFillAlpha", "placedBorderColor", "placedBorderAlpha",
+            "templateFillColor", "templateFillAlpha", "templateBorderColor", "templateBorderAlpha"
+        ]);
+
         const configEntries = [];
         if (config && typeof config === "object") {
             for (const [k, v] of Object.entries(config)) {
-                if (typeof v === "function") continue;
+                if (typeof v === "function" || knownKeys.has(k)) continue;
                 configEntries.push({
                     key: k,
                     value: typeof v === "object" ? JSON.stringify(v) : String(v)
@@ -758,6 +809,11 @@ function getAllEntries() {
             fillColor,
             fillAlpha,
             hasCustomStyling,
+            placedFillColor,
+            placedFillAlpha,
+            placedBorderColor,
+            placedBorderAlpha,
+            hasPlacedStyling,
             icon,
             configEntries,
         });
