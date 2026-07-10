@@ -92,6 +92,13 @@ function rotateCrosshairInstance(crosshair, newDirDeg) {
 export function attachWheelRotation(crosshair, config = {}) {
     detachWheelRotation();
 
+    const isCone = config.type === "cone" || config.t === "cone";
+    const isAttached = shouldStickToToken(config, isCone) && Boolean(config.token);
+    if (isAttached) {
+        log.debug("attachWheelRotation | Crosshair is attached to token. Disabling mouse wheel rotation.");
+        return;
+    }
+
     config.currentDirection = config.currentDirection ?? config.direction ?? 0;
 
     activeWheelHandler = (event) => {
