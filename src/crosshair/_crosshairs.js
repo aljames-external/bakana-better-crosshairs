@@ -17,9 +17,13 @@ export const crosshair = {
         cone,
         circle,
         ray,
+        square: ray,
+        rect: ray,
     },
     cone,
     circle,
     ray,
+    square: ray,
+    rect: ray,
     play,
 };

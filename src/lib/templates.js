@@ -772,7 +772,12 @@ function getAllEntries() {
             isLocal = true;
         }
 
-        const typeKey = type.toLowerCase().replace(/\s+/g, "-");
+        const circleFile = config.circleFile || config.file || "eskie.crosshair.circle.fantasy_01.white.full";
+        const coneFile = config.coneFile || config.file || "eskie.crosshair.cone.thin.fantasy_01.white.full";
+        const rayFile = config.rayFile || config.file || "eskie.crosshair.ray.fantasy_01.white";
+        const squareFile = config.squareFile || config.rayFile || config.file || "eskie.crosshair.ray.fantasy_01.white";
+
+        const typeKey = "auto-detect";
         const distVal = config.distance ?? config.radius ?? config.length;
         const distanceDisplay = distVal !== undefined ? `${distVal} ft` : null;
         const widthVal = config.width;
@@ -813,7 +818,7 @@ function getAllEntries() {
         const postPlacementCode = config.postPlacementCode || config.postCode || config.postRegionCode || config.postTemplateCode || "";
 
         const knownKeys = new Set([
-            "type", "local", "file", "animationFile", "distance", "radius", "length", "width", "angle",
+            "type", "local", "file", "animationFile", "circleFile", "coneFile", "rayFile", "squareFile", "rectFile", "distance", "radius", "length", "width", "angle",
             "stickToToken", "attachToToken", "lockToToken", "showLine", "lineFile",
             "borderColor", "borderAlpha", "fillColor", "fillAlpha", "icon",
             "placedFillColor", "placedFillAlpha", "placedBorderColor", "placedBorderAlpha",
@@ -833,20 +838,16 @@ function getAllEntries() {
             }
         }
 
-        const isCircle = typeKey === "circle";
-        const isCone = typeKey === "cone";
-        const isRay = typeKey === "ray";
-        const isAutoDetect = typeKey === "auto-detect";
-
         results.push({
             itemName,
-            type,
-            typeKey,
-            isCircle,
-            isCone,
-            isRay,
-            isAutoDetect,
-            file: file || "Default Sequencer Asset",
+            type: "Auto-Detect",
+            typeKey: "auto-detect",
+            isAutoDetect: true,
+            circleFile,
+            coneFile,
+            rayFile,
+            squareFile,
+            file: circleFile,
             isCustomFunction,
             isLocal,
             config,

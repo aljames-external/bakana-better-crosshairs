@@ -123,18 +123,6 @@
                             <table class="bbc-config-table">
                                 <tbody>
                                     <tr>
-                                        <th>Crosshair Shape Type</th>
-                                        <td>
-                                            <span class="bbc-pill view-only">{{type}}</span>
-                                            <select class="bbc-edit-select edit-only" data-field="type">
-                                                <option value="Auto-Detect" {{#if isAutoDetect}}selected{{/if}}>Auto-Detect</option>
-                                                <option value="circle" {{#if isCircle}}selected{{/if}}>Circle</option>
-                                                <option value="cone" {{#if isCone}}selected{{/if}}>Cone</option>
-                                                <option value="ray" {{#if isRay}}selected{{/if}}>Ray</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <tr>
                                         <th>Registration Scope</th>
                                         <td>
                                             <span class="view-only">{{#if isLocal}}<span class="bbc-pill no">Local Only (Session Scope)</span>{{else}}<span class="bbc-pill yes">World Synced (Persisted)</span>{{/if}}</span>
@@ -145,10 +133,31 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th>Sequencer File Path</th>
+                                        <th>Circle Sequencer Filepath</th>
                                         <td>
-                                            <code class="bbc-code-pill view-only">{{file}}</code>
-                                            <input type="text" class="bbc-edit-input edit-only" data-field="file" value="{{file}}" placeholder="Sequencer asset path..." />
+                                            <code class="bbc-code-pill view-only">{{circleFile}}</code>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="circleFile" value="{{circleFile}}" placeholder="eskie.crosshair.circle.fantasy_01.white.full" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Cone Sequencer Filepath</th>
+                                        <td>
+                                            <code class="bbc-code-pill view-only">{{coneFile}}</code>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="coneFile" value="{{coneFile}}" placeholder="eskie.crosshair.cone.thin.fantasy_01.white.full" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Ray Sequencer Filepath</th>
+                                        <td>
+                                            <code class="bbc-code-pill view-only">{{rayFile}}</code>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="rayFile" value="{{rayFile}}" placeholder="eskie.crosshair.ray.fantasy_01.white" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Square Sequencer Filepath</th>
+                                        <td>
+                                            <code class="bbc-code-pill view-only">{{squareFile}}</code>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="squareFile" value="{{squareFile}}" placeholder="eskie.crosshair.ray.fantasy_01.white" />
                                         </td>
                                     </tr>
                                     <tr>

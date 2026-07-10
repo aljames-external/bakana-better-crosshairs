@@ -156,7 +156,7 @@ export class AutorecMenuApplication extends BaseApplication {
                 newName = newName.trim();
 
                 if (!manager.has(newName)) {
-                    manager.register(newName, { type: "circle", distance: 30 }, { persist: true });
+                    manager.register(newName, {}, { persist: true });
                     manager.broadcastSync();
                     ui.notifications?.info(`Added workflow: "${newName}".`);
                 }
