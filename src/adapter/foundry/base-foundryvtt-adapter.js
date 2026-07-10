@@ -6,12 +6,12 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
-     * Extract normalized calling item and activity context from a Foundry placeable or document.
-     * @param {Document|PlaceableObject} target
+     * Extract normalized calling item and activity context from a Foundry document.
+     * @param {Document} doc - The template or region document
      * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}}
      */
-    extractCallingContext(target) {
-        const doc = target.document ?? target;
+    extractCallingContext(doc) {
+        if (!doc) return { item: null, itemName: "", itemId: "", activity: null, activityName: "", activityId: "" };
         let itemObj = doc.item;
         let activityObj = null;
 
@@ -56,12 +56,13 @@ export class BaseFoundryVTTAdapter {
     /**
      * Filter and match autorec candidates for a Foundry document (MeasuredTemplate / Region)
      * by calling the system adapter to decide whether an entry should replace the default crosshair.
-     * @param {Document|PlaceableObject} target - The template/region placeable or document
+     * @param {Document} doc - The template or region document
      * @param {Map<string, Object>} entries - Registered autorec entries map
      * @returns {Object|null} The matching autorec entry or null
      */
-    matchAutorecEntry(target, entries) {
-        const context = this.extractCallingContext(target);
+    matchAutorecEntry(doc, entries) {
+        if (!doc || !entries) return null;
+        const context = this.extractCallingContext(doc);
         if (!context.itemName && !context.itemId) return null;
 
         for (const entry of entries.values()) {
@@ -71,6 +72,7 @@ export class BaseFoundryVTTAdapter {
         }
         return null;
     }
+
 
 
 
