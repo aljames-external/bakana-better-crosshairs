@@ -1,7 +1,6 @@
 import { crosshair } from './crosshair/_crosshairs.js';
 import { file, closest, absolutePath } from './lib/filemanager.js';
 import { log } from './lib/logger.js';
-import { manager } from './lib/templates.js';
 import { autorecManager } from './autorec/autorecManager.js';
 import { attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement, getTokenEdgePoint, snapCoordinates } from './crosshair/util.js';
 import { localize } from './lib/utils.js';
@@ -22,6 +21,8 @@ Hooks.once('init', async () => {
             );
         }
 
+        const manager = autorecManager;
+
         const util = {
             localize,
             file,
@@ -39,6 +40,7 @@ Hooks.once('init', async () => {
         setupApiCalls({ manager });
         setupApiCalls({ autorecManager });
         setupApiCalls({ log });
+
 
         const moduleApi = {
             crosshair,

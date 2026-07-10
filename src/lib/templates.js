@@ -1,4 +1,3 @@
-import { MODULE_ID } from './constants.js';
 import { log } from './logger.js';
 import { crosshair } from '../crosshair/_crosshairs.js';
 import { Token } from './compat.js';
@@ -125,15 +124,14 @@ async function handleDrawPreview(placeable) {
         };
         log.debug(`handleDrawPreview | Auto-detected sequence config for "${entry.itemName}":`, autoConfig);
 
-        let result;
         if (typeof entry.handler === "function") {
-            result = await entry.handler(token, autoConfig);
+            await entry.handler(token, autoConfig);
         } else {
             const mergedConfig = foundry.utils.mergeObject(autoConfig, entry.handler || {}, { inplace: false });
             const crosshairType = mergedConfig.type || "circle";
             const builder = crosshair[crosshairType] || crosshair.circle;
             log.debug(`handleDrawPreview | Playing default "${crosshairType}" crosshair for "${entry.itemName}" with config:`, mergedConfig);
-            result = await builder.play(token, mergedConfig);
+            await builder.play(token, mergedConfig);
         }
         log.debug(`handleDrawPreview | Sequencer crosshair sequence initiated for "${entry.itemName}". Awaiting placement click...`);
     } catch (err) {
@@ -143,14 +141,10 @@ async function handleDrawPreview(placeable) {
     }
 }
 
-function formatRegionShapeUpdate(originalShape, coords) {
-    return crosshairAdapter.formatShapeUpdate(originalShape, coords);
-}
-
 /**
  * Handle document preCreate (v13 preCreateMeasuredTemplate / v14 preCreateRegion).
  */
-function handlePreCreate(doc, data, options, userId) {
+function handlePreCreate(doc, _data, _options, userId) {
     // Ensure only the hook owner processes their own creation
     if (userId !== game.user.id) return true;
 
@@ -194,7 +188,7 @@ function handlePreCreate(doc, data, options, userId) {
  * Handle document post-creation hook (v13 createMeasuredTemplate / v14 createRegion).
  * Executes user-configured post-placement Javascript inside a try/catch block with standard context variables.
  */
-async function handleCreateDocument(doc, options, userId) {
+async function handleCreateDocument(doc, _options, userId) {
     if (userId !== game.user?.id) return;
 
     const entry = autorecManager.getRegisteredEntry(doc);
@@ -234,8 +228,8 @@ function initializeHooks() {
 
     crosshairAdapter.registerPlacementHooks({
         onDrawPreview: (placeable) => handleDrawPreview(placeable),
-        onPreCreate: (doc, data, options, userId) => handlePreCreate(doc, data, options, userId),
-        onCreate: (doc, options, userId) => handleCreateDocument(doc, options, userId)
+        onPreCreate: (doc, _data, _options, userId) => handlePreCreate(doc, _data, _options, userId),
+        onCreate: (doc, _options, userId) => handleCreateDocument(doc, _options, userId)
     });
 
     if (game.ready) {
@@ -248,30 +242,5 @@ function initializeHooks() {
 // Connect autorec registration to hook initialization
 autorecManager.onRegister(() => initializeHooks());
 
-async function getPosition(template, config = {}) {
-    if (template) {
-        const { primary, secondary } = crosshairAdapter.getPosition(template);
-        return [primary, secondary];
-    } else {
-        const position = await Sequencer.Crosshair.show();
-        if (position.cancelled) { return []; }
-        return [position, undefined];
-    }
-}
+export { initializeHooks };
 
-export const manager = {
-    getPosition,
-    register: (...args) => autorecManager.register(...args),
-    registerMany: (...args) => autorecManager.registerMany(...args),
-    unregister: (...args) => autorecManager.unregister(...args),
-    unregisterMany: (...args) => autorecManager.unregisterMany(...args),
-    overwrite: (...args) => autorecManager.overwrite(...args),
-    has: (...args) => autorecManager.has(...args),
-    get: (...args) => autorecManager.get(...args),
-    list: (...args) => autorecManager.list(...args),
-    getAllEntries: (...args) => autorecManager.getAllEntries(...args),
-    loadSavedRegistrations: (...args) => autorecManager.loadSavedRegistrations(...args),
-    initializeReadySync: (...args) => autorecManager.initializeReadySync(...args),
-    broadcastSync: (...args) => autorecManager.broadcastSync(...args),
-    autorec: autorecManager
-};
