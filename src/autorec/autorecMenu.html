@@ -36,10 +36,11 @@
                         <i class="fa-solid fa-crosshairs bbc-item-icon"></i>
                         <span class="bbc-item-name">{{itemName}}</span>
                     </div>
+                    {{#if isLocal}}
                     <div class="bbc-card-meta">
-                        <span class="bbc-type-badge {{typeKey}}">{{type}}</span>
-                        {{#if isLocal}}<span class="bbc-type-badge local" title="Local Only (Session Scope)">Local</span>{{/if}}
+                        <span class="bbc-type-badge local" title="Local Only (Session Scope)">Local</span>
                     </div>
+                    {{/if}}
                 </div>
                 {{/each}}
             </div>
