@@ -10,9 +10,10 @@ export class BaseFoundryVTTAdapter {
      * @param {Document} doc - The template or region document
      * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}}
      */
-    extractCallingContext(doc) {
-        if (!doc) return { item: null, itemName: "", itemId: "", activity: null, activityName: "", activityId: "" };
-        let itemObj = doc.item;
+    extractCallingContext(target) {
+        if (!target) return { item: null, itemName: "", itemId: "", activity: null, activityName: "", activityId: "" };
+        const document = target.document ?? target;
+        let itemObj = document.item || target.item;
         let activityObj = null;
 
         if (itemObj && (itemObj.item || (itemObj.parent && itemObj.parent.documentName === "Item"))) {
@@ -20,18 +21,18 @@ export class BaseFoundryVTTAdapter {
             itemObj = itemObj.item || itemObj.parent;
         }
 
-        if (!itemObj && doc.flags?.dnd5e?.origin && typeof fromUuidSync === "function") {
-            try { itemObj = fromUuidSync(doc.flags.dnd5e.origin); } catch (e) {}
+        if (!itemObj && document.flags?.dnd5e?.origin && typeof fromUuidSync === "function") {
+            try { itemObj = fromUuidSync(document.flags.dnd5e.origin); } catch (e) {}
         }
-        if (!itemObj && doc.flags?.['midi-qol']?.itemUuid && typeof fromUuidSync === "function") {
-            try { itemObj = fromUuidSync(doc.flags['midi-qol'].itemUuid); } catch (e) {}
+        if (!itemObj && document.flags?.['midi-qol']?.itemUuid && typeof fromUuidSync === "function") {
+            try { itemObj = fromUuidSync(document.flags['midi-qol'].itemUuid); } catch (e) {}
         }
-        if (!itemObj && doc.flags?.core?.sourceId && typeof fromUuidSync === "function") {
-            try { itemObj = fromUuidSync(doc.flags.core.sourceId); } catch (e) {}
+        if (!itemObj && document.flags?.core?.sourceId && typeof fromUuidSync === "function") {
+            try { itemObj = fromUuidSync(document.flags.core.sourceId); } catch (e) {}
         }
 
         if (itemObj && !activityObj) {
-            const actIdentifier = doc.flags?.dnd5e?.activity || doc.flags?.dnd5e?.activityUuid || doc.flags?.dnd5e?.activityId || doc.flags?.['midi-qol']?.activityId;
+            const actIdentifier = document.flags?.dnd5e?.activity || document.flags?.dnd5e?.activityUuid || document.flags?.dnd5e?.activityId || document.flags?.['midi-qol']?.activityId;
             if (actIdentifier) {
                 if (typeof fromUuidSync === "function" && typeof actIdentifier === "string" && actIdentifier.includes(".")) {
                     try { activityObj = fromUuidSync(actIdentifier); } catch (e) {}
@@ -63,13 +64,18 @@ export class BaseFoundryVTTAdapter {
     matchAutorecEntry(doc, entries) {
         if (!doc || !entries) return null;
         const context = this.extractCallingContext(doc);
-        if (!context.itemName && !context.itemId) return null;
+        if (!context.itemName && !context.itemId) {
+            console.log("BBC | matchAutorecEntry | Could not extract calling item context from document/placeable:", doc);
+            return null;
+        }
 
         for (const entry of entries.values()) {
             if (systemAdapter.shouldReplace(context, entry)) {
+                console.log(`BBC | matchAutorecEntry | Matched entry "${entry.itemName}" for calling item "${context.itemName}"`);
                 return { ...entry, item: context.item, activity: context.activity };
             }
         }
+        console.log(`BBC | matchAutorecEntry | No matching autorec entry for calling item "${context.itemName}"`);
         return null;
     }
 

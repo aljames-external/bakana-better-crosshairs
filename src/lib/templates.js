@@ -30,20 +30,27 @@ function detectTemplateProperties(target) {
  */
 async function handleDrawPreview(placeable) {
     const doc = placeable.document ?? placeable;
-    log.debug(`handleDrawPreview | Hook fired for doc.id=${doc.id || "preview"}`);
-    // Only intercept preview instances (uncreated documents) for the local owner
-    if (doc.id || !isOwner(doc)) {
-        log.debug(`handleDrawPreview | Skipping non-preview or non-owned placeable (doc.id=${doc.id})`);
+    const isPreview = placeable.isPreview || (canvas.templates?.preview?.children || []).includes(placeable) || (canvas.regions?.preview?.children || []).includes(placeable) || !canvas.scene?.templates?.has(doc.id);
+
+    console.log(`BBC | handleDrawPreview | Hook fired:`, {
+        docId: doc.id,
+        isPreview,
+        isOwner: isOwner(doc),
+        placeable
+    });
+
+    if (!isPreview || !isOwner(doc)) {
+        console.log(`BBC | handleDrawPreview | Skipping non-preview or non-owned placeable:`, { docId: doc.id, isPreview });
         return;
     }
 
     const entry = autorecManager.getRegisteredEntry(placeable);
     if (!entry) {
-        log.debug(`handleDrawPreview | No registered handler matched for preview.`);
+        console.log(`BBC | handleDrawPreview | No registered handler matched for preview.`);
         return;
     }
 
-    log.info(`handleDrawPreview | Intercepting template preview for "${entry.itemName}"`);
+    console.log(`BBC | handleDrawPreview | Intercepting template preview for "${entry.itemName}"`);
 
     // 1. Immediately hide the Foundry template/region preview graphic completely so custom Sequencer visuals take over
     crosshairAdapter.hidePreview(placeable);
@@ -77,7 +84,7 @@ async function handleDrawPreview(placeable) {
         resolved: false,
         promise: null,
         async resolve(coords = {}) {
-            log.debug(`context.resolve | Sequencer crosshair PLACED at (${coords.x}, ${coords.y}). Updating preview document coordinates...`, coords);
+            console.log(`BBC | context.resolve | Sequencer crosshair PLACED at (${coords.x}, ${coords.y}):`, coords);
             Object.assign(this, coords);
             this.resolved = true;
 
@@ -92,20 +99,20 @@ async function handleDrawPreview(placeable) {
                 }
 
                 if (pending.deferredCreateData && canvas.scene) {
-                    log.debug(`context.resolve | Resuming deferred document creation on scene "${canvas.scene.name}" at (${coords.x}, ${coords.y})`);
+                    console.log(`BBC | context.resolve | Resuming deferred document creation on scene "${canvas.scene.name}"`);
                     const deferredData = foundry.utils.deepClone(pending.deferredCreateData);
                     delete deferredData._id;
                     const docName = previewDoc?.documentName || (deferredData.shapes ? "Region" : "MeasuredTemplate");
                     try {
                         await canvas.scene.createEmbeddedDocuments(docName, [deferredData]);
                     } catch (err) {
-                        log.error(`context.resolve | Failed to create deferred ${docName} document on placement:`, err);
+                        console.error(`BBC | context.resolve | Failed to create deferred ${docName} document:`, err);
                     }
                 }
             }
         },
         cancel() {
-            log.debug(`context.cancel | Sequencer crosshair CANCELLED for "${entry.itemName}"`);
+            console.log(`BBC | context.cancel | Sequencer crosshair CANCELLED for "${entry.itemName}"`);
             this.cancelled = true;
             this.resolved = true;
             const pending = pendingPlacements.get(placementKey);
@@ -130,7 +137,7 @@ async function handleDrawPreview(placeable) {
             actor,
             scope: { item, actor, token, doc }
         };
-        log.debug(`handleDrawPreview | Auto-detected sequence config for "${entry.itemName}":`, autoConfig);
+        console.log(`BBC | handleDrawPreview | Config for "${entry.itemName}":`, autoConfig);
 
         if (typeof entry.handler === "function") {
             await entry.handler(token, autoConfig);
@@ -138,12 +145,12 @@ async function handleDrawPreview(placeable) {
             const mergedConfig = foundry.utils.mergeObject(autoConfig, entry.handler || {}, { inplace: false });
             const crosshairType = mergedConfig.type || "circle";
             const builder = crosshair[crosshairType] || crosshair.circle;
-            log.debug(`handleDrawPreview | Playing default "${crosshairType}" crosshair for "${entry.itemName}" with config:`, mergedConfig);
+            console.log(`BBC | handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}"`);
             await builder.play(token, mergedConfig);
         }
-        log.debug(`handleDrawPreview | Sequencer crosshair sequence completed for "${entry.itemName}".`);
+        console.log(`BBC | handleDrawPreview | Sequencer crosshair sequence completed for "${entry.itemName}".`);
     } catch (err) {
-        log.error(`Error running sequencer sequence for ${entry.itemName}:`, err);
+        console.error(`BBC | handleDrawPreview | Error running sequencer sequence for "${entry.itemName}":`, err);
         pending.cancelled = true;
         pending.resolved = true;
     }
@@ -163,26 +170,31 @@ function handlePreCreate(doc, _data, _options, userId) {
     const pending = pendingPlacements.get(placementKey);
     if (!pending) return true;
 
+    console.log(`BBC | handlePreCreate | Hook fired for "${entry.itemName}" (pending.resolved=${pending.resolved}):`, {
+        docName: doc.documentName,
+        pendingCoords: pending.coords
+    });
+
     // If the sequencer sequence was right-click cancelled, abort placement
     if (pending.cancelled) {
-        log.debug(`handlePreCreate | Cancelling placement for key=${placementKey}`);
+        console.log(`BBC | handlePreCreate | Cancelling placement for "${entry.itemName}"`);
         pendingPlacements.delete(placementKey);
         return false;
     }
 
     // If the sequencer sequence has resolved with coordinates, update the document
     if (pending.resolved && pending.coords) {
-        log.debug(`handlePreCreate | Sequencer resolved placement for key=${placementKey}. Applying placement data.`, pending.coords);
+        console.log(`BBC | handlePreCreate | Applying placement data for "${entry.itemName}":`, pending.coords);
         const updateData = crosshairAdapter.formatDocumentUpdate(doc, pending.coords, pending.config || {});
         doc.updateSource(updateData);
         pendingPlacements.delete(placementKey);
-        log.debug(`handlePreCreate | Updated document source for key=${placementKey}`, updateData);
+        console.log(`BBC | handlePreCreate | Updated document source:`, updateData);
         return true;
     }
 
     // If sequence is still interactive/running, defer creation until sequence resolves
     pending.deferredCreateData = doc.toObject();
-    log.debug(`handlePreCreate | Deferring premature document creation while Sequencer crosshair is active (key=${placementKey})`);
+    console.log(`BBC | handlePreCreate | Deferring premature document creation while Sequencer crosshair is active ("${entry.itemName}")`);
     return false;
 }
 
