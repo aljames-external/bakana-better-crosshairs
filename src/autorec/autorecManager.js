@@ -1,5 +1,8 @@
 import { MODULE_ID } from '../lib/constants.js';
 import { log } from '../lib/logger.js';
+import { systemAdapter } from '../adapter/system/index.js';
+import { crosshairAdapter } from '../adapter/foundry/index.js';
+
 
 /**
  * AutorecManager manages automatic recognition (autorec) registrations for template/region items.
@@ -48,61 +51,34 @@ export class AutorecManager {
      * Resolve the parent Item and Activity (if present) from a template/region target.
      */
     resolveItemAndActivity(target) {
-        const doc = target.document ?? target;
-        let itemObj = doc.item;
-        let activityObj = null;
-
-        if (!itemObj && doc.flags?.dnd5e?.origin && typeof fromUuidSync === "function") {
-            try { itemObj = fromUuidSync(doc.flags.dnd5e.origin); } catch (e) {}
+        if (systemAdapter.supportsActivities && typeof systemAdapter.resolveItemAndActivity === "function") {
+            return systemAdapter.resolveItemAndActivity(target);
         }
-        if (!itemObj && doc.flags?.['midi-qol']?.itemUuid && typeof fromUuidSync === "function") {
-            try { itemObj = fromUuidSync(doc.flags['midi-qol'].itemUuid); } catch (e) {}
-        }
-
-        // Check if itemObj is actually an Activity (has parent Item in .item or .parent)
-        if (itemObj && (itemObj.item || (itemObj.parent && itemObj.parent.documentName === "Item"))) {
-            activityObj = itemObj;
-            itemObj = itemObj.item || itemObj.parent;
-        }
-
+        const base = systemAdapter.resolveItem(target);
         return {
-            item: itemObj,
-            itemName: itemObj?.name,
-            itemId: itemObj?.id,
-            activity: activityObj,
-            activityName: activityObj?.name,
-            activityId: activityObj?.id
+            ...base,
+            activity: null,
+            activityName: "",
+            activityId: ""
         };
     }
 
     indexRegistration(registeredKey, handler) {
-        let reqItem = registeredKey;
-        let reqActivity = handler?.activity;
+        const itemName = handler?.itemName || registeredKey;
+        const activityId = handler?.activityId || "";
+        const activityName = handler?.activityName || "";
+        const entry = typeof handler === "object" && handler !== null ? { ...handler, itemName } : { itemName, handler };
 
-        if (registeredKey.includes("|")) {
-            const parts = registeredKey.split("|").map(p => p.trim());
-            reqItem = parts[0];
-            reqActivity = reqActivity || parts[1];
-        } else if (registeredKey.includes(":")) {
-            const parts = registeredKey.split(":").map(p => p.trim());
-            reqItem = parts[0];
-            reqActivity = reqActivity || parts[1];
+        this.fastLookupMap.set(registeredKey, entry);
+        this.fastLookupMap.set(registeredKey.toLowerCase(), entry);
+        if (itemName) {
+            this.fastLookupMap.set(itemName, entry);
+            this.fastLookupMap.set(itemName.toLowerCase(), entry);
         }
-
-        const entry = { itemName: registeredKey, handler };
-
-        if (reqActivity) {
-            const iKeys = [reqItem, reqItem.toLowerCase()];
-            const aKeys = [reqActivity, reqActivity.toLowerCase()];
-            for (const ik of iKeys) {
-                for (const ak of aKeys) {
-                    this.fastLookupMap.set(`${ik}|${ak}`, entry);
-                    this.fastLookupMap.set(`${ik}:${ak}`, entry);
-                }
-            }
-        } else {
-            this.fastLookupMap.set(reqItem, entry);
-            this.fastLookupMap.set(reqItem.toLowerCase(), entry);
+        if (activityId || activityName) {
+            const act = activityId || activityName;
+            this.fastLookupMap.set(`${itemName}|${act}`, entry);
+            this.fastLookupMap.set(`${itemName.toLowerCase()}|${act.toLowerCase()}`, entry);
         }
     }
 
@@ -114,52 +90,18 @@ export class AutorecManager {
     }
 
     /**
-     * Helper to match a template/region document or placeable to a registered item name in O(1) time.
-     * Supports:
-     * - Item name or ID alone (e.g. "Longbow") -> matches all activities on Longbow
-     * - Item and Activity name (e.g. "Longbow | Special Attack" or "Longbow: Special Attack") -> matches only that activity on Longbow
+     * Match a template/region document or placeable to a registered autorec workflow.
+     * Delegates document inspection to the Foundry Adapter, which in turn calls the System Adapter
+     * for additional item and activity filtering.
      */
     getRegisteredEntry(target) {
         if (!target) return null;
         if (typeof target === "string") {
             return this.fastLookupMap.get(target) || this.fastLookupMap.get(target.toLowerCase()) || null;
         }
-
-        const { item, itemName, itemId, activityName, activityId } = this.resolveItemAndActivity(target);
-
-        if (!itemName && !itemId) return null;
-
-        const lookupKeys = [];
-
-        // 1. Most specific: Item + Activity combinations
-        if (activityName || activityId) {
-            const iKeys = [itemId, itemName, itemName?.toLowerCase()].filter(Boolean);
-            const aKeys = [activityId, activityName, activityName?.toLowerCase()].filter(Boolean);
-            for (const ik of iKeys) {
-                for (const ak of aKeys) {
-                    lookupKeys.push(`${ik}|${ak}`);
-                    lookupKeys.push(`${ik}:${ak}`);
-                }
-            }
-        }
-
-        // 2. Item-only combinations
-        if (itemId) lookupKeys.push(itemId);
-        if (itemName) {
-            lookupKeys.push(itemName);
-            lookupKeys.push(itemName.toLowerCase());
-        }
-
-        for (const key of lookupKeys) {
-            const match = this.fastLookupMap.get(key);
-            if (match) {
-                log.debug(`getRegisteredEntry | Fast O(1) match "${match.itemName}" found for lookup key "${key}"`);
-                return { ...match, item };
-            }
-        }
-
-        return null;
+        return crosshairAdapter.matchAutorecEntry(target, this.registeredHandlers);
     }
+
 
     initializeReadySync() {
         if (this.readySyncInitialized) return;
@@ -499,9 +441,22 @@ export class AutorecManager {
 
             const concurrentCode = config.concurrentCode || config.preAnimationCode || config.customCode || "";
             const postPlacementCode = config.postPlacementCode || config.postCode || config.postRegionCode || config.postTemplateCode || "";
+            const cleanItemName = config.itemName || itemName;
+            const activityId = config.activityId || "";
+            const activityName = config.activityName || "";
+            const hasActivity = Boolean(activityId || activityName);
+            const activityDisplay = activityName || activityId || "";
+
             results.push({
-                itemName,
+                regKey: itemName,
+                itemName: cleanItemName,
+                activityId,
+                activityName,
+                hasActivity,
+                activityDisplay,
+                supportsActivities: systemAdapter.supportsActivities,
                 type: "Auto-Detect",
+
                 typeKey: "auto-detect",
                 isAutoDetect: true,
                 circleFile,

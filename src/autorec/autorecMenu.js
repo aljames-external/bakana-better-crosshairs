@@ -1,8 +1,8 @@
 import { MODULE_ID } from "../lib/constants.js";
 import { autorecManager as manager } from "./autorecManager.js";
-
-
+import { systemAdapter } from "../adapter/system/index.js";
 import { localize } from "../lib/utils.js";
+
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications?.api || {};
 
@@ -72,7 +72,9 @@ export class AutorecMenuApplication extends BaseApplication {
             count: entries.length,
             isEmpty: entries.length === 0,
             isGM: typeof game !== "undefined" ? Boolean(game.user?.isGM) : true,
+            supportsActivities: systemAdapter.supportsActivities,
             isV14,
+
             prePlacementTitle,
             placementSectionTitle,
             postPlacementTitle,
@@ -126,11 +128,12 @@ export class AutorecMenuApplication extends BaseApplication {
         if (addWorkflowBtn) {
             addWorkflowBtn.addEventListener("click", async () => {
                 const DialogClass = window.Dialog || foundry.applications?.api?.DialogV2;
-                let newName = null;
+                let result = null;
+                const supportsActivities = systemAdapter.supportsActivities;
 
                 if (typeof DialogClass === "function" && DialogClass.prompt) {
                     try {
-                        newName = await DialogClass.prompt({
+                        result = await DialogClass.prompt({
                             title: "Add New Crosshair Workflow",
                             content: `
                                 <form>
@@ -138,34 +141,49 @@ export class AutorecMenuApplication extends BaseApplication {
                                         <label>Workflow Item Name:</label>
                                         <input type="text" name="workflowName" placeholder="e.g. Fireball or Longbow" autofocus />
                                     </div>
+                                    ${supportsActivities ? `
+                                    <div class="form-group">
+                                        <label>Activity ID or Name (Optional):</label>
+                                        <input type="text" name="activityName" placeholder="e.g. Attack or Save" />
+                                    </div>` : ""}
                                 </form>
                             `,
                             label: "Add Workflow",
                             callback: (html) => {
-                                const input = html[0]?.querySelector ? html[0].querySelector("input[name='workflowName']") : (html.querySelector ? html.querySelector("input[name='workflowName']") : null);
-                                return input?.value?.trim() || null;
+                                const rootEl = html[0] || html;
+                                const itemInput = rootEl.querySelector ? rootEl.querySelector("input[name='workflowName']") : null;
+                                const actInput = supportsActivities && rootEl.querySelector ? rootEl.querySelector("input[name='activityName']") : null;
+                                const itemName = itemInput?.value?.trim() || null;
+                                const activity = actInput?.value?.trim() || "";
+                                return itemName ? { itemName, activity } : null;
                             }
                         });
                     } catch (e) {
-                        newName = null;
+                        result = null;
                     }
                 } else {
-                    newName = window.prompt("Enter new crosshair workflow Item Name:");
+                    const itemName = window.prompt("Enter new crosshair workflow Item Name:");
+                    if (itemName && itemName.trim()) {
+                        result = { itemName: itemName.trim(), activity: "" };
+                    }
                 }
 
-                if (!newName || !newName.trim()) return;
-                newName = newName.trim();
+                if (!result || !result.itemName) return;
+                const { itemName, activity } = result;
+                const regKey = activity ? `${itemName} | ${activity}` : itemName;
 
-                if (!manager.has(newName)) {
-                    manager.register(newName, {}, { persist: true });
+                if (!manager.has(regKey)) {
+                    const config = activity ? { itemName, activityId: activity, activityName: activity } : { itemName };
+                    manager.register(regKey, config, { persist: true });
                     manager.broadcastSync();
-                    ui.notifications?.info(`Added workflow: "${newName}".`);
+                    ui.notifications?.info(`Added workflow: "${regKey}".`);
                 }
 
-                this.selectItem(root, newName);
+                this.selectItem(root, regKey);
                 this.render(false);
             });
         }
+
 
         // Prevent checkbox click from switching sidebar tab
         root.querySelectorAll(".bbc-item-select-checkbox").forEach(chk => {

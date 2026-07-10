@@ -39,11 +39,16 @@
             {{else}}
             <div class="bbc-items-list">
                 {{#each entries}}
-                <div class="bbc-item-card" data-item-name="{{itemName}}">
-                    <input type="checkbox" class="bbc-item-select-checkbox edit-only" data-item-name="{{itemName}}" title="Select workflow to remove" />
+                <div class="bbc-item-card" data-item-name="{{regKey}}">
+                    <input type="checkbox" class="bbc-item-select-checkbox edit-only" data-item-name="{{regKey}}" title="Select workflow to remove" />
                     <div class="bbc-card-main">
                         <i class="fa-solid fa-crosshairs bbc-item-icon"></i>
                         <span class="bbc-item-name">{{itemName}}</span>
+                        {{#if ../supportsActivities}}
+                        {{#if hasActivity}}
+                        <span class="bbc-activity-pill" title="Activity: {{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
+                        {{/if}}
+                        {{/if}}
                     </div>
                     {{#if isLocal}}
                     <div class="bbc-card-meta">
@@ -53,6 +58,7 @@
                 </div>
                 {{/each}}
             </div>
+
             {{/if}}
         </aside>
 
@@ -69,18 +75,24 @@
 
             <!-- Inspector detail panes for each item -->
             {{#each entries}}
-            <div class="bbc-inspector-detail" data-item-name="{{itemName}}" style="display: none;">
+            <div class="bbc-inspector-detail" data-item-name="{{regKey}}" style="display: none;">
                 <header class="bbc-detail-header">
                     <div class="bbc-title-left">
                         <i class="fa-solid fa-crosshairs bbc-detail-icon"></i>
                         <h2>{{itemName}}</h2>
+                        {{#if ../supportsActivities}}
+                        {{#if hasActivity}}
+                        <span class="bbc-activity-pill" title="Activity: {{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
+                        {{/if}}
+                        {{/if}}
                     </div>
                     <div class="bbc-detail-actions edit-only">
-                        <button type="button" class="bbc-delete-single-btn" data-item-name="{{itemName}}" title="Delete Workflow">
+                        <button type="button" class="bbc-delete-single-btn" data-item-name="{{regKey}}" title="Delete Workflow">
                             <i class="fa-solid fa-trash-can"></i> Remove
                         </button>
                     </div>
                 </header>
+
 
                 <div class="bbc-sections-scroll">
                     <!-- Section 1: Pre-Region / Pre-Template Placement -->
@@ -123,7 +135,26 @@
                             <table class="bbc-config-table">
                                 <tbody>
                                     <tr>
+                                        <th>Calling Item Name</th>
+                                        <td>
+                                            <span class="view-only"><code>{{itemName}}</code></span>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="itemName" value="{{itemName}}" placeholder="e.g. Longbow" />
+                                        </td>
+                                    </tr>
+                                    {{#if ../supportsActivities}}
+                                    <tr>
+                                        <th>Calling Activity ID / Name (DnD5e)</th>
+                                        <td>
+                                            <span class="view-only">
+                                                {{#if activityDisplay}}<code>{{activityDisplay}}</code>{{else}}<span class="bbc-pill no">All Activities</span>{{/if}}
+                                            </span>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="activityId" value="{{activityId}}" placeholder="e.g. Attack or Activity ID" />
+                                        </td>
+                                    </tr>
+                                    {{/if}}
+                                    <tr>
                                         <th>Registration Scope</th>
+
                                         <td>
                                             <span class="view-only">{{#if isLocal}}<span class="bbc-pill no">Local Only (Session Scope)</span>{{else}}<span class="bbc-pill yes">World Synced (Persisted)</span>{{/if}}</span>
                                             <label class="bbc-edit-checkbox-label edit-only">
