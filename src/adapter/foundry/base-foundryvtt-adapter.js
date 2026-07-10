@@ -96,14 +96,22 @@ export class BaseFoundryVTTAdapter {
         placeable.alpha = 0;
         if (placeable.template) {
             placeable.template.visible = false;
+            placeable.template.renderable = false;
             placeable.template.alpha = 0;
         }
         if (placeable.ruler) {
             placeable.ruler.visible = false;
+            placeable.ruler.renderable = false;
             placeable.ruler.text = "";
         }
         if (placeable.controlIcon) {
             placeable.controlIcon.visible = false;
+        }
+        if (typeof placeable.highlightGrid === "function") {
+            placeable.highlightGrid = function() {};
+        }
+        if (placeable.highlightId && canvas.grid?.clearHighlightLayer) {
+            try { canvas.grid.clearHighlightLayer(placeable.highlightId); } catch (e) {}
         }
 
         placeable.refresh = function() {
@@ -112,18 +120,22 @@ export class BaseFoundryVTTAdapter {
             this.alpha = 0;
             if (this.template) {
                 this.template.visible = false;
+                this.template.renderable = false;
                 this.template.alpha = 0;
             }
             if (this.ruler) {
                 this.ruler.visible = false;
+                this.ruler.renderable = false;
                 this.ruler.text = "";
             }
             if (this.controlIcon) {
                 this.controlIcon.visible = false;
             }
+            if (this.highlightId && canvas.grid?.clearHighlightLayer) {
+                try { canvas.grid.clearHighlightLayer(this.highlightId); } catch (e) {}
+            }
             return this;
         };
-        placeable.highlightGrid = function() {};
     }
 
     /**
