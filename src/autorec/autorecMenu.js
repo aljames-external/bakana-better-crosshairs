@@ -299,7 +299,8 @@ export class AutorecMenuApplication extends BaseApplication {
             if (!itemName) return;
 
             const existingEntry = manager.get(itemName) || {};
-            const config = foundry.utils.deepClone(existingEntry.config || {});
+            const existingHandler = existingEntry.handler || existingEntry.config || existingEntry;
+            const config = foundry.utils.deepClone(typeof existingHandler === "object" ? existingHandler : {});
             let modified = false;
 
             // Fixed schema properties [data-field]
@@ -334,9 +335,10 @@ export class AutorecMenuApplication extends BaseApplication {
         if (modifiedAny) {
             const persistedDict = {};
             for (const itemName of manager.list()) {
-                const config = manager.get(itemName);
-                if (config && typeof config === "object" && !config.local && typeof config !== "function") {
-                    persistedDict[itemName] = config;
+                const entry = manager.get(itemName);
+                const handler = entry?.handler || entry?.config || entry;
+                if (handler && typeof handler === "object" && !handler.local && typeof handler !== "function") {
+                    persistedDict[itemName] = handler;
                 }
             }
             await manager.overwrite(persistedDict);

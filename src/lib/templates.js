@@ -618,7 +618,8 @@ function loadSavedRegistrations(savedRegistrations = {}) {
         }
     }
 
-    for (const [itemName, config] of Object.entries(savedRegistrations)) {
+    for (const [itemName, rawConfig] of Object.entries(savedRegistrations)) {
+        const config = rawConfig?.handler || rawConfig?.config || rawConfig;
         const current = registeredHandlers.get(itemName);
         const isCurrentLocal = typeof current === "object" && current !== null && current.local === true;
         if (!isCurrentLocal) {
@@ -835,9 +836,9 @@ function getAllEntries() {
             file = handlerOrConfig;
             type = "Auto-Detect";
         } else if (typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
-            config = handlerOrConfig;
-            type = handlerOrConfig.type || "Auto-Detect";
-            file = handlerOrConfig.file || handlerOrConfig.animationFile || "";
+            config = handlerOrConfig.handler || handlerOrConfig.config || handlerOrConfig;
+            type = config.type || "Auto-Detect";
+            file = config.file || config.animationFile || "";
         }
 
         let isLocal = !persistedItemNames.has(itemName);
