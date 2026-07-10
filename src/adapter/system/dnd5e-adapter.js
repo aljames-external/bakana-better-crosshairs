@@ -69,11 +69,11 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
     shouldReplace(context, entry) {
         if (!super.shouldReplace(context, entry)) return false;
 
-        const entryActivityId = (entry.activityId || "").trim();
-        const entryActivityName = (entry.activityName || "").trim().toLowerCase();
+        const entryFilterExact = (entry.activityId || "").trim();
+        const entryFilterLower = (entry.activityId || entry.activityName || "").trim().toLowerCase();
 
         // If the entry specifies no activity filter, it applies to any activity on this item
-        if (!entryActivityId && !entryActivityName) {
+        if (!entryFilterLower) {
             log.info(`Dnd5eSystemAdapter.shouldReplace | Entry "${entry.itemName}" specifies no activity filter -> MATCHED`);
             return true;
         }
@@ -82,11 +82,11 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
         const callingActivityName = (context?.activityName || context?.activity?.name || "").trim().toLowerCase();
 
         const match = Boolean(
-            (entryActivityId && callingActivityId && entryActivityId === callingActivityId) ||
-            (entryActivityName && callingActivityName && entryActivityName === callingActivityName)
+            (entryFilterExact && callingActivityId && entryFilterExact === callingActivityId) ||
+            (entryFilterLower && callingActivityName && entryFilterLower === callingActivityName)
         );
 
-        log.info(`Dnd5eSystemAdapter.shouldReplace | Activity comparison (${match ? 'MATCHED' : 'FAILED'}): calling activity ("${callingActivityName}" / "${callingActivityId}") vs entry activity ("${entryActivityName}" / "${entryActivityId}")`);
+        log.info(`Dnd5eSystemAdapter.shouldReplace | Activity comparison (${match ? 'MATCHED' : 'FAILED'}): calling activity ("${callingActivityName}" / "${callingActivityId}") vs entry activity filter ("${entryFilterLower}" / "${entryFilterExact}")`);
         return match;
     }
 }
