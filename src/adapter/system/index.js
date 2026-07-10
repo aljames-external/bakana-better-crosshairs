@@ -11,10 +11,14 @@ export let systemAdapter = new BaseSystemAdapter();
  * @returns {BaseSystemAdapter|Dnd5eSystemAdapter}
  */
 export function initializeSystemAdapter() {
-    if (game?.system?.id === "dnd5e") {
-        systemAdapter = new Dnd5eSystemAdapter();
-    } else {
-        systemAdapter = new BaseSystemAdapter();
+    switch (game?.system?.id) {
+        case "dnd5e":
+            systemAdapter = new Dnd5eSystemAdapter();
+            break;
+        default:
+            systemAdapter = new BaseSystemAdapter();
+            break;
     }
     return systemAdapter;
 }
+
