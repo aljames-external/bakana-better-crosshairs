@@ -4,13 +4,9 @@ import { systemAdapter } from "../adapter/system/index.js";
 import { localize } from "../lib/utils.js";
 
 
-const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications?.api || {};
+const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
-const BaseApplication = (ApplicationV2 && HandlebarsApplicationMixin)
-    ? HandlebarsApplicationMixin(ApplicationV2)
-    : (window.FormApplication || window.Application);
-
-export class AutorecMenuApplication extends BaseApplication {
+export class AutorecMenuApplication extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
         id: "bbc-autorec-menu",
         tag: "form",
@@ -31,32 +27,6 @@ export class AutorecMenuApplication extends BaseApplication {
             template: `modules/${MODULE_ID}/src/autorec/autorecMenu.html`
         }
     };
-
-    static get defaultOptions() {
-        if (super.defaultOptions) {
-            return foundry.utils.mergeObject(super.defaultOptions, {
-                id: "bbc-autorec-menu",
-                title: "BBC.autorecMenu.title",
-                template: `modules/${MODULE_ID}/src/autorec/autorecMenu.html`,
-                classes: ["bbc-app", "bbc-autorec-form"],
-                width: 860,
-                height: 640,
-                resizable: true,
-                closeOnSubmit: false
-            });
-        }
-        return {};
-    }
-
-    render(force = false, options = {}) {
-        if (typeof force === "object" && force !== null) {
-            options = force;
-            force = options.force ?? false;
-        } else if (typeof force === "boolean") {
-            options = { ...options, force };
-        }
-        return super.render(options);
-    }
 
     async _prepareContext(options) {
         const entries = manager.getAllEntries();
@@ -84,19 +54,9 @@ export class AutorecMenuApplication extends BaseApplication {
         };
     }
 
-    async getData(options) {
-        return this._prepareContext(options);
-    }
-
     _onRender(context, options) {
-        if (super._onRender) super._onRender(context, options);
+        super._onRender(context, options);
         this._attachEventListeners(this.element);
-    }
-
-    activateListeners(html) {
-        if (super.activateListeners) super.activateListeners(html);
-        const root = html && html[0] ? html[0] : (this.element || html);
-        this._attachEventListeners(root);
     }
 
     _attachEventListeners(root) {
@@ -127,45 +87,39 @@ export class AutorecMenuApplication extends BaseApplication {
         const addWorkflowBtn = root.querySelector(".bbc-add-workflow-btn");
         if (addWorkflowBtn) {
             addWorkflowBtn.addEventListener("click", async () => {
-                const DialogClass = window.Dialog || foundry.applications?.api?.DialogV2;
                 let result = null;
                 const supportsActivities = systemAdapter.supportsActivities;
 
-                if (typeof DialogClass === "function" && DialogClass.prompt) {
-                    try {
-                        result = await DialogClass.prompt({
-                            title: "Add New Crosshair Workflow",
-                            content: `
-                                <form>
-                                    <div class="form-group">
-                                        <label>Workflow Item Name:</label>
-                                        <input type="text" name="workflowName" placeholder="e.g. Fireball or Longbow" autofocus />
-                                    </div>
-                                    ${supportsActivities ? `
-                                    <div class="form-group">
-                                        <label>Activity ID or Name (Optional):</label>
-                                        <input type="text" name="activityName" placeholder="e.g. Attack or Save" />
-                                    </div>` : ""}
-                                </form>
-                            `,
+                try {
+                    result = await DialogV2.prompt({
+                        window: { title: "Add New Crosshair Workflow" },
+                        content: `
+                            <form>
+                                <div class="form-group">
+                                    <label>Workflow Item Name:</label>
+                                    <input type="text" name="workflowName" placeholder="e.g. Fireball or Longbow" autofocus />
+                                </div>
+                                ${supportsActivities ? `
+                                <div class="form-group">
+                                    <label>Activity ID or Name (Optional):</label>
+                                    <input type="text" name="activityName" placeholder="e.g. Attack or Save" />
+                                </div>` : ""}
+                            </form>
+                        `,
+                        ok: {
                             label: "Add Workflow",
-                            callback: (html) => {
-                                const rootEl = html[0] || html;
+                            callback: (event, button, html) => {
+                                const rootEl = button.form || html;
                                 const itemInput = rootEl.querySelector ? rootEl.querySelector("input[name='workflowName']") : null;
                                 const actInput = supportsActivities && rootEl.querySelector ? rootEl.querySelector("input[name='activityName']") : null;
                                 const itemName = itemInput?.value?.trim() || null;
                                 const activity = actInput?.value?.trim() || "";
                                 return itemName ? { itemName, activity } : null;
                             }
-                        });
-                    } catch (e) {
-                        result = null;
-                    }
-                } else {
-                    const itemName = window.prompt("Enter new crosshair workflow Item Name:");
-                    if (itemName && itemName.trim()) {
-                        result = { itemName: itemName.trim(), activity: "" };
-                    }
+                        }
+                    });
+                } catch (e) {
+                    result = null;
                 }
 
                 if (!result || !result.itemName) return;
