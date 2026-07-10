@@ -81,7 +81,7 @@ async function create(token, config = {}) {
         })
         .callback(Sequencer.Crosshair.CALLBACKS.PLACED, async (...args) => {
             Sequencer.EffectManager.endEffects({ name: id });
-            resolveCrosshairPlacement(args[0], config, ...args);
+            resolveCrosshairPlacement(args[0], { ...config, token, stickToToken }, ...args);
         })
         .callback(Sequencer.Crosshair.CALLBACKS.CANCEL, () => {
             Sequencer.EffectManager.endEffects({ name: id });
