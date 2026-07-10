@@ -264,12 +264,9 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
             x = snapped.x;
             y = snapped.y;
         }
-    }
-
-    if (direction === undefined && (isRayOrCone || isAnchored)) {
-        const dx = clickX - x;
-        const dy = clickY - y;
-        direction = Math.atan2(dy, dx) * (180 / Math.PI);
+        if (direction === undefined) {
+            direction = config.currentDirection ?? config.direction ?? config.angle ?? 0;
+        }
     }
 
     if (typeof direction === "number") {
