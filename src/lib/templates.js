@@ -877,9 +877,28 @@ function getAllEntries() {
     return results.sort((a, b) => a.itemName.localeCompare(b.itemName));
 }
 
-function highlightJavascript(code) {
+export function highlightJavascript(code) {
     if (!code || typeof code !== "string") return "";
 
+    // 1. Delegate to Prism.js if loaded in the current Foundry or browser context
+    if (typeof window !== "undefined" && window.Prism?.highlight && window.Prism?.languages?.javascript) {
+        try {
+            return window.Prism.highlight(code, window.Prism.languages.javascript, "javascript");
+        } catch (e) {
+            log.debug("Prism highlight failed, falling back to built-in tokenizer", e);
+        }
+    }
+
+    // 2. Delegate to highlight.js (hljs) if loaded in the current Foundry context
+    if (typeof window !== "undefined" && window.hljs?.highlight) {
+        try {
+            return window.hljs.highlight(code, { language: "javascript" }).value;
+        } catch (e) {
+            log.debug("hljs highlight failed, falling back to built-in tokenizer", e);
+        }
+    }
+
+    // 3. Built-in zero-dependency tokenizer fallback
     let escaped = code
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -891,7 +910,7 @@ function highlightJavascript(code) {
     const keywords = /\b(const|let|var|function|async|await|return|if|else|try|catch|for|while|new|true|false|null|undefined|class|import|export)\b/g;
     escaped = escaped.replace(keywords, '<span class="bbc-syn-keyword">$1</span>');
 
-    const builtins = /\b(token|actor|item|scope|config|crosshair|canvas|game|doc|console|log|ui|Hooks|Sequencer)\b/g;
+    const builtins = /\b(token|actor|item|scope|config|crosshair|canvas|game|doc|console|log|ui|Hooks|Sequencer|Promise|Math|Object|Array)\b/g;
     escaped = escaped.replace(builtins, '<span class="bbc-syn-builtin">$1</span>');
 
     escaped = escaped.replace(/\b(\d+(\.\d+)?)\b/g, '<span class="bbc-syn-number">$1</span>');
@@ -914,6 +933,7 @@ export const manager = {
     list,
     getAllEntries,
     loadSavedRegistrations,
+    highlightJavascript,
     initializeReadySync,
     broadcastSync,
 };

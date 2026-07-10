@@ -1,6 +1,6 @@
 import { MODULE_ID } from "../lib/constants.js";
 import { log } from "../lib/logger.js";
-import { manager } from "../lib/templates.js";
+import { manager, highlightJavascript } from "../lib/templates.js";
 import { localize } from "../lib/utils.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications?.api || {};
@@ -119,6 +119,30 @@ export class AutorecMenuApplication extends BaseApplication {
                 }
             });
         }
+
+        // Live Syntax-Highlighted Editor Sync
+        root.querySelectorAll(".bbc-live-editor-container").forEach(container => {
+            const textarea = container.querySelector(".bbc-live-textarea");
+            const backdropCode = container.querySelector(".bbc-live-backdrop code");
+            const backdrop = container.querySelector(".bbc-live-backdrop");
+            if (!textarea || !backdropCode) return;
+
+            const syncHighlight = () => {
+                let val = textarea.value || "";
+                if (val.endsWith("\n")) val += " ";
+                backdropCode.innerHTML = highlightJavascript(val);
+            };
+
+            const syncScroll = () => {
+                if (backdrop) {
+                    backdrop.scrollTop = textarea.scrollTop;
+                    backdrop.scrollLeft = textarea.scrollLeft;
+                }
+            };
+
+            textarea.addEventListener("input", syncHighlight);
+            textarea.addEventListener("scroll", syncScroll);
+        });
 
         // Prevent checkbox click from switching sidebar tab
         root.querySelectorAll(".bbc-item-select-checkbox").forEach(chk => {
