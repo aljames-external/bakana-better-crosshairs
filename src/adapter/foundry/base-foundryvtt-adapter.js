@@ -61,8 +61,7 @@ export class BaseFoundryVTTAdapter {
         // 1. Group candidate entries for this item and order: activity-specific rules first, item fallbacks last
         const candidateEntries = [];
         for (const [key, entry] of entries.entries()) {
-            if (key === "DEFAULT" || entry.isDefault || entry.itemName === "DEFAULT") continue;
-            if (entry.enabled === false) continue;
+            if (entry.isDefault || !entry.enabled) continue;
             const entryItemName = (entry.itemName ?? "").trim().toLowerCase();
             if (entryItemName === context.itemName.toLowerCase() || key.toLowerCase() === context.itemName.toLowerCase()) {
                 candidateEntries.push(entry);
@@ -86,7 +85,7 @@ export class BaseFoundryVTTAdapter {
 
         // 2. If no specific match was found, fall back to the DEFAULT entry if enabled
         const defaultEntry = entries.get("DEFAULT");
-        if (defaultEntry && defaultEntry.enabled !== false) {
+        if (defaultEntry && defaultEntry.enabled) {
             log.debug(`matchAutorecEntry | [DEFAULT FALLBACK] No specific item match found for "${context.itemName}"; applying DEFAULT crosshair entry.`);
             return { ...defaultEntry, item: context.item, activity: context.activity };
         }

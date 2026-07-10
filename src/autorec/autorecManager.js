@@ -118,16 +118,15 @@ export class AutorecManager {
         const cleanName = String(itemName).trim().toLowerCase();
         const candidates = [];
         for (const [key, entry] of this.registeredHandlers.entries()) {
-            if (key === "DEFAULT" || entry.isDefault || entry.itemName === "DEFAULT") continue;
-            if (entry.enabled === false) continue;
-            const eItem = (entry.itemName || key.split(" | ")[0] || "").trim().toLowerCase();
+            if (entry.isDefault || !entry.enabled) continue;
+            const eItem = (entry.itemName ?? "").trim().toLowerCase();
             if (eItem === cleanName || key.toLowerCase() === cleanName) {
                 candidates.push(entry);
             }
         }
         candidates.sort((a, b) => {
-            const aHasAct = Boolean((a.activityId || a.activityName || "").trim());
-            const bHasAct = Boolean((b.activityId || b.activityName || "").trim());
+            const aHasAct = Boolean((a.activityId ?? a.activityName ?? "").trim());
+            const bHasAct = Boolean((b.activityId ?? b.activityName ?? "").trim());
             if (aHasAct && !bHasAct) return -1;
             if (!aHasAct && bHasAct) return 1;
             return 0;
@@ -523,7 +522,7 @@ export class AutorecManager {
             const hasActivity = Boolean(activityId || activityName);
             const activityDisplay = activityName || activityId || "";
 
-            const isDefault = itemName === "DEFAULT" || config.isDefault === true;
+            const isDefault = Boolean(config.isDefault);
             const enabled = config.enabled !== false;
 
             results.push({
