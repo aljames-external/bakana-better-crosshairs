@@ -120,6 +120,15 @@ export class AutorecMenuApplication extends BaseApplication {
             });
         }
 
+        // Ensure Prism highlights code blocks on application render
+        if (typeof window !== "undefined" && window.Prism?.highlightAllUnder) {
+            try {
+                window.Prism.highlightAllUnder(root);
+            } catch (e) {
+                log.debug("Prism highlightAllUnder failed", e);
+            }
+        }
+
         // Prevent checkbox click from switching sidebar tab
         root.querySelectorAll(".bbc-item-select-checkbox").forEach(chk => {
             chk.addEventListener("click", (ev) => ev.stopPropagation());
