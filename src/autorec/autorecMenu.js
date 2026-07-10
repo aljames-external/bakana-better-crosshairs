@@ -1,6 +1,6 @@
 import { MODULE_ID } from "../lib/constants.js";
 import { log } from "../lib/logger.js";
-import { template } from "../lib/templates.js";
+import { manager } from "../lib/templates.js";
 import { localize } from "../lib/utils.js";
 
 export class AutorecMenuApplication extends FormApplication {
@@ -18,7 +18,7 @@ export class AutorecMenuApplication extends FormApplication {
     }
 
     async getData(options) {
-        const entries = template.getAllEntries();
+        const entries = manager.getAllEntries();
         return {
             entries,
             count: entries.length,

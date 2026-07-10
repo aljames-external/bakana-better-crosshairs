@@ -1,7 +1,7 @@
 import { crosshair } from './crosshair/_crosshairs.js';
 import { file, closest, absolutePath } from './lib/filemanager.js';
 import { log } from './lib/logger.js';
-import { template, templates } from './lib/templates.js';
+import { manager, template, templates } from './lib/templates.js';
 import { attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement, getTokenEdgePoint, snapCoordinates } from './crosshair/util.js';
 import { localize } from './lib/utils.js';
 import './settings.js';
@@ -35,6 +35,7 @@ Hooks.once('init', async () => {
 
         setupApiCalls({ crosshair });
         setupApiCalls({ util });
+        setupApiCalls({ manager });
         setupApiCalls({ template });
         setupApiCalls({ templates });
         setupApiCalls({ log });
@@ -42,6 +43,7 @@ Hooks.once('init', async () => {
         const moduleApi = {
             crosshair,
             util,
+            manager,
             template,
             templates,
             log,

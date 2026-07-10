@@ -559,7 +559,7 @@ function getAllEntries() {
     return results.sort((a, b) => a.itemName.localeCompare(b.itemName));
 }
 
-export const template = {
+export const manager = {
     getPosition,
     register,
     unregister,
@@ -569,4 +569,5 @@ export const template = {
     getAllEntries,
 };
 
-export const templates = template;
+export const template = manager;
+export const templates = manager;
