@@ -83,22 +83,37 @@ export class BaseFoundryVTTAdapter {
      * @param {PlaceableObject} placeable
      */
     hidePreview(placeable) {
+        if (!placeable) return;
         placeable.visible = false;
         placeable.renderable = false;
         placeable.alpha = 0;
-        if (placeable.template) placeable.template.visible = false;
-        if (placeable.ruler) placeable.ruler.visible = false;
-        if (placeable.controlIcon) placeable.controlIcon.visible = false;
+        if (placeable.template) {
+            placeable.template.visible = false;
+            placeable.template.alpha = 0;
+        }
+        if (placeable.ruler) {
+            placeable.ruler.visible = false;
+            placeable.ruler.text = "";
+        }
+        if (placeable.controlIcon) {
+            placeable.controlIcon.visible = false;
+        }
 
         placeable.refresh = function() {
             this.visible = false;
             this.renderable = false;
+            this.alpha = 0;
+            if (this.template) {
+                this.template.visible = false;
+                this.template.alpha = 0;
+            }
             if (this.ruler) {
                 this.ruler.visible = false;
                 this.ruler.text = "";
             }
-            if (this.template) this.template.visible = false;
-            if (this.controlIcon) this.controlIcon.visible = false;
+            if (this.controlIcon) {
+                this.controlIcon.visible = false;
+            }
             return this;
         };
         placeable.highlightGrid = function() {};
