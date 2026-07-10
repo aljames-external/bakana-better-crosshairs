@@ -51,23 +51,9 @@
             {{#each entries}}
             <div class="bbc-inspector-detail" data-item-name="{{itemName}}" style="display: none;">
                 <header class="bbc-detail-header">
-                    <div class="bbc-detail-title-row">
-                        <div class="bbc-title-left">
-                            <i class="fa-solid fa-crosshairs bbc-detail-icon"></i>
-                            <h2>{{itemName}}</h2>
-                        </div>
-                        <button type="button" class="bbc-copy-btn" data-copy-text="{{itemName}}" title="Copy Item Name">
-                            <i class="fa-solid fa-copy"></i> Copy Name
-                        </button>
-                    </div>
-                    <div class="bbc-detail-badges">
-                        <span class="bbc-type-badge {{typeKey}}"><i class="fa-solid fa-shapes"></i> {{type}} Crosshair</span>
-                        <span class="bbc-status-badge active"><i class="fa-solid fa-circle-check"></i> O(1) Indexed</span>
-                        {{#if isLocal}}
-                        <span class="bbc-status-badge local"><i class="fa-solid fa-laptop"></i> Local Only</span>
-                        {{else}}
-                        <span class="bbc-status-badge active"><i class="fa-solid fa-cloud"></i> World Synced</span>
-                        {{/if}}
+                    <div class="bbc-title-left">
+                        <i class="fa-solid fa-crosshairs bbc-detail-icon"></i>
+                        <h2>{{itemName}}</h2>
                     </div>
                 </header>
 

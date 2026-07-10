@@ -662,7 +662,7 @@ function list() {
 function getAllEntries() {
     const results = [];
     for (const [itemName, handlerOrConfig] of registeredHandlers.entries()) {
-        let type = "circle";
+        let type = "Auto-Detect";
         let file = "";
         let isCustomFunction = false;
         let config = {};
@@ -673,10 +673,10 @@ function getAllEntries() {
             file = "Function Handler";
         } else if (typeof handlerOrConfig === "string") {
             file = handlerOrConfig;
-            type = "circle";
+            type = "Auto-Detect";
         } else if (typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
             config = handlerOrConfig;
-            type = handlerOrConfig.type || "circle";
+            type = handlerOrConfig.type || "Auto-Detect";
             file = handlerOrConfig.file || handlerOrConfig.animationFile || "";
         }
 
@@ -685,7 +685,7 @@ function getAllEntries() {
             isLocal = true;
         }
 
-        const typeKey = type.toLowerCase();
+        const typeKey = type.toLowerCase().replace(/\s+/g, "-");
         const distVal = config.distance ?? config.radius ?? config.length;
         const distanceDisplay = distVal !== undefined ? `${distVal} ft` : null;
         const widthVal = config.width;
@@ -714,7 +714,7 @@ function getAllEntries() {
 
         results.push({
             itemName,
-            type: type.charAt(0).toUpperCase() + type.slice(1),
+            type,
             typeKey,
             file: file || "Default Sequencer Asset",
             isCustomFunction,
