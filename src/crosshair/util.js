@@ -1,5 +1,5 @@
 import { log } from "../lib/logger.js";
-import { Token } from "../lib/compat.js";
+import { Token, Ray } from "../lib/compat.js";
 
 let activeWheelHandler = null;
 let activePointerHandler = null;
@@ -13,10 +13,9 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad) {
             try { tmpl.document.updateSource({ direction: newDirDeg }); } catch (e) {}
         }
     }
-    const RayClass = globalThis.foundry?.canvas?.geometry?.Ray ?? globalThis.Ray;
-    if (tmpl.ray && RayClass && tmpl.ray.origin) {
+    if (tmpl.ray && Ray && tmpl.ray.origin) {
         try {
-            tmpl.ray = RayClass.fromAngle(tmpl.ray.origin.x, tmpl.ray.origin.y, rad, tmpl.ray.distance || 1000);
+            tmpl.ray = Ray.fromAngle(tmpl.ray.origin.x, tmpl.ray.origin.y, rad, tmpl.ray.distance || 1000);
         } catch (e) {}
     }
     if (tmpl.renderFlags) {
