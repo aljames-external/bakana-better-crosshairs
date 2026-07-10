@@ -69,23 +69,7 @@
                             <span class="bbc-section-tag ready">Extensible Hook</span>
                         </div>
                         <div class="bbc-section-body">
-                            <p class="bbc-section-desc">Executes before the visual crosshair sequence initializes.</p>
-                            <table class="bbc-config-table">
-                                <tbody>
-                                    <tr>
-                                        <th>Trigger Tile Conditions</th>
-                                        <td>Preview intercept (Owner client drawing hook)</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Token Anchor Context</th>
-                                        <td>Automatic active token or controlled selection detection</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Preview Suppression</th>
-                                        <td>Default template shape &amp; ruler alpha set to 0 during interactive phase</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <p class="bbc-section-desc">Automatic preview interception (`preCreate` hook) and active token detection (`stickToToken` origin).</p>
                         </div>
                     </section>
 
@@ -147,30 +131,28 @@
                                         <th>Origin Stretch Line</th>
                                         <td>{{#if showLine}}<span class="bbc-pill yes">Enabled</span> <code class="bbc-code-pill">{{lineFile}}</code>{{else}}<span class="bbc-pill no">Disabled</span>{{/if}}</td>
                                     </tr>
+                                    {{#if hasCustomStyling}}
                                     <tr>
-                                        <th>Border Styling</th>
+                                        <th>Border Styling (Tile Highlight)</th>
                                         <td>
                                             <span class="bbc-color-swatch" data-color="{{borderColor}}"></span>
                                             <code>{{borderColor}}</code> (Alpha: {{borderAlpha}})
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th>Fill Styling</th>
+                                        <th>Fill Styling (Tile Highlight)</th>
                                         <td>
                                             <span class="bbc-color-swatch" data-color="{{fillColor}}"></span>
                                             <code>{{fillColor}}</code> (Alpha: {{fillAlpha}})
                                         </td>
                                     </tr>
+                                    {{/if}}
                                     {{#if icon}}
                                     <tr>
                                         <th>Custom Cursor Icon</th>
                                         <td><code class="bbc-code-pill">{{icon}}</code></td>
                                     </tr>
                                     {{/if}}
-                                    <tr>
-                                        <th>Interactive Rotation</th>
-                                        <td>Mousewheel (`Shift` for 1° fine step, 5° standard step)</td>
-                                    </tr>
                                 </tbody>
                             </table>
 
@@ -209,23 +191,7 @@
                             <span class="bbc-section-tag ready">Workflow Resume</span>
                         </div>
                         <div class="bbc-section-body">
-                            <p class="bbc-section-desc">Runs when the crosshair is placed (`CALLBACKS.PLACED`) or cancelled (`CALLBACKS.CANCEL`).</p>
-                            <table class="bbc-config-table">
-                                <tbody>
-                                    <tr>
-                                        <th>Placement Resolution</th>
-                                        <td>Insects coordinates &amp; rotation (`resolveCrosshairPlacement`)</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Target Document Injection</th>
-                                        <td>Updates `MeasuredTemplate` or Foundry V14 `Region` shape source</td>
-                                    </tr>
-                                    <tr>
-                                        <th>Cleanup Lifecycle</th>
-                                        <td>Terminates local Sequencer effects (`Sequencer.EffectManager.endEffects`)</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <p class="bbc-section-desc">Automatic placement resolution (`CALLBACKS.PLACED`), shape injection, and effect cleanup (`CALLBACKS.CANCEL`).</p>
                         </div>
                     </section>
                 </div>

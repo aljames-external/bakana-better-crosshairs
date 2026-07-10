@@ -698,7 +698,13 @@ function getAllEntries() {
         const borderColor = config.borderColor || "#ffffff";
         const borderAlpha = config.borderAlpha !== undefined ? config.borderAlpha : 0;
         const fillColor = config.fillColor || "#000000";
-        const fillAlpha = config.fillAlpha !== undefined ? config.fillAlpha : 0.1;
+        const fillAlpha = config.fillAlpha !== undefined ? config.fillAlpha : 0;
+        const hasCustomStyling = Boolean(
+            config.borderColor ||
+            config.borderAlpha !== undefined ||
+            config.fillColor ||
+            config.fillAlpha !== undefined
+        );
         const icon = config.icon || null;
 
         const configEntries = [];
@@ -730,6 +736,7 @@ function getAllEntries() {
             borderAlpha,
             fillColor,
             fillAlpha,
+            hasCustomStyling,
             icon,
             configEntries,
         });

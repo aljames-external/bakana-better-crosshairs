@@ -27,7 +27,7 @@ async function create(token, config = {}) {
         borderColor = "#ffffff",
         borderAlpha = 0,
         fillColor = "#000000",
-        fillAlpha = 0.1,
+        fillAlpha = 0,
         context = null
     } = config;
 
