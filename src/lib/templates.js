@@ -1,6 +1,7 @@
 import { MODULE_ID } from './constants.js';
 import { log } from './logger.js';
 import { crosshair } from '../crosshair/_crosshairs.js';
+import Prism from "../../lib/prism/prism-es.js";
 
 const registeredHandlers = new Map();
 const fastLookupMap = new Map();
@@ -880,25 +881,14 @@ function getAllEntries() {
 export function highlightJavascript(code) {
     if (!code || typeof code !== "string") return "";
 
-    // 1. Delegate to Prism.js if loaded
-    if (typeof window !== "undefined" && window.Prism?.highlight && window.Prism?.languages?.javascript) {
+    if (Prism?.highlight && Prism?.languages?.javascript) {
         try {
-            return window.Prism.highlight(code, window.Prism.languages.javascript, "javascript");
+            return Prism.highlight(code, Prism.languages.javascript, "javascript");
         } catch (e) {
             log.debug("Prism highlight failed", e);
         }
     }
 
-    // 2. Delegate to highlight.js (hljs) if loaded
-    if (typeof window !== "undefined" && window.hljs?.highlight) {
-        try {
-            return window.hljs.highlight(code, { language: "javascript" }).value;
-        } catch (e) {
-            log.debug("hljs highlight failed", e);
-        }
-    }
-
-    // No custom regex highlighting - return plain HTML-escaped text
     return code
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
