@@ -79,12 +79,15 @@ export class AutorecManager {
     }
 
     indexRegistration(registeredKey, handler) {
-        const itemName = handler?.itemName || registeredKey.split(" | ")[0].trim();
-        const activityId = (handler?.activityId || "").trim();
-        const activityName = (handler?.activityName || "").trim();
+        const itemName = handler?.itemName ?? registeredKey.split(" | ")[0].trim();
+        const activityId = (handler?.activityId ?? "").trim();
+        const activityName = (handler?.activityName ?? "").trim();
+        const hasActivity = Boolean(activityId || activityName);
+        const isDefault = Boolean(handler?.isDefault || registeredKey === "DEFAULT");
+        const enabled = handler?.enabled !== false;
         const entry = typeof handler === "object" && handler !== null
-            ? { ...handler, id: registeredKey, regKey: registeredKey, itemName }
-            : { id: registeredKey, regKey: registeredKey, itemName, handler };
+            ? { ...handler, id: registeredKey, regKey: registeredKey, itemName, activityId, activityName, hasActivity, isDefault, enabled }
+            : { id: registeredKey, regKey: registeredKey, itemName, activityId, activityName, hasActivity, isDefault, enabled, handler };
 
         this.fastLookupMap.set(registeredKey, entry);
         this.fastLookupMap.set(registeredKey.toLowerCase(), entry);
@@ -124,10 +127,8 @@ export class AutorecManager {
             }
         }
         candidates.sort((a, b) => {
-            const aHasAct = Boolean((a.activityId ?? a.activityName ?? "").trim());
-            const bHasAct = Boolean((b.activityId ?? b.activityName ?? "").trim());
-            if (aHasAct && !bHasAct) return -1;
-            if (!aHasAct && bHasAct) return 1;
+            if (a.hasActivity && !b.hasActivity) return -1;
+            if (!a.hasActivity && b.hasActivity) return 1;
             return 0;
         });
         return candidates;

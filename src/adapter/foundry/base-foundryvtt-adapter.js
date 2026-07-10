@@ -69,15 +69,13 @@ export class BaseFoundryVTTAdapter {
         }
 
         candidateEntries.sort((a, b) => {
-            const aHasAct = Boolean((a.activityId ?? a.activityName ?? "").trim());
-            const bHasAct = Boolean((b.activityId ?? b.activityName ?? "").trim());
-            if (aHasAct && !bHasAct) return -1;
-            if (!aHasAct && bHasAct) return 1;
+            if (a.hasActivity && !b.hasActivity) return -1;
+            if (!a.hasActivity && b.hasActivity) return 1;
             return 0;
         });
 
         for (const entry of candidateEntries) {
-            if (systemAdapter.shouldReplace(context, entry)) {
+            if (systemAdapter.isMatch(context, entry)) {
                 log.debug(`matchAutorecEntry | [MATCH FOUND] Specific entry "${entry.itemName}" (activity: "${entry.activityName ?? 'ANY'}") matched calling item "${context.itemName}" (activity: "${context.activityName}")`);
                 return { ...entry, item: context.item, activity: context.activity };
             }

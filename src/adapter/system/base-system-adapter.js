@@ -21,20 +21,18 @@ export class BaseSystemAdapter {
     }
 
     /**
-     * Determine whether an autorec entry should replace the default crosshair
-     * based on the calling item context.
-     * @param {{item?: Item, itemName?: string, itemId?: string}} context - The calling item context
-     * @param {Object} entry - Registered autorec workflow entry
-
-     * @returns {boolean} Whether to replace with this entry
+     * Evaluate whether a calling context matches a candidate autorec entry.
+     * Base implementation compares item name or item id.
+     * @param {{item?: Item, itemName?: string, itemId?: string}} context - Normalized calling item context
+     * @param {Object} entry - Registered autorec entry
+     * @returns {boolean}
      */
-    shouldReplace(context, entry) {
+    isMatch(context, entry) {
         if (!context || !entry) return false;
-
-        const callingName = (context.itemName || context.item?.name || "").trim().toLowerCase();
-        const callingId = (context.itemId || context.item?.id || "").trim();
-        const entryName = (entry.itemName || entry.name || "").trim().toLowerCase();
-        const entryId = (entry.itemId || "").trim();
+        const callingName = (context.itemName ?? context.item?.name ?? "").trim().toLowerCase();
+        const callingId = (context.itemId ?? context.item?.id ?? "").trim();
+        const entryName = (entry.itemName ?? entry.name ?? "").trim().toLowerCase();
+        const entryId = (entry.itemId ?? "").trim();
 
         const match = Boolean(
             (entryName && callingName && entryName === callingName) ||
@@ -42,7 +40,7 @@ export class BaseSystemAdapter {
         );
 
         if (!match) {
-            log.debug(`BaseSystemAdapter.shouldReplace | Item match FAILED: calling ("${callingName}" / "${callingId}") vs entry ("${entryName}" / "${entryId}")`);
+            log.debug(`BaseSystemAdapter.isMatch | Item match FAILED: calling ("${callingName}" / "${callingId}") vs entry ("${entryName}" / "${entryId}")`);
         }
         return match;
     }

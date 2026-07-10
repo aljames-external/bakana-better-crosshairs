@@ -60,21 +60,21 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
     }
 
     /**
-     * Determine whether an autorec entry should replace the default crosshair in DnD5e.
+     * Evaluate whether a calling context matches a candidate autorec entry in DnD5e.
      * Checks item match AND validates calling activity against entry activity filters.
      * @param {{item?: Item, itemName?: string, itemId?: string, activity?: Object, activityName?: string, activityId?: string}} context
      * @param {Object} entry
      * @returns {boolean}
      */
-    shouldReplace(context, entry) {
-        if (!super.shouldReplace(context, entry)) return false;
+    isMatch(context, entry) {
+        if (!super.isMatch(context, entry)) return false;
 
         const entryFilterExact = (entry.activityId ?? "").trim();
         const entryFilterLower = (entry.activityId ?? entry.activityName ?? "").trim().toLowerCase();
 
         // If the entry specifies no activity filter, it applies to any activity on this item
         if (!entryFilterLower) {
-            log.debug(`Dnd5eSystemAdapter.shouldReplace | Entry "${entry.itemName}" specifies no activity filter -> MATCHED`);
+            log.debug(`Dnd5eSystemAdapter.isMatch | Entry "${entry.itemName}" specifies no activity filter -> MATCHED`);
             return true;
         }
 
@@ -86,7 +86,7 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
             (entryFilterLower && callingActivityName && entryFilterLower === callingActivityName)
         );
 
-        log.debug(`Dnd5eSystemAdapter.shouldReplace | Activity comparison (${match ? 'MATCHED' : 'FAILED'}): calling activity ("${callingActivityName}" / "${callingActivityId}") vs entry activity filter ("${entryFilterLower}" / "${entryFilterExact}")`);
+        log.debug(`Dnd5eSystemAdapter.isMatch | Activity comparison (${match ? 'MATCHED' : 'FAILED'}): calling activity ("${callingActivityName}" / "${callingActivityId}") vs entry activity filter ("${entryFilterLower}" / "${entryFilterExact}")`);
         return match;
     }
 }
