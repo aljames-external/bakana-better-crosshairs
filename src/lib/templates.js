@@ -77,7 +77,7 @@ async function handleDrawPreview(placeable) {
         resolved: false,
         promise: null,
         resolve(coords = {}) {
-            log.debug(`context.resolve | Sequencer crosshair PLACED at (${coords.x}, ${coords.y}). Allowing original workflow document creation...`, coords);
+            log.debug(`context.resolve | Sequencer crosshair PLACED at (${coords.x}, ${coords.y}). Updating preview document coordinates...`, coords);
             Object.assign(this, coords);
             this.resolved = true;
 
@@ -91,9 +91,6 @@ async function handleDrawPreview(placeable) {
                     crosshairAdapter.updatePreviewShape(previewDoc, coords);
                 }
             }
-
-            // Clean up any lingering preview placeables on the canvas
-            crosshairAdapter.clearPreviewCanvas();
         },
         cancel() {
             log.debug(`context.cancel | Sequencer crosshair CANCELLED for "${entry.itemName}"`);
@@ -104,7 +101,6 @@ async function handleDrawPreview(placeable) {
                 pending.cancelled = true;
                 pending.resolved = true;
             }
-            crosshairAdapter.clearPreviewCanvas();
             pendingPlacements.delete(placementKey);
         }
     };
@@ -169,19 +165,18 @@ function handlePreCreate(doc, _data, _options, userId) {
         pendingCoords: pending.coords
     });
 
-    // If the sequencer sequence has resolved with coordinates, update the document
-    if (pending.resolved && pending.coords) {
-        const updateData = crosshairAdapter.formatDocumentUpdate(doc, pending.coords, pending.config || {});
-        doc.updateSource(updateData);
-        pendingPlacements.delete(placementKey);
-        log.debug(`handlePreCreate | Updating workflow document source and allowing creation for key=${placementKey}`, updateData);
-        return true;
-    }
+    const coords = pending.coords || {
+        x: doc.x,
+        y: doc.y,
+        distance: doc.distance,
+        direction: doc.direction
+    };
 
-    // If sequence is still interactive/running, defer creation until sequence resolves
-    pending.deferredCreateData = doc.toObject();
-    log.debug(`handlePreCreate | Deferring original preview creation while Sequencer crosshair is active`);
-    return false;
+    const updateData = crosshairAdapter.formatDocumentUpdate(doc, coords, pending.config || {});
+    doc.updateSource(updateData);
+    pendingPlacements.delete(placementKey);
+    log.debug(`handlePreCreate | Modified workflow document source with placement data for key=${placementKey}`, updateData);
+    return true;
 }
 
 /**

@@ -48,18 +48,14 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
      * @param {{x: number, y: number}} coords
      */
     updatePreviewShape(previewDoc, coords) {
-        const dx = coords.x - previewDoc.x;
-        const dy = coords.y - previewDoc.y;
-        previewDoc.direction = Math.toDegrees(Math.atan2(dy, dx));
-        previewDoc.distance = Math.hypot(dx, dy) / (canvas.dimensions?.size || 100) * (canvas.dimensions?.distance || 5);
-    }
-
-    /**
-     * Clear lingering placement preview graphics on the canvas.
-     */
-    clearPreviewCanvas() {
-        if (canvas.templates?.preview) {
-            canvas.templates.preview.removeChildren();
+        if (!previewDoc || !coords) return;
+        if (coords.x !== undefined) previewDoc.x = coords.x;
+        if (coords.y !== undefined) previewDoc.y = coords.y;
+        if (coords.direction !== undefined || coords.rotation !== undefined) {
+            previewDoc.direction = coords.direction ?? coords.rotation;
+        }
+        if (coords.distance !== undefined || coords.radius !== undefined) {
+            previewDoc.distance = coords.distance ?? coords.radius;
         }
     }
 

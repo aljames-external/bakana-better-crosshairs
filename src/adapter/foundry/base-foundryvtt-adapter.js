@@ -135,10 +135,6 @@ export class BaseFoundryVTTAdapter {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement updatePreviewShape(previewDoc, coords).");
     }
 
-    clearPreviewCanvas() {
-        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement clearPreviewCanvas().");
-    }
-
     formatDocumentUpdate(doc, coords, config) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement formatDocumentUpdate(doc, coords, config).");
     }

@@ -59,15 +59,6 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Clear lingering Region preview graphics on the canvas.
-     */
-    clearPreviewCanvas() {
-        if (canvas.regions?.preview) {
-            canvas.regions.preview.removeChildren();
-        }
-    }
-
-    /**
      * Format the complete updateData payload for modifying a Region document source during preCreate.
      * @param {Document} doc
      * @param {Object} coords
@@ -93,24 +84,19 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     }
     /**
      * Format a Region shape update based on drag destination coordinates.
-
      * @private
      */
     _formatRegionShapeUpdate(originalShape, coords) {
         const shape = foundry.utils.deepClone(originalShape);
-        if (shape.type === "circle") {
-            const dx = coords.x - shape.x;
-            const dy = coords.y - shape.y;
-            shape.radius = Math.hypot(dx, dy);
-        } else if (shape.type === "cone") {
-            const dx = coords.x - shape.x;
-            const dy = coords.y - shape.y;
-            shape.radius = Math.hypot(dx, dy);
-            shape.rotation = Math.toDegrees(Math.atan2(dy, dx));
-        } else if (shape.type === "rectangle") {
-            shape.width = coords.x - shape.x;
-            shape.height = coords.y - shape.y;
+        if (coords.x !== undefined) shape.x = coords.x;
+        if (coords.y !== undefined) shape.y = coords.y;
+        if (coords.direction !== undefined || coords.rotation !== undefined) {
+            shape.rotation = coords.direction ?? coords.rotation;
         }
+        if (coords.distance !== undefined || coords.radius !== undefined) {
+            shape.radius = coords.distance ?? coords.radius;
+        }
+        if (coords.width !== undefined) shape.width = coords.width;
         return shape;
     }
 }
