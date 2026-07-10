@@ -1,4 +1,5 @@
 import { systemAdapter } from "../system/index.js";
+import { log } from "../../lib/logger.js";
 
 export class BaseFoundryVTTAdapter {
     constructor() {
@@ -65,17 +66,17 @@ export class BaseFoundryVTTAdapter {
         if (!doc || !entries) return null;
         const context = this.extractCallingContext(doc);
         if (!context.itemName && !context.itemId) {
-            console.log("BBC | matchAutorecEntry | Could not extract calling item context from document/placeable:", doc);
+            log.debug("matchAutorecEntry | Could not extract calling item context from document/placeable:", doc);
             return null;
         }
 
         for (const entry of entries.values()) {
             if (systemAdapter.shouldReplace(context, entry)) {
-                console.log(`BBC | matchAutorecEntry | Matched entry "${entry.itemName}" for calling item "${context.itemName}"`);
+                log.debug(`matchAutorecEntry | Matched entry "${entry.itemName}" for calling item "${context.itemName}"`);
                 return { ...entry, item: context.item, activity: context.activity };
             }
         }
-        console.log(`BBC | matchAutorecEntry | No matching autorec entry for calling item "${context.itemName}"`);
+        log.debug(`matchAutorecEntry | No matching autorec entry for calling item "${context.itemName}"`);
         return null;
     }
 
