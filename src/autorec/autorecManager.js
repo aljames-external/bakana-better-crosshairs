@@ -409,7 +409,12 @@ export class AutorecManager {
             const widthDisplay = widthVal !== undefined ? `${widthVal} ft` : null;
             const angleVal = config.angle;
             const angleDisplay = angleVal !== undefined ? `${angleVal}°` : null;
-            const stickToToken = Boolean(config.stickToToken ?? config.attachToToken ?? config.lockToToken ?? (typeKey === "cone"));
+            const rawStick = config.stickToToken ?? config.attachToToken ?? config.lockToToken;
+            const isStickOn = rawStick === true || rawStick === "true" || rawStick === "on";
+            const isStickOff = rawStick === false || rawStick === "false" || rawStick === "off";
+            const isStickDefault = !isStickOn && !isStickOff;
+            const stickToTokenMode = isStickOn ? "true" : (isStickOff ? "false" : "default");
+            const stickToToken = isStickOn ? true : (isStickOff ? false : (config.type === "cone" || config.t === "cone"));
             const showLine = config.showLine !== false;
             const lineFile = config.lineFile || "eskie.crosshair.line.generic_01.white";
             const borderColor = config.borderColor || "#ffffff";
@@ -471,6 +476,10 @@ export class AutorecManager {
                 widthDisplay,
                 angleDisplay,
                 stickToToken,
+                stickToTokenMode,
+                isStickDefault,
+                isStickOn,
+                isStickOff,
                 showLine,
                 lineFile,
                 borderColor,

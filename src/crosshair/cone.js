@@ -7,7 +7,7 @@ async function create(token, config = {}) {
         angle = 53.13,
         coneSize = "thin",
         distance = 30,
-        stickToToken = config.stickToToken ?? config.attachToToken ?? config.lockToToken ?? false,
+        stickToToken = config.stickToToken ?? config.attachToToken ?? config.lockToToken ?? true,
         file,
         coneFile = file || config.animationFile || closest(`eskie.crosshair.cone.${coneSize}.fantasy_01.white.full`),
         icon = config.icon,

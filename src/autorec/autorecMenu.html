@@ -198,11 +198,16 @@
                                     <tr>
                                         <th>Lock to Token (Stick)</th>
                                         <td>
-                                            <span class="view-only">{{#if stickToToken}}<span class="bbc-pill yes">Yes (Locked to Origin Token)</span>{{else}}<span class="bbc-pill no">No (Free Cursor Placement)</span>{{/if}}</span>
-                                            <label class="bbc-edit-checkbox-label edit-only">
-                                                <input type="checkbox" class="bbc-edit-checkbox" data-field="stickToToken" {{#if stickToToken}}checked{{/if}} />
-                                                <span>Lock to origin token</span>
-                                            </label>
+                                            <span class="view-only">
+                                                {{#if isStickOn}}<span class="bbc-pill yes">On (Locked to Origin Token)</span>{{/if}}
+                                                {{#if isStickOff}}<span class="bbc-pill no">Off (Free Cursor Placement)</span>{{/if}}
+                                                {{#if isStickDefault}}<span class="bbc-pill neutral">Default (Cone: On, Others: Off)</span>{{/if}}
+                                            </span>
+                                            <select class="bbc-edit-select edit-only" data-field="stickToToken">
+                                                <option value="default" {{#if isStickDefault}}selected{{/if}}>Default (Cone: On, Others: Off)</option>
+                                                <option value="true" {{#if isStickOn}}selected{{/if}}>On (Always Lock to Origin Token)</option>
+                                                <option value="false" {{#if isStickOff}}selected{{/if}}>Off (Always Free Cursor Placement)</option>
+                                            </select>
                                         </td>
                                     </tr>
                                     <tr>
