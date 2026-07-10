@@ -12,8 +12,9 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
      */
     registerPlacementHooks(callbacks) {
         Hooks.on("drawMeasuredTemplate", (template) => callbacks.onDrawPreview(template));
-        Hooks.on("preCreateMeasuredTemplate", (doc, data, options, userId) => callbacks.onPreCreate(doc, data, options, userId));
-        Hooks.on("createMeasuredTemplate", (doc, options, userId) => callbacks.onCreate(doc, options, userId));
+        Hooks.on("preCreateMeasuredTemplate", (doc, _data, _options, userId) => callbacks.onPreCreate(doc, _data, _options, userId));
+        Hooks.on("createMeasuredTemplate", (doc, _options, userId) => callbacks.onCreate(doc, _options, userId));
+
     }
 
     /**
@@ -87,33 +88,5 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
         }
         return updateData;
     }
-
-    /**
-     * Format a shape coordinate update for a live preview.
-     * @param {Object} originalShape
-     * @param {Object} coords
-     * @returns {Object}
-     */
-    formatShapeUpdate(originalShape, coords) {
-        return foundry.utils.mergeObject(foundry.utils.deepClone(originalShape), coords);
-    }
-
-    /**
-     * Get primary and secondary (farpoint) world coordinates from a template document.
-     * @param {Document} doc
-     * @returns {{primary: {x: number, y: number}, secondary: {x: number, y: number}}}
-     */
-    getPosition(doc) {
-        const primary = { x: doc.x || 0, y: doc.y || 0 };
-        let secondary = { x: primary.x, y: primary.y };
-        if (doc.direction !== undefined && doc.distance) {
-            const rad = Math.toRadians(doc.direction);
-            const distPx = (doc.distance / (canvas.dimensions?.distance || 5)) * (canvas.dimensions?.size || 100);
-            secondary = {
-                x: primary.x + Math.cos(rad) * distPx,
-                y: primary.y + Math.sin(rad) * distPx
-            };
-        }
-        return { primary, secondary };
-    }
 }
+

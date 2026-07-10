@@ -68,12 +68,5 @@ export class BaseFoundryVTTAdapter {
     formatDocumentUpdate(doc, coords, config) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement formatDocumentUpdate(doc, coords, config).");
     }
-
-    formatShapeUpdate(originalShape, coords) {
-        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement formatShapeUpdate(originalShape, coords).");
-    }
-
-    getPosition(doc) {
-        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement getPosition(doc).");
-    }
 }
+

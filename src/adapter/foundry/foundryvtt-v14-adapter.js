@@ -12,8 +12,9 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      */
     registerPlacementHooks(callbacks) {
         Hooks.on("drawRegion", (region) => callbacks.onDrawPreview(region));
-        Hooks.on("preCreateRegion", (doc, data, options, userId) => callbacks.onPreCreate(doc, data, options, userId));
-        Hooks.on("createRegion", (doc, options, userId) => callbacks.onCreate(doc, options, userId));
+        Hooks.on("preCreateRegion", (doc, _data, _options, userId) => callbacks.onPreCreate(doc, _data, _options, userId));
+        Hooks.on("createRegion", (doc, _options, userId) => callbacks.onCreate(doc, _options, userId));
+
     }
 
     /**
@@ -88,19 +89,9 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         updateData.flags = foundry.utils.mergeObject(doc.flags || {}, styling.flags);
         return updateData;
     }
-
-    /**
-     * Format a Region shape coordinate update for a live preview.
-     * @param {Object} originalShape
-     * @param {Object} coords
-     * @returns {Object}
-     */
-    formatShapeUpdate(originalShape, coords) {
-        return this._formatRegionShapeUpdate(originalShape, coords);
-    }
-
     /**
      * Format a Region shape update based on drag destination coordinates.
+
      * @private
      */
     _formatRegionShapeUpdate(originalShape, coords) {
@@ -120,24 +111,5 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         }
         return shape;
     }
-
-    /**
-     * Get primary and secondary (farpoint) world coordinates from a Region document.
-     * @param {Document} doc
-     * @returns {{primary: {x: number, y: number}, secondary: {x: number, y: number}}}
-     */
-    getPosition(doc) {
-        const shape = doc.shapes?.[0] || {};
-        const primary = { x: shape.x || 0, y: shape.y || 0 };
-        let distance = shape.radius || shape.distance || 0;
-        let secondary = { x: primary.x, y: primary.y };
-        if (shape.rotation !== undefined && distance) {
-            const rad = Math.toRadians(shape.rotation);
-            secondary = {
-                x: primary.x + Math.cos(rad) * distance,
-                y: primary.y + Math.sin(rad) * distance
-            };
-        }
-        return { primary, secondary };
-    }
 }
+
