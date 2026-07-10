@@ -685,43 +685,23 @@ function unregister(itemName, { persist = true, local = false } = {}) {
 
 async function unregisterMany(itemNames, { persist = true, local = false } = {}) {
     if (!Array.isArray(itemNames)) return;
-    const namesToPersist = [];
     for (const itemName of itemNames) {
-        const deleted = registeredHandlers.delete(itemName);
-        const wasPersisted = persistedItemNames.has(itemName);
-        if (deleted) {
-            log.info(`Unregistered template sequence for item: ${itemName}`);
-        }
-        if (persist && !local && (wasPersisted || typeof itemName === "string")) {
-            namesToPersist.push(itemName);
-        }
+        registeredHandlers.delete(itemName);
+        persistedItemNames.delete(itemName);
+        log.info(`Unregistered template sequence for item: ${itemName}`);
     }
     rebuildFastLookupMap();
 
-    if (persist && !local && namesToPersist.length > 0) {
-        if (game.user?.isGM) {
-            try {
-                const saved = foundry.utils.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") || {});
-                let modified = false;
-                for (const itemName of namesToPersist) {
-                    if (itemName in saved) {
-                        delete saved[itemName];
-                        persistedItemNames.delete(itemName);
-                        modified = true;
-                    }
-                }
-                if (modified) {
-                    await game.settings.set(MODULE_ID, "registeredTemplates", saved);
-                    broadcastSync();
-                }
-            } catch (e) {
-                log.warn(`Failed to batch unpersist template settings:`, e);
-            }
-        } else if (game.socket) {
-            for (const itemName of namesToPersist) {
-                game.socket.emit(`module.${MODULE_ID}`, { type: "UNREGISTER_TEMPLATE", itemName });
+    if (persist && !local) {
+        const persistedDict = {};
+        for (const [itemName, config] of registeredHandlers.entries()) {
+            if (config && typeof config === "object" && !config.local && typeof config !== "function") {
+                persistedDict[itemName] = config;
             }
         }
+        await overwrite(persistedDict);
+    } else {
+        broadcastSync();
     }
 }
 
@@ -752,6 +732,27 @@ async function registerMany(entries, { persist = true } = {}) {
                 game.socket.emit(`module.${MODULE_ID}`, { type: "REGISTER_TEMPLATE", itemName, config });
             }
         }
+    }
+}
+
+async function overwrite(persistedDict = {}) {
+    if (typeof game === "undefined") return;
+    if (game.user?.isGM) {
+        try {
+            await game.settings.set(MODULE_ID, "registeredTemplates", persistedDict);
+            persistedItemNames.clear();
+            for (const itemName of Object.keys(persistedDict)) {
+                persistedItemNames.add(itemName);
+            }
+            broadcastSync();
+        } catch (e) {
+            log.warn("Failed to overwrite registeredTemplates setting:", e);
+        }
+    } else if (game.socket) {
+        game.socket.emit(`module.${MODULE_ID}`, {
+            type: "OVERWRITE_TEMPLATES",
+            persistedDict
+        });
     }
 }
 
@@ -960,6 +961,7 @@ export const manager = {
     registerMany,
     unregister,
     unregisterMany,
+    overwrite,
     has,
     get,
     list,

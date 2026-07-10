@@ -352,7 +352,7 @@ export class AutorecMenuApplication extends BaseApplication {
     }
 
     async saveAllEditedConfigurations(root) {
-        const entriesToSave = [];
+        let modifiedAny = false;
         root.querySelectorAll(".bbc-inspector-detail").forEach(detailEl => {
             const itemName = detailEl.dataset.itemName;
             if (!itemName) return;
@@ -408,13 +408,21 @@ export class AutorecMenuApplication extends BaseApplication {
             });
 
             if (modified) {
-                entriesToSave.push({ itemName, config, local: Boolean(config.local) });
+                manager.register(itemName, config, { persist: false, local: Boolean(config.local) });
+                modifiedAny = true;
             }
         });
 
-        if (entriesToSave.length > 0) {
-            await manager.registerMany(entriesToSave, { persist: true });
-            ui.notifications?.info(`Saved ${entriesToSave.length} workflow configuration(s) and synced across all clients.`);
+        if (modifiedAny) {
+            const persistedDict = {};
+            for (const itemName of manager.list()) {
+                const config = manager.get(itemName);
+                if (config && typeof config === "object" && !config.local && typeof config !== "function") {
+                    persistedDict[itemName] = config;
+                }
+            }
+            await manager.overwrite(persistedDict);
+            ui.notifications?.info("Saved workflow configurations and synced across all clients.");
             this.render(false);
         }
     }
