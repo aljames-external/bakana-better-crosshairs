@@ -13,9 +13,10 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad) {
             try { tmpl.document.updateSource({ direction: newDirDeg }); } catch (e) {}
         }
     }
-    if (tmpl.ray && typeof Ray !== "undefined" && tmpl.ray.origin) {
+    const RayClass = globalThis.foundry?.canvas?.geometry?.Ray ?? globalThis.Ray;
+    if (tmpl.ray && RayClass && tmpl.ray.origin) {
         try {
-            tmpl.ray = Ray.fromAngle(tmpl.ray.origin.x, tmpl.ray.origin.y, rad, tmpl.ray.distance || 1000);
+            tmpl.ray = RayClass.fromAngle(tmpl.ray.origin.x, tmpl.ray.origin.y, rad, tmpl.ray.distance || 1000);
         } catch (e) {}
     }
     if (tmpl.renderFlags) {
