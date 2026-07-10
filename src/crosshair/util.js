@@ -201,78 +201,71 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     detachWheelRotation();
     log.debug("resolveCrosshairPlacement | Inspecting arguments passed to PLACED callback:", crosshair, config, extraArgs);
 
-    let targetX, targetY, direction;
+    let direction = typeof config.currentDirection === "number" ? config.currentDirection : undefined;
 
-    if (typeof config.currentDirection === "number") {
-        direction = config.currentDirection;
-    }
-
-    // Search all arguments for click/target x/y coordinates and rotation/direction
+    // Search arguments for explicit rotation/direction
     const allArgs = [crosshair, config, ...extraArgs];
     for (const arg of allArgs) {
         if (!arg || typeof arg !== "object") continue;
-
         let foundDir = arg.direction ?? arg.data?.direction ?? arg.template?.direction ?? arg.placeable?.direction ?? arg._direction;
-        if (typeof foundDir === "number") {
+        if (typeof foundDir === "number" && direction === undefined) {
             direction = foundDir;
-        } else if (arg.ray && typeof arg.ray.angle === "number") {
+        } else if (arg.ray && typeof arg.ray.angle === "number" && direction === undefined) {
             direction = arg.ray.angle * (180 / Math.PI);
-        } else {
+        } else if (direction === undefined) {
             const rot = arg.rotation ?? arg.data?.rotation ?? arg._rotation;
             if (typeof rot === "number") {
                 direction = (Math.abs(rot) <= Math.PI * 2 && rot !== 0) ? (rot * (180 / Math.PI)) : rot;
             }
         }
-
-        if (typeof arg.x === "number" && typeof arg.y === "number" && targetX === undefined) {
-            targetX = arg.x;
-            targetY = arg.y;
-        }
-        if (arg.position && typeof arg.position.x === "number" && typeof arg.position.y === "number" && targetX === undefined) {
-            targetX = arg.position.x;
-            targetY = arg.position.y;
-        }
-        if (arg.center && typeof arg.center.x === "number" && typeof arg.center.y === "number" && targetX === undefined) {
-            targetX = arg.center.x;
-            targetY = arg.center.y;
-        }
     }
 
-    if (typeof direction === "number") {
-        while (direction < 0) direction += 360;
-        direction = direction % 360;
-    }
+    const mousePos = canvas?.mousePosition || {};
+    let clickX = crosshair?.target?.x ?? extraArgs.find(a => typeof a?.x === "number")?.x ?? mousePos.x ?? 0;
+    let clickY = crosshair?.target?.y ?? extraArgs.find(a => typeof a?.y === "number")?.y ?? mousePos.y ?? 0;
 
-    if (typeof targetX !== "number" || typeof targetY !== "number") {
-        const mousePos = canvas?.mousePosition || {};
-        targetX = mousePos.x ?? 0;
-        targetY = mousePos.y ?? 0;
-    }
+    let originX = crosshair?.source?.x ?? clickX;
+    let originY = crosshair?.source?.y ?? clickY;
 
-    let x = targetX;
-    let y = targetY;
+    let x = originX;
+    let y = originY;
 
+    const isRayOrCone = config.type === "ray" || config.type === "cone" || config.t === "ray" || config.t === "cone";
     const isAnchored = (config.stickToToken || config.attachToToken || config.lockToToken) && config.token;
     const isV14 = typeof game !== "undefined" && typeof foundry !== "undefined" && foundry.utils.isNewerVersion(game.version, "14");
 
-    if (isAnchored) {
+    if (isAnchored && config.token) {
         if (!isV14) {
-            const mousePos = canvas?.mousePosition || {};
-            const clickX = mousePos.x ?? targetX;
-            const clickY = mousePos.y ?? targetY;
             const edgePoint = getTokenEdgePoint(config.token, clickX, clickY);
             x = edgePoint.x;
             y = edgePoint.y;
-            direction = edgePoint.direction;
+            if (direction === undefined) direction = edgePoint.direction;
         }
         log.debug("resolveCrosshairPlacement | Token anchored edge placement ->", { x, y, direction, isV14 });
-    } else {
+    } else if (isRayOrCone && config.token) {
+        const tok = config.token;
+        x = tok.center?.x ?? (tok.x + (tok.w || 0) / 2) ?? clickX;
+        y = tok.center?.y ?? (tok.y + (tok.h || 0) / 2) ?? clickY;
+    } else if (!isRayOrCone) {
+        x = clickX;
+        y = clickY;
         const snapMode = config.snapToGrid ?? "corner";
         if (snapMode && snapMode !== false && snapMode !== "none") {
             const snapped = snapCoordinates(x, y, snapMode);
             x = snapped.x;
             y = snapped.y;
         }
+    }
+
+    if (direction === undefined && (isRayOrCone || isAnchored)) {
+        const dx = clickX - x;
+        const dy = clickY - y;
+        direction = Math.atan2(dy, dx) * (180 / Math.PI);
+    }
+
+    if (typeof direction === "number") {
+        while (direction < 0) direction += 360;
+        direction = direction % 360;
     }
 
     const result = {
