@@ -2,6 +2,7 @@ import { MODULE_ID } from './constants.js';
 import { log } from './logger.js';
 import { crosshair } from '../crosshair/_crosshairs.js';
 import { Token } from './compat.js';
+import { crosshairAdapter } from '../adapter/foundry/index.js';
 
 const registeredHandlers = new Map();
 const fastLookupMap = new Map();
@@ -140,32 +141,8 @@ function isOwner(doc) {
  */
 function detectTemplateProperties(target) {
     const doc = target.document ?? target;
-    let type = "circle";
-    let distance = 20;
-    let angle = 53.13;
-    let width = 5;
-
-    if (doc.documentName === "Region" || doc.shapes) {
-        const shape = doc.shapes?.[0] || {};
-        const st = shape.type;
-        if (st === "rectangle" || st === "polygon") {
-            type = "rect";
-        } else {
-            type = "circle";
-        }
-        distance = shape.radius || shape.distance || 20;
-    } else {
-        const t = doc.t || "circle";
-        if (t === "cone") type = "cone";
-        else if (t === "ray") type = "ray";
-        else type = "circle";
-
-        distance = doc.distance || 20;
-        angle = doc.angle || 53.13;
-        width = doc.width || 5;
-    }
-
-    return { type, distance, radius: distance, angle, width };
+    const props = crosshairAdapter.detectProperties(doc);
+    return { ...props, radius: props.distance };
 }
 
 /**
@@ -188,26 +165,8 @@ async function handleDrawPreview(placeable) {
 
     log.info(`handleDrawPreview | Intercepting template preview for "${entry.itemName}"`);
 
-    // 1. Immediately hide the Foundry template preview completely so we do Sequencer visuals instead
-    placeable.visible = false;
-    placeable.renderable = false;
-    placeable.alpha = 0;
-    if (placeable.template) placeable.template.visible = false;
-    if (placeable.ruler) placeable.ruler.visible = false;
-    if (placeable.controlIcon) placeable.controlIcon.visible = false;
-
-    placeable.refresh = function() {
-        this.visible = false;
-        this.renderable = false;
-        if (this.ruler) {
-            this.ruler.visible = false;
-            this.ruler.text = "";
-        }
-        if (this.template) this.template.visible = false;
-        if (this.controlIcon) this.controlIcon.visible = false;
-        return this;
-    };
-    placeable.highlightGrid = function() {};
+    // 1. Immediately hide the Foundry template/region preview graphic completely so custom Sequencer visuals take over
+    crosshairAdapter.hidePreview(placeable);
 
     // 2. Resolve token context
     let rawToken = entry.item?.parent?.getActiveTokens?.()[0] || doc.item?.parent?.getActiveTokens?.()[0] || canvas.tokens?.controlled?.[0] || undefined;
@@ -247,29 +206,14 @@ async function handleDrawPreview(placeable) {
                 pending.coords = coords;
                 pending.resolved = true;
 
-                // Populate original preview document immediately so v14 schema validation passes
                 const previewDoc = pending.originalTemplate?.document;
                 if (previewDoc) {
-                    if (previewDoc.documentName === "Region" && Array.isArray(previewDoc.shapes) && previewDoc.shapes.length > 0) {
-                        const orig = previewDoc.shapes[0]._source || previewDoc.shapes[0];
-                        const updatedShape = formatRegionShapeUpdate(orig, coords);
-                        if (typeof previewDoc.updateSource === "function") {
-                            previewDoc.updateSource({ shapes: [updatedShape] });
-                        }
-                    } else if (typeof previewDoc.updateSource === "function") {
-                        previewDoc.updateSource({
-                            x: coords.x,
-                            y: coords.y,
-                            distance: coords.distance ?? coords.radius,
-                            direction: coords.direction ?? coords.rotation
-                        });
-                    }
+                    crosshairAdapter.updatePreviewShape(previewDoc, coords);
                 }
             }
 
             // Clean up any lingering preview placeables on the canvas
-            if (canvas.templates?.preview) canvas.templates.preview.removeChildren();
-            if (canvas.regions?.preview) canvas.regions.preview.removeChildren();
+            crosshairAdapter.clearPreviewCanvas();
         },
         cancel() {
             log.debug(`context.cancel | Sequencer crosshair CANCELLED for "${entry.itemName}"`);
@@ -280,8 +224,7 @@ async function handleDrawPreview(placeable) {
                 pending.cancelled = true;
                 pending.resolved = true;
             }
-            if (canvas.templates?.preview) canvas.templates.preview.removeChildren();
-            if (canvas.regions?.preview) canvas.regions.preview.removeChildren();
+            crosshairAdapter.clearPreviewCanvas();
             pendingPlacements.delete(placementKey);
         }
     };
@@ -320,43 +263,7 @@ async function handleDrawPreview(placeable) {
 }
 
 function formatRegionShapeUpdate(originalShape, coords) {
-    const shapeType = originalShape.type;
-    switch (shapeType) {
-        case "circle":
-            return {
-                type: "circle",
-                x: coords.x ?? originalShape.x,
-                y: coords.y ?? originalShape.y,
-                radius: coords.radius ?? coords.distance ?? originalShape.radius,
-                hole: originalShape.hole ?? false
-            };
-        case "line":
-            return {
-                type: "line",
-                x: coords.x ?? originalShape.x,
-                y: coords.y ?? originalShape.y,
-                length: coords.distance ?? coords.radius ?? originalShape.length,
-                width: coords.width ?? originalShape.width,
-                rotation: coords.direction ?? coords.rotation ?? originalShape.rotation,
-                hole: originalShape.hole ?? false
-            };
-        case "cone":
-            return {
-                type: "cone",
-                x: coords.x ?? originalShape.x,
-                y: coords.y ?? originalShape.y,
-                radius: coords.distance ?? coords.radius ?? originalShape.radius,
-                rotation: coords.direction ?? coords.rotation ?? originalShape.rotation,
-                angle: coords.angle ?? originalShape.angle,
-                curvature: originalShape.curvature ?? "round",
-                hole: originalShape.hole ?? false
-            };
-        default:
-            return foundry.utils.mergeObject(foundry.utils.deepClone(originalShape), {
-                x: coords.x ?? originalShape.x,
-                y: coords.y ?? originalShape.y
-            });
-    }
+    return crosshairAdapter.formatShapeUpdate(originalShape, coords);
 }
 
 /**
@@ -389,55 +296,7 @@ function handlePreCreate(doc, data, options, userId) {
 
     // If the sequencer sequence has resolved with coordinates, update the document
     if (pending.resolved && pending.coords) {
-        const updateData = {};
-
-        // Support v14 Region update
-        if (doc.documentName === 'Region' && Array.isArray(doc.shapes) && doc.shapes.length > 0) {
-            const originalShape = foundry.utils.deepClone(
-                doc.shapes[0]._source || (typeof doc.shapes[0].toObject === "function" ? doc.shapes[0].toObject() : doc.shapes[0])
-            );
-            const newShape = formatRegionShapeUpdate(originalShape, pending.coords);
-
-            delete newShape._id;
-            updateData.shapes = [newShape];
-            log.debug(`handlePreCreate | Formatted v14 Region shape update ->`, { originalShape, newShape });
-        } else {
-            // Support MeasuredTemplate update (v13 and v14)
-            if (pending.coords.x !== undefined) updateData.x = pending.coords.x;
-            if (pending.coords.y !== undefined) updateData.y = pending.coords.y;
-            if (pending.coords.distance !== undefined) updateData.distance = pending.coords.distance;
-            if (pending.coords.direction !== undefined) updateData.direction = pending.coords.direction;
-            if (pending.coords.width !== undefined) updateData.width = pending.coords.width;
-            if (pending.coords.t !== undefined) updateData.t = pending.coords.t;
-        }
-
-        // Apply Placed Template (v13-) / Region (v14+) Styling if configured
-        const pConf = pending.config || {};
-        const placedFillColor = pConf.placedFillColor || pConf.templateFillColor;
-        const placedFillAlpha = pConf.placedFillAlpha !== undefined ? pConf.placedFillAlpha : pConf.templateFillAlpha;
-        const placedBorderColor = pConf.placedBorderColor || pConf.templateBorderColor;
-        const placedBorderAlpha = pConf.placedBorderAlpha !== undefined ? pConf.placedBorderAlpha : pConf.templateBorderAlpha;
-
-        if (doc.documentName === 'Region') {
-            if (placedFillColor || placedBorderColor) updateData.color = placedFillColor || placedBorderColor;
-        } else {
-            if (placedFillColor) updateData.fillColor = placedFillColor;
-            if (placedBorderColor) updateData.borderColor = placedBorderColor;
-            if ("fillAlpha" in (doc._source || doc) && placedFillAlpha !== undefined) updateData.fillAlpha = placedFillAlpha;
-            if ("alpha" in (doc._source || doc) && placedFillAlpha !== undefined) updateData.alpha = placedFillAlpha;
-        }
-
-        if (placedFillColor || placedFillAlpha !== undefined || placedBorderColor || placedBorderAlpha !== undefined) {
-            updateData.flags = foundry.utils.mergeObject(doc.flags || {}, {
-                bbc: {
-                    placedFillColor,
-                    placedFillAlpha,
-                    placedBorderColor,
-                    placedBorderAlpha
-                }
-            });
-        }
-
+        const updateData = crosshairAdapter.formatDocumentUpdate(doc, pending.coords, pending.config || {});
         doc.updateSource(updateData);
         pendingPlacements.delete(placementKey);
         log.debug(`handlePreCreate | Updating workflow document source and allowing creation for key=${placementKey}`, updateData);
@@ -455,7 +314,7 @@ function handlePreCreate(doc, data, options, userId) {
  * Executes user-configured post-placement Javascript inside a try/catch block with standard context variables.
  */
 async function handleCreateDocument(doc, options, userId) {
-    if (typeof game !== "undefined" && userId !== game.user?.id) return;
+    if (userId !== game.user?.id) return;
 
     const entry = getRegisteredEntry(doc);
     const flagsConfig = doc.flags?.bbc;
@@ -492,7 +351,7 @@ function initializeReadySync() {
     if (readySyncInitialized) return;
     readySyncInitialized = true;
 
-    if (typeof game !== "undefined" && game.socket) {
+    if (game.socket) {
         game.socket.on(`module.${MODULE_ID}`, (data) => {
             if (!data || typeof data !== "object") return;
             if (data.type === "REGISTER_TEMPLATE") {
@@ -529,28 +388,20 @@ function initializeHooks() {
     if (hooksInitialized) return;
     hooksInitialized = true;
 
-    // Core MeasuredTemplate placement hooks (v13 and v14)
-    Hooks.on("drawMeasuredTemplate", (template) => handleDrawPreview(template));
-    Hooks.on("preCreateMeasuredTemplate", (doc, data, options, userId) => handlePreCreate(doc, data, options, userId));
-    Hooks.on("createMeasuredTemplate", (doc, options, userId) => handleCreateDocument(doc, options, userId));
+    crosshairAdapter.registerPlacementHooks({
+        onDrawPreview: (placeable) => handleDrawPreview(placeable),
+        onPreCreate: (doc, data, options, userId) => handlePreCreate(doc, data, options, userId),
+        onCreate: (doc, options, userId) => handleCreateDocument(doc, options, userId)
+    });
 
-    const isV14 = typeof game !== "undefined" && typeof foundry !== "undefined" && foundry.utils.isNewerVersion(game.version, "14");
-    if (isV14) {
-        log.debug("initializeHooks | Foundry v14+ detected, also registering Region hooks.");
-        Hooks.on("drawRegion", (region) => handleDrawPreview(region));
-        Hooks.on("preCreateRegion", (doc, data, options, userId) => handlePreCreate(doc, data, options, userId));
-        Hooks.on("createRegion", (doc, options, userId) => handleCreateDocument(doc, options, userId));
-    }
-
-    if (typeof game !== "undefined" && game.ready) {
+    if (game.ready) {
         initializeReadySync();
-    } else if (typeof Hooks !== "undefined" && Hooks.once) {
+    } else {
         Hooks.once("ready", initializeReadySync);
     }
 }
 
 function persistRegistration(itemName, config) {
-    if (typeof game === "undefined") return;
     if (!game.ready) {
         Hooks.once("ready", () => persistRegistration(itemName, config));
         return;
@@ -576,7 +427,6 @@ function persistRegistration(itemName, config) {
 }
 
 function persistUnregistration(itemName) {
-    if (typeof game === "undefined") return;
     if (!game.ready) {
         Hooks.once("ready", () => persistUnregistration(itemName));
         return;
@@ -737,7 +587,6 @@ async function registerMany(entries, { persist = true } = {}) {
 }
 
 async function overwrite(persistedDict = {}) {
-    if (typeof game === "undefined") return;
     if (game.user?.isGM) {
         try {
             await game.settings.set(MODULE_ID, "registeredTemplates", persistedDict);
@@ -758,39 +607,11 @@ async function overwrite(persistedDict = {}) {
 }
 
 async function getPosition(template, config = {}) {
-    let position;
     if (template) {
-        let primary, secondary;
-
-        // Foundry V14 Region structures
-        if (template.documentName === 'Region' || template.shapes) {
-            const shape = template.shapes[0];
-            primary = { x: shape.x, y: shape.y };
-
-            // Calculate the furthest point based on shape rotation and radius
-            let distance = shape.radius || shape.distance || 0;
-            // Depending on the shape type, we find the farpoint along its rotation
-            if (shape.rotation !== undefined && distance) {
-                const rad = Math.toRadians(shape.rotation);
-                secondary = {
-                    x: primary.x + Math.cos(rad) * distance,
-                    y: primary.y + Math.sin(rad) * distance
-                };
-            } else {
-                // Fallback to origin if no direction is present (e.g. circles)
-                secondary = { x: primary.x, y: primary.y };
-            }
-        } else {
-            log.info(`getPosition: Falling back to legacy MeasuredTemplate support (pre-V14). This support will be removed in Foundry V16.`);
-            // Legacy MeasuredTemplate support
-            const farpoint = template.object.ray.B;
-            secondary = { x: farpoint.x, y: farpoint.y };
-            primary = { x: template.x, y: template.y };
-        }
-
+        const { primary, secondary } = crosshairAdapter.getPosition(template);
         return [primary, secondary];
     } else {
-        position = await Sequencer.Crosshair.show();
+        const position = await Sequencer.Crosshair.show();
         if (position.cancelled) { return []; }
         return [position, undefined];
     }
@@ -928,7 +749,7 @@ function getAllEntries() {
 }
 
 function broadcastSync() {
-    if (typeof game !== "undefined" && game.socket) {
+    if (game.socket) {
         game.socket.emit(`module.${MODULE_ID}`, { type: "SYNC_AUTORECS" });
     }
 }
