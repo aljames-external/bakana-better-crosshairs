@@ -164,27 +164,6 @@
                                         <th>Custom Function Handler</th>
                                         <td>{{#if isCustomFunction}}<span class="bbc-pill yes">Yes (Custom Script)</span>{{else}}<span class="bbc-pill no">No (Declarative Config)</span>{{/if}}</td>
                                     </tr>
-                                    <tr class="{{#unless distanceDisplay}}edit-only{{/unless}}">
-                                        <th>Distance / Radius (ft)</th>
-                                        <td>
-                                            <span class="bbc-pill view-only">{{distanceDisplay}}</span>
-                                            <input type="number" class="bbc-edit-input edit-only" data-field="distance" value="{{config.distance}}" placeholder="e.g. 30" />
-                                        </td>
-                                    </tr>
-                                    <tr class="{{#unless widthDisplay}}edit-only{{/unless}}">
-                                        <th>Ray Width (ft)</th>
-                                        <td>
-                                            <span class="bbc-pill view-only">{{widthDisplay}}</span>
-                                            <input type="number" class="bbc-edit-input edit-only" data-field="width" value="{{config.width}}" placeholder="e.g. 5" />
-                                        </td>
-                                    </tr>
-                                    <tr class="{{#unless angleDisplay}}edit-only{{/unless}}">
-                                        <th>Cone Angle (degrees)</th>
-                                        <td>
-                                            <span class="bbc-pill view-only">{{angleDisplay}}</span>
-                                            <input type="number" class="bbc-edit-input edit-only" data-field="angle" value="{{config.angle}}" placeholder="e.g. 53.13" />
-                                        </td>
-                                    </tr>
                                     <tr>
                                         <th>Lock to Token (Stick)</th>
                                         <td>
