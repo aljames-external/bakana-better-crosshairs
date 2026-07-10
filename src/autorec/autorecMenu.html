@@ -28,6 +28,7 @@
                     </div>
                     <div class="bbc-card-meta">
                         <span class="bbc-type-badge {{typeKey}}">{{type}}</span>
+                        {{#if isLocal}}<span class="bbc-type-badge local" title="Local Only (Session Scope)">Local</span>{{/if}}
                     </div>
                 </div>
                 {{/each}}
@@ -62,6 +63,11 @@
                     <div class="bbc-detail-badges">
                         <span class="bbc-type-badge {{typeKey}}"><i class="fa-solid fa-shapes"></i> {{type}} Crosshair</span>
                         <span class="bbc-status-badge active"><i class="fa-solid fa-circle-check"></i> O(1) Indexed</span>
+                        {{#if isLocal}}
+                        <span class="bbc-status-badge local"><i class="fa-solid fa-laptop"></i> Local Only</span>
+                        {{else}}
+                        <span class="bbc-status-badge active"><i class="fa-solid fa-cloud"></i> World Synced</span>
+                        {{/if}}
                     </div>
                 </header>
 
@@ -116,6 +122,10 @@
                                         <td><span class="bbc-pill">{{type}}</span></td>
                                     </tr>
                                     <tr>
+                                        <th>Registration Scope</th>
+                                        <td>{{#if isLocal}}<span class="bbc-pill no">Local Only (Session Scope)</span>{{else}}<span class="bbc-pill yes">World Synced (Persisted)</span>{{/if}}</td>
+                                    </tr>
+                                    <tr>
                                         <th>Sequencer File Path</th>
                                         <td>
                                             <code class="bbc-code-pill">{{file}}</code>
@@ -125,12 +135,80 @@
                                         <th>Custom Function Handler</th>
                                         <td>{{#if isCustomFunction}}<span class="bbc-pill yes">Yes (Custom Script)</span>{{else}}<span class="bbc-pill no">No (Declarative Config)</span>{{/if}}</td>
                                     </tr>
+                                    {{#if distanceDisplay}}
+                                    <tr>
+                                        <th>Distance / Radius</th>
+                                        <td><span class="bbc-pill">{{distanceDisplay}}</span></td>
+                                    </tr>
+                                    {{/if}}
+                                    {{#if widthDisplay}}
+                                    <tr>
+                                        <th>Ray Width</th>
+                                        <td><span class="bbc-pill">{{widthDisplay}}</span></td>
+                                    </tr>
+                                    {{/if}}
+                                    {{#if angleDisplay}}
+                                    <tr>
+                                        <th>Cone Angle</th>
+                                        <td><span class="bbc-pill">{{angleDisplay}}</span></td>
+                                    </tr>
+                                    {{/if}}
+                                    <tr>
+                                        <th>Lock to Token (Stick)</th>
+                                        <td>{{#if stickToToken}}<span class="bbc-pill yes">Yes (Locked to Origin Token)</span>{{else}}<span class="bbc-pill no">No (Free Cursor Placement)</span>{{/if}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Origin Stretch Line</th>
+                                        <td>{{#if showLine}}<span class="bbc-pill yes">Enabled</span> <code class="bbc-code-pill">{{lineFile}}</code>{{else}}<span class="bbc-pill no">Disabled</span>{{/if}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Border Styling</th>
+                                        <td>
+                                            <span class="bbc-color-swatch" data-color="{{borderColor}}"></span>
+                                            <code>{{borderColor}}</code> (Alpha: {{borderAlpha}})
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Fill Styling</th>
+                                        <td>
+                                            <span class="bbc-color-swatch" data-color="{{fillColor}}"></span>
+                                            <code>{{fillColor}}</code> (Alpha: {{fillAlpha}})
+                                        </td>
+                                    </tr>
+                                    {{#if icon}}
+                                    <tr>
+                                        <th>Custom Cursor Icon</th>
+                                        <td><code class="bbc-code-pill">{{icon}}</code></td>
+                                    </tr>
+                                    {{/if}}
                                     <tr>
                                         <th>Interactive Rotation</th>
                                         <td>Mousewheel (`Shift` for 1° fine step, 5° standard step)</td>
                                     </tr>
                                 </tbody>
                             </table>
+
+                            {{#if configEntries.length}}
+                            <div class="bbc-config-entries-wrapper">
+                                <h4 class="bbc-config-subheading"><i class="fa-solid fa-sliders"></i> All Configured Properties</h4>
+                                <table class="bbc-config-table bbc-config-entries-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Configuration Key</th>
+                                            <th>Configured Value</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{#each configEntries}}
+                                        <tr>
+                                            <td><code>{{key}}</code></td>
+                                            <td><code class="bbc-code-pill">{{value}}</code></td>
+                                        </tr>
+                                        {{/each}}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {{/if}}
                         </div>
                     </section>
 

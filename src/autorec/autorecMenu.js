@@ -89,6 +89,13 @@ export class AutorecMenuApplication extends FormApplication {
                 ui.notifications?.info(`Copied "${text}" to clipboard.`);
             }
         });
+
+        // 5. Initialize Color Swatches
+        html.find(".bbc-color-swatch").each((_, el) => {
+            if (el.dataset.color) {
+                el.style.backgroundColor = el.dataset.color;
+            }
+        });
     }
 
     async _updateObject(event, formData) {
