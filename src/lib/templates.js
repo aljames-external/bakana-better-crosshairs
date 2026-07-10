@@ -120,6 +120,22 @@ async function handleDrawPreview(placeable) {
                 pending.resolved = true;
             }
             pendingPlacements.delete(placementKey);
+
+            if (placeable) {
+                if (typeof placeable._onRightClick === "function") {
+                    try {
+                        placeable._onRightClick({ preventDefault: () => {}, stopPropagation: () => {} });
+                    } catch (e) {
+                        log.debug("context.cancel | Error triggering placeable._onRightClick:", e);
+                    }
+                } else if (typeof placeable.destroy === "function") {
+                    try {
+                        placeable.destroy({ children: true });
+                    } catch (e) {
+                        log.debug("context.cancel | Error destroying placeable:", e);
+                    }
+                }
+            }
         }
     };
 
