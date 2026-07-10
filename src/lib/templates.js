@@ -142,7 +142,15 @@ async function handleDrawPreview(placeable) {
             await entry.handler(token, autoConfig);
         } else {
             const entryConfig = (typeof entry.handler === "object" && entry.handler !== null ? entry.handler : (typeof entry === "object" && entry !== null ? entry : {}));
-            const mergedConfig = foundry.utils.mergeObject(autoConfig, entryConfig, { inplace: false });
+            const mergedConfig = {
+                ...autoConfig,
+                ...entryConfig,
+                context: autoConfig.context,
+                item: autoConfig.item || entryConfig.item,
+                actor: autoConfig.actor || entryConfig.actor,
+                activity: entryConfig.activity || entry.activity,
+                scope: autoConfig.scope
+            };
             const crosshairType = mergedConfig.type || "circle";
             const builder = crosshair[crosshairType] || crosshair.circle;
             log.debug(`handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}"`);
