@@ -1,4 +1,5 @@
 import { BaseFoundryVTTAdapter } from "./base-foundryvtt-adapter.js";
+import { log } from "../../lib/logger.js";
 
 export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     constructor() {
@@ -22,6 +23,15 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}}
      */
     detectProperties(doc) {
+        log.debug("FoundryVTTV14Adapter.detectProperties | Inspecting raw document:", {
+            documentName: doc.documentName,
+            t: doc.t,
+            distance: doc.distance,
+            width: doc.width,
+            shapes: doc.shapes,
+            rawObject: typeof doc.toObject === "function" ? doc.toObject() : doc
+        });
+
         if (doc.t) {
             const shapeMap = {
                 circle: "circle",
@@ -30,7 +40,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 rect: "square"
             };
             const distance = doc.distance || 0;
-            return {
+            const result = {
                 type: shapeMap[doc.t] || "circle",
                 distance,
                 radius: distance,
@@ -39,6 +49,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 x: doc.x || 0,
                 y: doc.y || 0
             };
+            log.debug("FoundryVTTV14Adapter.detectProperties | Detected from doc.t (MeasuredTemplate):", result);
+            return result;
         }
 
         const shape = doc.shapes?.[0] || {};
@@ -51,7 +63,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         const rawRadius = shape.radius || shape.distance || shape.length || 0;
         const distance = rawRadius > 20 ? Math.round(rawRadius / pxPerFoot) : rawRadius;
 
-        return {
+        const result = {
             type: shapeType,
             distance,
             radius: distance,
@@ -60,6 +72,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             x: shape.x || 0,
             y: shape.y || 0
         };
+        log.debug("FoundryVTTV14Adapter.detectProperties | Detected from doc.shapes (Region):", result);
+        return result;
     }
 
 
