@@ -31,6 +31,9 @@ async function create(token, config = {}) {
         context = null
     } = config;
 
+    config.token = token;
+    config.stickToToken = stickToToken;
+
     let targets;
 
     async function circleGraphic(crosshair) {
@@ -81,7 +84,7 @@ async function create(token, config = {}) {
         })
         .callback(Sequencer.Crosshair.CALLBACKS.PLACED, async (...args) => {
             Sequencer.EffectManager.endEffects({ name: id });
-            resolveCrosshairPlacement(args[0], { ...config, token, stickToToken }, ...args);
+            resolveCrosshairPlacement(args[0], config, ...args);
         })
         .callback(Sequencer.Crosshair.CALLBACKS.CANCEL, () => {
             Sequencer.EffectManager.endEffects({ name: id });

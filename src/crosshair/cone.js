@@ -18,6 +18,9 @@ async function create(token, config = {}) {
         context = null
     } = config;
 
+    config.token = token;
+    config.stickToToken = stickToToken;
+
     let targets;
 
     async function coneGraphic(crosshair) { 
@@ -35,7 +38,7 @@ async function create(token, config = {}) {
             .play();
     }
 
-    attachWheelRotation(null, { ...config, token, stickToToken });
+    attachWheelRotation(null, config);
 
     let cone = new Sequence()
         .crosshair("position")
@@ -57,12 +60,12 @@ async function create(token, config = {}) {
 
     cone
         .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {
-            attachWheelRotation(crosshair, { ...config, token, stickToToken });
+            attachWheelRotation(crosshair, config);
             await coneGraphic(crosshair);
         })
         .callback(Sequencer.Crosshair.CALLBACKS.PLACED, async (...args) => {
             Sequencer.EffectManager.endEffects({ name: id });
-            resolveCrosshairPlacement(args[0], { ...config, token, stickToToken }, ...args);
+            resolveCrosshairPlacement(args[0], config, ...args);
         })
         .callback(Sequencer.Crosshair.CALLBACKS.CANCEL, () => {
             detachWheelRotation();
