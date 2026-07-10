@@ -1,0 +1,371 @@
+<div class="bbc-autorec-container">
+    <header class="bbc-autorec-topbar">
+        <div class="bbc-search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="bbc-autorec-search" class="bbc-search-input" placeholder="Filter registered workflows (e.g. Fireball)..." autocomplete="off" />
+        </div>
+        <div class="bbc-topbar-actions">
+            {{#if isGM}}
+            <label class="bbc-edit-slider-label" title="Enable GM Edit Mode">
+                <span>Edit Mode</span>
+                <input type="checkbox" id="bbc-edit-mode-toggle" class="bbc-edit-toggle-input" />
+                <span class="bbc-edit-slider-track"></span>
+            </label>
+            {{/if}}
+            <div class="bbc-count-badge">
+                <i class="fa-solid fa-list-check"></i>
+                <span>{{count}} Registered Workflows</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="bbc-autorec-layout">
+        <!-- Left Sidebar: Registered Item Names -->
+        <aside class="bbc-sidebar">
+            <div class="bbc-sidebar-actions edit-only">
+                <button type="button" class="bbc-add-workflow-btn" title="Add New Workflow">
+                    <i class="fa-solid fa-plus"></i> Add
+                </button>
+                <button type="button" class="bbc-remove-selected-btn" title="Remove Checked Workflows">
+                    <i class="fa-solid fa-trash-can"></i> Remove
+                </button>
+            </div>
+
+            {{#if isEmpty}}
+            <div class="bbc-sidebar-empty">
+                <i class="fa-solid fa-folder-open"></i>
+                <p>No crosshair animations registered yet.</p>
+            </div>
+            {{else}}
+            <div class="bbc-items-list">
+                {{#each entries}}
+                <div class="bbc-item-card" data-item-name="{{regKey}}">
+                    {{#unless isDefault}}
+                    <input type="checkbox" class="bbc-item-select-checkbox edit-only" data-item-name="{{regKey}}" title="Select workflow to remove" />
+                    {{/unless}}
+                    <div class="bbc-card-main">
+                        <i class="fa-solid fa-crosshairs bbc-item-icon"></i>
+                        <span class="bbc-item-name">{{itemName}}</span>
+                        {{#if isDefault}}
+                        <span class="bbc-type-badge default" title="Global Fallback Entry">DEFAULT</span>
+                        {{/if}}
+                        {{#if ../supportsActivities}}
+                        {{#if hasActivity}}
+                        <span class="bbc-activity-pill" title="Activity: {{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
+                        {{/if}}
+                        {{/if}}
+                    </div>
+                    {{#if isLocal}}
+                    <div class="bbc-card-meta">
+                        <span class="bbc-type-badge local" title="Local Only (Session Scope)">Local</span>
+                    </div>
+                    {{/if}}
+                </div>
+                {{/each}}
+            </div>
+
+            {{/if}}
+        </aside>
+
+        <!-- Right Inspector: Comprehensive Configuration Sections -->
+        <main class="bbc-inspector">
+            <!-- Empty state when no item is selected -->
+            <div class="bbc-inspector-empty">
+                <div class="bbc-empty-card">
+                    <i class="fa-solid fa-wand-magic-sparkles bbc-empty-icon"></i>
+                    <h3>Select a Registered Workflow</h3>
+                    <p>Click on any item name in the sidebar to inspect its pre-animation, core animation, and post-animation configuration.</p>
+                </div>
+            </div>
+
+            <!-- Inspector detail panes for each item -->
+            {{#each entries}}
+            <div class="bbc-inspector-detail" data-item-name="{{regKey}}" style="display: none;">
+                <header class="bbc-detail-header">
+                    <div class="bbc-title-left">
+                        <i class="fa-solid fa-crosshairs bbc-detail-icon"></i>
+                        <h2>{{itemName}}</h2>
+                        {{#if ../supportsActivities}}
+                        {{#if hasActivity}}
+                        <span class="bbc-activity-pill" title="Activity: {{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
+                        {{/if}}
+                        {{/if}}
+                    </div>
+                    <div class="bbc-detail-actions edit-only">
+                        {{#unless isDefault}}
+                        <button type="button" class="bbc-delete-single-btn" data-item-name="{{regKey}}" title="Delete Workflow">
+                            <i class="fa-solid fa-trash-can"></i> Remove
+                        </button>
+                        {{/unless}}
+                    </div>
+                </header>
+
+
+                <div class="bbc-sections-scroll">
+                    <!-- Section 1: Pre-Region / Pre-Template Placement -->
+                    <section class="bbc-section-card">
+                        <div class="bbc-section-header">
+                            <div class="bbc-section-title">
+                                <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+                                <i class="fa-solid fa-code bbc-section-icon"></i>
+                                <h3>{{../prePlacementTitle}}</h3>
+                            </div>
+                        </div>
+                        <div class="bbc-section-body">
+                            <p class="bbc-section-desc">Executes custom Javascript code concurrent with {{../docTerm}} placement selection.</p>
+                            <div class="bbc-code-container">
+                                <div class="view-only">
+                                    {{#if concurrentCode}}
+                                    <pre class="bbc-code-preview"><code>{{concurrentCode}}</code></pre>
+                                    {{else}}
+                                    <span class="bbc-pill no">No custom script configured</span>
+                                    {{/if}}
+                                </div>
+                                <div class="edit-only">
+                                    <textarea class="bbc-edit-textarea bbc-code-editor" data-field="concurrentCode" spellcheck="false" placeholder="// Enter Javascript code...&#10;// Available variables: token, actor, item, scope, config, crosshair, canvas, game" rows="5">{{concurrentCode}}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Section 2: Animation Configuration -->
+                    <section class="bbc-section-card">
+                        <div class="bbc-section-header">
+                            <div class="bbc-section-title">
+                                <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+                                <i class="fa-solid fa-film bbc-section-icon"></i>
+                                <h3>Animation Configuration</h3>
+                            </div>
+                        </div>
+                        <div class="bbc-section-body">
+                            <p class="bbc-section-desc">Sequencer crosshair graphic asset and interactive rendering properties.</p>
+                            <table class="bbc-config-table">
+                                <tbody>
+                                    <tr>
+                                        <th>Workflow Enabled</th>
+                                        <td>
+                                            <span class="view-only">
+                                                {{#if enabled}}<span class="bbc-pill yes">Enabled</span>{{else}}<span class="bbc-pill no">Disabled</span>{{/if}}
+                                            </span>
+                                            <label class="bbc-toggle-label edit-only">
+                                                <input type="checkbox" class="bbc-edit-input" data-field="enabled" {{#if enabled}}checked{{/if}} />
+                                                <span>{{#if enabled}}Enabled{{else}}Disabled{{/if}}</span>
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Calling Item Name</th>
+                                        <td>
+                                            {{#if isDefault}}
+                                            <span><code>DEFAULT</code> <span class="bbc-type-badge default" style="margin-left:6px;">Global Fallback</span></span>
+                                            {{else}}
+                                            <span class="view-only"><code>{{itemName}}</code></span>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="itemName" value="{{itemName}}" placeholder="e.g. Longbow" />
+                                            {{/if}}
+                                        </td>
+                                    </tr>
+                                    {{#if ../supportsActivities}}
+                                    {{#unless isDefault}}
+                                    <tr>
+                                        <th>Calling Activity ID / Name (DnD5e)</th>
+                                        <td>
+                                            <span class="view-only">
+                                                {{#if activityDisplay}}<code>{{activityDisplay}}</code>{{else}}<span class="bbc-pill no">All Activities</span>{{/if}}
+                                            </span>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="activityId" value="{{activityId}}" placeholder="e.g. Attack or Activity ID" />
+                                        </td>
+                                    </tr>
+                                    {{/unless}}
+                                    {{/if}}
+                                    <tr>
+                                        <th>Registration Scope</th>
+
+                                        <td>
+                                            <span class="view-only">{{#if isLocal}}<span class="bbc-pill no">Local Only (Session Scope)</span>{{else}}<span class="bbc-pill yes">World Synced (Persisted)</span>{{/if}}</span>
+                                            <label class="bbc-edit-checkbox-label edit-only">
+                                                <input type="checkbox" class="bbc-edit-checkbox" data-field="local" {{#if isLocal}}checked{{/if}} />
+                                                <span>Local Only (Session Scope)</span>
+                                            </label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Circle Sequencer Filepath</th>
+                                        <td>
+                                            <code class="bbc-code-pill view-only">{{circleFile}}</code>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="circleFile" value="{{circleFile}}" placeholder="eskie.crosshair.circle.fantasy_01.white.full" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Cone Sequencer Filepath</th>
+                                        <td>
+                                            <code class="bbc-code-pill view-only">{{coneFile}}</code>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="coneFile" value="{{coneFile}}" placeholder="eskie.crosshair.cone.thin.fantasy_01.white.full" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Ray Sequencer Filepath</th>
+                                        <td>
+                                            <code class="bbc-code-pill view-only">{{rayFile}}</code>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="rayFile" value="{{rayFile}}" placeholder="eskie.crosshair.ray.fantasy_01.white" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Square Sequencer Filepath</th>
+                                        <td>
+                                            <code class="bbc-code-pill view-only">{{squareFile}}</code>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="squareFile" value="{{squareFile}}" placeholder="eskie.crosshair.ray.fantasy_01.white" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Custom Function Handler</th>
+                                        <td>{{#if isCustomFunction}}<span class="bbc-pill yes">Yes (Custom Script)</span>{{else}}<span class="bbc-pill no">No (Declarative Config)</span>{{/if}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Lock to Token (Stick)</th>
+                                        <td>
+                                            <span class="view-only">
+                                                {{#if isStickOn}}<span class="bbc-pill yes">On (Locked to Origin Token)</span>{{/if}}
+                                                {{#if isStickOff}}<span class="bbc-pill no">Off (Free Cursor Placement)</span>{{/if}}
+                                                {{#if isStickDefault}}<span class="bbc-pill neutral">Default (Cone: On, Others: Off)</span>{{/if}}
+                                            </span>
+                                            <select class="bbc-edit-select edit-only" data-field="stickToToken">
+                                                <option value="default" {{#if isStickDefault}}selected{{/if}}>Default (Cone: On, Others: Off)</option>
+                                                <option value="true" {{#if isStickOn}}selected{{/if}}>On (Always Lock to Origin Token)</option>
+                                                <option value="false" {{#if isStickOff}}selected{{/if}}>Off (Always Free Cursor Placement)</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Origin Stretch Line</th>
+                                        <td>
+                                            <span class="view-only bbc-inline-flex-row">{{#if showLine}}<span class="bbc-pill yes">Enabled</span><code class="bbc-code-pill">{{lineFile}}</code>{{else}}<span class="bbc-pill no">Disabled</span>{{/if}}</span>
+                                            <div class="bbc-edit-row edit-only">
+                                                <label class="bbc-edit-checkbox-label">
+                                                    <input type="checkbox" class="bbc-edit-checkbox" data-field="showLine" {{#if showLine}}checked{{/if}} />
+                                                    <span>Show Line</span>
+                                                </label>
+                                                <input type="text" class="bbc-edit-input" data-field="lineFile" value="{{lineFile}}" placeholder="eskie.crosshair.line..." />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="{{#unless hasCustomStyling}}edit-only{{/unless}}">
+                                        <th>Border Styling (Tile Highlight)</th>
+                                        <td>
+                                            <span class="view-only">
+                                                <span class="bbc-color-swatch" data-color="{{borderColor}}"></span>
+                                                <code>{{borderColor}}</code> (Alpha: {{borderAlpha}})
+                                            </span>
+                                            <div class="bbc-edit-color-row edit-only">
+                                                <input type="color" class="bbc-edit-color" data-field="borderColor" value="{{borderColor}}" />
+                                                <label>Alpha: <input type="number" step="0.1" min="0" max="1" class="bbc-edit-input small" data-field="borderAlpha" value="{{borderAlpha}}" /></label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="{{#unless hasCustomStyling}}edit-only{{/unless}}">
+                                        <th>Fill Styling (Tile Highlight)</th>
+                                        <td>
+                                            <span class="view-only">
+                                                <span class="bbc-color-swatch" data-color="{{fillColor}}"></span>
+                                                <code>{{fillColor}}</code> (Alpha: {{fillAlpha}})
+                                            </span>
+                                            <div class="bbc-edit-color-row edit-only">
+                                                <input type="color" class="bbc-edit-color" data-field="fillColor" value="{{fillColor}}" />
+                                                <label>Alpha: <input type="number" step="0.1" min="0" max="1" class="bbc-edit-input small" data-field="fillAlpha" value="{{fillAlpha}}" /></label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="{{#unless icon}}edit-only{{/unless}}">
+                                        <th>Custom Cursor Icon</th>
+                                        <td>
+                                            <span class="view-only"><code class="bbc-code-pill">{{icon}}</code></span>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="icon" value="{{icon}}" placeholder="icons/..." />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </section>
+
+                    <!-- Section 3: Template / Region Placement Configuration -->
+                    <section class="bbc-section-card">
+                        <div class="bbc-section-header">
+                            <div class="bbc-section-title">
+                                <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+                                <i class="fa-solid fa-shapes bbc-section-icon"></i>
+                                <h3>{{../placementSectionTitle}}</h3>
+                            </div>
+                        </div>
+                        <div class="bbc-section-body">
+                            <p class="bbc-section-desc">Configures the fill color, border color, and alpha opacities of the final placed {{../docTerm}} document on the canvas.</p>
+                            <table class="bbc-config-table">
+                                <tbody>
+                                    <tr class="{{#unless hasPlacedStyling}}edit-only{{/unless}}">
+                                        <th>Placed Fill Styling</th>
+                                        <td>
+                                            <span class="view-only">
+                                                <span class="bbc-color-swatch" data-color="{{placedFillColor}}"></span>
+                                                <code>{{placedFillColor}}</code> (Alpha: {{placedFillAlpha}})
+                                            </span>
+                                            <div class="bbc-edit-color-row edit-only">
+                                                <input type="color" class="bbc-edit-color" data-field="placedFillColor" value="{{placedFillColor}}" />
+                                                <label>Alpha: <input type="number" step="0.1" min="0" max="1" class="bbc-edit-input small" data-field="placedFillAlpha" value="{{placedFillAlpha}}" /></label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="{{#unless hasPlacedStyling}}edit-only{{/unless}}">
+                                        <th>Placed Border Styling</th>
+                                        <td>
+                                            <span class="view-only">
+                                                <span class="bbc-color-swatch" data-color="{{placedBorderColor}}"></span>
+                                                <code>{{placedBorderColor}}</code> (Alpha: {{placedBorderAlpha}})
+                                            </span>
+                                            <div class="bbc-edit-color-row edit-only">
+                                                <input type="color" class="bbc-edit-color" data-field="placedBorderColor" value="{{placedBorderColor}}" />
+                                                <label>Alpha: <input type="number" step="0.1" min="0" max="1" class="bbc-edit-input small" data-field="placedBorderAlpha" value="{{placedBorderAlpha}}" /></label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {{#unless hasPlacedStyling}}
+                                    <tr class="view-only">
+                                        <td colspan="2" style="text-align: center; color: #64748b; font-style: italic;">
+                                            Using default Foundry / Game System placement colors (Enable Edit Mode to customize).
+                                        </td>
+                                    </tr>
+                                    {{/unless}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Section 4: Post-Region / Post-Template Placement -->
+                    <section class="bbc-section-card">
+                        <div class="bbc-section-header">
+                            <div class="bbc-section-title">
+                                <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+                                <i class="fa-solid fa-flag-checkered bbc-section-icon"></i>
+                                <h3>{{../postPlacementTitle}}</h3>
+                            </div>
+                        </div>
+                        <div class="bbc-section-body">
+                            <p class="bbc-section-desc">Executes custom Javascript code after final {{../docTerm}} document creation.</p>
+                            <div class="bbc-code-container">
+                                <div class="view-only">
+                                    {{#if postPlacementCode}}
+                                    <pre class="bbc-code-preview"><code>{{postPlacementCode}}</code></pre>
+                                    {{else}}
+                                    <span class="bbc-pill no">No custom post-placement script configured</span>
+                                    {{/if}}
+                                </div>
+                                <div class="edit-only">
+                                    <textarea class="bbc-edit-textarea bbc-code-editor" data-field="postPlacementCode" spellcheck="false" placeholder="// Enter Javascript code...&#10;// Available variables: doc, token, actor, item, scope, config, canvas, game" rows="5">{{postPlacementCode}}</textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+            {{/each}}
+        </main>
+    </div>
+</div>
