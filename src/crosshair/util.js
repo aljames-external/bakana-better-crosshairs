@@ -221,18 +221,15 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     }
 
     const mousePos = canvas?.mousePosition || {};
-    let clickX = crosshair?.target?.x ?? extraArgs.find(a => typeof a?.x === "number")?.x ?? mousePos.x ?? 0;
-    let clickY = crosshair?.target?.y ?? extraArgs.find(a => typeof a?.y === "number")?.y ?? mousePos.y ?? 0;
-
-    let originX = crosshair?.source?.x ?? clickX;
-    let originY = crosshair?.source?.y ?? clickY;
-
-    let x = originX;
-    let y = originY;
+    const clickX = mousePos.x ?? 0;
+    const clickY = mousePos.y ?? 0;
 
     const isRayOrCone = config.type === "ray" || config.type === "cone" || config.t === "ray" || config.t === "cone";
     const isAnchored = (config.stickToToken || config.attachToToken || config.lockToToken) && config.token;
     const isV14 = typeof game !== "undefined" && typeof foundry !== "undefined" && foundry.utils.isNewerVersion(game.version, "14");
+
+    let x = clickX;
+    let y = clickY;
 
     if (isAnchored && config.token) {
         if (!isV14) {
