@@ -47,6 +47,16 @@ export class AutorecMenuApplication extends BaseApplication {
         return {};
     }
 
+    render(force = false, options = {}) {
+        if (typeof force === "object" && force !== null) {
+            options = force;
+            force = options.force ?? false;
+        } else if (typeof force === "boolean") {
+            options = { ...options, force };
+        }
+        return super.render(options);
+    }
+
     async _prepareContext(options) {
         const entries = manager.getAllEntries();
         const isV14 = typeof game !== "undefined" && (game.release?.generation >= 14 || parseInt(game.version) >= 14);
