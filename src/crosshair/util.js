@@ -249,13 +249,19 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     let y = clickY;
 
     if (isAnchored && config.token) {
-        if (!isV14) {
-            const edgePoint = getTokenEdgePoint(config.token, clickX, clickY);
+        if (!isRayOrCone) {
+            // Attached Circle / Square: centered directly on the token center
+            const tok = config.token;
+            x = tok.center?.x ?? (tok.x + (tok.w || 0) / 2);
+            y = tok.center?.y ?? (tok.y + (tok.h || 0) / 2);
+        } else if (!isV14) {
+            // Attached Ray / Cone: continuous perimeter intersection matching Sequencer lockToEdge
+            const edgePoint = getTokenEdgePoint(config.token, clickX, clickY, false);
             x = edgePoint.x;
             y = edgePoint.y;
             if (direction === undefined) direction = edgePoint.direction;
         }
-        log.debug("resolveCrosshairPlacement | Token anchored edge placement ->", { x, y, direction, isV14 });
+        log.debug("resolveCrosshairPlacement | Token anchored placement ->", { x, y, direction, isV14 });
     } else {
         // Detached / free cursor placement: Origin is where the user clicked (clickX, clickY)
         x = clickX;
@@ -301,7 +307,7 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
 /**
  * Calculate point on token boundary edge toward target position along with angle in degrees.
  */
-export function getTokenEdgePoint(tokenInput, targetX, targetY, sticky = true) {
+export function getTokenEdgePoint(tokenInput, targetX, targetY, sticky = false) {
     const token = tokenInput instanceof Token ? tokenInput : (tokenInput?.object instanceof Token ? tokenInput.object : tokenInput);
     const cx = token.center?.x ?? (token.x + (token.w || 0) / 2);
     const cy = token.center?.y ?? (token.y + (token.h || 0) / 2);
