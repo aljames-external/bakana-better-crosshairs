@@ -242,11 +242,8 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
             if (direction === undefined) direction = edgePoint.direction;
         }
         log.debug("resolveCrosshairPlacement | Token anchored edge placement ->", { x, y, direction, isV14 });
-    } else if (isRayOrCone && config.token) {
-        const tok = config.token;
-        x = tok.center?.x ?? (tok.x + (tok.w || 0) / 2) ?? clickX;
-        y = tok.center?.y ?? (tok.y + (tok.h || 0) / 2) ?? clickY;
-    } else if (!isRayOrCone) {
+    } else {
+        // Detached / free cursor placement: Origin is where the user clicked (clickX, clickY)
         x = clickX;
         y = clickY;
         const snapMode = config.snapToGrid ?? "corner";
