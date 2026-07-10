@@ -287,10 +287,15 @@ async function handleDrawPreview(placeable) {
     try {
         // 3. Auto-detect template properties and assemble sequence config
         const detected = detectTemplateProperties(placeable);
+        const item = doc.item || entry.item;
+        const actor = token?.actor || item?.actor;
         const autoConfig = {
             ...detected,
             context,
-            icon: doc.item?.img || doc.flags?.['midi-qol']?.itemImg
+            icon: doc.item?.img || doc.flags?.['midi-qol']?.itemImg,
+            item,
+            actor,
+            scope: { item, actor, token, doc }
         };
         log.debug(`handleDrawPreview | Auto-detected sequence config for "${entry.itemName}":`, autoConfig);
 
@@ -443,6 +448,44 @@ function handlePreCreate(doc, data, options, userId) {
     return false;
 }
 
+/**
+ * Handle document post-creation hook (v13 createMeasuredTemplate / v14 createRegion).
+ * Executes user-configured post-placement Javascript inside a try/catch block with standard context variables.
+ */
+async function handleCreateDocument(doc, options, userId) {
+    if (typeof game !== "undefined" && userId !== game.user?.id) return;
+
+    const entry = getRegisteredEntry(doc);
+    const flagsConfig = doc.flags?.bbc;
+    const config = (entry?.handler && typeof entry.handler === "object" ? entry.handler : (flagsConfig || {}));
+
+    const code = config.postPlacementCode || config.postCode || config.postRegionCode || config.postTemplateCode;
+    if (!code || typeof code !== "string" || !code.trim()) return;
+
+    const token = canvas.tokens?.controlled?.[0] || undefined;
+    const item = config.item || doc.item;
+    const actor = token?.actor || item?.actor || config.actor;
+    const scope = { doc, token, actor, item, config };
+
+    try {
+        const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+        const fn = new AsyncFunction(
+            "doc",
+            "token",
+            "actor",
+            "item",
+            "scope",
+            "config",
+            "canvas",
+            "game",
+            code
+        );
+        await fn(doc, token, actor, item, scope, config, canvas, game);
+    } catch (e) {
+        log.error(`Error executing post-placement script for ${doc.documentName}:`, e);
+    }
+}
+
 function initializeReadySync() {
     if (readySyncInitialized) return;
     readySyncInitialized = true;
@@ -487,12 +530,14 @@ function initializeHooks() {
     // Core MeasuredTemplate placement hooks (v13 and v14)
     Hooks.on("drawMeasuredTemplate", (template) => handleDrawPreview(template));
     Hooks.on("preCreateMeasuredTemplate", (doc, data, options, userId) => handlePreCreate(doc, data, options, userId));
+    Hooks.on("createMeasuredTemplate", (doc, options, userId) => handleCreateDocument(doc, options, userId));
 
     const isV14 = typeof game !== "undefined" && typeof foundry !== "undefined" && foundry.utils.isNewerVersion(game.version, "14");
     if (isV14) {
         log.debug("initializeHooks | Foundry v14+ detected, also registering Region hooks.");
         Hooks.on("drawRegion", (region) => handleDrawPreview(region));
         Hooks.on("preCreateRegion", (doc, data, options, userId) => handlePreCreate(doc, data, options, userId));
+        Hooks.on("createRegion", (doc, options, userId) => handleCreateDocument(doc, options, userId));
     }
 
     if (typeof game !== "undefined" && game.ready) {
@@ -762,12 +807,17 @@ function getAllEntries() {
             config.templateBorderAlpha !== undefined
         );
 
+        const concurrentCode = config.concurrentCode || config.preAnimationCode || config.customCode || "";
+        const postPlacementCode = config.postPlacementCode || config.postCode || config.postRegionCode || config.postTemplateCode || "";
+
         const knownKeys = new Set([
             "type", "local", "file", "animationFile", "distance", "radius", "length", "width", "angle",
             "stickToToken", "attachToToken", "lockToToken", "showLine", "lineFile",
             "borderColor", "borderAlpha", "fillColor", "fillAlpha", "icon",
             "placedFillColor", "placedFillAlpha", "placedBorderColor", "placedBorderAlpha",
-            "templateFillColor", "templateFillAlpha", "templateBorderColor", "templateBorderAlpha"
+            "templateFillColor", "templateFillAlpha", "templateBorderColor", "templateBorderAlpha",
+            "concurrentCode", "preAnimationCode", "customCode",
+            "postPlacementCode", "postCode", "postRegionCode", "postTemplateCode"
         ]);
 
         const configEntries = [];
@@ -814,6 +864,8 @@ function getAllEntries() {
             placedBorderColor,
             placedBorderAlpha,
             hasPlacedStyling,
+            concurrentCode,
+            postPlacementCode,
             icon,
             configEntries,
         });

@@ -79,18 +79,38 @@
                 </header>
 
                 <div class="bbc-sections-scroll">
-                    <!-- Section 1: Pre-Animation Configuration -->
+                    <!-- Section 1: Pre-Region / Pre-Template Placement -->
                     <section class="bbc-section-card">
                         <div class="bbc-section-header">
                             <div class="bbc-section-title">
                                 <i class="fa-solid fa-chevron-down bbc-chevron"></i>
-                                <i class="fa-solid fa-play bbc-section-icon"></i>
-                                <h3>Pre-Animation Configuration</h3>
+                                <i class="fa-solid fa-code bbc-section-icon"></i>
+                                <h3>{{../prePlacementTitle}}</h3>
                             </div>
-                            <span class="bbc-section-tag ready">Extensible Hook</span>
+                            <span class="bbc-section-tag ready">Javascript Hook</span>
                         </div>
                         <div class="bbc-section-body">
-                            <p class="bbc-section-desc">Automatic preview interception (`preCreate` hook) and active token detection (`stickToToken` origin).</p>
+                            <p class="bbc-section-desc">Executes custom Javascript code concurrently before running the Sequencer <code>.play()</code> cursor animation.</p>
+                            <table class="bbc-config-table">
+                                <tbody>
+                                    <tr>
+                                        <th>Pre-Placement Script</th>
+                                        <td>
+                                            <div class="view-only">
+                                                {{#if concurrentCode}}
+                                                <pre class="bbc-code-preview"><code>{{concurrentCode}}</code></pre>
+                                                {{else}}
+                                                <span class="bbc-pill no">No custom script configured</span>
+                                                {{/if}}
+                                            </div>
+                                            <div class="edit-only">
+                                                <textarea class="bbc-edit-textarea" data-field="concurrentCode" placeholder="// Enter Javascript code to run before .play()&#10;// Available variables: token, actor, item, scope, config, crosshair, canvas, game" rows="4">{{concurrentCode}}</textarea>
+                                                <p class="bbc-hint-text small">Wrapped in <code>try { ... } catch(e) { log.error(e); }</code> before <code>.play()</code>.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </section>
 
@@ -317,18 +337,38 @@
                         </div>
                     </section>
 
-                    <!-- Section 4: Post-Animation Configuration -->
+                    <!-- Section 4: Post-Region / Post-Template Placement -->
                     <section class="bbc-section-card">
                         <div class="bbc-section-header">
                             <div class="bbc-section-title">
                                 <i class="fa-solid fa-chevron-down bbc-chevron"></i>
                                 <i class="fa-solid fa-flag-checkered bbc-section-icon"></i>
-                                <h3>Post-Animation Configuration</h3>
+                                <h3>{{../postPlacementTitle}}</h3>
                             </div>
-                            <span class="bbc-section-tag ready">Workflow Resume</span>
+                            <span class="bbc-section-tag ready">{{../placementSectionTag}}</span>
                         </div>
                         <div class="bbc-section-body">
-                            <p class="bbc-section-desc">Automatic placement resolution (`CALLBACKS.PLACED`), shape injection, and effect cleanup (`CALLBACKS.CANCEL`).</p>
+                            <p class="bbc-section-desc">Executes custom Javascript code after the final region or template document has been created on the canvas (called from document creation hook).</p>
+                            <table class="bbc-config-table">
+                                <tbody>
+                                    <tr>
+                                        <th>Post-Placement Script</th>
+                                        <td>
+                                            <div class="view-only">
+                                                {{#if postPlacementCode}}
+                                                <pre class="bbc-code-preview"><code>{{postPlacementCode}}</code></pre>
+                                                {{else}}
+                                                <span class="bbc-pill no">No custom post-placement script configured</span>
+                                                {{/if}}
+                                            </div>
+                                            <div class="edit-only">
+                                                <textarea class="bbc-edit-textarea" data-field="postPlacementCode" placeholder="// Enter Javascript code to run after region/template creation...&#10;// Available variables: doc, token, actor, item, scope, config, canvas, game" rows="4">{{postPlacementCode}}</textarea>
+                                                <p class="bbc-hint-text small">Wrapped in <code>try { ... } catch(e) { log.error(e); }</code> from document creation hook.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </section>
                 </div>

@@ -660,3 +660,40 @@
     cursor: pointer;
     flex-shrink: 0;
 }
+
+/* --- Code Block & Script Hook Editors --- */
+.bbc-code-preview {
+    background: rgba(13, 16, 23, 0.85);
+    border: 1px solid rgba(99, 102, 241, 0.28);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    color: #e2e8f0;
+    line-height: 1.45;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 0;
+}
+
+.bbc-edit-textarea {
+    width: 100%;
+    min-height: 96px;
+    background: rgba(15, 18, 28, 0.85);
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    color: #f8fafc;
+    resize: vertical;
+    outline: none;
+    line-height: 1.45;
+    transition: border-color 0.2s ease;
+}
+
+.bbc-edit-textarea:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+}

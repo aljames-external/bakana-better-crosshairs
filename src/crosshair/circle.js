@@ -1,5 +1,5 @@
 import { closest } from "../lib/filemanager.js";
-import { resolveCrosshairPlacement } from "./util.js";
+import { resolveCrosshairPlacement, runConcurrentScript } from "./util.js";
 
 function resolveCircleAsset(pathOrKey, effectSize) {
     const cleanSize = Math.round(effectSize);
@@ -93,7 +93,10 @@ async function create(token, config = {}) {
 
 async function play(token, config = {}) {
     let [circle] = await create(token, config);
-    return circle.play();
+    return Promise.all([
+        runConcurrentScript(token, config, circle),
+        circle.play()
+    ]);
 }
 
 async function stop(token, { id = `Circle Crosshair` } = {}) {

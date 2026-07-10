@@ -60,7 +60,9 @@ export class AutorecMenuApplication extends BaseApplication {
     async _prepareContext(options) {
         const entries = manager.getAllEntries();
         const isV14 = typeof game !== "undefined" && (game.release?.generation >= 14 || parseInt(game.version) >= 14);
+        const prePlacementTitle = isV14 ? "Pre-Region Placement" : "Pre-Template Placement";
         const placementSectionTitle = isV14 ? "Region Placement Configuration" : "Template Placement Configuration";
+        const postPlacementTitle = isV14 ? "Post-Region Placement" : "Post-Template Placement";
         const placementSectionTag = isV14 ? "V14+ Region" : "V13- MeasuredTemplate";
 
         return {
@@ -69,7 +71,9 @@ export class AutorecMenuApplication extends BaseApplication {
             isEmpty: entries.length === 0,
             isGM: typeof game !== "undefined" ? Boolean(game.user?.isGM) : true,
             isV14,
+            prePlacementTitle,
             placementSectionTitle,
+            postPlacementTitle,
             placementSectionTag,
             menuHint: localize("BBC.autorecMenu.menuHint")
         };

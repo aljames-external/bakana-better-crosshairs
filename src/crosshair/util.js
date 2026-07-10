@@ -376,3 +376,35 @@ export function snapCoordinates(x, y, mode = "all") {
     }
     return { x, y };
 }
+
+const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+
+/**
+ * Execute custom concurrent Javascript code before running the Sequencer .play() sequence.
+ * Wrapped in try/catch block with standard context variables.
+ */
+export async function runConcurrentScript(token, config = {}, crosshairSequence = null) {
+    const code = config.concurrentCode || config.preAnimationCode || config.customCode;
+    if (!code || typeof code !== "string" || !code.trim()) return;
+
+    const actor = token?.actor || config.actor;
+    const item = config.item;
+    const scope = config.scope || { token, actor, item, config };
+
+    try {
+        const fn = new AsyncFunction(
+            "token",
+            "actor",
+            "item",
+            "scope",
+            "config",
+            "crosshair",
+            "canvas",
+            "game",
+            code
+        );
+        await fn(token, actor, item, scope, config, crosshairSequence, canvas, game);
+    } catch (e) {
+        log.error("Error executing concurrent placement script:", e);
+    }
+}

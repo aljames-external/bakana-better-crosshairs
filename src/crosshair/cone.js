@@ -1,5 +1,5 @@
 import { closest } from "../lib/filemanager.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation } from "./util.js";
+import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript } from "./util.js";
 
 async function create(token, config = {}) {
     const {
@@ -75,7 +75,10 @@ async function create(token, config = {}) {
 
 async function play(token, config = {}) {
     let [cone] = await create(token, config);
-    return cone.play();
+    return Promise.all([
+        runConcurrentScript(token, config, cone),
+        cone.play()
+    ]);
 }
 
 async function stop(token, {id = `Cone Crosshair`} = {}) {

@@ -1,5 +1,5 @@
 import { closest } from "../lib/filemanager.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation } from "./util.js";
+import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript } from "./util.js";
 
 async function create(token, config = {}) {
     const distance = config.distance ?? config.length ?? config.radius ?? 30;
@@ -81,7 +81,10 @@ async function create(token, config = {}) {
 
 async function play(token, config = {}) {
     let [ray] = await create(token, config);
-    return ray.play();
+    return Promise.all([
+        runConcurrentScript(token, config, ray),
+        ray.play()
+    ]);
 }
 
 async function stop(token, { id = `Ray Crosshair` } = {}) {
