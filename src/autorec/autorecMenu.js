@@ -19,8 +19,8 @@ export class AutorecMenuApplication extends BaseApplication {
             resizable: true
         },
         position: {
-            width: 780,
-            height: 580
+            width: 860,
+            height: 640
         },
         classes: ["bbc-app", "bbc-autorec-form"]
     };
@@ -38,8 +38,8 @@ export class AutorecMenuApplication extends BaseApplication {
                 title: "BBC.autorecMenu.title",
                 template: `modules/${MODULE_ID}/src/autorec/autorecMenu.html`,
                 classes: ["bbc-app", "bbc-autorec-form"],
-                width: 780,
-                height: 580,
+                width: 860,
+                height: 640,
                 resizable: true,
                 closeOnSubmit: false
             });
