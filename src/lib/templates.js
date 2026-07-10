@@ -1,10 +1,13 @@
+import { MODULE_ID } from './constants.js';
 import { log } from './logger.js';
 import { crosshair } from '../crosshair/_crosshairs.js';
 
 const registeredHandlers = new Map();
 const fastLookupMap = new Map();
 const pendingPlacements = new Map();
+const persistedItemNames = new Set();
 let hooksInitialized = false;
+let readySyncInitialized = false;
 
 /**
  * Resolve the parent Item and Activity (if present) from a template/region target.
@@ -412,6 +415,33 @@ function handlePreCreate(doc, data, options, userId) {
     return false;
 }
 
+function initializeReadySync() {
+    if (readySyncInitialized) return;
+    readySyncInitialized = true;
+
+    if (typeof game !== "undefined" && game.socket) {
+        game.socket.on(`module.${MODULE_ID}`, (data) => {
+            if (!data || typeof data !== "object") return;
+            if (data.type === "REGISTER_TEMPLATE") {
+                if (game.user?.isGM) {
+                    register(data.itemName, data.config, { persist: true });
+                }
+            } else if (data.type === "UNREGISTER_TEMPLATE") {
+                if (game.user?.isGM) {
+                    unregister(data.itemName, { persist: true });
+                }
+            }
+        });
+    }
+
+    try {
+        const saved = game.settings?.get(MODULE_ID, "registeredTemplates");
+        if (saved) loadSavedRegistrations(saved);
+    } catch (e) {
+        log.warn("Failed to load saved registeredTemplates setting", e);
+    }
+}
+
 function initializeHooks() {
     if (hooksInitialized) return;
     hooksInitialized = true;
@@ -426,6 +456,89 @@ function initializeHooks() {
         Hooks.on("drawRegion", (region) => handleDrawPreview(region));
         Hooks.on("preCreateRegion", (doc, data, options, userId) => handlePreCreate(doc, data, options, userId));
     }
+
+    if (typeof game !== "undefined" && game.ready) {
+        initializeReadySync();
+    } else if (typeof Hooks !== "undefined" && Hooks.once) {
+        Hooks.once("ready", initializeReadySync);
+    }
+}
+
+function persistRegistration(itemName, config) {
+    if (typeof game === "undefined") return;
+    if (!game.ready) {
+        Hooks.once("ready", () => persistRegistration(itemName, config));
+        return;
+    }
+
+    if (game.user?.isGM) {
+        try {
+            const saved = foundry.utils.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") || {});
+            saved[itemName] = config;
+            game.settings.set(MODULE_ID, "registeredTemplates", saved);
+            persistedItemNames.add(itemName);
+        } catch (e) {
+            log.warn(`Failed to persist registered template setting for: ${itemName}`, e);
+        }
+    } else if (game.socket) {
+        game.socket.emit(`module.${MODULE_ID}`, {
+            type: "REGISTER_TEMPLATE",
+            itemName,
+            config
+        });
+    }
+}
+
+function persistUnregistration(itemName) {
+    if (typeof game === "undefined") return;
+    if (!game.ready) {
+        Hooks.once("ready", () => persistUnregistration(itemName));
+        return;
+    }
+
+    if (game.user?.isGM) {
+        try {
+            const saved = foundry.utils.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") || {});
+            if (itemName in saved) {
+                delete saved[itemName];
+                game.settings.set(MODULE_ID, "registeredTemplates", saved);
+                persistedItemNames.delete(itemName);
+            }
+        } catch (e) {
+            log.warn(`Failed to unpersist template setting for: ${itemName}`, e);
+        }
+    } else if (game.socket) {
+        game.socket.emit(`module.${MODULE_ID}`, {
+            type: "UNREGISTER_TEMPLATE",
+            itemName
+        });
+    }
+}
+
+function loadSavedRegistrations(savedRegistrations = {}) {
+    if (!savedRegistrations || typeof savedRegistrations !== "object") {
+        savedRegistrations = {};
+    }
+
+    for (const itemName of Array.from(persistedItemNames)) {
+        if (!(itemName in savedRegistrations)) {
+            const current = registeredHandlers.get(itemName);
+            const isCurrentLocal = typeof current === "object" && current !== null && current.local === true;
+            if (!isCurrentLocal) {
+                unregister(itemName, { persist: false });
+            }
+            persistedItemNames.delete(itemName);
+        }
+    }
+
+    for (const [itemName, config] of Object.entries(savedRegistrations)) {
+        const current = registeredHandlers.get(itemName);
+        const isCurrentLocal = typeof current === "object" && current !== null && current.local === true;
+        if (!isCurrentLocal) {
+            register(itemName, config, { persist: false });
+            persistedItemNames.add(itemName);
+        }
+    }
 }
 
 /**
@@ -433,34 +546,54 @@ function initializeHooks() {
  * Turning off any previous registration for that item name and registering the new one.
  *
  * @param {string} itemName - Name of the item/spell (e.g., 'Fireball')
- * @param {Function|Object|string} [handlerOrConfig={}] - Optional string file path, config object (e.g. { file: '...' }), or custom async function(token, autoConfig)
+ * @param {Function|Object|string} [handlerOrConfig={}] - Optional string file path, config object (e.g. { file: '...', local: true }), or custom async function(token, autoConfig)
+ * @param {Object} [options={}]
+ * @param {boolean} [options.persist=true] - Whether to persist registration to world settings across reboots/clients
+ * @param {boolean} [options.local=false] - Whether this registration should only exist locally on this client and not persist or sync
  */
-function register(itemName, handlerOrConfig = {}) {
+function register(itemName, handlerOrConfig = {}, { persist = true, local = false } = {}) {
     initializeHooks();
     if (typeof handlerOrConfig === "string") {
         handlerOrConfig = { file: handlerOrConfig };
     }
+    const isLocal = local || (typeof handlerOrConfig === "object" && handlerOrConfig !== null && handlerOrConfig.local === true);
+
     if (registeredHandlers.has(itemName)) {
-        log.info(`Re-registering template sequence for item: ${itemName}`);
+        log.info(`Re-registering template sequence for item: ${itemName}${isLocal ? " (local only)" : ""}`);
     } else {
-        log.info(`Registering template sequence for item: ${itemName}`);
+        log.info(`Registering template sequence for item: ${itemName}${isLocal ? " (local only)" : ""}`);
     }
     registeredHandlers.set(itemName, handlerOrConfig);
     indexRegistration(itemName, handlerOrConfig);
+
+    if (isLocal) {
+        if (persistedItemNames.has(itemName)) {
+            persistUnregistration(itemName);
+        }
+    } else if (persist && typeof handlerOrConfig !== "function") {
+        persistRegistration(itemName, handlerOrConfig);
+    }
 }
 
 /**
  * Unregister a template placement handler for an item.
  *
  * @param {string} itemName - Name of the item/spell
+ * @param {Object} [options={}]
+ * @param {boolean} [options.persist=true] - Whether to remove registration from world settings across reboots/clients
+ * @param {boolean} [options.local=false] - If true, only unregister locally
  */
-function unregister(itemName) {
-    if (registeredHandlers.delete(itemName)) {
+function unregister(itemName, { persist = true, local = false } = {}) {
+    const deleted = registeredHandlers.delete(itemName);
+    const wasPersisted = persistedItemNames.has(itemName);
+    if (deleted) {
         rebuildFastLookupMap();
         log.info(`Unregistered template sequence for item: ${itemName}`);
-        return true;
     }
-    return false;
+    if (persist && !local && wasPersisted && typeof itemName === "string") {
+        persistUnregistration(itemName);
+    }
+    return deleted;
 }
 
 async function getPosition(template, config = {}) {
@@ -547,13 +680,58 @@ function getAllEntries() {
             file = handlerOrConfig.file || handlerOrConfig.animationFile || "";
         }
 
+        let isLocal = !persistedItemNames.has(itemName);
+        if (typeof handlerOrConfig === "object" && handlerOrConfig !== null && handlerOrConfig.local === true) {
+            isLocal = true;
+        }
+
+        const typeKey = type.toLowerCase();
+        const distVal = config.distance ?? config.radius ?? config.length;
+        const distanceDisplay = distVal !== undefined ? `${distVal} ft` : null;
+        const widthVal = config.width;
+        const widthDisplay = widthVal !== undefined ? `${widthVal} ft` : null;
+        const angleVal = config.angle;
+        const angleDisplay = angleVal !== undefined ? `${angleVal}°` : null;
+        const stickToToken = Boolean(config.stickToToken ?? config.attachToToken ?? config.lockToToken ?? (typeKey === "cone"));
+        const showLine = config.showLine !== false;
+        const lineFile = config.lineFile || "eskie.crosshair.line.generic_01.white";
+        const borderColor = config.borderColor || "#ffffff";
+        const borderAlpha = config.borderAlpha !== undefined ? config.borderAlpha : 0;
+        const fillColor = config.fillColor || "#000000";
+        const fillAlpha = config.fillAlpha !== undefined ? config.fillAlpha : 0.1;
+        const icon = config.icon || null;
+
+        const configEntries = [];
+        if (config && typeof config === "object") {
+            for (const [k, v] of Object.entries(config)) {
+                if (typeof v === "function") continue;
+                configEntries.push({
+                    key: k,
+                    value: typeof v === "object" ? JSON.stringify(v) : String(v)
+                });
+            }
+        }
+
         results.push({
             itemName,
             type: type.charAt(0).toUpperCase() + type.slice(1),
-            typeKey: type.toLowerCase(),
+            typeKey,
             file: file || "Default Sequencer Asset",
             isCustomFunction,
+            isLocal,
             config,
+            distanceDisplay,
+            widthDisplay,
+            angleDisplay,
+            stickToToken,
+            showLine,
+            lineFile,
+            borderColor,
+            borderAlpha,
+            fillColor,
+            fillAlpha,
+            icon,
+            configEntries,
         });
     }
     return results.sort((a, b) => a.itemName.localeCompare(b.itemName));
@@ -567,7 +745,6 @@ export const manager = {
     get,
     list,
     getAllEntries,
+    loadSavedRegistrations,
+    initializeReadySync,
 };
-
-export const template = manager;
-export const templates = manager;

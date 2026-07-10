@@ -1,5 +1,6 @@
 import { MODULE_ID } from "./lib/constants.js";
 import { log } from './lib/logger.js';
+import { manager } from './lib/templates.js';
 import { AutorecMenuApplication } from "./autorec/autorecMenu.js";
 
 Hooks.once('init', function() {
@@ -12,6 +13,17 @@ Hooks.once('init', function() {
         icon: 'fa-solid fa-wand-magic-sparkles',
         type: AutorecMenuApplication,
         restricted: false
+    });
+
+    game.settings.register(MODULE_ID, 'registeredTemplates', {
+        name: 'Registered Templates',
+        scope: 'world',
+        config: false,
+        type: Object,
+        default: {},
+        onChange: (savedRegistrations) => {
+            manager.loadSavedRegistrations(savedRegistrations);
+        }
     });
 
     game.settings.register(MODULE_ID, 'logVerbosity', {

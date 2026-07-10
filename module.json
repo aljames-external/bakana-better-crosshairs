@@ -30,6 +30,7 @@
     "manifest": "#{MANIFEST}#",
     "download": "#{DOWNLOAD}#",
     "license": "LICENSE",
+    "socket": true,
     "relationships": {
         "requires": [
             {
