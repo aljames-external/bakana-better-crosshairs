@@ -880,42 +880,29 @@ function getAllEntries() {
 export function highlightJavascript(code) {
     if (!code || typeof code !== "string") return "";
 
-    // 1. Delegate to Prism.js if loaded in the current Foundry or browser context
+    // 1. Delegate to Prism.js if loaded
     if (typeof window !== "undefined" && window.Prism?.highlight && window.Prism?.languages?.javascript) {
         try {
             return window.Prism.highlight(code, window.Prism.languages.javascript, "javascript");
         } catch (e) {
-            log.debug("Prism highlight failed, falling back to built-in tokenizer", e);
+            log.debug("Prism highlight failed", e);
         }
     }
 
-    // 2. Delegate to highlight.js (hljs) if loaded in the current Foundry context
+    // 2. Delegate to highlight.js (hljs) if loaded
     if (typeof window !== "undefined" && window.hljs?.highlight) {
         try {
             return window.hljs.highlight(code, { language: "javascript" }).value;
         } catch (e) {
-            log.debug("hljs highlight failed, falling back to built-in tokenizer", e);
+            log.debug("hljs highlight failed", e);
         }
     }
 
-    // 3. Built-in zero-dependency tokenizer fallback
-    let escaped = code
+    // No custom regex highlighting - return plain HTML-escaped text
+    return code
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
-
-    escaped = escaped.replace(/(^|\s)(\/\/.*$)/gm, '$1<span class="bbc-syn-comment">$2</span>');
-    escaped = escaped.replace(/(["'`])((?:\\.|[^\\])*?)\1/g, '<span class="bbc-syn-string">$1$2$1</span>');
-
-    const keywords = /\b(const|let|var|function|async|await|return|if|else|try|catch|for|while|new|true|false|null|undefined|class|import|export)\b/g;
-    escaped = escaped.replace(keywords, '<span class="bbc-syn-keyword">$1</span>');
-
-    const builtins = /\b(token|actor|item|scope|config|crosshair|canvas|game|doc|console|log|ui|Hooks|Sequencer|Promise|Math|Object|Array)\b/g;
-    escaped = escaped.replace(builtins, '<span class="bbc-syn-builtin">$1</span>');
-
-    escaped = escaped.replace(/\b(\d+(\.\d+)?)\b/g, '<span class="bbc-syn-number">$1</span>');
-
-    return escaped;
 }
 
 function broadcastSync() {
