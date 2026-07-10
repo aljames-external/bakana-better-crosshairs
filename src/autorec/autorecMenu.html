@@ -87,10 +87,9 @@
                                 <i class="fa-solid fa-code bbc-section-icon"></i>
                                 <h3>{{../prePlacementTitle}}</h3>
                             </div>
-                            <span class="bbc-section-tag ready">Javascript Hook</span>
                         </div>
                         <div class="bbc-section-body">
-                            <p class="bbc-section-desc">Executes custom Javascript code concurrent with region or template placement selection.</p>
+                            <p class="bbc-section-desc">Executes custom Javascript code concurrent with {{../docTerm}} placement selection.</p>
                             <div class="bbc-code-container">
                                 <div class="view-only">
                                     {{#if concurrentCode}}
@@ -114,7 +113,6 @@
                                 <i class="fa-solid fa-film bbc-section-icon"></i>
                                 <h3>Animation Configuration</h3>
                             </div>
-                            <span class="bbc-section-tag active">{{type}}</span>
                         </div>
                         <div class="bbc-section-body">
                             <p class="bbc-section-desc">Sequencer crosshair graphic asset and interactive rendering properties.</p>
@@ -285,10 +283,9 @@
                                 <i class="fa-solid fa-shapes bbc-section-icon"></i>
                                 <h3>{{../placementSectionTitle}}</h3>
                             </div>
-                            <span class="bbc-section-tag ready">{{../placementSectionTag}}</span>
                         </div>
                         <div class="bbc-section-body">
-                            <p class="bbc-section-desc">Configures the fill color, border color, and alpha opacities of the final placed document on the canvas.</p>
+                            <p class="bbc-section-desc">Configures the fill color, border color, and alpha opacities of the final placed {{../docTerm}} document on the canvas.</p>
                             <table class="bbc-config-table">
                                 <tbody>
                                     <tr class="{{#unless hasPlacedStyling}}edit-only{{/unless}}">
@@ -337,10 +334,9 @@
                                 <i class="fa-solid fa-flag-checkered bbc-section-icon"></i>
                                 <h3>{{../postPlacementTitle}}</h3>
                             </div>
-                            <span class="bbc-section-tag ready">{{../placementSectionTag}}</span>
                         </div>
                         <div class="bbc-section-body">
-                            <p class="bbc-section-desc">Executes custom Javascript code after final region or template document creation.</p>
+                            <p class="bbc-section-desc">Executes custom Javascript code after final {{../docTerm}} document creation.</p>
                             <div class="bbc-code-container">
                                 <div class="view-only">
                                     {{#if postPlacementCode}}

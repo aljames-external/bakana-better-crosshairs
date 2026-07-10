@@ -64,6 +64,7 @@ export class AutorecMenuApplication extends BaseApplication {
         const placementSectionTitle = isV14 ? "Region Placement Configuration" : "Template Placement Configuration";
         const postPlacementTitle = isV14 ? "Post-Region Placement" : "Post-Template Placement";
         const placementSectionTag = isV14 ? "V14+ Region" : "V13- MeasuredTemplate";
+        const docTerm = isV14 ? "region" : "template";
 
         return {
             entries,
@@ -75,6 +76,7 @@ export class AutorecMenuApplication extends BaseApplication {
             placementSectionTitle,
             postPlacementTitle,
             placementSectionTag,
+            docTerm,
             menuHint: localize("BBC.autorecMenu.menuHint")
         };
     }
