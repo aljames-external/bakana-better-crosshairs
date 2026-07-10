@@ -44,7 +44,7 @@ async function handleDrawPreview(placeable) {
         return;
     }
 
-    const entry = autorecManager.getRegisteredEntry(placeable);
+    const entry = autorecManager.getRegisteredEntry(doc);
     if (!entry) {
         log.debug(`handleDrawPreview | No registered handler matched for preview.`);
         return;

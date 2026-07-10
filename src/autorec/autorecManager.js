@@ -143,9 +143,10 @@ export class AutorecManager {
     getRegisteredEntry(target) {
         if (!target) return null;
         if (typeof target === "string") {
-            return this.fastLookupMap.get(target) || this.fastLookupMap.get(target.toLowerCase()) || null;
+            return this.fastLookupMap.get(target) ?? this.fastLookupMap.get(target.toLowerCase()) ?? null;
         }
-        return crosshairAdapter.matchAutorecEntry(target, this.registeredHandlers, this);
+        const doc = target instanceof foundry.abstract.Document ? target : target.document;
+        return crosshairAdapter.matchAutorecEntry(doc, this.registeredHandlers);
     }
 
 
