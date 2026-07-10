@@ -255,10 +255,12 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
             x = tok.center?.x ?? (tok.x + (tok.w || 0) / 2);
             y = tok.center?.y ?? (tok.y + (tok.h || 0) / 2);
         } else if (!isV14) {
-            // Attached Ray / Cone: continuous perimeter intersection matching Sequencer lockToEdge
+            // Attached Ray / Cone: continuous perimeter intersection snapped to nearest grid vertex (corner)
+            // matching Sequencer's lockToEdge vertex steps on multi-grid tokens (1x1, 2x2, 4x4)
             const edgePoint = getTokenEdgePoint(config.token, clickX, clickY, false);
-            x = edgePoint.x;
-            y = edgePoint.y;
+            const snappedEdge = snapCoordinates(edgePoint.x, edgePoint.y, "corner");
+            x = snappedEdge.x;
+            y = snappedEdge.y;
             if (direction === undefined) direction = edgePoint.direction;
         }
         log.debug("resolveCrosshairPlacement | Token anchored placement ->", { x, y, direction, isV14 });
