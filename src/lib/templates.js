@@ -889,28 +889,6 @@ function getAllEntries() {
 
         const concurrentCode = config.concurrentCode || config.preAnimationCode || config.customCode || "";
         const postPlacementCode = config.postPlacementCode || config.postCode || config.postRegionCode || config.postTemplateCode || "";
-
-        const knownKeys = new Set([
-            "type", "local", "file", "animationFile", "circleFile", "coneFile", "rayFile", "squareFile", "rectFile", "distance", "radius", "length", "width", "angle",
-            "stickToToken", "attachToToken", "lockToToken", "showLine", "lineFile",
-            "borderColor", "borderAlpha", "fillColor", "fillAlpha", "icon",
-            "placedFillColor", "placedFillAlpha", "placedBorderColor", "placedBorderAlpha",
-            "templateFillColor", "templateFillAlpha", "templateBorderColor", "templateBorderAlpha",
-            "concurrentCode", "preAnimationCode", "customCode",
-            "postPlacementCode", "postCode", "postRegionCode", "postTemplateCode"
-        ]);
-
-        const configEntries = [];
-        if (config && typeof config === "object") {
-            for (const [k, v] of Object.entries(config)) {
-                if (typeof v === "function" || knownKeys.has(k)) continue;
-                configEntries.push({
-                    key: k,
-                    value: typeof v === "object" ? JSON.stringify(v) : String(v)
-                });
-            }
-        }
-
         results.push({
             itemName,
             type: "Auto-Detect",
@@ -943,7 +921,6 @@ function getAllEntries() {
             concurrentCode,
             postPlacementCode,
             icon,
-            configEntries,
         });
     }
     return results.sort((a, b) => a.itemName.localeCompare(b.itemName));

@@ -264,65 +264,6 @@ export class AutorecMenuApplication extends BaseApplication {
                 el.style.backgroundColor = el.dataset.color;
             }
         });
-
-        // 6. Remove Custom Property in All Configured Properties
-        root.querySelectorAll(".bbc-remove-config-key-btn").forEach(btn => {
-            btn.addEventListener("click", (ev) => {
-                const key = ev.currentTarget.dataset.configKey;
-                const detailEl = ev.currentTarget.closest(".bbc-inspector-detail");
-                const itemName = detailEl?.dataset.itemName;
-                if (!itemName || !key) return;
-
-                const existingEntry = manager.get(itemName) || {};
-                const config = foundry.utils.deepClone(existingEntry.config || {});
-                delete config[key];
-
-                const persist = !config.local;
-                manager.register(itemName, config, { persist, local: Boolean(config.local) });
-                manager.broadcastSync();
-                ui.notifications?.info(`Removed property "${key}" from workflow "${itemName}".`);
-                this.render(false);
-            });
-        });
-
-        // 7. Add Custom Property in All Configured Properties
-        root.querySelectorAll(".bbc-add-config-key-btn").forEach(btn => {
-            btn.addEventListener("click", (ev) => {
-                const detailEl = ev.currentTarget.closest(".bbc-inspector-detail");
-                const itemName = detailEl?.dataset.itemName;
-                const row = ev.currentTarget.closest(".bbc-add-property-row");
-                const keyInput = row?.querySelector(".bbc-new-config-key");
-                const valInput = row?.querySelector(".bbc-new-config-val");
-
-                const key = keyInput?.value?.trim();
-                const rawVal = valInput?.value;
-                if (!itemName || !key) {
-                    ui.notifications?.warn("Please specify a property key name.");
-                    return;
-                }
-
-                let parsedVal = rawVal;
-                try {
-                    parsedVal = JSON.parse(rawVal);
-                } catch (e) {
-                    parsedVal = rawVal;
-                }
-                if (typeof parsedVal === "string" && /^-?\d+(\.\d+)?$/.test(parsedVal)) {
-                    const n = parseFloat(parsedVal);
-                    if (!isNaN(n)) parsedVal = n;
-                }
-
-                const existingEntry = manager.get(itemName) || {};
-                const config = foundry.utils.deepClone(existingEntry.config || {});
-                config[key] = parsedVal;
-
-                const persist = !config.local;
-                manager.register(itemName, config, { persist, local: Boolean(config.local) });
-                manager.broadcastSync();
-                ui.notifications?.info(`Added property "${key}" to workflow "${itemName}".`);
-                this.render(false);
-            });
-        });
     }
 
     selectItem(root, itemName) {
@@ -380,29 +321,6 @@ export class AutorecMenuApplication extends BaseApplication {
                 if (config[field] !== val) {
                     if (val === undefined) delete config[field];
                     else config[field] = val;
-                    modified = true;
-                }
-            });
-
-            // Arbitrary custom properties [data-config-key]
-            detailEl.querySelectorAll("[data-config-key]").forEach(inputEl => {
-                const key = inputEl.dataset.configKey;
-                if (!key) return;
-
-                const rawVal = inputEl.value;
-                let parsedVal = rawVal;
-                try {
-                    parsedVal = JSON.parse(rawVal);
-                } catch (e) {
-                    parsedVal = rawVal;
-                }
-                if (typeof parsedVal === "string" && /^-?\d+(\.\d+)?$/.test(parsedVal)) {
-                    const n = parseFloat(parsedVal);
-                    if (!isNaN(n)) parsedVal = n;
-                }
-
-                if (config[key] !== parsedVal) {
-                    config[key] = parsedVal;
                     modified = true;
                 }
             });

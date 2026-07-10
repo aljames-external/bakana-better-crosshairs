@@ -244,47 +244,6 @@
                                 </tbody>
                             </table>
 
-                            <div class="bbc-config-entries-wrapper {{#unless configEntries.length}}edit-only{{/unless}}">
-                                <h4 class="bbc-config-subheading"><i class="fa-solid fa-sliders"></i> All Configured Properties</h4>
-                                <table class="bbc-config-table bbc-config-entries-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Configuration Key</th>
-                                            <th>Configured Value</th>
-                                            <th class="edit-only" style="width: 55px; text-align: center;">Remove</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {{#each configEntries}}
-                                        <tr>
-                                            <td><code>{{key}}</code></td>
-                                            <td>
-                                                <span class="view-only"><code class="bbc-code-pill">{{value}}</code></span>
-                                                <input type="text" class="bbc-edit-input edit-only" data-config-key="{{key}}" value="{{value}}" placeholder="Value..." />
-                                            </td>
-                                            <td class="edit-only" style="text-align: center;">
-                                                <button type="button" class="bbc-remove-config-key-btn" data-config-key="{{key}}" title="Remove Property">
-                                                    <i class="fa-solid fa-trash-can"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        {{/each}}
-                                        <tr class="bbc-add-property-row edit-only">
-                                            <td>
-                                                <input type="text" class="bbc-edit-input bbc-new-config-key" placeholder="New property key..." />
-                                            </td>
-                                            <td>
-                                                <input type="text" class="bbc-edit-input bbc-new-config-val" placeholder="New property value..." />
-                                            </td>
-                                            <td style="text-align: center;">
-                                                <button type="button" class="bbc-add-config-key-btn" title="Add Property">
-                                                    <i class="fa-solid fa-plus"></i> Add
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
                         </div>
                     </section>
 
