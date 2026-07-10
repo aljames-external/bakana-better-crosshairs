@@ -249,13 +249,17 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     let y = clickY;
 
     if (isAnchored && config.token) {
-        const anchored = crosshairAdapter.resolveAnchoredPlacement(config.token, clickX, clickY, isRayOrCone, direction, {
-            getTokenEdgePoint,
-            snapCoordinates
-        });
-        x = anchored.x;
-        y = anchored.y;
-        if (direction === undefined) direction = anchored.direction;
+        if (!isRayOrCone) {
+            // Attached Circle / Square: centered directly on the token center
+            const tok = config.token;
+            x = tok.center?.x ?? (tok.x + (tok.w || 0) / 2);
+            y = tok.center?.y ?? (tok.y + (tok.h || 0) / 2);
+        } else {
+            const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, { x: clickX, y: clickY });
+            x = anchored.x;
+            y = anchored.y;
+            direction = anchored.direction;
+        }
         log.debug("resolveCrosshairPlacement | Token anchored placement via version adapter ->", { x, y, direction });
     } else {
         // Detached / free cursor placement: Origin is where the user clicked (clickX, clickY)

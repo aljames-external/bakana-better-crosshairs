@@ -92,26 +92,10 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Resolve placement origin coordinates for an anchored shape in Foundry V12/V13 MeasuredTemplates.
-     * Circles and squares center on the token. Rays and cones use token perimeter intersection snapped to the nearest grid vertex.
+     * Resolve placement anchor coordinates {x, y, direction} on a token's edge toward a click coordinate.
      */
-    resolveAnchoredPlacement(token, clickX, clickY, isRayOrCone, direction, helpers = {}) {
-        if (!token) return { x: clickX, y: clickY, direction };
-        if (!isRayOrCone) {
-            const x = token.center?.x ?? (token.x + (token.w || 0) / 2);
-            const y = token.center?.y ?? (token.y + (token.h || 0) / 2);
-            return { x, y, direction };
-        }
-        if (typeof helpers.getTokenEdgePoint === "function" && typeof helpers.snapCoordinates === "function") {
-            const edgePoint = helpers.getTokenEdgePoint(token, clickX, clickY, false);
-            const snappedEdge = helpers.snapCoordinates(edgePoint.x, edgePoint.y, "corner");
-            return {
-                x: snappedEdge.x,
-                y: snappedEdge.y,
-                direction: direction ?? edgePoint.direction
-            };
-        }
-        return { x: clickX, y: clickY, direction };
+    resolveAnchorPlacement(token, clickCoords = {}) {
+        return super.resolveAnchorPlacement(token, clickCoords);
     }
 }
 

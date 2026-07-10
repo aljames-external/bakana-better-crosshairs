@@ -162,12 +162,42 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
-     * Resolve placement origin coordinates for a crosshair anchored/attached to a token.
+     * Resolve placement anchor coordinates {x, y, direction} on a token's edge toward a click coordinate.
+     * Takes only the token object and {x, y} click coordinates.
+     * Calculates exact token perimeter intersection and angle matching Sequencer crosshair anchor points.
      */
-    resolveAnchoredPlacement(token, clickX, clickY, isRayOrCone, direction, _helpers = {}) {
-        if (!token) return { x: clickX, y: clickY, direction };
-        const x = token.center?.x ?? (token.x + (token.w || 0) / 2);
-        const y = token.center?.y ?? (token.y + (token.h || 0) / 2);
+    resolveAnchorPlacement(token, clickCoords = {}) {
+        const clickX = clickCoords.x ?? 0;
+        const clickY = clickCoords.y ?? 0;
+        if (!token) return { x: clickX, y: clickY, direction: 0 };
+
+        const tok = token instanceof Token ? token : (token.object instanceof Token ? token.object : token);
+        const cx = tok.center?.x ?? (tok.x + (tok.w || 0) / 2);
+        const cy = tok.center?.y ?? (tok.y + (tok.h || 0) / 2);
+        const hw = (tok.w || canvas?.grid?.size || 100) / 2;
+        const hh = (tok.h || canvas?.grid?.size || 100) / 2;
+
+        const dx = clickX - cx;
+        const dy = clickY - cy;
+        const angleRad = Math.atan2(dy, dx);
+        let direction = angleRad * (180 / Math.PI);
+        if (direction < 0) direction += 360;
+
+        if (Math.abs(dx) < 1e-6 && Math.abs(dy) < 1e-6) {
+            return { x: cx, y: cy, direction: 0 };
+        }
+
+        const scaleX = Math.abs(dx) > 1e-6 ? Math.abs(hw / dx) : Infinity;
+        const scaleY = Math.abs(dy) > 1e-6 ? Math.abs(hh / dy) : Infinity;
+        const scale = Math.min(scaleX, scaleY);
+
+        const edgeX = cx + dx * scale;
+        const edgeY = cy + dy * scale;
+
+        const size = canvas?.grid?.size || 100;
+        const x = Math.round(edgeX / size) * size;
+        const y = Math.round(edgeY / size) * size;
+
         return { x, y, direction };
     }
 }

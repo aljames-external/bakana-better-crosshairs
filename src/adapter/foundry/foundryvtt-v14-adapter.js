@@ -104,16 +104,10 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Resolve placement origin coordinates for an anchored shape in Foundry V14+ Regions.
+     * Resolve placement anchor coordinates {x, y, direction} on a token's edge toward a click coordinate.
      */
-    resolveAnchoredPlacement(token, clickX, clickY, isRayOrCone, direction) {
-        if (!token) return { x: clickX, y: clickY, direction };
-        if (!isRayOrCone) {
-            const x = token.center?.x ?? (token.x + (token.w || 0) / 2);
-            const y = token.center?.y ?? (token.y + (token.h || 0) / 2);
-            return { x, y, direction };
-        }
-        return { x: clickX, y: clickY, direction };
+    resolveAnchorPlacement(token, clickCoords = {}) {
+        return super.resolveAnchorPlacement(token, clickCoords);
     }
 }
 
