@@ -20,13 +20,11 @@ export const version = {
      * @returns {boolean} True if current is between min and max inclusive, false otherwise.
      */
     clamp(current, min, max) {
-        if (foundry.utils.isNewerVersion(min, current)) {
-            return false;
-        }
-        if (max !== undefined && max !== null) {
-            if (foundry.utils.isNewerVersion(current, max)) {
-                return false;
-            }
-        }
+        if (!current || !min) return false;
+        const isNewer = foundry.utils.isNewerVersion;
+
+        if (isNewer(min, current)) return false;
+        if (max === undefined) return true;
+        return !isNewer(current, max);
     }
 };
