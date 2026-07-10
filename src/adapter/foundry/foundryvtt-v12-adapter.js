@@ -41,6 +41,20 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
         };
     }
 
+    /**
+     * Format graphic sizing for Sequencer effects on Foundry V12 (pixel units).
+     */
+    formatGraphicSize(distance = 30, width = 5, shapeType = "ray") {
+        const gridDist = canvas?.dimensions?.distance || 5;
+        const gridSize = canvas?.dimensions?.size || 100;
+        const lengthPixels = (distance / gridDist) * gridSize;
+        const widthPixels = Math.max(gridSize, (width / gridDist) * gridSize);
+        return {
+            size: { width: lengthPixels, height: widthPixels },
+            gridUnits: false
+        };
+    }
+
 
     /**
      * Update live canvas preview shape coordinates during mouse drag.

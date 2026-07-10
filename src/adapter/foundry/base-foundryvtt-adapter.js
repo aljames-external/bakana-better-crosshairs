@@ -267,5 +267,17 @@ export class BaseFoundryVTTAdapter {
             direction
         };
     }
+
+    /**
+     * Format graphic sizing for Sequencer effects.
+     */
+    formatGraphicSize(distance = 30, width = 5, shapeType = "ray") {
+        const gridDist = canvas?.dimensions?.distance || 5;
+        const gridSize = canvas?.dimensions?.size || 100;
+        return {
+            size: { width: (distance / gridDist) * gridSize, height: Math.max(gridSize, (width / gridDist) * gridSize) },
+            gridUnits: false
+        };
+    }
 }
 

@@ -1,5 +1,6 @@
 import { closest } from "../lib/filemanager.js";
 import { log } from "../lib/logger.js";
+import { crosshairAdapter } from "../adapter/foundry/index.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
 
 async function create(token, config = {}) {
@@ -27,19 +28,16 @@ async function create(token, config = {}) {
 
     async function rayGraphic(crosshair) {
         const seq = new Sequence().wait(50);
+        const sizing = crosshairAdapter.formatGraphicSize(distance, width, "ray");
 
-        const gridDist = canvas?.dimensions?.distance || 5;
-        const lengthGridUnits = distance / gridDist;
-        const widthGridUnits = width / gridDist;
-
-        log.debug(`rayGraphic | Sizing ray in grid units: length=${lengthGridUnits} (${distance} ft), width=${widthGridUnits} (${width} ft)`);
+        log.debug(`rayGraphic | Sizing ray graphic:`, { distance, width, sizing });
 
         seq.effect()
             .name(id)
             .file(rayFile)
             .attachTo(crosshair)
             .anchor({ x: 0, y: 0.5 })
-            .size({ width: lengthGridUnits, height: widthGridUnits }, { gridUnits: true })
+            .size(sizing.size, { gridUnits: sizing.gridUnits })
             .opacity(0.8)
             .belowTokens()
             .locally()
