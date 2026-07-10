@@ -93,7 +93,7 @@
                             <div class="bbc-code-container">
                                 <div class="view-only">
                                     {{#if concurrentCode}}
-                                    <pre class="bbc-code-preview language-javascript"><code class="language-javascript">{{{concurrentCodeHighlighted}}}</code></pre>
+                                    <pre class="bbc-code-preview"><code>{{concurrentCode}}</code></pre>
                                     {{else}}
                                     <span class="bbc-pill no">No custom script configured</span>
                                     {{/if}}
@@ -340,7 +340,7 @@
                             <div class="bbc-code-container">
                                 <div class="view-only">
                                     {{#if postPlacementCode}}
-                                    <pre class="bbc-code-preview language-javascript"><code class="language-javascript">{{{postPlacementCodeHighlighted}}}</code></pre>
+                                    <pre class="bbc-code-preview"><code>{{postPlacementCode}}</code></pre>
                                     {{else}}
                                     <span class="bbc-pill no">No custom post-placement script configured</span>
                                     {{/if}}

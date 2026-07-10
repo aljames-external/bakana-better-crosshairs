@@ -1,7 +1,6 @@
 import { MODULE_ID } from './constants.js';
 import { log } from './logger.js';
 import { crosshair } from '../crosshair/_crosshairs.js';
-import Prism from "../../lib/prism/prism-es.js";
 
 const registeredHandlers = new Map();
 const fastLookupMap = new Map();
@@ -810,8 +809,6 @@ function getAllEntries() {
 
         const concurrentCode = config.concurrentCode || config.preAnimationCode || config.customCode || "";
         const postPlacementCode = config.postPlacementCode || config.postCode || config.postRegionCode || config.postTemplateCode || "";
-        const concurrentCodeHighlighted = highlightJavascript(concurrentCode);
-        const postPlacementCodeHighlighted = highlightJavascript(postPlacementCode);
 
         const knownKeys = new Set([
             "type", "local", "file", "animationFile", "distance", "radius", "length", "width", "angle",
@@ -868,31 +865,12 @@ function getAllEntries() {
             placedBorderAlpha,
             hasPlacedStyling,
             concurrentCode,
-            concurrentCodeHighlighted,
             postPlacementCode,
-            postPlacementCodeHighlighted,
             icon,
             configEntries,
         });
     }
     return results.sort((a, b) => a.itemName.localeCompare(b.itemName));
-}
-
-export function highlightJavascript(code) {
-    if (!code || typeof code !== "string") return "";
-
-    if (Prism?.highlight && Prism?.languages?.javascript) {
-        try {
-            return Prism.highlight(code, Prism.languages.javascript, "javascript");
-        } catch (e) {
-            log.debug("Prism highlight failed", e);
-        }
-    }
-
-    return code
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
 }
 
 function broadcastSync() {
@@ -910,7 +888,6 @@ export const manager = {
     list,
     getAllEntries,
     loadSavedRegistrations,
-    highlightJavascript,
     initializeReadySync,
     broadcastSync,
 };
