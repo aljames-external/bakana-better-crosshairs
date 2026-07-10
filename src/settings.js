@@ -1,6 +1,6 @@
 import { MODULE_ID } from "./lib/constants.js";
 import { log } from './lib/logger.js';
-import { manager } from './lib/templates.js';
+import { autorecManager } from './autorec/autorecManager.js';
 import { AutorecMenuApplication } from "./autorec/autorecMenu.js";
 
 Hooks.once('init', function() {
@@ -22,7 +22,7 @@ Hooks.once('init', function() {
         type: Object,
         default: {},
         onChange: (savedRegistrations) => {
-            manager.loadSavedRegistrations(savedRegistrations);
+            autorecManager.loadSavedRegistrations(savedRegistrations);
         }
     });
 
