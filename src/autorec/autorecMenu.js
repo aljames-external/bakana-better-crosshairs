@@ -3,21 +3,51 @@ import { log } from "../lib/logger.js";
 import { manager } from "../lib/templates.js";
 import { localize } from "../lib/utils.js";
 
-export class AutorecMenuApplication extends FormApplication {
-    static get defaultOptions() {
-        return foundry.utils.mergeObject(super.defaultOptions, {
-            id: "bbc-autorec-menu",
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications?.api || {};
+
+const BaseApplication = (ApplicationV2 && HandlebarsApplicationMixin)
+    ? HandlebarsApplicationMixin(ApplicationV2)
+    : (window.FormApplication || window.Application);
+
+export class AutorecMenuApplication extends BaseApplication {
+    static DEFAULT_OPTIONS = {
+        id: "bbc-autorec-menu",
+        tag: "form",
+        window: {
             title: "BBC.autorecMenu.title",
-            template: `modules/${MODULE_ID}/src/autorec/autorecMenu.html`,
-            classes: ["bbc-app", "bbc-autorec-form"],
+            icon: "fa-solid fa-crosshairs",
+            resizable: true
+        },
+        position: {
             width: 780,
-            height: 580,
-            resizable: true,
-            closeOnSubmit: false
-        });
+            height: 580
+        },
+        classes: ["bbc-app", "bbc-autorec-form"]
+    };
+
+    static PARTS = {
+        main: {
+            template: `modules/${MODULE_ID}/src/autorec/autorecMenu.html`
+        }
+    };
+
+    static get defaultOptions() {
+        if (super.defaultOptions) {
+            return foundry.utils.mergeObject(super.defaultOptions, {
+                id: "bbc-autorec-menu",
+                title: "BBC.autorecMenu.title",
+                template: `modules/${MODULE_ID}/src/autorec/autorecMenu.html`,
+                classes: ["bbc-app", "bbc-autorec-form"],
+                width: 780,
+                height: 580,
+                resizable: true,
+                closeOnSubmit: false
+            });
+        }
+        return {};
     }
 
-    async getData(options) {
+    async _prepareContext(options) {
         const entries = manager.getAllEntries();
         return {
             entries,
@@ -28,132 +58,158 @@ export class AutorecMenuApplication extends FormApplication {
         };
     }
 
+    async getData(options) {
+        return this._prepareContext(options);
+    }
+
+    _onRender(context, options) {
+        if (super._onRender) super._onRender(context, options);
+        this._attachEventListeners(this.element);
+    }
+
     activateListeners(html) {
-        super.activateListeners(html);
+        if (super.activateListeners) super.activateListeners(html);
+        const root = html && html[0] ? html[0] : (this.element || html);
+        this._attachEventListeners(root);
+    }
+
+    _attachEventListeners(root) {
+        if (!root) return;
 
         // Restore Edit Mode state across re-renders
-        const editToggle = html.find("#bbc-edit-mode-toggle");
-        if (this._editModeActive) {
-            editToggle.prop("checked", true);
-            html.find(".bbc-autorec-container").addClass("edit-mode");
+        const editToggle = root.querySelector("#bbc-edit-mode-toggle");
+        const container = root.querySelector(".bbc-autorec-container");
+        if (editToggle && container) {
+            if (this._editModeActive) {
+                editToggle.checked = true;
+                container.classList.add("edit-mode");
+            }
+
+            editToggle.addEventListener("change", (ev) => {
+                const turningOn = ev.currentTarget.checked;
+                this._editModeActive = turningOn;
+                container.classList.toggle("edit-mode", turningOn);
+
+                // When switching back to non-edit mode, save the page and sync all clients
+                if (!turningOn) {
+                    this.saveAllEditedConfigurations(root);
+                }
+            });
         }
 
-        // Toggle GM Edit Mode
-        editToggle.on("change", (ev) => {
-            const turningOn = ev.currentTarget.checked;
-            this._editModeActive = turningOn;
-            html.find(".bbc-autorec-container").toggleClass("edit-mode", turningOn);
-
-            // When switching back to non-edit mode, save the page and sync all clients
-            if (!turningOn) {
-                this.saveAllEditedConfigurations(html);
-            }
-        });
-
         // Prevent checkbox click from switching sidebar tab
-        html.find(".bbc-item-select-checkbox").on("click", (ev) => {
-            ev.stopPropagation();
+        root.querySelectorAll(".bbc-item-select-checkbox").forEach(chk => {
+            chk.addEventListener("click", (ev) => ev.stopPropagation());
         });
 
         // Batch Remove Selected Workflows
-        html.find(".bbc-remove-selected-btn").on("click", () => {
-            const checked = html.find(".bbc-item-select-checkbox:checked");
-            if (checked.length === 0) {
-                ui.notifications?.warn("Please select one or more workflows to remove.");
-                return;
-            }
-            const names = [];
-            checked.each((_, el) => names.push(el.dataset.itemName));
-            for (const itemName of names) {
-                manager.unregister(itemName, { persist: true });
-            }
-            manager.broadcastSync();
-            ui.notifications?.info(`Removed ${names.length} workflow(s).`);
-            this.render(false);
-        });
+        const removeSelectedBtn = root.querySelector(".bbc-remove-selected-btn");
+        if (removeSelectedBtn) {
+            removeSelectedBtn.addEventListener("click", () => {
+                const checked = root.querySelectorAll(".bbc-item-select-checkbox:checked");
+                if (checked.length === 0) {
+                    ui.notifications?.warn("Please select one or more workflows to remove.");
+                    return;
+                }
+                const names = [];
+                checked.forEach(el => names.push(el.dataset.itemName));
+                for (const itemName of names) {
+                    manager.unregister(itemName, { persist: true });
+                }
+                manager.broadcastSync();
+                ui.notifications?.info(`Removed ${names.length} workflow(s).`);
+                this.render(false);
+            });
+        }
 
         // Single Remove Workflow button in header
-        html.find(".bbc-delete-single-btn").on("click", (ev) => {
-            const itemName = ev.currentTarget.dataset.itemName;
-            if (itemName) {
-                manager.unregister(itemName, { persist: true });
-                manager.broadcastSync();
-                ui.notifications?.info(`Removed workflow "${itemName}".`);
-                this.render(false);
-            }
-        });
-
-        // 1. Search Filter
-        const searchInput = html.find("#bbc-autorec-search");
-        const cards = html.find(".bbc-item-card");
-        const details = html.find(".bbc-inspector-detail");
-        const emptyState = html.find(".bbc-inspector-empty");
-
-        searchInput.on("input", (ev) => {
-            const query = (ev.target.value || "").toLowerCase().trim();
-            cards.each((_, el) => {
-                const name = el.dataset.itemName?.toLowerCase() || "";
-                if (!query || name.includes(query)) {
-                    el.style.display = "flex";
-                } else {
-                    el.style.display = "none";
+        root.querySelectorAll(".bbc-delete-single-btn").forEach(btn => {
+            btn.addEventListener("click", (ev) => {
+                const itemName = ev.currentTarget.dataset.itemName;
+                if (itemName) {
+                    manager.unregister(itemName, { persist: true });
+                    manager.broadcastSync();
+                    ui.notifications?.info(`Removed workflow "${itemName}".`);
+                    this.render(false);
                 }
             });
         });
 
+        // 1. Search Filter
+        const searchInput = root.querySelector("#bbc-autorec-search");
+        const cards = root.querySelectorAll(".bbc-item-card");
+        const details = root.querySelectorAll(".bbc-inspector-detail");
+        const emptyState = root.querySelector(".bbc-inspector-empty");
+
+        if (searchInput) {
+            searchInput.addEventListener("input", (ev) => {
+                const query = (ev.target.value || "").toLowerCase().trim();
+                cards.forEach(el => {
+                    const name = el.dataset.itemName?.toLowerCase() || "";
+                    el.style.display = (!query || name.includes(query)) ? "flex" : "none";
+                });
+            });
+        }
+
         // 2. Sidebar Item Selection
-        cards.on("click", (ev) => {
-            const card = ev.currentTarget;
-            const itemName = card.dataset.itemName;
+        cards.forEach(card => {
+            card.addEventListener("click", (ev) => {
+                const currentCard = ev.currentTarget;
+                const itemName = currentCard.dataset.itemName;
 
-            cards.removeClass("active");
-            card.classList.add("active");
+                cards.forEach(c => c.classList.remove("active"));
+                currentCard.classList.add("active");
 
-            emptyState.hide();
-            details.hide();
-
-            const targetDetail = html.find(`.bbc-inspector-detail[data-item-name="${CSS.escape(itemName)}"]`);
-            if (targetDetail.length) {
-                targetDetail.css("display", "flex");
-            }
+                if (emptyState) emptyState.style.display = "none";
+                details.forEach(d => {
+                    if (d.dataset.itemName === itemName) {
+                        d.style.display = "flex";
+                    } else {
+                        d.style.display = "none";
+                    }
+                });
+            });
         });
 
         // 3. Expandable Section Accordions
-        html.find(".bbc-section-header").on("click", (ev) => {
-            const header = ev.currentTarget;
-            const body = header.nextElementSibling;
-            const icon = header.querySelector(".bbc-chevron");
+        root.querySelectorAll(".bbc-section-header").forEach(header => {
+            header.addEventListener("click", (ev) => {
+                const h = ev.currentTarget;
+                const body = h.nextElementSibling;
+                const icon = h.querySelector(".bbc-chevron");
 
-            if (body && body.classList.contains("bbc-section-body")) {
-                const isHidden = body.style.display === "none";
-                body.style.display = isHidden ? "block" : "none";
-                if (icon) {
-                    icon.style.transform = isHidden ? "rotate(0deg)" : "rotate(-90deg)";
+                if (body && body.classList.contains("bbc-section-body")) {
+                    const isHidden = body.style.display === "none";
+                    body.style.display = isHidden ? "block" : "none";
+                    if (icon) {
+                        icon.style.transform = isHidden ? "rotate(0deg)" : "rotate(-90deg)";
+                    }
                 }
-            }
+            });
         });
 
         // 4. Copy Path Action
-        html.find(".bbc-copy-btn").on("click", (ev) => {
-            const btn = ev.currentTarget;
-            const text = btn.dataset.copyText;
-            if (text && navigator.clipboard) {
-                navigator.clipboard.writeText(text);
-                ui.notifications?.info(`Copied "${text}" to clipboard.`);
-            }
+        root.querySelectorAll(".bbc-copy-btn").forEach(btn => {
+            btn.addEventListener("click", (ev) => {
+                const text = ev.currentTarget.dataset.copyText;
+                if (text && navigator.clipboard) {
+                    navigator.clipboard.writeText(text);
+                    ui.notifications?.info(`Copied "${text}" to clipboard.`);
+                }
+            });
         });
 
         // 5. Initialize Color Swatches
-        html.find(".bbc-color-swatch").each((_, el) => {
+        root.querySelectorAll(".bbc-color-swatch").forEach(el => {
             if (el.dataset.color) {
                 el.style.backgroundColor = el.dataset.color;
             }
         });
     }
 
-    saveAllEditedConfigurations(html) {
+    saveAllEditedConfigurations(root) {
         let savedCount = 0;
-        html.find(".bbc-inspector-detail").each((_, detailEl) => {
+        root.querySelectorAll(".bbc-inspector-detail").forEach(detailEl => {
             const itemName = detailEl.dataset.itemName;
             if (!itemName) return;
 
