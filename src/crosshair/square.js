@@ -42,7 +42,7 @@ async function create(token, config = {}) {
         return seq.play();
     }
 
-    attachWheelRotation(null, config);
+    attachWheelRotation(null, { ...config, token, stickToToken });
 
     let square = new Sequence()
         .crosshair("position")
@@ -63,7 +63,7 @@ async function create(token, config = {}) {
     square
         .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {
             if (crosshair?.pivot?.set) crosshair.pivot.set(0, 0);
-            attachWheelRotation(crosshair, config);
+            attachWheelRotation(crosshair, { ...config, token, stickToToken });
             await squareGraphic(crosshair);
         })
         .callback(Sequencer.Crosshair.CALLBACKS.PLACED, async (...args) => {

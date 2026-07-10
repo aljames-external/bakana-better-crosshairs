@@ -35,7 +35,7 @@ async function create(token, config = {}) {
             .play();
     }
 
-    attachWheelRotation(null, config);
+    attachWheelRotation(null, { ...config, token, stickToToken });
 
     let cone = new Sequence()
         .crosshair("position")
@@ -57,7 +57,7 @@ async function create(token, config = {}) {
 
     cone
         .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {
-            attachWheelRotation(crosshair, config);
+            attachWheelRotation(crosshair, { ...config, token, stickToToken });
             await coneGraphic(crosshair);
         })
         .callback(Sequencer.Crosshair.CALLBACKS.PLACED, async (...args) => {
