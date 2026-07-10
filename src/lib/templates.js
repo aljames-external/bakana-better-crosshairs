@@ -160,41 +160,62 @@ async function handleDrawPreview(placeable) {
  * Handle document preCreate (v13 preCreateMeasuredTemplate / v14 preCreateRegion).
  */
 function handlePreCreate(doc, _data, _options, userId) {
-    // Ensure only the hook owner processes their own creation
-    if (userId !== game.user.id) return true;
+    log.info(`handlePreCreate | [ENTRY] preCreate hook triggered for docName=${doc.documentName}, id=${doc.id}, userId=${userId}, localUser=${game.user.id}`);
 
-    const entry = autorecManager.getRegisteredEntry(doc);
-    if (!entry) return true;
+    if (userId !== game.user.id) {
+        log.info(`handlePreCreate | [SKIP] Skipping document from remote user ${userId}`);
+        return true;
+    }
 
-    const placementKey = `${entry.itemName}_${game.user.id}`;
-    const pending = pendingPlacements.get(placementKey);
-    if (!pending) return true;
+    let entry = autorecManager.getRegisteredEntry(doc);
+    let placementKey = null;
+    let pending = null;
 
-    log.debug(`handlePreCreate | Hook fired for "${entry.itemName}" (pending.resolved=${pending.resolved}):`, {
-        docName: doc.documentName,
-        pendingCoords: pending.coords
-    });
+    if (entry) {
+        placementKey = `${entry.itemName}_${game.user.id}`;
+        pending = pendingPlacements.get(placementKey);
+    } else {
+        // Fallback: match any active uncancelled pending placement for the local user
+        for (const [key, val] of pendingPlacements.entries()) {
+            if (key.endsWith(`_${game.user.id}`) && !val.cancelled) {
+                pending = val;
+                placementKey = key;
+                entry = { itemName: val.itemName, handler: val.config };
+                log.info(`handlePreCreate | [FALLBACK MATCH] Matched active pending placement "${val.itemName}" (key=${key})`);
+                break;
+            }
+        }
+    }
+
+    log.info(`handlePreCreate | [LOOKUP RESULT] entry="${entry?.itemName || null}", hasPending=${Boolean(pending)}, pending.resolved=${pending?.resolved}, pending.coords=`, pending?.coords);
+
+    if (!entry || !pending) {
+        log.info(`handlePreCreate | [PASS] No matching autorec entry or active pending placement. Allowing standard creation.`);
+        return true;
+    }
 
     // If the sequencer sequence was right-click cancelled, abort placement
     if (pending.cancelled) {
-        log.debug(`handlePreCreate | Cancelling placement for "${entry.itemName}"`);
+        log.info(`handlePreCreate | [ABORT] Placement was cancelled by user ("${entry.itemName}"). Returning false.`);
         pendingPlacements.delete(placementKey);
         return false;
     }
 
     // If the sequencer sequence has resolved with coordinates, update the document
     if (pending.resolved && pending.coords) {
-        log.debug(`handlePreCreate | Applying placement data for "${entry.itemName}":`, pending.coords);
+        log.info(`handlePreCreate | [APPLY] Sequencer placement resolved for "${entry.itemName}". Formatting updateData with coords:`, pending.coords);
         const updateData = crosshairAdapter.formatDocumentUpdate(doc, pending.coords, pending.config || {});
+        log.info(`handlePreCreate | [APPLY] Formatted updateData payload:`, updateData);
         doc.updateSource(updateData);
+        Object.assign(doc, updateData);
         pendingPlacements.delete(placementKey);
-        log.debug(`handlePreCreate | Updated document source:`, updateData);
+        log.info(`handlePreCreate | [APPLY COMPLETE] Document source after updateSource:`, doc._source || doc.toObject?.() || doc);
         return true;
     }
 
     // If sequence is still interactive/running, defer creation until sequence resolves
     pending.deferredCreateData = doc.toObject();
-    log.debug(`handlePreCreate | Deferring premature document creation while Sequencer crosshair is active ("${entry.itemName}")`);
+    log.info(`handlePreCreate | [DEFER] Sequencer crosshair is still interactive ("${entry.itemName}"). Deferring document creation until click.`);
     return false;
 }
 
