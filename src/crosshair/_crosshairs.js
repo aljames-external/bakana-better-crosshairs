@@ -1,6 +1,7 @@
 import { cone } from "./cone.js";
 import { circle } from "./circle.js";
 import { ray } from "./ray.js";
+import { square } from "./square.js";
 import { Token } from "../lib/compat.js";
 
 async function play(typeOrToken, tokenOrConfig, config) {
@@ -17,13 +18,11 @@ export const crosshair = {
         cone,
         circle,
         ray,
-        square: ray,
-        rect: ray,
+        square,
     },
     cone,
     circle,
     ray,
-    square: ray,
-    rect: ray,
+    square,
     play,
 };
