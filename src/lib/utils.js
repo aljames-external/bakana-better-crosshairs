@@ -7,3 +7,26 @@
 export function localize(key, fallback = key) {
     return game.i18n?.has(key) ? game.i18n.localize(key) : fallback;
 }
+
+/**
+ * Version utility for semantic range verification across Foundry VTT releases.
+ */
+export const version = {
+    /**
+     * Check whether a semantic version string is clamped between min and max (inclusive).
+     * @param {string} current - The current version string to test
+     * @param {string} min - Minimum allowed version string
+     * @param {string} [max] - Optional maximum allowed version string
+     * @returns {boolean} True if current is between min and max inclusive, false otherwise.
+     */
+    clamp(current, min, max) {
+        if (foundry.utils.isNewerVersion(min, current)) {
+            return false;
+        }
+        if (max !== undefined && max !== null) {
+            if (foundry.utils.isNewerVersion(current, max)) {
+                return false;
+            }
+        }
+    }
+};

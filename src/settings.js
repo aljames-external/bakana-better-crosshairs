@@ -1,10 +1,11 @@
-import { MODULE_ID } from "./lib/constants.js";
+import { MODULE_ID, MODULE_NAME } from "./lib/constants.js";
 import { log } from './lib/logger.js';
 import { autorecManager } from './autorec/autorecManager.js';
 import { AutorecMenuApplication } from "./autorec/autorecMenu.js";
 
 Hooks.once('init', function() {
-    log.info("Initializing Bakana's Better Crosshairs settings");
+    log.info(`Initializing ${MODULE_NAME} settings`);
+
 
     game.settings.registerMenu(MODULE_ID, 'autorecMenu', {
         name: 'BBC.settings.autorecMenu.name',
