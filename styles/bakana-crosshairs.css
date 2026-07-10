@@ -1,0 +1,760 @@
+/* ==========================================================================
+   Bakana's Better Crosshairs — Modern Glassmorphism UI Stylesheet
+   ========================================================================== */
+
+.bbc-app.bbc-autorec-form .window-content {
+    background: linear-gradient(135deg, #11141d 0%, #171a26 100%);
+    color: #e2e8f0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    padding: 0;
+    overflow: hidden;
+}
+
+.bbc-autorec-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* --- Top Header & Search Bar --- */
+.bbc-autorec-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    background: rgba(18, 22, 33, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.22);
+    gap: 10px;
+}
+
+.bbc-search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(28, 33, 48, 0.8);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 6px;
+    padding: 4px 10px;
+    flex: 1;
+    max-width: 380px;
+    transition: all 0.2s ease;
+}
+
+.bbc-search-wrapper:focus-within {
+    border-color: #6366f1;
+    box-shadow: 0 0 16px rgba(99, 102, 241, 0.35);
+}
+
+.bbc-search-wrapper i {
+    color: #818cf8;
+    font-size: 0.95rem;
+}
+
+.bbc-search-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #f8fafc;
+    font-size: 0.88rem;
+    width: 100%;
+}
+
+.bbc-search-input::placeholder {
+    color: #64748b;
+}
+
+.bbc-count-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(99, 102, 241, 0.15);
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    color: #a5b4fc;
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 14px;
+}
+
+/* --- Layout Split: Sidebar + Inspector --- */
+.bbc-autorec-layout {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* --- Sidebar --- */
+.bbc-sidebar {
+    width: 200px;
+    flex-shrink: 0;
+    background: rgba(15, 18, 28, 0.6);
+    border-right: 1px solid rgba(99, 102, 241, 0.18);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.bbc-sidebar-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.22);
+    background: rgba(13, 16, 23, 0.95);
+    flex-shrink: 0;
+    z-index: 2;
+}
+
+.bbc-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.bbc-sidebar-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: #64748b;
+    gap: 12px;
+}
+
+.bbc-sidebar-empty i {
+    font-size: 2.2rem;
+    color: #475569;
+}
+
+.bbc-item-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(26, 31, 46, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bbc-item-card:hover {
+    background: rgba(99, 102, 241, 0.12);
+    border-color: rgba(99, 102, 241, 0.35);
+    transform: translateX(3px);
+}
+
+.bbc-item-card.active {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.28) 0%, rgba(79, 70, 229, 0.15) 100%);
+    border-color: #6366f1;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+.bbc-card-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+}
+
+.bbc-item-icon {
+    color: #818cf8;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.bbc-item-name {
+    font-size: 0.80rem;
+    font-weight: 600;
+    color: #f1f5f9;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- Inspector Pane --- */
+.bbc-inspector {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+    min-height: 0;
+    background: rgba(18, 22, 33, 0.3);
+}
+
+.bbc-inspector-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 40px;
+}
+
+.bbc-empty-card {
+    text-align: center;
+    max-width: 380px;
+    background: rgba(28, 33, 48, 0.5);
+    border: 1px dashed rgba(99, 102, 241, 0.3);
+    border-radius: 16px;
+    padding: 36px 28px;
+}
+
+.bbc-empty-icon {
+    font-size: 2.6rem;
+    color: #818cf8;
+    margin-bottom: 16px;
+    display: block;
+    text-shadow: 0 0 16px rgba(129, 140, 248, 0.4);
+}
+
+.bbc-empty-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0 0 8px 0;
+}
+
+.bbc-empty-card p {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* --- Inspector Details --- */
+.bbc-inspector-detail {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.bbc-detail-header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    background: rgba(24, 29, 44, 0.65);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    gap: 16px;
+}
+
+.bbc-detail-title-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.bbc-title-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.bbc-detail-icon {
+    font-size: 1.0rem;
+    color: #818cf8;
+    filter: drop-shadow(0 0 8px rgba(129, 140, 248, 0.5));
+}
+
+.bbc-title-left h2 {
+    font-size: 0.80rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+    border: none;
+}
+
+.bbc-copy-btn {
+    background: rgba(99, 102, 241, 0.15);
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    color: #c7d2fe;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bbc-copy-btn:hover {
+    background: #6366f1;
+    color: #ffffff;
+    border-color: #818cf8;
+}
+
+.bbc-detail-badges {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* --- Badges & Pills --- */
+.bbc-type-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 12px;
+    background: rgba(99, 102, 241, 0.2);
+    color: #c7d2fe;
+    border: 1px solid rgba(99, 102, 241, 0.4);
+}
+
+.bbc-type-badge.circle {
+    background: rgba(14, 165, 233, 0.18);
+    color: #38bdf8;
+    border-color: rgba(14, 165, 233, 0.4);
+}
+
+.bbc-type-badge.cone {
+    background: rgba(245, 158, 11, 0.18);
+    color: #fbbf24;
+    border-color: rgba(245, 158, 11, 0.4);
+}
+
+.bbc-type-badge.ray {
+    background: rgba(16, 185, 129, 0.18);
+    color: #34d399;
+    border-color: rgba(16, 185, 129, 0.4);
+}
+
+.bbc-status-badge.active {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 12px;
+    background: rgba(16, 185, 129, 0.15);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.bbc-status-badge.local,
+.bbc-type-badge.local {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 12px;
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+/* --- Sections Scroll Area --- */
+.bbc-sections-scroll {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 18px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1;
+    min-height: 0;
+}
+
+.bbc-section-card {
+    flex-shrink: 0;
+    background: rgba(24, 29, 44, 0.55);
+    border: 1px solid rgba(99, 102, 241, 0.16);
+    border-radius: 8px;
+    overflow: visible;
+    transition: border-color 0.2s ease;
+}
+
+.bbc-section-card:hover {
+    border-color: rgba(99, 102, 241, 0.32);
+}
+
+.bbc-section-header {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: rgba(30, 36, 54, 0.6);
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.12);
+}
+
+.bbc-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bbc-chevron {
+    color: #818cf8;
+    font-size: 0.75rem;
+    transition: transform 0.2s ease;
+}
+
+.bbc-section-icon {
+    color: #a5b4fc;
+    font-size: 0.85rem;
+}
+
+.bbc-section-title h3 {
+    font-size: 0.80rem;
+    font-weight: 600;
+    color: #f8fafc;
+    margin: 0;
+    border: none;
+}
+
+.bbc-section-tag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background: rgba(99, 102, 241, 0.22);
+    color: #c7d2fe;
+}
+
+.bbc-section-tag.ready {
+    background: rgba(14, 165, 233, 0.2);
+    color: #38bdf8;
+}
+
+.bbc-section-body {
+    padding: 12px 14px;
+}
+
+.bbc-section-body::-webkit-scrollbar,
+.bbc-sections-scroll::-webkit-scrollbar,
+.bbc-items-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.bbc-section-body::-webkit-scrollbar-track,
+.bbc-sections-scroll::-webkit-scrollbar-track,
+.bbc-items-list::-webkit-scrollbar-track {
+    background: rgba(15, 18, 28, 0.4);
+    border-radius: 4px;
+}
+
+.bbc-section-body::-webkit-scrollbar-thumb,
+.bbc-sections-scroll::-webkit-scrollbar-thumb,
+.bbc-items-list::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.35);
+    border-radius: 4px;
+}
+
+.bbc-section-body::-webkit-scrollbar-thumb:hover,
+.bbc-sections-scroll::-webkit-scrollbar-thumb:hover,
+.bbc-items-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.6);
+}
+
+.bbc-section-desc {
+    font-size: 0.76rem;
+    color: #94a3b8;
+    margin: 0 0 10px 0;
+}
+
+/* --- Configuration Tables --- */
+.bbc-config-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: rgba(15, 18, 28, 0.4);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.bbc-config-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    background: rgba(28, 33, 50, 0.5);
+    width: 38%;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.bbc-config-table td {
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: #e2e8f0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.bbc-config-table tr:last-child th,
+.bbc-config-table tr:last-child td {
+    border-bottom: none;
+}
+
+.bbc-code-pill {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    color: #38bdf8;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.78rem;
+    padding: 3px 8px;
+    border-radius: 5px;
+    display: inline-block;
+    word-break: break-all;
+}
+
+.bbc-pill {
+    background: rgba(99, 102, 241, 0.18);
+    color: #c7d2fe;
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.bbc-inline-flex-row {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.bbc-inline-flex-row .bbc-code-pill {
+    margin: 0;
+}
+
+/* --- View / Edit Mode Dynamic Visibility --- */
+.bbc-autorec-container:not(.edit-mode) .edit-only {
+    display: none !important;
+}
+
+.bbc-autorec-container.edit-mode .view-only {
+    display: none !important;
+}
+
+/* --- Topbar Actions & Edit Slider --- */
+.bbc-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.bbc-edit-slider-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 0.80rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    user-select: none;
+}
+
+.bbc-edit-toggle-input {
+    display: none;
+}
+
+.bbc-edit-slider-track {
+    position: relative;
+    width: 38px;
+    height: 20px;
+    background: rgba(30, 36, 54, 0.9);
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    border-radius: 20px;
+    transition: all 0.25s ease;
+}
+
+.bbc-edit-slider-track::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background: #a5b4fc;
+    border-radius: 50%;
+    transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.bbc-edit-toggle-input:checked + .bbc-edit-slider-track {
+    background: rgba(99, 102, 241, 0.45);
+    border-color: #6366f1;
+}
+
+.bbc-edit-toggle-input:checked + .bbc-edit-slider-track::after {
+    transform: translateX(18px);
+    background: #ffffff;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+/* --- Edit Mode Form Controls --- */
+.bbc-edit-input,
+.bbc-edit-select {
+    width: 100%;
+    padding: 5px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    background: rgba(15, 18, 28, 0.75);
+    color: #f8fafc;
+    font-size: 0.80rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.bbc-edit-input:focus,
+.bbc-edit-select:focus {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 2px rgba(129, 140, 248, 0.25);
+}
+
+.bbc-edit-input.small {
+    width: 76px;
+    display: inline-block;
+}
+
+.bbc-edit-checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.80rem;
+    color: #e2e8f0;
+    cursor: pointer;
+}
+
+.bbc-edit-row,
+.bbc-edit-color-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.bbc-edit-color {
+    width: 34px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.bbc-sidebar-footer {
+    padding: 10px 14px;
+    border-top: 1px solid rgba(99, 102, 241, 0.2);
+    background: rgba(18, 22, 33, 0.7);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.bbc-remove-selected-btn,
+.bbc-delete-single-btn {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bbc-add-workflow-btn {
+    background: rgba(34, 197, 94, 0.15);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    color: #86efac;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bbc-sidebar-actions .bbc-add-workflow-btn,
+.bbc-sidebar-actions .bbc-remove-selected-btn {
+    flex: 1;
+    justify-content: center;
+}
+
+.bbc-remove-selected-btn:hover,
+.bbc-delete-single-btn:hover {
+    background: #ef4444;
+    color: #ffffff;
+    border-color: #f87171;
+}
+
+.bbc-add-workflow-btn:hover {
+    background: #22c55e;
+    color: #ffffff;
+    border-color: #4ade80;
+}
+
+.bbc-item-select-checkbox {
+    margin-right: 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+/* --- Code Block & Script Hook Editors --- */
+.bbc-code-preview {
+    background: rgba(13, 16, 23, 0.85);
+    border: 1px solid rgba(99, 102, 241, 0.28);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    color: #e2e8f0;
+    line-height: 1.45;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 0;
+}
+
+.bbc-edit-textarea {
+    width: 100%;
+    min-height: 96px;
+    background: rgba(15, 18, 28, 0.85);
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    color: #f8fafc;
+    resize: vertical;
+    outline: none;
+    line-height: 1.45;
+    transition: border-color 0.2s ease;
+}
+
+.bbc-edit-textarea:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
+}
+
+.bbc-code-container {
+    width: 100%;
+    margin-top: 8px;
+}
+
+
