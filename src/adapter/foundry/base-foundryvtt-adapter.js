@@ -164,41 +164,96 @@ export class BaseFoundryVTTAdapter {
     /**
      * Resolve placement anchor coordinates {x, y, direction} on a token's edge toward a click coordinate.
      * Takes only the token object and {x, y} click coordinates.
-     * Calculates exact token perimeter intersection and angle matching Sequencer crosshair anchor points.
+     * Implements 1-to-1 the exact algorithm from Sequencer 4.2.2 (#handleLockedEdge in CrosshairsPlaceable.js).
      */
     resolveAnchorPlacement(token, clickCoords = {}) {
-        const clickX = clickCoords.x ?? 0;
-        const clickY = clickCoords.y ?? 0;
-        if (!token) return { x: clickX, y: clickY, direction: 0 };
+        const rawClickX = clickCoords.x ?? 0;
+        const rawClickY = clickCoords.y ?? 0;
+        if (!token) return { x: rawClickX, y: rawClickY, direction: 0 };
 
         const tok = token instanceof Token ? token : (token.object instanceof Token ? token.object : token);
-        const cx = tok.center?.x ?? (tok.x + (tok.w || 0) / 2);
-        const cy = tok.center?.y ?? (tok.y + (tok.h || 0) / 2);
-        const hw = (tok.w || canvas?.grid?.size || 100) / 2;
-        const hh = (tok.h || canvas?.grid?.size || 100) / 2;
+        const centerMode = typeof CONST !== "undefined" && CONST.GRID_SNAPPING_MODES ? CONST.GRID_SNAPPING_MODES.CENTER : 1;
+        const edgeMidpointMode = typeof CONST !== "undefined" && CONST.GRID_SNAPPING_MODES ? CONST.GRID_SNAPPING_MODES.EDGE_MIDPOINT : 16;
+        const size = canvas?.grid?.size || 100;
 
-        const dx = clickX - cx;
-        const dy = clickY - cy;
-        const angleRad = Math.atan2(dy, dx);
-        let direction = angleRad * (180 / Math.PI);
-        if (direction < 0) direction += 360;
+        const snapPt = (pt, mode) => {
+            if (canvas?.grid?.getSnappedPoint) {
+                try { return canvas.grid.getSnappedPoint(pt, { mode, resolution: size }); } catch (e) {}
+            }
+            return pt;
+        };
 
-        if (Math.abs(dx) < 1e-6 && Math.abs(dy) < 1e-6) {
-            return { x: cx, y: cy, direction: 0 };
+        const snappedMouse = snapPt({ x: rawClickX, y: rawClickY }, centerMode);
+
+        const tx = tok.x || 0;
+        const ty = tok.y || 0;
+        const w = tok.w || tok.hitArea?.width || size;
+        const h = tok.h || tok.hitArea?.height || size;
+
+        const points = [tx, ty, tx + w, ty, tx + w, ty + h, tx, ty + h];
+
+        const centerPoint = typeof tok.getCenterPoint === "function"
+            ? tok.getCenterPoint()
+            : { x: tok.center?.x ?? (tx + w / 2), y: tok.center?.y ?? (ty + h / 2) };
+
+        const RayClass = foundry?.canvas?.geometry?.Ray ?? globalThis.Ray;
+        if (!RayClass) {
+            return { x: centerPoint.x, y: centerPoint.y, direction: 0 };
         }
 
-        const scaleX = Math.abs(dx) > 1e-6 ? Math.abs(hw / dx) : Infinity;
-        const scaleY = Math.abs(dy) > 1e-6 ? Math.abs(hh / dy) : Infinity;
-        const scale = Math.min(scaleX, scaleY);
+        const ray = new RayClass(centerPoint, snappedMouse);
+        let intersection = null;
+        for (let i = 0; i < points.length; i += 2) {
+            const p1 = { x: points[i], y: points[i + 1] };
+            const p2Idx = (i + 2) >= points.length ? 0 : (i + 2);
+            const p2 = { x: points[p2Idx], y: points[p2Idx + 1] };
+            intersection = ray.intersectSegment([p1.x, p1.y, p2.x, p2.y]);
+            if (intersection) break;
+        }
 
-        const edgeX = cx + dx * scale;
-        const edgeY = cy + dy * scale;
+        if (!intersection) {
+            const angleRad = Math.atan2(snappedMouse.y - centerPoint.y, snappedMouse.x - centerPoint.x);
+            let dir = angleRad * (180 / Math.PI);
+            if (dir < 0) dir += 360;
+            return { x: centerPoint.x, y: centerPoint.y, direction: dir };
+        }
 
-        const size = canvas?.grid?.size || 100;
-        const x = Math.round(edgeX / size) * size;
-        const y = Math.round(edgeY / size) * size;
+        let snappedIntersection = snapPt(intersection, edgeMidpointMode);
 
-        return { x, y, direction };
+        const isSquareGrid = canvas?.scene?.grid?.type === (typeof CONST !== "undefined" ? CONST.GRID_TYPES?.SQUARE : 1);
+        if (isSquareGrid) {
+            const left = snappedMouse.x < points[0];
+            const above = snappedMouse.y < points[1];
+            const right = snappedMouse.x > points[2];
+            const below = snappedMouse.y > points[5];
+            if ((left || right) && (below || above)) {
+                snappedIntersection.x = left ? points[0] - size : (right ? points[2] + size : snappedIntersection.x);
+                snappedIntersection.y = above ? points[1] - size : (right ? points[5] + size : snappedIntersection.y);
+                if (above && left) {
+                    snappedIntersection.x = points[0];
+                    snappedIntersection.y = points[1];
+                } else if (above && right) {
+                    snappedIntersection.x = points[2];
+                    snappedIntersection.y = points[3];
+                } else if (below && right) {
+                    snappedIntersection.x = points[4];
+                    snappedIntersection.y = points[5];
+                } else if (below && left) {
+                    snappedIntersection.x = points[6];
+                    snappedIntersection.y = points[7];
+                }
+            }
+        }
+
+        const dragAngle = (new RayClass(snappedIntersection, snappedMouse)).angle;
+        let direction = dragAngle * (180 / Math.PI);
+        if (direction < 0) direction += 360;
+
+        return {
+            x: snappedIntersection.x,
+            y: snappedIntersection.y,
+            direction
+        };
     }
 }
 
