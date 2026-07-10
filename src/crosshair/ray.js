@@ -1,4 +1,5 @@
 import { closest } from "../lib/filemanager.js";
+import { log } from "../lib/logger.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
 
 async function create(token, config = {}) {
@@ -8,13 +9,14 @@ async function create(token, config = {}) {
     const {
         id = `Ray Crosshair`,
         stickToToken = shouldStickToToken(config, false),
-        file,
-        rayFile = file || config.animationFile || closest(`eskie.crosshair.ray.fantasy_01.white`),
+        showLine = config.showLine ?? true,
+        rayFile = config.rayFile || closest(`eskie.crosshair.ray.fantasy_01.white`),
+        lineFile = config.lineFile || closest(`eskie.crosshair.line.fantasy_01.white`),
+        borderColor = config.borderColor || "#ffffff",
+        borderAlpha = config.borderAlpha ?? 0,
+        fillColor = config.fillColor || "#000000",
+        fillAlpha = config.fillAlpha ?? 0,
         icon = config.icon,
-        borderColor = "#ffffff",
-        borderAlpha = 0,
-        fillColor = "#000000",
-        fillAlpha = 0,
         context = null
     } = config;
 
@@ -27,16 +29,17 @@ async function create(token, config = {}) {
         const seq = new Sequence().wait(50);
 
         const gridDist = canvas?.dimensions?.distance || 5;
-        const gridSize = canvas?.dimensions?.size || 100;
-        const lengthPixels = (distance / gridDist) * gridSize;
-        const widthPixels = Math.max(gridSize, (width / gridDist) * gridSize);
+        const lengthGridUnits = distance / gridDist;
+        const widthGridUnits = width / gridDist;
+
+        log.debug(`rayGraphic | Sizing ray in grid units: length=${lengthGridUnits} (${distance} ft), width=${widthGridUnits} (${width} ft)`);
 
         seq.effect()
             .name(id)
             .file(rayFile)
             .attachTo(crosshair)
             .anchor({ x: 0, y: 0.5 })
-            .size({ width: lengthPixels, height: widthPixels })
+            .size({ width: lengthGridUnits, height: widthGridUnits }, { gridUnits: true })
             .opacity(0.8)
             .belowTokens()
             .locally()
