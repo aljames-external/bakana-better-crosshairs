@@ -14,16 +14,16 @@ export class BaseFoundryVTTAdapter {
     extractCallingContext(target) {
         if (!target) return { item: null, itemName: "", itemId: "", activity: null, activityName: "", activityId: "" };
         const document = target.document ?? target;
-        const itemObj = document.item || target.item || null;
-        const activityObj = document.activity || target.activity || null;
+        const itemObj = document.item ?? target.item ?? null;
+        const activityObj = document.activity ?? target.activity ?? null;
 
         const baseContext = {
             item: itemObj,
-            itemName: itemObj?.name || "",
-            itemId: itemObj?.id || "",
+            itemName: itemObj?.name ?? "",
+            itemId: itemObj?.id ?? "",
             activity: activityObj,
-            activityName: activityObj?.name || "",
-            activityId: activityObj?.id || activityObj?._id || ""
+            activityName: activityObj?.name ?? "",
+            activityId: activityObj?.id ?? activityObj?._id ?? ""
         };
 
         const result = systemAdapter.extractCallingContext(document, baseContext);
@@ -64,15 +64,15 @@ export class BaseFoundryVTTAdapter {
         for (const [key, entry] of entries.entries()) {
             if (key === "DEFAULT" || entry.isDefault || entry.itemName === "DEFAULT") continue;
             if (entry.enabled === false) continue;
-            const entryItemName = (entry.itemName || key.split(" | ")[0] || "").trim().toLowerCase();
+            const entryItemName = (entry.itemName ?? "").trim().toLowerCase();
             if (entryItemName === context.itemName.toLowerCase() || key.toLowerCase() === context.itemName.toLowerCase()) {
                 candidateEntries.push(entry);
             }
         }
 
         candidateEntries.sort((a, b) => {
-            const aHasAct = Boolean((a.activityId || a.activityName || "").trim());
-            const bHasAct = Boolean((b.activityId || b.activityName || "").trim());
+            const aHasAct = Boolean((a.activityId ?? a.activityName ?? "").trim());
+            const bHasAct = Boolean((b.activityId ?? b.activityName ?? "").trim());
             if (aHasAct && !bHasAct) return -1;
             if (!aHasAct && bHasAct) return 1;
             return 0;
@@ -80,7 +80,7 @@ export class BaseFoundryVTTAdapter {
 
         for (const entry of candidateEntries) {
             if (systemAdapter.shouldReplace(context, entry)) {
-                log.info(`matchAutorecEntry | [MATCH FOUND] Specific entry "${entry.itemName}" (activity: "${entry.activityName || 'ANY'}") matched calling item "${context.itemName}" (activity: "${context.activityName}")`);
+                log.info(`matchAutorecEntry | [MATCH FOUND] Specific entry "${entry.itemName}" (activity: "${entry.activityName ?? 'ANY'}") matched calling item "${context.itemName}" (activity: "${context.activityName}")`);
                 return { ...entry, item: context.item, activity: context.activity };
             }
         }
@@ -161,17 +161,17 @@ export class BaseFoundryVTTAdapter {
      * @returns {{placedFillColor?: string, placedFillAlpha?: number, placedBorderColor?: string, placedBorderAlpha?: number, flags: Object}}
      */
     extractPlacedStylingFlags(config = {}) {
-        const placedFillColor = config.placedFillColor || config.templateFillColor;
-        const placedFillAlpha = config.placedFillAlpha !== undefined ? config.placedFillAlpha : config.templateFillAlpha;
-        const placedBorderColor = config.placedBorderColor || config.templateBorderColor;
-        const placedBorderAlpha = config.placedBorderAlpha !== undefined ? config.placedBorderAlpha : config.templateBorderAlpha;
-        const postPlacementCode = config.postPlacementCode || config.postCode || config.postRegionCode || config.postTemplateCode || "";
+        const placedFillColor = config.placedFillColor ?? config.templateFillColor;
+        const placedFillAlpha = config.placedFillAlpha ?? config.templateFillAlpha;
+        const placedBorderColor = config.placedBorderColor ?? config.templateBorderColor;
+        const placedBorderAlpha = config.placedBorderAlpha ?? config.templateBorderAlpha;
+        const postPlacementCode = config.postPlacementCode ?? config.postCode ?? config.postRegionCode ?? config.postTemplateCode ?? "";
 
         const flags = {
             bbc: {
-                itemName: config.itemName || config.regKey || "",
-                activityName: config.activityName || "",
-                activityId: config.activityId || "",
+                itemName: config.itemName ?? config.regKey ?? "",
+                activityName: config.activityName ?? "",
+                activityId: config.activityId ?? "",
                 postPlacementCode,
                 placedFillColor,
                 placedFillAlpha,
