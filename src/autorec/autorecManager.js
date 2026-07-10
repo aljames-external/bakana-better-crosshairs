@@ -117,10 +117,9 @@ export class AutorecManager {
         if (!itemName) return [];
         const cleanName = String(itemName).trim().toLowerCase();
         const candidates = [];
-        for (const [key, entry] of this.registeredHandlers.entries()) {
+        for (const entry of this.registeredHandlers.values()) {
             if (entry.isDefault || !entry.enabled) continue;
-            const eItem = (entry.itemName ?? "").trim().toLowerCase();
-            if (eItem === cleanName || key.toLowerCase() === cleanName) {
+            if ((entry.itemName ?? "").trim().toLowerCase() === cleanName) {
                 candidates.push(entry);
             }
         }

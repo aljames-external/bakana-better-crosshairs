@@ -59,11 +59,11 @@ export class BaseFoundryVTTAdapter {
         });
 
         // 1. Group candidate entries for this item and order: activity-specific rules first, item fallbacks last
+        const callingItemName = context.itemName.trim().toLowerCase();
         const candidateEntries = [];
-        for (const [key, entry] of entries.entries()) {
+        for (const entry of entries.values()) {
             if (entry.isDefault || !entry.enabled) continue;
-            const entryItemName = (entry.itemName ?? "").trim().toLowerCase();
-            if (entryItemName === context.itemName.toLowerCase() || key.toLowerCase() === context.itemName.toLowerCase()) {
+            if ((entry.itemName ?? "").trim().toLowerCase() === callingItemName) {
                 candidateEntries.push(entry);
             }
         }
