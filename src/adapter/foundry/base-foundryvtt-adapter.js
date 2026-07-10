@@ -57,22 +57,21 @@ export class BaseFoundryVTTAdapter {
      * Filter and match autorec candidates for a Foundry document (MeasuredTemplate / Region)
      * by calling the system adapter to decide whether an entry should replace the default crosshair.
      * @param {Document|PlaceableObject} target - The template/region placeable or document
-     * @param {Array<Object>|Map<string, Object>} entries - Registered autorec entries
+     * @param {Map<string, Object>} entries - Registered autorec entries map
      * @returns {Object|null} The matching autorec entry or null
      */
     matchAutorecEntry(target, entries) {
         const context = this.extractCallingContext(target);
         if (!context.itemName && !context.itemId) return null;
 
-        const list = entries instanceof Map ? Array.from(entries.values()) : entries;
-
-        for (const entry of list) {
+        for (const entry of entries.values()) {
             if (systemAdapter.shouldReplace(context, entry)) {
-                return { ...(typeof entry === "object" ? entry : { itemName: entry }), item: context.item, activity: context.activity };
+                return { ...entry, item: context.item, activity: context.activity };
             }
         }
         return null;
     }
+
 
 
     /**
