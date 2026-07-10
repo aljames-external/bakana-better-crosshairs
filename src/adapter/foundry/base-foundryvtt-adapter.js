@@ -27,7 +27,7 @@ export class BaseFoundryVTTAdapter {
 
         const result = systemAdapter.extractCallingContext(doc, baseContext);
 
-        log.info("BaseFoundryVTTAdapter.extractCallingContext | Result from systemAdapter:", {
+        log.debug("BaseFoundryVTTAdapter.extractCallingContext | Result from systemAdapter:", {
             itemName: result.itemName,
             itemId: result.itemId,
             activityName: result.activityName,
@@ -48,11 +48,11 @@ export class BaseFoundryVTTAdapter {
         if (!doc || !entries) return null;
         const context = this.extractCallingContext(doc);
         if (!context.itemName && !context.itemId) {
-            log.info("matchAutorecEntry | Could not extract calling item context (missing itemName and itemId) from document:", { doc, context });
+            log.debug("matchAutorecEntry | Could not extract calling item context (missing itemName and itemId) from document:", { doc, context });
             return null;
         }
 
-        log.info("matchAutorecEntry | Comparing calling context against registered entries:", {
+        log.debug("matchAutorecEntry | Comparing calling context against registered entries:", {
             callingItemName: context.itemName,
             callingActivityName: context.activityName,
             entriesCount: entries.size
@@ -79,7 +79,7 @@ export class BaseFoundryVTTAdapter {
 
         for (const entry of candidateEntries) {
             if (systemAdapter.shouldReplace(context, entry)) {
-                log.info(`matchAutorecEntry | [MATCH FOUND] Specific entry "${entry.itemName}" (activity: "${entry.activityName ?? 'ANY'}") matched calling item "${context.itemName}" (activity: "${context.activityName}")`);
+                log.debug(`matchAutorecEntry | [MATCH FOUND] Specific entry "${entry.itemName}" (activity: "${entry.activityName ?? 'ANY'}") matched calling item "${context.itemName}" (activity: "${context.activityName}")`);
                 return { ...entry, item: context.item, activity: context.activity };
             }
         }
@@ -87,11 +87,11 @@ export class BaseFoundryVTTAdapter {
         // 2. If no specific match was found, fall back to the DEFAULT entry if enabled
         const defaultEntry = entries.get("DEFAULT");
         if (defaultEntry && defaultEntry.enabled !== false) {
-            log.info(`matchAutorecEntry | [DEFAULT FALLBACK] No specific item match found for "${context.itemName}"; applying DEFAULT crosshair entry.`);
+            log.debug(`matchAutorecEntry | [DEFAULT FALLBACK] No specific item match found for "${context.itemName}"; applying DEFAULT crosshair entry.`);
             return { ...defaultEntry, item: context.item, activity: context.activity };
         }
 
-        log.info(`matchAutorecEntry | [NO MATCH] No matching autorec entry or enabled DEFAULT entry for calling item "${context.itemName}" (activity: "${context.activityName}")`);
+        log.debug(`matchAutorecEntry | [NO MATCH] No matching autorec entry or enabled DEFAULT entry for calling item "${context.itemName}" (activity: "${context.activityName}")`);
         return null;
     }
 

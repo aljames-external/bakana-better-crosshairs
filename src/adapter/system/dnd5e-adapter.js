@@ -42,13 +42,13 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
         const result = {
             item: itemObj,
             itemName: itemObj?.name || baseContext.itemName || "",
-            itemId: itemObj?.id || baseContext.itemId || "",
+            itemId: itemObj?.id ?? baseContext.itemId ?? "",
             activity: activityObj,
-            activityName: activityObj?.name || baseContext.activityName || "",
-            activityId: activityObj?.id || activityObj?._id || baseContext.activityId || ""
+            activityName: activityObj?.name ?? baseContext.activityName ?? "",
+            activityId: activityObj?.id ?? baseContext.activityId ?? ""
         };
 
-        log.info("Dnd5eSystemAdapter.extractCallingContext | Resolved DnD5e context:", {
+        log.debug("Dnd5eSystemAdapter.extractCallingContext | Resolved DnD5e context:", {
             itemName: result.itemName,
             itemId: result.itemId,
             activityName: result.activityName,
@@ -69,24 +69,24 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
     shouldReplace(context, entry) {
         if (!super.shouldReplace(context, entry)) return false;
 
-        const entryFilterExact = (entry.activityId || "").trim();
-        const entryFilterLower = (entry.activityId || entry.activityName || "").trim().toLowerCase();
+        const entryFilterExact = (entry.activityId ?? "").trim();
+        const entryFilterLower = (entry.activityId ?? entry.activityName ?? "").trim().toLowerCase();
 
         // If the entry specifies no activity filter, it applies to any activity on this item
         if (!entryFilterLower) {
-            log.info(`Dnd5eSystemAdapter.shouldReplace | Entry "${entry.itemName}" specifies no activity filter -> MATCHED`);
+            log.debug(`Dnd5eSystemAdapter.shouldReplace | Entry "${entry.itemName}" specifies no activity filter -> MATCHED`);
             return true;
         }
 
-        const callingActivityId = (context?.activityId || context?.activity?.id || context?.activity?._id || "").trim();
-        const callingActivityName = (context?.activityName || context?.activity?.name || "").trim().toLowerCase();
+        const callingActivityId = (context?.activityId ?? context?.activity?.id ?? "").trim();
+        const callingActivityName = (context?.activityName ?? context?.activity?.name ?? "").trim().toLowerCase();
 
         const match = Boolean(
             (entryFilterExact && callingActivityId && entryFilterExact === callingActivityId) ||
             (entryFilterLower && callingActivityName && entryFilterLower === callingActivityName)
         );
 
-        log.info(`Dnd5eSystemAdapter.shouldReplace | Activity comparison (${match ? 'MATCHED' : 'FAILED'}): calling activity ("${callingActivityName}" / "${callingActivityId}") vs entry activity filter ("${entryFilterLower}" / "${entryFilterExact}")`);
+        log.debug(`Dnd5eSystemAdapter.shouldReplace | Activity comparison (${match ? 'MATCHED' : 'FAILED'}): calling activity ("${callingActivityName}" / "${callingActivityId}") vs entry activity filter ("${entryFilterLower}" / "${entryFilterExact}")`);
         return match;
     }
 }

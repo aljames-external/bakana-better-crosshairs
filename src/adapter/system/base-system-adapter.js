@@ -42,7 +42,7 @@ export class BaseSystemAdapter {
         );
 
         if (!match) {
-            log.info(`BaseSystemAdapter.shouldReplace | Item match FAILED: calling ("${callingName}" / "${callingId}") vs entry ("${entryName}" / "${entryId}")`);
+            log.debug(`BaseSystemAdapter.shouldReplace | Item match FAILED: calling ("${callingName}" / "${callingId}") vs entry ("${entryName}" / "${entryId}")`);
         }
         return match;
     }

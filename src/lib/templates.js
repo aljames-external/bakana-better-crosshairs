@@ -50,7 +50,7 @@ async function handleDrawPreview(placeable) {
         return;
     }
 
-    log.info(`handleDrawPreview | Intercepting template preview for "${entry.itemName}"`);
+    log.debug(`handleDrawPreview | Intercepting template preview for "${entry.itemName}"`);
 
     // 1. Immediately hide the Foundry template/region preview graphic completely so custom Sequencer visuals take over
     crosshairAdapter.hidePreview(placeable);
@@ -183,10 +183,10 @@ async function handleDrawPreview(placeable) {
  * Handle document preCreate (v13 preCreateMeasuredTemplate / v14 preCreateRegion).
  */
 function handlePreCreate(doc, _data, _options, userId) {
-    log.info(`handlePreCreate | [ENTRY] preCreate hook triggered for docName=${doc.documentName}, id=${doc.id}, userId=${userId}, localUser=${game.user.id}`);
+    log.debug(`handlePreCreate | [ENTRY] preCreate hook triggered for docName=${doc.documentName}, id=${doc.id}, userId=${userId}, localUser=${game.user.id}`);
 
     if (userId !== game.user.id) {
-        log.info(`handlePreCreate | [SKIP] Skipping document from remote user ${userId}`);
+        log.debug(`handlePreCreate | [SKIP] Skipping document from remote user ${userId}`);
         return true;
     }
 
@@ -204,40 +204,40 @@ function handlePreCreate(doc, _data, _options, userId) {
                 pending = val;
                 placementKey = key;
                 entry = { itemName: val.itemName, handler: val.config };
-                log.info(`handlePreCreate | [FALLBACK MATCH] Matched active pending placement "${val.itemName}" (key=${key})`);
+                log.debug(`handlePreCreate | [FALLBACK MATCH] Matched active pending placement "${val.itemName}" (key=${key})`);
                 break;
             }
         }
     }
 
-    log.info(`handlePreCreate | [LOOKUP RESULT] entry="${entry?.itemName || null}", hasPending=${Boolean(pending)}, pending.resolved=${pending?.resolved}, pending.coords=`, pending?.coords);
+    log.debug(`handlePreCreate | [LOOKUP RESULT] entry="${entry?.itemName ?? null}", hasPending=${Boolean(pending)}, pending.resolved=${pending?.resolved}, pending.coords=`, pending?.coords);
 
     if (!entry || !pending) {
-        log.info(`handlePreCreate | [PASS] No matching autorec entry or active pending placement. Allowing standard creation.`);
+        log.debug(`handlePreCreate | [PASS] No matching autorec entry or active pending placement. Allowing standard creation.`);
         return true;
     }
 
     // If the sequencer sequence was right-click cancelled, abort placement
     if (pending.cancelled) {
-        log.info(`handlePreCreate | [ABORT] Placement was cancelled by user ("${entry.itemName}"). Returning false.`);
+        log.debug(`handlePreCreate | [ABORT] Placement was cancelled by user ("${entry.itemName}"). Returning false.`);
         pendingPlacements.delete(placementKey);
         return false;
     }
 
     // If the sequencer sequence has resolved with coordinates, update the document
     if (pending.resolved && pending.coords) {
-        log.info(`handlePreCreate | [APPLY] Sequencer placement resolved for "${entry.itemName}". Formatting updateData with coords:`, pending.coords);
-        const updateData = crosshairAdapter.formatDocumentUpdate(doc, pending.coords, pending.config || {});
-        log.info(`handlePreCreate | [APPLY] Formatted updateData payload:`, updateData);
+        log.debug(`handlePreCreate | [APPLY] Sequencer placement resolved for "${entry.itemName}". Formatting updateData with coords:`, pending.coords);
+        const updateData = crosshairAdapter.formatDocumentUpdate(doc, pending.coords, pending.config ?? {});
+        log.debug(`handlePreCreate | [APPLY] Formatted updateData payload:`, updateData);
         doc.updateSource(updateData);
         pendingPlacements.delete(placementKey);
-        log.info(`handlePreCreate | [APPLY COMPLETE] Document source after updateSource:`, doc._source || doc.toObject?.() || doc);
+        log.debug(`handlePreCreate | [APPLY COMPLETE] Document source after updateSource:`, doc._source ?? doc.toObject?.() ?? doc);
         return true;
     }
 
     // If sequence is still interactive/running, defer creation until sequence resolves
     pending.deferredCreateData = doc.toObject();
-    log.info(`handlePreCreate | [DEFER] Sequencer crosshair is still interactive ("${entry.itemName}"). Deferring document creation until click.`);
+    log.debug(`handlePreCreate | [DEFER] Sequencer crosshair is still interactive ("${entry.itemName}"). Deferring document creation until click.`);
     return false;
 }
 
