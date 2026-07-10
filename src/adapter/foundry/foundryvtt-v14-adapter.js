@@ -159,15 +159,21 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      */
     _formatRegionShapeUpdate(originalShape, coords) {
         const shape = foundry.utils.deepClone(originalShape);
+        const pxPerFoot = (canvas?.dimensions?.size || 100) / (canvas?.dimensions?.distance || 5);
+
         if (coords.x !== undefined) shape.x = coords.x;
         if (coords.y !== undefined) shape.y = coords.y;
         if (coords.direction !== undefined || coords.rotation !== undefined) {
             shape.rotation = coords.direction ?? coords.rotation;
         }
         if (coords.distance !== undefined || coords.radius !== undefined) {
-            shape.radius = coords.distance ?? coords.radius;
+            const rawRadius = coords.distance ?? coords.radius;
+            shape.radius = rawRadius <= 1000 ? Math.round(rawRadius * pxPerFoot) : rawRadius;
         }
-        if (coords.width !== undefined) shape.width = coords.width;
+        if (coords.width !== undefined) {
+            const rawWidth = coords.width;
+            shape.width = rawWidth <= 1000 ? Math.round(rawWidth * pxPerFoot) : rawWidth;
+        }
         return shape;
     }
 }
