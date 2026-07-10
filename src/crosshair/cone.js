@@ -24,13 +24,20 @@ async function create(token, config = {}) {
     let targets;
 
     async function coneGraphic(crosshair) { 
+        const gridDist = canvas?.dimensions?.distance || 5;
+        const gridSize = canvas?.dimensions?.size || 100;
+        const lengthPixels = (distance / gridDist) * gridSize;
+        const angleRad = ((angle || 53.13) * Math.PI) / 180;
+        const widthPixels = 2 * lengthPixels * Math.tan(angleRad / 2);
+
         new Sequence()
             .wait(50)
             .effect()
             .name(id)
             .file(coneFile)
             .attachTo(crosshair)
-            .stretchTo(crosshair, {attachTo:true})
+            .anchor({ x: 0, y: 0.5 })
+            .size({ width: lengthPixels, height: widthPixels })
             .opacity(0.8)
             .belowTokens()
             .locally()

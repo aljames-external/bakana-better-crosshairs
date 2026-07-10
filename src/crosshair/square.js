@@ -29,7 +29,7 @@ async function create(token, config = {}) {
         const gridDist = canvas?.dimensions?.distance || 5;
         const gridSize = canvas?.dimensions?.size || 100;
         const lengthPixels = (distance / gridDist) * gridSize;
-        const widthPixels = (width / gridDist) * gridSize;
+        const widthPixels = ((width || distance) / gridDist) * gridSize;
 
         seq.effect()
             .name(id)

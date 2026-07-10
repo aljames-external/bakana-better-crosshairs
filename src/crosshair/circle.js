@@ -50,11 +50,15 @@ async function create(token, config = {}) {
                 .persist();
         }
 
+        const gridDist = canvas?.dimensions?.distance || 5;
+        const gridSize = canvas?.dimensions?.size || 100;
+        const diameterPixels = ((radius * 2) / gridDist) * gridSize;
+
         seq.effect()
             .name(id)
             .file(circleFile)
             .attachTo(crosshair)
-            .scaleToObject()
+            .size({ width: diameterPixels, height: diameterPixels })
             .opacity(0.8)
             .belowTokens()
             .locally()
