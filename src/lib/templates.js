@@ -151,14 +151,25 @@ async function handleDrawPreview(placeable) {
                 activity: entryConfig.activity || entry.activity,
                 scope: autoConfig.scope
             };
-            const explicitType = mergedConfig.type;
+            const explicitType = entryConfig.type;
             const isKnownType = ["circle", "cone", "ray", "square", "rect"].includes(String(explicitType || "").toLowerCase());
             const crosshairType = isKnownType
                 ? (String(explicitType).toLowerCase() === "rect" ? "square" : String(explicitType).toLowerCase())
                 : (detected.type || "circle");
             const builder = crosshair[crosshairType] || crosshair.circle;
-            log.debug(`handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}"`);
-            await builder.play(token, mergedConfig);
+
+            const shapeFileKey = `${crosshairType}File`;
+            const shapeSpecificFile = entryConfig[shapeFileKey]
+                || (typeof entryConfig.file === "string" && entryConfig.file.includes(crosshairType) ? entryConfig.file : null);
+
+            const finalConfig = {
+                ...mergedConfig,
+                type: crosshairType,
+                file: shapeSpecificFile || mergedConfig.file
+            };
+
+            log.debug(`handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}" with config:`, finalConfig);
+            await builder.play(token, finalConfig);
         }
         log.debug(`handleDrawPreview | Sequencer crosshair sequence completed for "${entry.itemName}".`);
     } catch (err) {
