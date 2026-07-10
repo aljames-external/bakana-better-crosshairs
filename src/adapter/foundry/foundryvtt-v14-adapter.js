@@ -102,12 +102,5 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         if (coords.width !== undefined) shape.width = coords.width;
         return shape;
     }
-
-    /**
-     * Resolve placement anchor coordinates {x, y, direction} on a token's edge toward a click coordinate.
-     */
-    resolveAnchorPlacement(token, clickCoords = {}) {
-        return super.resolveAnchorPlacement(token, clickCoords);
-    }
 }
 

@@ -90,12 +90,5 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
         }
         return updateData;
     }
-
-    /**
-     * Resolve placement anchor coordinates {x, y, direction} on a token's edge toward a click coordinate.
-     */
-    resolveAnchorPlacement(token, clickCoords = {}) {
-        return super.resolveAnchorPlacement(token, clickCoords);
-    }
 }
 
