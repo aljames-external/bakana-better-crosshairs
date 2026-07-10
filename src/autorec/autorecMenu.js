@@ -1,6 +1,6 @@
 import { MODULE_ID } from "../lib/constants.js";
 import { log } from "../lib/logger.js";
-import { manager, highlightJavascript } from "../lib/templates.js";
+import { manager } from "../lib/templates.js";
 import { localize } from "../lib/utils.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications?.api || {};
