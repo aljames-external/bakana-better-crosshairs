@@ -4,6 +4,15 @@ import { Token, Ray } from "../lib/compat.js";
 let activeWheelHandler = null;
 let activePointerHandler = null;
 
+export function shouldStickToToken(config, defaultVal = false) {
+    if (!config || typeof config !== "object") return defaultVal;
+    const val = config.stickToToken ?? config.attachToToken ?? config.lockToToken;
+    if (val === undefined || val === null || val === "" || val === "default") return defaultVal;
+    if (val === false || val === "false" || val === "off" || val === "no" || val === 0 || val === "0") return false;
+    if (val === true || val === "true" || val === "on" || val === "yes" || val === 1 || val === "1") return true;
+    return Boolean(val);
+}
+
 function refreshTemplateHighlights(tmpl, newDirDeg, rad) {
     if (!tmpl) return;
     tmpl.direction = newDirDeg;
@@ -225,7 +234,8 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     const clickY = mousePos.y ?? 0;
 
     const isRayOrCone = config.type === "ray" || config.type === "cone" || config.t === "ray" || config.t === "cone";
-    const isAnchored = (config.stickToToken || config.attachToToken || config.lockToToken) && config.token;
+    const isCone = config.type === "cone" || config.t === "cone";
+    const isAnchored = shouldStickToToken(config, isCone) && Boolean(config.token);
     const isV14 = typeof game !== "undefined" && typeof foundry !== "undefined" && foundry.utils.isNewerVersion(game.version, "14");
 
     let x = clickX;

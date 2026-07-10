@@ -1,5 +1,5 @@
 import { closest } from "../lib/filemanager.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript } from "./util.js";
+import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
 
 async function create(token, config = {}) {
     const {
@@ -7,7 +7,7 @@ async function create(token, config = {}) {
         angle = 53.13,
         coneSize = "thin",
         distance = 30,
-        stickToToken = config.stickToToken ?? config.attachToToken ?? config.lockToToken ?? true,
+        stickToToken = shouldStickToToken(config, true),
         file,
         coneFile = file || config.animationFile || closest(`eskie.crosshair.cone.${coneSize}.fantasy_01.white.full`),
         icon = config.icon,

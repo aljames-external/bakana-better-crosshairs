@@ -1,5 +1,5 @@
 import { closest } from "../lib/filemanager.js";
-import { resolveCrosshairPlacement, runConcurrentScript } from "./util.js";
+import { resolveCrosshairPlacement, runConcurrentScript, shouldStickToToken } from "./util.js";
 
 function resolveCircleAsset(pathOrKey, effectSize) {
     const cleanSize = Math.round(effectSize);
@@ -22,7 +22,7 @@ async function create(token, config = {}) {
         showLine = true,
         lineFile = "eskie.crosshair.line.generic_01.white",
         circleFile = resolveCircleAsset(fileArg, effectSize),
-        stickToToken = config.stickToToken ?? config.attachToToken ?? config.lockToToken ?? false,
+        stickToToken = shouldStickToToken(config, false),
         icon = config.icon,
         borderColor = "#ffffff",
         borderAlpha = 0,

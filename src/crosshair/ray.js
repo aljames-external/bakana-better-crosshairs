@@ -1,5 +1,5 @@
 import { closest } from "../lib/filemanager.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript } from "./util.js";
+import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
 
 async function create(token, config = {}) {
     const distance = config.distance ?? config.length ?? config.radius ?? 30;
@@ -7,7 +7,7 @@ async function create(token, config = {}) {
 
     const {
         id = `Ray Crosshair`,
-        stickToToken = config.stickToToken ?? config.attachToToken ?? config.lockToToken ?? false,
+        stickToToken = shouldStickToToken(config, false),
         file,
         rayFile = file || config.animationFile || closest(`eskie.crosshair.ray.fantasy_01.white`),
         icon = config.icon,
