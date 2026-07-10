@@ -248,11 +248,19 @@ function handlePreCreate(doc, _data, _options, userId) {
 async function handleCreateDocument(doc, _options, userId) {
     if (userId !== game.user?.id) return;
 
-    const entry = autorecManager.getRegisteredEntry(doc);
-    const flagsConfig = doc.flags?.bbc;
-    const config = (entry?.handler && typeof entry.handler === "object" ? entry.handler : (flagsConfig || {}));
+    const flagsConfig = doc.flags?.bbc || {};
+    let entry = autorecManager.getRegisteredEntry(doc);
+    if (!entry && flagsConfig.itemName) {
+        const lookupKey = flagsConfig.activityName ? `${flagsConfig.itemName} | ${flagsConfig.activityName}` : flagsConfig.itemName;
+        entry = autorecManager.getRegisteredEntry(lookupKey);
+    }
+    const config = {
+        ...flagsConfig,
+        ...(entry?.handler && typeof entry.handler === "object" ? entry.handler : (entry || {}))
+    };
 
     const code = config.postPlacementCode || config.postCode || config.postRegionCode || config.postTemplateCode;
+    log.debug(`handleCreateDocument | Evaluated post-placement hook for ${doc.documentName} (${doc.id}):`, { hasCode: Boolean(code), code, flagsConfig });
     if (!code || typeof code !== "string" || !code.trim()) return;
 
     const token = canvas.tokens?.controlled?.[0] || undefined;

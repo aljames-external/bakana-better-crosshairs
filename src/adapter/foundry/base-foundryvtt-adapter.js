@@ -165,9 +165,19 @@ export class BaseFoundryVTTAdapter {
         const placedFillAlpha = config.placedFillAlpha !== undefined ? config.placedFillAlpha : config.templateFillAlpha;
         const placedBorderColor = config.placedBorderColor || config.templateBorderColor;
         const placedBorderAlpha = config.placedBorderAlpha !== undefined ? config.placedBorderAlpha : config.templateBorderAlpha;
+        const postPlacementCode = config.postPlacementCode || config.postCode || config.postRegionCode || config.postTemplateCode || "";
 
         const flags = {
-            bbc: { placedFillColor, placedFillAlpha, placedBorderColor, placedBorderAlpha }
+            bbc: {
+                itemName: config.itemName || config.regKey || "",
+                activityName: config.activityName || "",
+                activityId: config.activityId || "",
+                postPlacementCode,
+                placedFillColor,
+                placedFillAlpha,
+                placedBorderColor,
+                placedBorderAlpha
+            }
         };
 
         return { placedFillColor, placedFillAlpha, placedBorderColor, placedBorderAlpha, flags };
