@@ -405,6 +405,35 @@
 
 .bbc-section-body {
     padding: 16px 18px;
+    max-height: 280px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.bbc-section-body::-webkit-scrollbar,
+.bbc-sections-scroll::-webkit-scrollbar,
+.bbc-items-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.bbc-section-body::-webkit-scrollbar-track,
+.bbc-sections-scroll::-webkit-scrollbar-track,
+.bbc-items-list::-webkit-scrollbar-track {
+    background: rgba(15, 18, 28, 0.4);
+    border-radius: 4px;
+}
+
+.bbc-section-body::-webkit-scrollbar-thumb,
+.bbc-sections-scroll::-webkit-scrollbar-thumb,
+.bbc-items-list::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.35);
+    border-radius: 4px;
+}
+
+.bbc-section-body::-webkit-scrollbar-thumb:hover,
+.bbc-sections-scroll::-webkit-scrollbar-thumb:hover,
+.bbc-items-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.6);
 }
 
 .bbc-section-desc {
