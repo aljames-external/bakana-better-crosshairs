@@ -3,40 +3,18 @@ import { Dnd5eSystemAdapter } from "./dnd5e-adapter.js";
 
 export { BaseSystemAdapter, Dnd5eSystemAdapter };
 
-let activeSystemAdapter = null;
+export let systemAdapter = new BaseSystemAdapter();
 
 /**
- * Get or instantiate the active System Adapter based on game.system.id.
- * Only dnd5e returns Dnd5eSystemAdapter (supportsActivities = true).
- * Other systems return BaseSystemAdapter (supportsActivities = false).
+ * Initialize the active System Adapter for the running game system.
+ * Should be called during the 'init' hook.
  * @returns {BaseSystemAdapter|Dnd5eSystemAdapter}
  */
-export function getSystemAdapter() {
-    if (activeSystemAdapter) return activeSystemAdapter;
-
-    const sysId = game?.system?.id;
-    if (sysId === "dnd5e") {
-        activeSystemAdapter = new Dnd5eSystemAdapter();
+export function initializeSystemAdapter() {
+    if (game?.system?.id === "dnd5e") {
+        systemAdapter = new Dnd5eSystemAdapter();
     } else {
-        activeSystemAdapter = new BaseSystemAdapter();
+        systemAdapter = new BaseSystemAdapter();
     }
-    return activeSystemAdapter;
+    return systemAdapter;
 }
-
-/**
- * Reset the cached System Adapter (useful for testing or system changes).
- */
-export function resetSystemAdapter() {
-    activeSystemAdapter = null;
-}
-
-/**
- * Proxy object delegating to the active System Adapter.
- */
-export const systemAdapter = new Proxy({}, {
-    get(target, prop) {
-        const adapter = getSystemAdapter();
-        const value = adapter[prop];
-        return typeof value === "function" ? value.bind(adapter) : value;
-    }
-});

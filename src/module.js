@@ -2,7 +2,7 @@ import { crosshair } from './crosshair/_crosshairs.js';
 import { file, closest, absolutePath } from './lib/filemanager.js';
 import { log } from './lib/logger.js';
 import { autorecManager } from './autorec/autorecManager.js';
-import { systemAdapter, getSystemAdapter } from './adapter/system/index.js';
+import { systemAdapter, initializeSystemAdapter } from './adapter/system/index.js';
 import { attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement, getTokenEdgePoint, snapCoordinates } from './crosshair/util.js';
 import { localize } from './lib/utils.js';
 import './settings.js';
@@ -10,6 +10,8 @@ import { MODULE_ID } from './lib/constants.js';
 
 Hooks.once('init', async () => {
     function setupModule() {
+        initializeSystemAdapter();
+
         function setupApiCalls(exportedFunctions) {
             globalThis.bbc = foundry.utils.mergeObject(
                 globalThis.bbc ?? {},
@@ -41,7 +43,6 @@ Hooks.once('init', async () => {
         setupApiCalls({ manager });
         setupApiCalls({ autorecManager });
         setupApiCalls({ systemAdapter });
-        setupApiCalls({ getSystemAdapter });
         setupApiCalls({ log });
 
         const moduleApi = {
@@ -50,9 +51,9 @@ Hooks.once('init', async () => {
             manager,
             autorecManager,
             systemAdapter,
-            getSystemAdapter,
             log,
         };
+
         const mod = game.modules.get(MODULE_ID);
         if (mod) mod.api = moduleApi;
     }
