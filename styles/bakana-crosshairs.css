@@ -524,6 +524,17 @@
     border-radius: 6px;
 }
 
+.bbc-inline-flex-row {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.bbc-inline-flex-row .bbc-code-pill {
+    margin: 0;
+}
+
 /* --- View / Edit Mode Dynamic Visibility --- */
 .bbc-autorec-container:not(.edit-mode) .edit-only {
     display: none !important;
