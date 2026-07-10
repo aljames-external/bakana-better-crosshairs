@@ -23,12 +23,65 @@ export class AutorecMenuApplication extends FormApplication {
             entries,
             count: entries.length,
             isEmpty: entries.length === 0,
+            isGM: typeof game !== "undefined" ? Boolean(game.user?.isGM) : true,
             menuHint: localize("BBC.autorecMenu.menuHint")
         };
     }
 
     activateListeners(html) {
         super.activateListeners(html);
+
+        // Restore Edit Mode state across re-renders
+        const editToggle = html.find("#bbc-edit-mode-toggle");
+        if (this._editModeActive) {
+            editToggle.prop("checked", true);
+            html.find(".bbc-autorec-container").addClass("edit-mode");
+        }
+
+        // Toggle GM Edit Mode
+        editToggle.on("change", (ev) => {
+            const turningOn = ev.currentTarget.checked;
+            this._editModeActive = turningOn;
+            html.find(".bbc-autorec-container").toggleClass("edit-mode", turningOn);
+
+            // When switching back to non-edit mode, save the page and sync all clients
+            if (!turningOn) {
+                this.saveAllEditedConfigurations(html);
+            }
+        });
+
+        // Prevent checkbox click from switching sidebar tab
+        html.find(".bbc-item-select-checkbox").on("click", (ev) => {
+            ev.stopPropagation();
+        });
+
+        // Batch Remove Selected Workflows
+        html.find(".bbc-remove-selected-btn").on("click", () => {
+            const checked = html.find(".bbc-item-select-checkbox:checked");
+            if (checked.length === 0) {
+                ui.notifications?.warn("Please select one or more workflows to remove.");
+                return;
+            }
+            const names = [];
+            checked.each((_, el) => names.push(el.dataset.itemName));
+            for (const itemName of names) {
+                manager.unregister(itemName, { persist: true });
+            }
+            manager.broadcastSync();
+            ui.notifications?.info(`Removed ${names.length} workflow(s).`);
+            this.render(false);
+        });
+
+        // Single Remove Workflow button in header
+        html.find(".bbc-delete-single-btn").on("click", (ev) => {
+            const itemName = ev.currentTarget.dataset.itemName;
+            if (itemName) {
+                manager.unregister(itemName, { persist: true });
+                manager.broadcastSync();
+                ui.notifications?.info(`Removed workflow "${itemName}".`);
+                this.render(false);
+            }
+        });
 
         // 1. Search Filter
         const searchInput = html.find("#bbc-autorec-search");
@@ -96,6 +149,56 @@ export class AutorecMenuApplication extends FormApplication {
                 el.style.backgroundColor = el.dataset.color;
             }
         });
+    }
+
+    saveAllEditedConfigurations(html) {
+        let savedCount = 0;
+        html.find(".bbc-inspector-detail").each((_, detailEl) => {
+            const itemName = detailEl.dataset.itemName;
+            if (!itemName) return;
+
+            const existingEntry = manager.get(itemName) || {};
+            const config = foundry.utils.deepClone(existingEntry.config || {});
+            let modified = false;
+
+            detailEl.querySelectorAll("[data-field]").forEach(inputEl => {
+                const field = inputEl.dataset.field;
+                if (!field) return;
+
+                let val;
+                if (inputEl.type === "checkbox") {
+                    val = inputEl.checked;
+                } else if (inputEl.type === "number") {
+                    const parsed = parseFloat(inputEl.value);
+                    val = isNaN(parsed) ? undefined : parsed;
+                } else {
+                    val = inputEl.value;
+                    if (val === "") val = undefined;
+                }
+
+                if (field === "type" && val === "Auto-Detect") {
+                    val = undefined;
+                }
+
+                if (config[field] !== val) {
+                    if (val === undefined) delete config[field];
+                    else config[field] = val;
+                    modified = true;
+                }
+            });
+
+            if (modified) {
+                const persist = !config.local;
+                manager.register(itemName, config, { persist, local: Boolean(config.local) });
+                savedCount++;
+            }
+        });
+
+        if (savedCount > 0) {
+            manager.broadcastSync();
+            ui.notifications?.info(`Saved ${savedCount} workflow configuration(s) and synced across all clients.`);
+            this.render(false);
+        }
     }
 
     async _updateObject(event, formData) {

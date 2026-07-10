@@ -4,9 +4,18 @@
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" id="bbc-autorec-search" class="bbc-search-input" placeholder="Filter registered workflows (e.g. Fireball)..." autocomplete="off" />
         </div>
-        <div class="bbc-count-badge">
-            <i class="fa-solid fa-list-check"></i>
-            <span>{{count}} Registered Workflows</span>
+        <div class="bbc-topbar-actions">
+            {{#if isGM}}
+            <label class="bbc-edit-slider-label" title="Enable GM Edit Mode">
+                <span>Edit Mode</span>
+                <input type="checkbox" id="bbc-edit-mode-toggle" class="bbc-edit-toggle-input" />
+                <span class="bbc-edit-slider-track"></span>
+            </label>
+            {{/if}}
+            <div class="bbc-count-badge">
+                <i class="fa-solid fa-list-check"></i>
+                <span>{{count}} Registered Workflows</span>
+            </div>
         </div>
     </header>
 
@@ -22,6 +31,7 @@
             <div class="bbc-items-list">
                 {{#each entries}}
                 <div class="bbc-item-card" data-item-name="{{itemName}}">
+                    <input type="checkbox" class="bbc-item-select-checkbox edit-only" data-item-name="{{itemName}}" title="Select workflow to remove" />
                     <div class="bbc-card-main">
                         <i class="fa-solid fa-crosshairs bbc-item-icon"></i>
                         <span class="bbc-item-name">{{itemName}}</span>
@@ -32,6 +42,11 @@
                     </div>
                 </div>
                 {{/each}}
+            </div>
+            <div class="bbc-sidebar-footer edit-only">
+                <button type="button" class="bbc-remove-selected-btn" title="Remove Checked Workflows">
+                    <i class="fa-solid fa-trash-can"></i> Remove
+                </button>
             </div>
             {{/if}}
         </aside>
@@ -54,6 +69,11 @@
                     <div class="bbc-title-left">
                         <i class="fa-solid fa-crosshairs bbc-detail-icon"></i>
                         <h2>{{itemName}}</h2>
+                    </div>
+                    <div class="bbc-detail-actions edit-only">
+                        <button type="button" class="bbc-delete-single-btn" data-item-name="{{itemName}}" title="Delete Workflow">
+                            <i class="fa-solid fa-trash-can"></i> Remove
+                        </button>
                     </div>
                 </header>
 
@@ -89,70 +109,114 @@
                                 <tbody>
                                     <tr>
                                         <th>Crosshair Shape Type</th>
-                                        <td><span class="bbc-pill">{{type}}</span></td>
+                                        <td>
+                                            <span class="bbc-pill view-only">{{type}}</span>
+                                            <select class="bbc-edit-select edit-only" data-field="type">
+                                                <option value="Auto-Detect" {{#if isAutoDetect}}selected{{/if}}>Auto-Detect</option>
+                                                <option value="circle" {{#if isCircle}}selected{{/if}}>Circle</option>
+                                                <option value="cone" {{#if isCone}}selected{{/if}}>Cone</option>
+                                                <option value="ray" {{#if isRay}}selected{{/if}}>Ray</option>
+                                            </select>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th>Registration Scope</th>
-                                        <td>{{#if isLocal}}<span class="bbc-pill no">Local Only (Session Scope)</span>{{else}}<span class="bbc-pill yes">World Synced (Persisted)</span>{{/if}}</td>
+                                        <td>
+                                            <span class="view-only">{{#if isLocal}}<span class="bbc-pill no">Local Only (Session Scope)</span>{{else}}<span class="bbc-pill yes">World Synced (Persisted)</span>{{/if}}</span>
+                                            <label class="bbc-edit-checkbox-label edit-only">
+                                                <input type="checkbox" class="bbc-edit-checkbox" data-field="local" {{#if isLocal}}checked{{/if}} />
+                                                <span>Local Only (Session Scope)</span>
+                                            </label>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th>Sequencer File Path</th>
                                         <td>
-                                            <code class="bbc-code-pill">{{file}}</code>
+                                            <code class="bbc-code-pill view-only">{{file}}</code>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="file" value="{{file}}" placeholder="Sequencer asset path..." />
                                         </td>
                                     </tr>
                                     <tr>
                                         <th>Custom Function Handler</th>
                                         <td>{{#if isCustomFunction}}<span class="bbc-pill yes">Yes (Custom Script)</span>{{else}}<span class="bbc-pill no">No (Declarative Config)</span>{{/if}}</td>
                                     </tr>
-                                    {{#if distanceDisplay}}
-                                    <tr>
-                                        <th>Distance / Radius</th>
-                                        <td><span class="bbc-pill">{{distanceDisplay}}</span></td>
+                                    <tr class="{{#unless distanceDisplay}}edit-only{{/unless}}">
+                                        <th>Distance / Radius (ft)</th>
+                                        <td>
+                                            <span class="bbc-pill view-only">{{distanceDisplay}}</span>
+                                            <input type="number" class="bbc-edit-input edit-only" data-field="distance" value="{{config.distance}}" placeholder="e.g. 30" />
+                                        </td>
                                     </tr>
-                                    {{/if}}
-                                    {{#if widthDisplay}}
-                                    <tr>
-                                        <th>Ray Width</th>
-                                        <td><span class="bbc-pill">{{widthDisplay}}</span></td>
+                                    <tr class="{{#unless widthDisplay}}edit-only{{/unless}}">
+                                        <th>Ray Width (ft)</th>
+                                        <td>
+                                            <span class="bbc-pill view-only">{{widthDisplay}}</span>
+                                            <input type="number" class="bbc-edit-input edit-only" data-field="width" value="{{config.width}}" placeholder="e.g. 5" />
+                                        </td>
                                     </tr>
-                                    {{/if}}
-                                    {{#if angleDisplay}}
-                                    <tr>
-                                        <th>Cone Angle</th>
-                                        <td><span class="bbc-pill">{{angleDisplay}}</span></td>
+                                    <tr class="{{#unless angleDisplay}}edit-only{{/unless}}">
+                                        <th>Cone Angle (degrees)</th>
+                                        <td>
+                                            <span class="bbc-pill view-only">{{angleDisplay}}</span>
+                                            <input type="number" class="bbc-edit-input edit-only" data-field="angle" value="{{config.angle}}" placeholder="e.g. 53.13" />
+                                        </td>
                                     </tr>
-                                    {{/if}}
                                     <tr>
                                         <th>Lock to Token (Stick)</th>
-                                        <td>{{#if stickToToken}}<span class="bbc-pill yes">Yes (Locked to Origin Token)</span>{{else}}<span class="bbc-pill no">No (Free Cursor Placement)</span>{{/if}}</td>
+                                        <td>
+                                            <span class="view-only">{{#if stickToToken}}<span class="bbc-pill yes">Yes (Locked to Origin Token)</span>{{else}}<span class="bbc-pill no">No (Free Cursor Placement)</span>{{/if}}</span>
+                                            <label class="bbc-edit-checkbox-label edit-only">
+                                                <input type="checkbox" class="bbc-edit-checkbox" data-field="stickToToken" {{#if stickToToken}}checked{{/if}} />
+                                                <span>Lock to origin token</span>
+                                            </label>
+                                        </td>
                                     </tr>
                                     <tr>
                                         <th>Origin Stretch Line</th>
-                                        <td>{{#if showLine}}<span class="bbc-pill yes">Enabled</span> <code class="bbc-code-pill">{{lineFile}}</code>{{else}}<span class="bbc-pill no">Disabled</span>{{/if}}</td>
+                                        <td>
+                                            <span class="view-only">{{#if showLine}}<span class="bbc-pill yes">Enabled</span> <code class="bbc-code-pill">{{lineFile}}</code>{{else}}<span class="bbc-pill no">Disabled</span>{{/if}}</span>
+                                            <div class="bbc-edit-row edit-only">
+                                                <label class="bbc-edit-checkbox-label">
+                                                    <input type="checkbox" class="bbc-edit-checkbox" data-field="showLine" {{#if showLine}}checked{{/if}} />
+                                                    <span>Show Line</span>
+                                                </label>
+                                                <input type="text" class="bbc-edit-input" data-field="lineFile" value="{{lineFile}}" placeholder="eskie.crosshair.line..." />
+                                            </div>
+                                        </td>
                                     </tr>
-                                    {{#if hasCustomStyling}}
-                                    <tr>
+                                    <tr class="{{#unless hasCustomStyling}}edit-only{{/unless}}">
                                         <th>Border Styling (Tile Highlight)</th>
                                         <td>
-                                            <span class="bbc-color-swatch" data-color="{{borderColor}}"></span>
-                                            <code>{{borderColor}}</code> (Alpha: {{borderAlpha}})
+                                            <span class="view-only">
+                                                <span class="bbc-color-swatch" data-color="{{borderColor}}"></span>
+                                                <code>{{borderColor}}</code> (Alpha: {{borderAlpha}})
+                                            </span>
+                                            <div class="bbc-edit-color-row edit-only">
+                                                <input type="color" class="bbc-edit-color" data-field="borderColor" value="{{borderColor}}" />
+                                                <label>Alpha: <input type="number" step="0.1" min="0" max="1" class="bbc-edit-input small" data-field="borderAlpha" value="{{borderAlpha}}" /></label>
+                                            </div>
                                         </td>
                                     </tr>
-                                    <tr>
+                                    <tr class="{{#unless hasCustomStyling}}edit-only{{/unless}}">
                                         <th>Fill Styling (Tile Highlight)</th>
                                         <td>
-                                            <span class="bbc-color-swatch" data-color="{{fillColor}}"></span>
-                                            <code>{{fillColor}}</code> (Alpha: {{fillAlpha}})
+                                            <span class="view-only">
+                                                <span class="bbc-color-swatch" data-color="{{fillColor}}"></span>
+                                                <code>{{fillColor}}</code> (Alpha: {{fillAlpha}})
+                                            </span>
+                                            <div class="bbc-edit-color-row edit-only">
+                                                <input type="color" class="bbc-edit-color" data-field="fillColor" value="{{fillColor}}" />
+                                                <label>Alpha: <input type="number" step="0.1" min="0" max="1" class="bbc-edit-input small" data-field="fillAlpha" value="{{fillAlpha}}" /></label>
+                                            </div>
                                         </td>
                                     </tr>
-                                    {{/if}}
-                                    {{#if icon}}
-                                    <tr>
+                                    <tr class="{{#unless icon}}edit-only{{/unless}}">
                                         <th>Custom Cursor Icon</th>
-                                        <td><code class="bbc-code-pill">{{icon}}</code></td>
+                                        <td>
+                                            <span class="view-only"><code class="bbc-code-pill">{{icon}}</code></span>
+                                            <input type="text" class="bbc-edit-input edit-only" data-field="icon" value="{{icon}}" placeholder="icons/..." />
+                                        </td>
                                     </tr>
-                                    {{/if}}
                                 </tbody>
                             </table>
 

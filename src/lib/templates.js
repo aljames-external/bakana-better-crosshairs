@@ -430,6 +430,16 @@ function initializeReadySync() {
                 if (game.user?.isGM) {
                     unregister(data.itemName, { persist: true });
                 }
+            } else if (data.type === "SYNC_AUTORECS") {
+                try {
+                    const saved = game.settings?.get(MODULE_ID, "registeredTemplates");
+                    if (saved) loadSavedRegistrations(saved);
+                } catch (e) {
+                    log.warn("Failed to load saved registeredTemplates setting", e);
+                }
+                Object.values(ui.windows || {}).forEach(w => {
+                    if (w && w.id === "bbc-autorec-menu") w.render(false);
+                });
             }
         });
     }
@@ -477,6 +487,7 @@ function persistRegistration(itemName, config) {
             saved[itemName] = config;
             game.settings.set(MODULE_ID, "registeredTemplates", saved);
             persistedItemNames.add(itemName);
+            broadcastSync();
         } catch (e) {
             log.warn(`Failed to persist registered template setting for: ${itemName}`, e);
         }
@@ -503,6 +514,7 @@ function persistUnregistration(itemName) {
                 delete saved[itemName];
                 game.settings.set(MODULE_ID, "registeredTemplates", saved);
                 persistedItemNames.delete(itemName);
+                broadcastSync();
             }
         } catch (e) {
             log.warn(`Failed to unpersist template setting for: ${itemName}`, e);
@@ -718,10 +730,19 @@ function getAllEntries() {
             }
         }
 
+        const isCircle = typeKey === "circle";
+        const isCone = typeKey === "cone";
+        const isRay = typeKey === "ray";
+        const isAutoDetect = typeKey === "auto-detect";
+
         results.push({
             itemName,
             type,
             typeKey,
+            isCircle,
+            isCone,
+            isRay,
+            isAutoDetect,
             file: file || "Default Sequencer Asset",
             isCustomFunction,
             isLocal,
@@ -744,6 +765,12 @@ function getAllEntries() {
     return results.sort((a, b) => a.itemName.localeCompare(b.itemName));
 }
 
+function broadcastSync() {
+    if (typeof game !== "undefined" && game.socket) {
+        game.socket.emit(`module.${MODULE_ID}`, { type: "SYNC_AUTORECS" });
+    }
+}
+
 export const manager = {
     getPosition,
     register,
@@ -754,4 +781,5 @@ export const manager = {
     getAllEntries,
     loadSavedRegistrations,
     initializeReadySync,
+    broadcastSync,
 };
