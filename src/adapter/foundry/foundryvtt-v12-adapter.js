@@ -83,7 +83,7 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
         if ("alpha" in (doc._source || doc) && styling.placedFillAlpha !== undefined) updateData.alpha = styling.placedFillAlpha;
 
         if (styling.placedFillColor || styling.placedFillAlpha !== undefined || styling.placedBorderColor || styling.placedBorderAlpha !== undefined) {
-            updateData.flags = foundry.utils.mergeObject(doc.flags || {}, styling.flags);
+            updateData.flags = styling.flags;
         }
         if (config.hidden === true || config.hideTemplate === true) {
             updateData.hidden = true;

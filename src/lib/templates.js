@@ -207,7 +207,6 @@ function handlePreCreate(doc, _data, _options, userId) {
         const updateData = crosshairAdapter.formatDocumentUpdate(doc, pending.coords, pending.config || {});
         log.info(`handlePreCreate | [APPLY] Formatted updateData payload:`, updateData);
         doc.updateSource(updateData);
-        Object.assign(doc, updateData);
         pendingPlacements.delete(placementKey);
         log.info(`handlePreCreate | [APPLY COMPLETE] Document source after updateSource:`, doc._source || doc.toObject?.() || doc);
         return true;
