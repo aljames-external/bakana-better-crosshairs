@@ -90,27 +90,19 @@
                             <span class="bbc-section-tag ready">Javascript Hook</span>
                         </div>
                         <div class="bbc-section-body">
-                            <p class="bbc-section-desc">Executes custom Javascript code concurrently before running the Sequencer <code>.play()</code> cursor animation.</p>
-                            <table class="bbc-config-table">
-                                <tbody>
-                                    <tr>
-                                        <th>Pre-Placement Script</th>
-                                        <td>
-                                            <div class="view-only">
-                                                {{#if concurrentCode}}
-                                                <pre class="bbc-code-preview"><code>{{concurrentCode}}</code></pre>
-                                                {{else}}
-                                                <span class="bbc-pill no">No custom script configured</span>
-                                                {{/if}}
-                                            </div>
-                                            <div class="edit-only">
-                                                <textarea class="bbc-edit-textarea" data-field="concurrentCode" placeholder="// Enter Javascript code to run before .play()&#10;// Available variables: token, actor, item, scope, config, crosshair, canvas, game" rows="4">{{concurrentCode}}</textarea>
-                                                <p class="bbc-hint-text small">Wrapped in <code>try { ... } catch(e) { log.error(e); }</code> before <code>.play()</code>.</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <p class="bbc-section-desc">Executes custom Javascript code concurrently with the region or template placement animation.</p>
+                            <div class="bbc-code-container">
+                                <div class="view-only">
+                                    {{#if concurrentCode}}
+                                    <pre class="bbc-code-preview bbc-js-highlight"><code>{{{concurrentCodeHighlighted}}}</code></pre>
+                                    {{else}}
+                                    <span class="bbc-pill no">No custom script configured</span>
+                                    {{/if}}
+                                </div>
+                                <div class="edit-only">
+                                    <textarea class="bbc-edit-textarea bbc-code-editor" data-field="concurrentCode" spellcheck="false" placeholder="// Enter Javascript code...&#10;// Available variables: token, actor, item, scope, config, crosshair, canvas, game" rows="5">{{concurrentCode}}</textarea>
+                                </div>
+                            </div>
                         </div>
                     </section>
 
@@ -349,26 +341,18 @@
                         </div>
                         <div class="bbc-section-body">
                             <p class="bbc-section-desc">Executes custom Javascript code after the final region or template document has been created on the canvas (called from document creation hook).</p>
-                            <table class="bbc-config-table">
-                                <tbody>
-                                    <tr>
-                                        <th>Post-Placement Script</th>
-                                        <td>
-                                            <div class="view-only">
-                                                {{#if postPlacementCode}}
-                                                <pre class="bbc-code-preview"><code>{{postPlacementCode}}</code></pre>
-                                                {{else}}
-                                                <span class="bbc-pill no">No custom post-placement script configured</span>
-                                                {{/if}}
-                                            </div>
-                                            <div class="edit-only">
-                                                <textarea class="bbc-edit-textarea" data-field="postPlacementCode" placeholder="// Enter Javascript code to run after region/template creation...&#10;// Available variables: doc, token, actor, item, scope, config, canvas, game" rows="4">{{postPlacementCode}}</textarea>
-                                                <p class="bbc-hint-text small">Wrapped in <code>try { ... } catch(e) { log.error(e); }</code> from document creation hook.</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="bbc-code-container">
+                                <div class="view-only">
+                                    {{#if postPlacementCode}}
+                                    <pre class="bbc-code-preview bbc-js-highlight"><code>{{{postPlacementCodeHighlighted}}}</code></pre>
+                                    {{else}}
+                                    <span class="bbc-pill no">No custom post-placement script configured</span>
+                                    {{/if}}
+                                </div>
+                                <div class="edit-only">
+                                    <textarea class="bbc-edit-textarea bbc-code-editor" data-field="postPlacementCode" spellcheck="false" placeholder="// Enter Javascript code...&#10;// Available variables: doc, token, actor, item, scope, config, canvas, game" rows="5">{{postPlacementCode}}</textarea>
+                                </div>
+                            </div>
                         </div>
                     </section>
                 </div>

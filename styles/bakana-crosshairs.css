@@ -697,3 +697,32 @@
     border-color: #6366f1;
     box-shadow: 0 0 12px rgba(99, 102, 241, 0.35);
 }
+
+.bbc-code-container {
+    width: 100%;
+    margin-top: 8px;
+}
+
+/* --- Javascript Syntax Highlighting Token Palette --- */
+.bbc-syn-keyword {
+    color: #c084fc;
+    font-weight: 600;
+}
+
+.bbc-syn-builtin {
+    color: #38bdf8;
+    font-weight: 600;
+}
+
+.bbc-syn-string {
+    color: #34d399;
+}
+
+.bbc-syn-number {
+    color: #fbbf24;
+}
+
+.bbc-syn-comment {
+    color: #64748b;
+    font-style: italic;
+}

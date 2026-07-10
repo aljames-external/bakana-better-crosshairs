@@ -809,6 +809,8 @@ function getAllEntries() {
 
         const concurrentCode = config.concurrentCode || config.preAnimationCode || config.customCode || "";
         const postPlacementCode = config.postPlacementCode || config.postCode || config.postRegionCode || config.postTemplateCode || "";
+        const concurrentCodeHighlighted = highlightJavascript(concurrentCode);
+        const postPlacementCodeHighlighted = highlightJavascript(postPlacementCode);
 
         const knownKeys = new Set([
             "type", "local", "file", "animationFile", "distance", "radius", "length", "width", "angle",
@@ -865,12 +867,36 @@ function getAllEntries() {
             placedBorderAlpha,
             hasPlacedStyling,
             concurrentCode,
+            concurrentCodeHighlighted,
             postPlacementCode,
+            postPlacementCodeHighlighted,
             icon,
             configEntries,
         });
     }
     return results.sort((a, b) => a.itemName.localeCompare(b.itemName));
+}
+
+function highlightJavascript(code) {
+    if (!code || typeof code !== "string") return "";
+
+    let escaped = code
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+    escaped = escaped.replace(/(^|\s)(\/\/.*$)/gm, '$1<span class="bbc-syn-comment">$2</span>');
+    escaped = escaped.replace(/(["'`])((?:\\.|[^\\])*?)\1/g, '<span class="bbc-syn-string">$1$2$1</span>');
+
+    const keywords = /\b(const|let|var|function|async|await|return|if|else|try|catch|for|while|new|true|false|null|undefined|class|import|export)\b/g;
+    escaped = escaped.replace(keywords, '<span class="bbc-syn-keyword">$1</span>');
+
+    const builtins = /\b(token|actor|item|scope|config|crosshair|canvas|game|doc|console|log|ui|Hooks|Sequencer)\b/g;
+    escaped = escaped.replace(builtins, '<span class="bbc-syn-builtin">$1</span>');
+
+    escaped = escaped.replace(/\b(\d+(\.\d+)?)\b/g, '<span class="bbc-syn-number">$1</span>');
+
+    return escaped;
 }
 
 function broadcastSync() {
