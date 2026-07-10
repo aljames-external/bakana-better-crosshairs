@@ -28,16 +28,20 @@ async function create(token, config = {}) {
 
     async function rayGraphic(crosshair) {
         const seq = new Sequence().wait(50);
-        const sizing = crosshairAdapter.formatGraphicSize(distance, width, "ray");
+        const gridDist = canvas?.dimensions?.distance || 5;
+        const gridSize = canvas?.dimensions?.size || 100;
+        const lengthPixels = (distance / gridDist) * gridSize;
+        const widthPixels = Math.max(gridSize, (width / gridDist) * gridSize);
+        const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
 
-        log.debug(`rayGraphic | Sizing ray graphic:`, { distance, width, sizing });
+        log.debug(`rayGraphic | Sizing ray graphic:`, { distance, width, lengthPixels, widthPixels, factor, gridUnits });
 
         seq.effect()
             .name(id)
             .file(rayFile)
             .attachTo(crosshair)
             .anchor({ x: 0, y: 0.5 })
-            .size(sizing.size, { gridUnits: sizing.gridUnits })
+            .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits })
             .opacity(0.8)
             .belowTokens()
             .locally()

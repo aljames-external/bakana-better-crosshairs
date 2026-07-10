@@ -1,12 +1,14 @@
 import { closest } from "../lib/filemanager.js";
+import { crosshairAdapter } from "../adapter/foundry/index.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
 
 async function create(token, config = {}) {
+    const distance = config.distance ?? config.length ?? config.radius ?? 30;
+    const angle = config.angle ?? 53.13;
+
     const {
         id = `Cone Crosshair`,
-        angle = 53.13,
         coneSize = "thin",
-        distance = 30,
         stickToToken = shouldStickToToken(config, true),
         file,
         coneFile = file || config.animationFile || closest(`eskie.crosshair.cone.${coneSize}.fantasy_01.white.full`),
@@ -20,6 +22,8 @@ async function create(token, config = {}) {
 
     config.token = token;
     config.stickToToken = stickToToken;
+    config.distance = distance;
+    config.angle = angle;
 
     let targets;
 
@@ -29,6 +33,7 @@ async function create(token, config = {}) {
         const lengthPixels = (distance / gridDist) * gridSize;
         const angleRad = ((angle || 53.13) * Math.PI) / 180;
         const widthPixels = 2 * lengthPixels * Math.tan(angleRad / 2);
+        const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
 
         new Sequence()
             .wait(50)
@@ -37,7 +42,7 @@ async function create(token, config = {}) {
             .file(coneFile)
             .attachTo(crosshair)
             .anchor({ x: 0, y: 0.5 })
-            .size({ width: lengthPixels, height: widthPixels })
+            .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits })
             .opacity(0.8)
             .belowTokens()
             .locally()

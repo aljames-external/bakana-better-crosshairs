@@ -1,5 +1,6 @@
 import { closest } from "../lib/filemanager.js";
-import { resolveCrosshairPlacement, runConcurrentScript, shouldStickToToken } from "./util.js";
+import { crosshairAdapter } from "../adapter/foundry/index.js";
+import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
 
 function resolveCircleAsset(pathOrKey, effectSize) {
     const cleanSize = Math.round(effectSize);
@@ -53,12 +54,13 @@ async function create(token, config = {}) {
         const gridDist = canvas?.dimensions?.distance || 5;
         const gridSize = canvas?.dimensions?.size || 100;
         const diameterPixels = ((radius * 2) / gridDist) * gridSize;
+        const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
 
         seq.effect()
             .name(id)
             .file(circleFile)
             .attachTo(crosshair)
-            .size({ width: diameterPixels, height: diameterPixels })
+            .size({ width: diameterPixels * factor, height: diameterPixels * factor }, { gridUnits })
             .opacity(0.8)
             .belowTokens()
             .locally()

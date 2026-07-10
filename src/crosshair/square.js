@@ -1,4 +1,5 @@
 import { closest } from "../lib/filemanager.js";
+import { crosshairAdapter } from "../adapter/foundry/index.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
 
 async function create(token, config = {}) {
@@ -8,13 +9,14 @@ async function create(token, config = {}) {
     const {
         id = `Square Crosshair`,
         stickToToken = shouldStickToToken(config, false),
-        file,
-        squareFile = config.squareFile ?? file ?? config.animationFile ?? closest(`eskie.crosshair.ray.fantasy_01.white`),
+        showLine = config.showLine ?? true,
+        squareFile = config.squareFile || closest(`eskie.crosshair.square.fantasy_01.white`),
+        lineFile = config.lineFile || closest(`eskie.crosshair.line.fantasy_01.white`),
+        borderColor = config.borderColor || "#ffffff",
+        borderAlpha = config.borderAlpha ?? 0,
+        fillColor = config.fillColor || "#000000",
+        fillAlpha = config.fillAlpha ?? 0,
         icon = config.icon,
-        borderColor = "#ffffff",
-        borderAlpha = 0,
-        fillColor = "#000000",
-        fillAlpha = 0,
         context = null
     } = config;
 
@@ -30,13 +32,14 @@ async function create(token, config = {}) {
         const gridSize = canvas?.dimensions?.size || 100;
         const lengthPixels = (distance / gridDist) * gridSize;
         const widthPixels = ((width || distance) / gridDist) * gridSize;
+        const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
 
         seq.effect()
             .name(id)
             .file(squareFile)
             .attachTo(crosshair)
             .anchor({ x: 0, y: 0.5 })
-            .size({ width: lengthPixels, height: widthPixels })
+            .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits })
             .opacity(0.8)
             .belowTokens()
             .locally()

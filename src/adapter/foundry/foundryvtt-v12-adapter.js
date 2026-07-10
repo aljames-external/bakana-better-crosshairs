@@ -41,18 +41,40 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
         };
     }
 
-    /**
-     * Format graphic sizing for Sequencer effects on Foundry V12 (pixel units).
-     */
-    formatGraphicSize(distance = 30, width = 5, shapeType = "ray") {
+    formatGraphicSize(distance = 30, widthOrAngle = 5, shapeType = "ray") {
         const gridDist = canvas?.dimensions?.distance || 5;
         const gridSize = canvas?.dimensions?.size || 100;
         const lengthPixels = (distance / gridDist) * gridSize;
-        const widthPixels = Math.max(gridSize, (width / gridDist) * gridSize);
+
+        if (shapeType === "circle") {
+            const diameterPixels = ((distance * 2) / gridDist) * gridSize;
+            return {
+                size: { width: diameterPixels, height: diameterPixels },
+                gridUnits: false
+            };
+        }
+
+        if (shapeType === "cone") {
+            const angleRad = ((widthOrAngle || 53.13) * Math.PI) / 180;
+            const widthPixels = 2 * lengthPixels * Math.tan(angleRad / 2);
+            return {
+                size: { width: lengthPixels, height: widthPixels },
+                gridUnits: false
+            };
+        }
+
+        const widthPixels = ((widthOrAngle || distance) / gridDist) * gridSize;
         return {
-            size: { width: lengthPixels, height: widthPixels },
+            size: { width: lengthPixels, height: Math.max(gridSize, widthPixels) },
             gridUnits: false
         };
+    }
+
+    /**
+     * Return template pixel multiplier factor for V12 (legacy pixel sizing).
+     */
+    getTemplatePixelFactor() {
+        return { factor: 1, gridUnits: false };
     }
 
 
