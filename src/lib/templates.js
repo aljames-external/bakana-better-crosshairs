@@ -66,8 +66,7 @@ async function handleDrawPreview(placeable) {
         resolved: false,
         cancelled: false,
         coords: null,
-        originalTemplate: placeable,
-        config: typeof entry.handler === "object" && entry.handler !== null ? entry.handler : {}
+        config: (typeof entry.handler === "object" && entry.handler !== null ? entry.handler : (typeof entry === "object" && entry !== null ? entry : {}))
     };
     pendingPlacements.set(placementKey, pending);
 
@@ -142,7 +141,8 @@ async function handleDrawPreview(placeable) {
         if (typeof entry.handler === "function") {
             await entry.handler(token, autoConfig);
         } else {
-            const mergedConfig = foundry.utils.mergeObject(autoConfig, entry.handler || {}, { inplace: false });
+            const entryConfig = (typeof entry.handler === "object" && entry.handler !== null ? entry.handler : (typeof entry === "object" && entry !== null ? entry : {}));
+            const mergedConfig = foundry.utils.mergeObject(autoConfig, entryConfig, { inplace: false });
             const crosshairType = mergedConfig.type || "circle";
             const builder = crosshair[crosshairType] || crosshair.circle;
             log.debug(`handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}"`);
