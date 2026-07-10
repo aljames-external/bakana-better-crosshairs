@@ -120,13 +120,50 @@ export class AutorecMenuApplication extends BaseApplication {
             });
         }
 
-        // Ensure Prism highlights code blocks on application render
-        if (typeof window !== "undefined" && window.Prism?.highlightAllUnder) {
-            try {
-                window.Prism.highlightAllUnder(root);
-            } catch (e) {
-                log.debug("Prism highlightAllUnder failed", e);
-            }
+        // Add New Workflow Button
+        const addWorkflowBtn = root.querySelector(".bbc-add-workflow-btn");
+        if (addWorkflowBtn) {
+            addWorkflowBtn.addEventListener("click", async () => {
+                const DialogClass = window.Dialog || foundry.applications?.api?.DialogV2;
+                let newName = null;
+
+                if (typeof DialogClass === "function" && DialogClass.prompt) {
+                    try {
+                        newName = await DialogClass.prompt({
+                            title: "Add New Crosshair Workflow",
+                            content: `
+                                <form>
+                                    <div class="form-group">
+                                        <label>Workflow Item Name:</label>
+                                        <input type="text" name="workflowName" placeholder="e.g. Fireball or Longbow" autofocus />
+                                    </div>
+                                </form>
+                            `,
+                            label: "Add Workflow",
+                            callback: (html) => {
+                                const input = html[0]?.querySelector ? html[0].querySelector("input[name='workflowName']") : (html.querySelector ? html.querySelector("input[name='workflowName']") : null);
+                                return input?.value?.trim() || null;
+                            }
+                        });
+                    } catch (e) {
+                        newName = null;
+                    }
+                } else {
+                    newName = window.prompt("Enter new crosshair workflow Item Name:");
+                }
+
+                if (!newName || !newName.trim()) return;
+                newName = newName.trim();
+
+                if (!manager.has(newName)) {
+                    manager.register(newName, { type: "circle", distance: 30 }, { persist: true });
+                    manager.broadcastSync();
+                    ui.notifications?.info(`Added workflow: "${newName}".`);
+                }
+
+                this.selectItem(root, newName);
+                this.render(false);
+            });
         }
 
         // Prevent checkbox click from switching sidebar tab

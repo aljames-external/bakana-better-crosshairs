@@ -22,6 +22,15 @@
     <div class="bbc-autorec-layout">
         <!-- Left Sidebar: Registered Item Names -->
         <aside class="bbc-sidebar">
+            <div class="bbc-sidebar-actions edit-only">
+                <button type="button" class="bbc-add-workflow-btn" title="Add New Workflow">
+                    <i class="fa-solid fa-plus"></i> Add
+                </button>
+                <button type="button" class="bbc-remove-selected-btn" title="Remove Checked Workflows">
+                    <i class="fa-solid fa-trash-can"></i> Remove
+                </button>
+            </div>
+
             {{#if isEmpty}}
             <div class="bbc-sidebar-empty">
                 <i class="fa-solid fa-folder-open"></i>
@@ -43,11 +52,6 @@
                     {{/if}}
                 </div>
                 {{/each}}
-            </div>
-            <div class="bbc-sidebar-footer edit-only">
-                <button type="button" class="bbc-remove-selected-btn" title="Remove Checked Workflows">
-                    <i class="fa-solid fa-trash-can"></i> Remove
-                </button>
             </div>
             {{/if}}
         </aside>
