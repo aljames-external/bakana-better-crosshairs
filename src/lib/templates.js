@@ -21,9 +21,9 @@ function isOwner(doc) {
  */
 function detectTemplateProperties(target) {
     const doc = target.document ?? target;
-    const props = crosshairAdapter.detectProperties(doc);
-    return { ...props, radius: props.distance };
+    return crosshairAdapter.detectProperties(doc);
 }
+
 
 /**
  * Handle preview drawing (v13 drawMeasuredTemplate / v14 drawRegion).

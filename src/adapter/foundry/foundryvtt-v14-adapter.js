@@ -35,13 +35,15 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
         return {
             type: shapeType,
-            distance: distance,
+            distance,
+            radius: distance,
             width: shape.width || 0,
             angle: shape.angle || 0,
             x: shape.x || 0,
             y: shape.y || 0
         };
     }
+
 
     /**
      * Update live canvas preview shape coordinates during mouse drag.

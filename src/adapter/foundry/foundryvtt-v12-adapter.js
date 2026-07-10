@@ -29,15 +29,18 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
             ray: "ray",
             rect: "square"
         };
+        const distance = doc.distance || 0;
         return {
             type: shapeMap[doc.t] || "circle",
-            distance: doc.distance || 0,
+            distance,
+            radius: distance,
             width: doc.width || 0,
             angle: doc.angle || 0,
             x: doc.x || 0,
             y: doc.y || 0
         };
     }
+
 
     /**
      * Update live canvas preview shape coordinates during mouse drag.
