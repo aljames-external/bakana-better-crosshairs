@@ -13,11 +13,15 @@
         "minimum": "12",
         "verified": "14"
     },
+    "scripts": [
+        "lib/prism/prism.min.js"
+    ],
     "esmodules": [
         "src/module.js"
     ],
     "styles": [
-        "styles/bakana-crosshairs.css"
+        "styles/bakana-crosshairs.css",
+        "lib/prism/prism-okaidia.css"
     ],
     "languages": [
         {
