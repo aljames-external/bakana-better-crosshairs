@@ -68,7 +68,7 @@ async function create(token, config = {}) {
             .fillColor(fillColor, { alpha: fillAlpha });
 
     if (stickToToken && token) {
-        circle.location(token);
+        circle.location(token, { lockToEdge: true, lockToEdgeDirection: false });
     }
 
     if (icon) {
