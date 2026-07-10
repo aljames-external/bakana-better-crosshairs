@@ -267,10 +267,10 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
     async saveAllEditedConfigurations(root) {
         let modifiedAny = false;
         root.querySelectorAll(".bbc-inspector-detail").forEach(detailEl => {
-            const itemName = detailEl.dataset.itemName;
-            if (!itemName) return;
+            const regKey = detailEl.dataset.itemName;
+            if (!regKey) return;
 
-            const existingEntry = manager.get(itemName) || {};
+            const existingEntry = manager.registeredHandlers.get(regKey) || manager.get(regKey) || {};
             const existingHandler = existingEntry.handler || existingEntry.config || existingEntry;
             const config = foundry.utils.deepClone(typeof existingHandler === "object" ? existingHandler : {});
             let modified = false;
@@ -301,18 +301,18 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             });
 
             if (modified) {
-                manager.register(itemName, config, { persist: false, local: Boolean(config.local) });
+                manager.register(regKey, config, { persist: false, local: Boolean(config.local) });
                 modifiedAny = true;
             }
         });
 
         if (modifiedAny) {
             const persistedDict = {};
-            for (const itemName of manager.list()) {
-                const entry = manager.get(itemName);
+            for (const regKey of manager.list()) {
+                const entry = manager.registeredHandlers.get(regKey) || manager.get(regKey);
                 const handler = entry?.handler || entry?.config || entry;
                 if (handler && typeof handler === "object" && !handler.local && typeof handler !== "function") {
-                    persistedDict[itemName] = handler;
+                    persistedDict[regKey] = handler;
                 }
             }
             await manager.overwrite(persistedDict);

@@ -79,14 +79,17 @@ export class AutorecManager {
     }
 
     indexRegistration(registeredKey, handler) {
-        const itemName = handler?.itemName || registeredKey;
-        const activityId = handler?.activityId || "";
-        const activityName = handler?.activityName || "";
-        const entry = typeof handler === "object" && handler !== null ? { ...handler, itemName } : { itemName, handler };
+        const itemName = handler?.itemName || registeredKey.split(" | ")[0].trim();
+        const activityId = (handler?.activityId || "").trim();
+        const activityName = (handler?.activityName || "").trim();
+        const entry = typeof handler === "object" && handler !== null
+            ? { ...handler, id: registeredKey, regKey: registeredKey, itemName }
+            : { id: registeredKey, regKey: registeredKey, itemName, handler };
 
         this.fastLookupMap.set(registeredKey, entry);
         this.fastLookupMap.set(registeredKey.toLowerCase(), entry);
-        if (itemName) {
+
+        if (itemName && !activityId && !activityName) {
             this.fastLookupMap.set(itemName, entry);
             this.fastLookupMap.set(itemName.toLowerCase(), entry);
         }
@@ -105,6 +108,34 @@ export class AutorecManager {
     }
 
     /**
+     * Get all registered candidate entries for a given item name, ordered:
+     * - Entries WITH an activity filter specified come first (most specific).
+     * - Entries WITHOUT an activity filter come last (general item fallback).
+     * - Within tiebreaks, order is preserved front-to-back (first registered wins).
+     */
+    getEntriesForItem(itemName) {
+        if (!itemName) return [];
+        const cleanName = String(itemName).trim().toLowerCase();
+        const candidates = [];
+        for (const [key, entry] of this.registeredHandlers.entries()) {
+            if (key === "DEFAULT" || entry.isDefault || entry.itemName === "DEFAULT") continue;
+            if (entry.enabled === false) continue;
+            const eItem = (entry.itemName || key.split(" | ")[0] || "").trim().toLowerCase();
+            if (eItem === cleanName || key.toLowerCase() === cleanName) {
+                candidates.push(entry);
+            }
+        }
+        candidates.sort((a, b) => {
+            const aHasAct = Boolean((a.activityId || a.activityName || "").trim());
+            const bHasAct = Boolean((b.activityId || b.activityName || "").trim());
+            if (aHasAct && !bHasAct) return -1;
+            if (!aHasAct && bHasAct) return 1;
+            return 0;
+        });
+        return candidates;
+    }
+
+    /**
      * Match a template/region document or placeable to a registered autorec workflow.
      * Delegates document inspection to the Foundry Adapter, which in turn calls the System Adapter
      * for additional item and activity filtering.
@@ -114,7 +145,7 @@ export class AutorecManager {
         if (typeof target === "string") {
             return this.fastLookupMap.get(target) || this.fastLookupMap.get(target.toLowerCase()) || null;
         }
-        return crosshairAdapter.matchAutorecEntry(target, this.registeredHandlers);
+        return crosshairAdapter.matchAutorecEntry(target, this.registeredHandlers, this);
     }
 
 
