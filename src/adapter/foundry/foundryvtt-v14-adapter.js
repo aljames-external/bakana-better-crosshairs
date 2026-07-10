@@ -12,7 +12,6 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      */
     registerPlacementHooks(callbacks) {
         Hooks.on("drawMeasuredTemplate", (template) => callbacks.onDrawPreview(template));
-        Hooks.on("drawRegion", (region) => callbacks.onDrawPreview(region));
         Hooks.on("preCreateRegion", (doc, _data, _options, userId) => callbacks.onPreCreate(doc, _data, _options, userId));
         Hooks.on("createRegion", (doc, _options, userId) => callbacks.onCreate(doc, _options, userId));
     }
