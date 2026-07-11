@@ -1,4 +1,5 @@
 import { log } from "./logger.js";
+import { localize } from "./utils.js";
 
 /**
  * Checks if the versions are in ascending order.
@@ -60,16 +61,16 @@ function _isActivated(dependency) {
  */
 function _versionMessageAppend(dependency, version) {
     let msg = '';
-    if (dependency?.min) msg += `\n\tMinimum version: ${dependency?.min}`;
-    if (dependency?.max) msg += `\n\tMaximum version: ${dependency?.max}`;
-    msg += (version) ? `\n\tCurrent version: ${version}` : ``;
-    msg += `\n\tCurrent state: `;
+    if (dependency?.min) msg += `\n\t${localize("BBC.Dependency.MinVersion", "Minimum version: ")}${dependency?.min}`;
+    if (dependency?.max) msg += `\n\t${localize("BBC.Dependency.MaxVersion", "Maximum version: ")}${dependency?.max}`;
+    msg += (version) ? `\n\t${localize("BBC.Dependency.CurVersion", "Current version: ")}${version}` : ``;
+    msg += `\n\t${localize("BBC.Dependency.CurState", "Current state: ")}`;
 
     const entity = _getEntity(dependency);
     const compatible = _isAscending(dependency.min, version, dependency.max);
-    if (!entity) return (msg + 'NOT INSTALLED');
-    else if (!compatible) msg += 'INCOMPATIBLE';
-    else if (!entity.active) msg += 'NOT ACTIVATED';
+    if (!entity) return (msg + localize("BBC.Dependency.StateNotInstalled", "NOT INSTALLED"));
+    else if (!compatible) msg += localize("BBC.Dependency.StateIncompatible", "INCOMPATIBLE");
+    else if (!entity.active) msg += localize("BBC.Dependency.StateNotActivated", "NOT ACTIVATED");
     else msg += '[AN UNKNOWN ERROR OCCURRED]';
 
     return msg;
@@ -81,7 +82,7 @@ function isActivated(dependency, warnMessage) {
     if (!valid && warnMessage) {
         if (warnMessage.length) warnMessage += '\n';
         const depRef = dependency?.id + ((dependency?.ref) ? ` (${dependency?.ref})` : '');
-        warnMessage += `Warning: ${depRef} is not activated and between expected versions:`;
+        warnMessage += `${localize("BBC.Dependency.WarnNotActivated", "Warning: not activated and between expected versions:")} ${depRef}`;
         warnMessage += _versionMessageAppend(dependency, _getEntity(dependency)?.version);
         log.warn(warnMessage);
     }
@@ -93,7 +94,7 @@ function isInstalled(dependency, warnMessage) {
     if (!valid && warnMessage) {
         if (warnMessage.length) warnMessage += '\n';
         const depRef = dependency?.id + ((dependency?.ref) ? ` (${dependency?.ref})` : '');
-        warnMessage += `Warning: ${depRef} is not installed and between expected versions:`;
+        warnMessage += `${localize("BBC.Dependency.WarnNotInstalled", "Warning: not installed and between expected versions:")} ${depRef}`;
         warnMessage += _versionMessageAppend(dependency, _getEntity(dependency)?.version);
         log.warn(warnMessage);
     }
@@ -106,7 +107,7 @@ function isInstalled(dependency, warnMessage) {
  * @returns {boolean} Whether the dependency is activated.
  */
 function hasRecommended(dependency) {
-    return isActivated(dependency, 'Recommend installing the following:');
+    return isActivated(dependency, localize("BBC.Dependency.RecommendInstalling", "Recommend installing the following:"));
 }
 
 /**
@@ -118,7 +119,7 @@ function hasSomeRecommended(dependencyList) {
     for (let dependency of dependencyList)
         if (isActivated(dependency)) return true;
 
-    let warnMsg = 'Recommend installing one of the following:';
+    let warnMsg = localize("BBC.Dependency.RecommendInstallingOne", "Recommend installing one of the following:");
     for (let dependency of dependencyList) {
         warnMsg += `\nModule: ${dependency?.id}`;
         if (dependency?.ref) warnMsg += ` (${dependency?.ref})`;
@@ -134,7 +135,7 @@ function hasSomeRecommended(dependencyList) {
  */
 function required(dependencyList) {
     if (!Array.isArray(dependencyList)) return required([dependencyList]);
-    let errorMsg = `Requires all of the following to be installed and activated:\n`;
+    let errorMsg = localize("BBC.Dependency.RequiresAll", "Requires all of the following to be installed and activated:\n");
     let dependencyMet = true;
 
     for (let dependency of dependencyList) {
@@ -155,7 +156,7 @@ function required(dependencyList) {
  * @returns {null | throw}
  */
 function someRequired(dependencyList) {
-    let errorMsg = `Requires at least one of the following to be installed and activated:\n`;
+    let errorMsg = localize("BBC.Dependency.RequiresOne", "Requires at least one of the following to be installed and activated:\n");
 
     for (let dependency of dependencyList) {
         if (_isActivated(dependency)) return;

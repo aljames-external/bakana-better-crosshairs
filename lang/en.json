@@ -128,6 +128,21 @@
             "JB2A": "Both JB2A Patreon and Free are activated, both modules use the path `jb2a.` to prefix files. This will cause conflicts! Recommend disabling / uninstalling the free version.",
             "BLFX": "Both Boss Loot Assets Premium and Free are activated, both modules use the path `blfx.` to prefix files. This will cause conflicts! Recommend disabling / uninstalling the free version."
         },
+        "Dependency": {
+            "MinVersion": "Minimum version: ",
+            "MaxVersion": "Maximum version: ",
+            "CurVersion": "Current version: ",
+            "CurState": "Current state: ",
+            "StateNotInstalled": "NOT INSTALLED",
+            "StateIncompatible": "INCOMPATIBLE",
+            "StateNotActivated": "NOT ACTIVATED",
+            "WarnNotActivated": "Warning: not activated and between expected versions:",
+            "WarnNotInstalled": "Warning: not installed and between expected versions:",
+            "RecommendInstalling": "Recommend installing the following:",
+            "RecommendInstallingOne": "Recommend installing one of the following:",
+            "RequiresAll": "Requires all of the following to be installed and activated:\n",
+            "RequiresOne": "Requires at least one of the following to be installed and activated:\n"
+        },
         "Units": {
             "Feet": "ft"
         }
