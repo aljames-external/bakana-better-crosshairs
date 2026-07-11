@@ -121,7 +121,7 @@ function hasSomeRecommended(dependencyList) {
 
     let warnMsg = localize("BBC.Dependency.RecommendInstallingOne", "Recommend installing one of the following:");
     for (let dependency of dependencyList) {
-        warnMsg += `\nModule: ${dependency?.id}`;
+        warnMsg += `\n${localize("BBC.Dependency.ModuleLabel", "Module: ")}${dependency?.id}`;
         if (dependency?.ref) warnMsg += ` (${dependency?.ref})`;
     }
     log.warn(warnMsg);
@@ -143,7 +143,7 @@ function required(dependencyList) {
         dependencyMet = false;
 
         const depRef = dependency?.id + ((dependency?.ref) ? ` (${dependency?.ref})` : '');
-        errorMsg += `\nModule: ${depRef}`;
+        errorMsg += `\n${localize("BBC.Dependency.ModuleLabel", "Module: ")}${depRef}`;
         errorMsg += _versionMessageAppend(dependency, _getEntity(dependency)?.version);
     }
 
@@ -162,7 +162,7 @@ function someRequired(dependencyList) {
         if (_isActivated(dependency)) return;
         if (errorMsg.length) errorMsg += '\n';
         const depRef = dependency?.id + ((dependency?.ref) ? ` (${dependency?.ref})` : '');
-        errorMsg += `Module: ${depRef}`;
+        errorMsg += `${localize("BBC.Dependency.ModuleLabel", "Module: ")}${depRef}`;
         errorMsg += _versionMessageAppend(dependency, _getEntity(dependency)?.version);
     }
     throw errorMsg;
