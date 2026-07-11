@@ -231,7 +231,7 @@ export class AutorecManager {
             } catch (e) {
                 log.error(`Failed to persist registered template setting for: ${itemName}`, e);
             }
-        } else if (game.socket) {
+        } else {
             game.socket.emit(`module.${MODULE_ID}`, {
                 type: "REGISTER_TEMPLATE",
                 itemName,
@@ -262,7 +262,7 @@ export class AutorecManager {
             } catch (e) {
                 log.error(`Failed to unpersist template setting for: ${itemName}`, e);
             }
-        } else if (game.socket) {
+        } else {
             game.socket.emit(`module.${MODULE_ID}`, {
                 type: "UNREGISTER_TEMPLATE",
                 itemName
@@ -449,7 +449,7 @@ export class AutorecManager {
                 } catch (e) {
                     log.error("Failed to batch persist template registrations:", e);
                 }
-            } else if (game.socket) {
+            } else {
                 for (const [itemName, config] of Object.entries(toPersist)) {
                     game.socket.emit(`module.${MODULE_ID}`, { type: "REGISTER_TEMPLATE", itemName, config });
                 }
@@ -473,7 +473,7 @@ export class AutorecManager {
             } catch (e) {
                 log.error("Failed to overwrite registeredTemplates setting:", e);
             }
-        } else if (game.socket) {
+        } else {
             game.socket.emit(`module.${MODULE_ID}`, {
                 type: "OVERWRITE_TEMPLATES",
                 persistedDict
