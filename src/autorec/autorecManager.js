@@ -285,7 +285,7 @@ export class AutorecManager {
         }
 
         for (const [itemName, rawConfig] of Object.entries(savedRegistrations)) {
-            const config = rawConfig?.handler ?? rawConfig?.config ?? rawConfig;
+            const config = rawConfig?.handler ?? rawConfig;
             const current = this.registeredHandlers.get(itemName);
             const isCurrentLocal = Boolean(current?.local);
             if (!isCurrentLocal) {
