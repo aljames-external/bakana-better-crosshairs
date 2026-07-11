@@ -139,7 +139,7 @@ export function absolutePath(configPath) {
     const resolvedConfig = closest(configPath);
     try {
         const entry = Sequencer.Database.getEntry(resolvedConfig, { softFail: true });
-        return (typeof entry === 'string') ? entry : (entry?.file || entry?.files?.[0] || resolvedConfig);
+        return (typeof entry === 'string') ? entry : (entry?.file ?? entry?.files?.[0] ?? resolvedConfig);
     } catch (e) {
         log.debug(`filemanager | Failed to resolve Sequencer entry for: ${resolvedConfig}`, e);
         return resolvedConfig;

@@ -1,3 +1,5 @@
+import { log } from "./logger.js";
+
 /**
  * Checks if the versions are in ascending order.
  * @param {string} min The minimum version.
@@ -16,7 +18,7 @@ function _isAscending(min, version, max) {
 function _getEntity(dependency) {
     const isModule = game.modules.get(dependency?.id);
     const entity = isModule ? game.modules.get(dependency?.id) : globalThis[dependency?.id];
-    if (dependency?.id == 'foundry') return game;
+    if (dependency?.id === 'foundry') return game;
     return entity;
 }
 
@@ -81,7 +83,7 @@ function isActivated(dependency, warnMessage) {
         const depRef = dependency?.id + ((dependency?.ref) ? ` (${dependency?.ref})` : '');
         warnMessage += `Warning: ${depRef} is not activated and between expected versions:`;
         warnMessage += _versionMessageAppend(dependency, _getEntity(dependency)?.version);
-        console.warn(warnMessage);
+        log.warn(warnMessage);
     }
     return valid;
 }
@@ -93,7 +95,7 @@ function isInstalled(dependency, warnMessage) {
         const depRef = dependency?.id + ((dependency?.ref) ? ` (${dependency?.ref})` : '');
         warnMessage += `Warning: ${depRef} is not installed and between expected versions:`;
         warnMessage += _versionMessageAppend(dependency, _getEntity(dependency)?.version);
-        console.warn(warnMessage);
+        log.warn(warnMessage);
     }
     return valid;
 }
@@ -121,7 +123,7 @@ function hasSomeRecommended(dependencyList) {
         warnMsg += `\nModule: ${dependency?.id}`;
         if (dependency?.ref) warnMsg += ` (${dependency?.ref})`;
     }
-    console.warn(warnMsg);
+    log.warn(warnMsg);
     return false;
 }
 

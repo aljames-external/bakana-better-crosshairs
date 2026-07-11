@@ -181,9 +181,9 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
 
         if (searchInput) {
             searchInput.addEventListener("input", (ev) => {
-                const query = (ev.target.value || "").toLowerCase().trim();
+                const query = (ev.target.value ?? "").toLowerCase().trim();
                 cards.forEach(el => {
-                    const name = el.dataset.itemName?.toLowerCase() || "";
+                    const name = el.dataset.itemName?.toLowerCase() ?? "";
                     el.style.display = (!query || name.includes(query)) ? "flex" : "none";
                 });
             });
@@ -270,8 +270,8 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             const regKey = detailEl.dataset.itemName;
             if (!regKey) return;
 
-            const existingEntry = manager.registeredHandlers.get(regKey) || manager.get(regKey) || {};
-            const existingHandler = existingEntry.handler || existingEntry.config || existingEntry;
+            const existingEntry = manager.registeredHandlers.get(regKey) ?? manager.get(regKey) ?? {};
+            const existingHandler = existingEntry.handler ?? existingEntry.config ?? existingEntry;
             const config = foundry.utils.deepClone(typeof existingHandler === "object" ? existingHandler : {});
             let modified = false;
 
@@ -309,8 +309,8 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
         if (modifiedAny) {
             const persistedDict = {};
             for (const regKey of manager.list()) {
-                const entry = manager.registeredHandlers.get(regKey) || manager.get(regKey);
-                const handler = entry?.handler || entry?.config || entry;
+                const entry = manager.registeredHandlers.get(regKey) ?? manager.get(regKey);
+                const handler = entry?.handler ?? entry?.config ?? entry;
                 if (handler && typeof handler === "object" && !handler.local && typeof handler !== "function") {
                     persistedDict[regKey] = handler;
                 }

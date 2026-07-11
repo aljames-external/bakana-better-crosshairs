@@ -194,7 +194,7 @@ export class AutorecManager {
 
         if (game.user?.isGM) {
             try {
-                const saved = foundry.utils.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") || {});
+                const saved = foundry.utils.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") ?? {});
                 saved[itemName] = config;
                 game.settings.set(MODULE_ID, "registeredTemplates", saved);
                 this.persistedItemNames.add(itemName);
@@ -219,7 +219,7 @@ export class AutorecManager {
 
         if (game.user?.isGM) {
             try {
-                const saved = foundry.utils.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") || {});
+                const saved = foundry.utils.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") ?? {});
                 if (itemName in saved) {
                     delete saved[itemName];
                     game.settings.set(MODULE_ID, "registeredTemplates", saved);
@@ -268,7 +268,7 @@ export class AutorecManager {
             this.registeredHandlers.set("DEFAULT", { ...DEFAULT_AUTOREC_ENTRY });
             this.indexRegistration("DEFAULT", { ...DEFAULT_AUTOREC_ENTRY });
         } else {
-            const currentDefault = this.registeredHandlers.get("DEFAULT") || {};
+            const currentDefault = this.registeredHandlers.get("DEFAULT") ?? {};
             this.registeredHandlers.set("DEFAULT", {
                 ...DEFAULT_AUTOREC_ENTRY,
                 ...(typeof currentDefault === "object" ? currentDefault : {}),
@@ -382,7 +382,7 @@ export class AutorecManager {
         if (persist && Object.keys(toPersist).length > 0) {
             if (game.user?.isGM) {
                 try {
-                    const saved = foundry.utils.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") || {});
+                    const saved = foundry.utils.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") ?? {});
                     Object.assign(saved, toPersist);
                     await game.settings.set(MODULE_ID, "registeredTemplates", saved);
                     this.broadcastSync();
@@ -467,10 +467,10 @@ export class AutorecManager {
                 isLocal = true;
             }
 
-            const circleFile = config.circleFile || config.file || "eskie.crosshair.circle.fantasy_01.white.full";
-            const coneFile = config.coneFile || config.file || "eskie.crosshair.cone.thin.fantasy_01.white.full";
-            const rayFile = config.rayFile || config.file || "eskie.crosshair.ray.fantasy_01.white";
-            const squareFile = config.squareFile || config.rayFile || config.file || "eskie.crosshair.ray.fantasy_01.white";
+            const circleFile = config.circleFile ?? config.file ?? "eskie.crosshair.circle.fantasy_01.white.full";
+            const coneFile = config.coneFile ?? config.file ?? "eskie.crosshair.cone.thin.fantasy_01.white.full";
+            const rayFile = config.rayFile ?? config.file ?? "eskie.crosshair.ray.fantasy_01.white";
+            const squareFile = config.squareFile ?? config.rayFile ?? config.file ?? "eskie.crosshair.ray.fantasy_01.white";
 
             const typeKey = "auto-detect";
             const distVal = config.distance ?? config.radius ?? config.length;
@@ -486,23 +486,23 @@ export class AutorecManager {
             const stickToTokenMode = isStickOn ? "true" : (isStickOff ? "false" : "default");
             const stickToToken = isStickOn ? true : (isStickOff ? false : (config.type === "cone" || config.t === "cone"));
             const showLine = config.showLine !== false;
-            const lineFile = config.lineFile || "eskie.crosshair.line.generic_01.white";
-            const borderColor = config.borderColor || "#ffffff";
-            const borderAlpha = config.borderAlpha !== undefined ? config.borderAlpha : 0;
-            const fillColor = config.fillColor || "#000000";
-            const fillAlpha = config.fillAlpha !== undefined ? config.fillAlpha : 0;
+            const lineFile = config.lineFile ?? "eskie.crosshair.line.generic_01.white";
+            const borderColor = config.borderColor ?? "#ffffff";
+            const borderAlpha = config.borderAlpha ?? 0;
+            const fillColor = config.fillColor ?? "#000000";
+            const fillAlpha = config.fillAlpha ?? 0;
             const hasCustomStyling = Boolean(
                 config.borderColor ||
                 config.borderAlpha !== undefined ||
                 config.fillColor ||
                 config.fillAlpha !== undefined
             );
-            const icon = config.icon || null;
+            const icon = config.icon ?? null;
 
-            const placedFillColor = config.placedFillColor || config.templateFillColor || "#0099ff";
-            const placedFillAlpha = config.placedFillAlpha !== undefined ? config.placedFillAlpha : (config.templateFillAlpha !== undefined ? config.templateFillAlpha : 0.25);
-            const placedBorderColor = config.placedBorderColor || config.templateBorderColor || "#000000";
-            const placedBorderAlpha = config.placedBorderAlpha !== undefined ? config.placedBorderAlpha : (config.templateBorderAlpha !== undefined ? config.templateBorderAlpha : 1);
+            const placedFillColor = config.placedFillColor ?? config.templateFillColor ?? "#0099ff";
+            const placedFillAlpha = config.placedFillAlpha ?? config.templateFillAlpha ?? 0.25;
+            const placedBorderColor = config.placedBorderColor ?? config.templateBorderColor ?? "#000000";
+            const placedBorderAlpha = config.placedBorderAlpha ?? config.templateBorderAlpha ?? 1;
             const hasPlacedStyling = Boolean(
                 config.placedFillColor ||
                 config.placedFillAlpha !== undefined ||
@@ -514,13 +514,13 @@ export class AutorecManager {
                 config.templateBorderAlpha !== undefined
             );
 
-            const concurrentCode = config.concurrentCode || config.preAnimationCode || config.customCode || "";
-            const postPlacementCode = config.postPlacementCode || config.postCode || config.postRegionCode || config.postTemplateCode || "";
-            const cleanItemName = config.itemName || itemName;
-            const activityId = config.activityId || "";
-            const activityName = config.activityName || "";
+            const concurrentCode = config.concurrentCode ?? config.preAnimationCode ?? config.customCode ?? "";
+            const postPlacementCode = config.postPlacementCode ?? config.postCode ?? config.postRegionCode ?? config.postTemplateCode ?? "";
+            const cleanItemName = config.itemName ?? itemName;
+            const activityId = config.activityId ?? "";
+            const activityName = config.activityName ?? "";
             const hasActivity = Boolean(activityId || activityName);
-            const activityDisplay = activityName || activityId || "";
+            const activityDisplay = activityName ? activityName : (activityId ? activityId : "");
 
             const isDefault = Boolean(config.isDefault);
             const enabled = config.enabled !== false;
