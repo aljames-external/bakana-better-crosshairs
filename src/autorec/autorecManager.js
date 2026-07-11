@@ -79,7 +79,7 @@ export class AutorecManager {
      * Index a registered handler in the fast lookup map under its canonical lowercase keys.
      * Normalizes partial configuration objects against canonical DEFAULT_AUTOREC_ENTRY schema.
      * @param {string} registeredKey - Unique registration key (e.g. "Fireball" or "Fireball | 123")
-     * @param {Object|Function|string} handler - Autorec configuration or callback
+     * @param {Object|Function} handler - Autorec configuration or callback
      */
     indexRegistration(registeredKey, handler) {
         const itemName = handler?.itemName ?? registeredKey.split(" | ")[0].trim();
@@ -88,7 +88,7 @@ export class AutorecManager {
         const activityName = isDefault ? "" : (handler?.activityName ?? "").trim();
         const hasActivity = Boolean(activityId || activityName);
         const enabled = handler?.enabled !== false;
-        const baseConfig = typeof handler === "object" && handler !== null ? handler : { handler };
+        const baseConfig = typeof handler === "function" ? { handler } : (handler ?? {});
         const entry = {
             ...DEFAULT_AUTOREC_ENTRY,
             ...baseConfig,
@@ -516,10 +516,10 @@ export class AutorecManager {
                 isCustomFunction = true;
                 type = "Custom Script";
                 file = "Function Handler";
-            } else if (typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
-                config = handlerOrConfig.handler ?? handlerOrConfig.config ?? handlerOrConfig;
+            } else {
+                config = handlerOrConfig ?? {};
                 type = config.type ?? "Auto-Detect";
-                file = config.file ?? config.animationFile ?? "";
+                file = config.file ?? "";
             }
 
             const isLocal = Boolean(handlerOrConfig?.local) || !this.persistedItemNames.has(itemName);
