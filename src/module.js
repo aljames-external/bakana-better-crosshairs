@@ -10,56 +10,22 @@ import { localize } from './lib/utils.js';
 import './settings.js';
 import { MODULE_ID, MODULE_NAME } from './lib/constants.js';
 
+function initializeApi() {
+    const moduleApi = {
+        crosshair,
+        autorec: autorecManager
+    };
+    const mod = game.modules.get(MODULE_ID);
+    if (mod) mod.api = moduleApi;
+}
+
 Hooks.once('init', async () => {
     function setupModule() {
-        initializeSystemAdapter();
         initializeFoundryAdapter();
+        initializeSystemAdapter();
         initializeHooks();
-
-        function setupApiCalls(exportedFunctions) {
-            globalThis.bbc = foundry.utils.mergeObject(
-                globalThis.bbc ?? {},
-                exportedFunctions
-            );
-        }
-
-        const manager = autorecManager;
-
-        const util = {
-            localize,
-            file,
-            closest,
-            absolutePath,
-            attachWheelRotation,
-            detachWheelRotation,
-            resolveCrosshairPlacement,
-            getTokenEdgePoint,
-            snapCoordinates,
-        };
-
-        setupApiCalls({ crosshair });
-        setupApiCalls({ util });
-        setupApiCalls({ manager });
-        setupApiCalls({ autorecManager });
-        setupApiCalls({ systemAdapter });
-        setupApiCalls({ crosshairAdapter });
-        setupApiCalls({ log });
-
-        const moduleApi = {
-            crosshair,
-            util,
-            manager,
-            autorecManager,
-            systemAdapter,
-            crosshairAdapter,
-            log,
-        };
-
-
-        const mod = game.modules.get(MODULE_ID);
-        if (mod) mod.api = moduleApi;
+        initializeApi();
     }
-
 
     setupModule();
     log.info(`${MODULE_NAME} module ready`);
