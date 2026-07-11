@@ -13,8 +13,8 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
     }
 
     extractCallingContext(document, baseContext = {}) {
-        let itemObj = baseContext.item || null;
-        let activityObj = baseContext.activity || null;
+        let itemObj = baseContext.item ?? null;
+        let activityObj = baseContext.activity ?? null;
 
         if (!itemObj && document?.flags?.dnd5e?.origin && typeof fromUuidSync === "function") {
             try { itemObj = fromUuidSync(document.flags.dnd5e.origin); } catch (e) {}
@@ -24,24 +24,24 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
         }
 
         if (itemObj && (itemObj.item || (itemObj.parent && itemObj.parent.documentName === "Item"))) {
-            activityObj = activityObj || itemObj;
-            itemObj = itemObj.item || itemObj.parent;
+            activityObj = activityObj ?? itemObj;
+            itemObj = itemObj.item ?? itemObj.parent;
         }
 
-        const actIdentifier = document?.flags?.dnd5e?.activity || document?.flags?.dnd5e?.activityUuid || document?.flags?.dnd5e?.activityId;
+        const actIdentifier = document?.flags?.dnd5e?.activity ?? document?.flags?.dnd5e?.activityUuid ?? document?.flags?.dnd5e?.activityId;
         if (!activityObj && actIdentifier) {
             if (typeof fromUuidSync === "function" && typeof actIdentifier === "string" && actIdentifier.includes(".")) {
                 try { activityObj = fromUuidSync(actIdentifier); } catch (e) {}
             }
             if (!activityObj && itemObj?.system?.activities) {
                 activityObj = itemObj.system.activities.get?.(actIdentifier)
-                    || (typeof itemObj.system.activities.find === "function" ? itemObj.system.activities.find(a => a.id === actIdentifier || a._id === actIdentifier || a.uuid === actIdentifier || a.name === actIdentifier) : null);
+                    ?? (typeof itemObj.system.activities.find === "function" ? itemObj.system.activities.find(a => a.id === actIdentifier || a._id === actIdentifier || a.uuid === actIdentifier || a.name === actIdentifier) : null);
             }
         }
 
         const result = {
             item: itemObj,
-            itemName: itemObj?.name || baseContext.itemName || "",
+            itemName: itemObj?.name ?? baseContext.itemName ?? "",
             itemId: itemObj?.id ?? baseContext.itemId ?? "",
             activity: activityObj,
             activityName: activityObj?.name ?? baseContext.activityName ?? "",

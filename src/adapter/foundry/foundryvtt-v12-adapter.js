@@ -29,15 +29,15 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
             ray: "ray",
             rect: "square"
         };
-        const distance = doc.distance || 0;
+        const distance = doc.distance ?? 0;
         return {
-            type: shapeMap[doc.t] || "circle",
+            type: shapeMap[doc.t] ?? "circle",
             distance,
             radius: distance,
-            width: doc.width || 0,
-            angle: doc.angle || 0,
-            x: doc.x || 0,
-            y: doc.y || 0
+            width: doc.width ?? 0,
+            angle: doc.angle ?? 0,
+            x: doc.x ?? 0,
+            y: doc.y ?? 0
         };
     }
 
@@ -52,8 +52,8 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
     }
 
     formatGraphicSize(distance = 30, widthOrAngle = 5, shapeType = "ray") {
-        const gridDist = canvas?.dimensions?.distance || 5;
-        const gridSize = canvas?.dimensions?.size || 100;
+        const gridDist = canvas?.dimensions?.distance ?? 5;
+        const gridSize = canvas?.dimensions?.size ?? 100;
         const lengthPixels = (distance / gridDist) * gridSize;
 
         if (shapeType === "circle") {
@@ -65,7 +65,7 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
         }
 
         if (shapeType === "cone") {
-            const angleRad = ((widthOrAngle || 53.13) * Math.PI) / 180;
+            const angleRad = ((widthOrAngle ?? 53.13) * Math.PI) / 180;
             const widthPixels = 2 * lengthPixels * Math.tan(angleRad / 2);
             return {
                 size: { width: lengthPixels, height: widthPixels },
@@ -73,7 +73,7 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
             };
         }
 
-        const widthPixels = ((widthOrAngle || distance) / gridDist) * gridSize;
+        const widthPixels = ((widthOrAngle ?? distance) / gridDist) * gridSize;
         return {
             size: { width: lengthPixels, height: Math.max(gridSize, widthPixels) },
             gridUnits: false
@@ -97,12 +97,8 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
         if (!previewDoc || !coords) return;
         if (coords.x !== undefined) previewDoc.x = coords.x;
         if (coords.y !== undefined) previewDoc.y = coords.y;
-        if (coords.direction !== undefined || coords.rotation !== undefined) {
-            previewDoc.direction = coords.direction ?? coords.rotation;
-        }
-        if (coords.distance !== undefined || coords.radius !== undefined) {
-            previewDoc.distance = coords.distance ?? coords.radius;
-        }
+        if (coords.direction !== undefined) previewDoc.direction = coords.direction;
+        if (coords.distance !== undefined) previewDoc.distance = coords.distance;
     }
 
     /**
@@ -116,8 +112,8 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
         const updateData = {};
         if (coords.x !== undefined) updateData.x = coords.x;
         if (coords.y !== undefined) updateData.y = coords.y;
-        if (coords.distance !== undefined || coords.radius !== undefined) updateData.distance = coords.distance ?? coords.radius;
-        if (coords.direction !== undefined || coords.rotation !== undefined) updateData.direction = coords.direction ?? coords.rotation;
+        if (coords.distance !== undefined) updateData.distance = coords.distance;
+        if (coords.direction !== undefined) updateData.direction = coords.direction;
         if (coords.width !== undefined) updateData.width = coords.width;
         if (coords.t !== undefined) updateData.t = coords.t;
 
