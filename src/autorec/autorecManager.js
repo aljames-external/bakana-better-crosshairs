@@ -311,7 +311,10 @@ export class AutorecManager {
                 ...(typeof currentDefault === "object" ? currentDefault : {}),
                 id: "DEFAULT",
                 itemName: "DEFAULT",
-                isDefault: true
+                isDefault: true,
+                activityId: "",
+                activityName: "",
+                hasActivity: false
             });
             this.indexRegistration("DEFAULT", this.registeredHandlers.get("DEFAULT"));
         }
@@ -397,6 +400,8 @@ export class AutorecManager {
     async unregisterMany(itemNames, { persist = true, local = false } = {}) {
         if (!Array.isArray(itemNames)) return;
         for (const itemName of itemNames) {
+            const existing = this.registeredHandlers.get(itemName);
+            if (existing?.isDefault) continue;
             this.registeredHandlers.delete(itemName);
             this.persistedItemNames.delete(itemName);
             log.info(`Unregistered template sequence for item: ${itemName}`);
@@ -406,7 +411,7 @@ export class AutorecManager {
         if (persist && !local) {
             const persistedDict = {};
             for (const [itemName, config] of this.registeredHandlers.entries()) {
-                if (config && typeof config === "object" && !config.local && typeof config !== "function") {
+                if (typeof config === "object" && config !== null && !config.local) {
                     persistedDict[itemName] = config;
                 }
             }
@@ -425,10 +430,9 @@ export class AutorecManager {
         if (!Array.isArray(entries)) return;
         const toPersist = {};
         for (const { itemName, config, local } of entries) {
-            this.registeredHandlers.set(itemName, config);
-            this.indexRegistration(itemName, config);
+            this.register(itemName, config, { persist: false, local });
             if (persist && !local && typeof config !== "function") {
-                toPersist[itemName] = config;
+                toPersist[itemName] = this.registeredHandlers.get(itemName);
                 this.persistedItemNames.add(itemName);
             }
         }
@@ -532,24 +536,24 @@ export class AutorecManager {
                 isLocal = true;
             }
 
+            const isDefault = Boolean(config.isDefault);
             const circleFile = config.circleFile ?? config.file ?? "eskie.crosshair.circle.fantasy_01.white.full";
             const coneFile = config.coneFile ?? config.file ?? "eskie.crosshair.cone.thin.fantasy_01.white.full";
             const rayFile = config.rayFile ?? config.file ?? "eskie.crosshair.ray.fantasy_01.white";
-            const squareFile = config.squareFile ?? config.rayFile ?? config.file ?? "eskie.crosshair.ray.fantasy_01.white";
+            const squareFile = config.squareFile ?? config.file ?? "eskie.crosshair.ray.fantasy_01.white";
 
             const typeKey = "auto-detect";
-            const distVal = config.distance ?? config.radius ?? config.length;
+            const distVal = config.distance ?? config.radius;
             const distanceDisplay = distVal !== undefined ? `${distVal} ft` : null;
             const widthVal = config.width;
             const widthDisplay = widthVal !== undefined ? `${widthVal} ft` : null;
             const angleVal = config.angle;
             const angleDisplay = angleVal !== undefined ? `${angleVal}°` : null;
-            const rawStick = config.stickToToken ?? config.attachToToken ?? config.lockToToken;
-            const isStickOn = rawStick === true || rawStick === "true" || rawStick === "on";
-            const isStickOff = rawStick === false || rawStick === "false" || rawStick === "off";
-            const isStickDefault = !isStickOn && !isStickOff;
-            const stickToTokenMode = isStickOn ? "true" : (isStickOff ? "false" : "default");
-            const stickToToken = isStickOn ? true : (isStickOff ? false : (config.type === "cone" || config.t === "cone"));
+            const stickToToken = Boolean(config.stickToToken);
+            const stickToTokenMode = stickToToken ? "true" : "false";
+            const isStickOn = stickToToken;
+            const isStickOff = !stickToToken;
+            const isStickDefault = false;
             const showLine = config.showLine !== false;
             const lineFile = config.lineFile ?? "eskie.crosshair.line.generic_01.white";
             const borderColor = config.borderColor ?? "#ffffff";
@@ -578,12 +582,10 @@ export class AutorecManager {
             const concurrentCode = config.concurrentCode ?? "";
             const postPlacementCode = config.postPlacementCode ?? "";
             const cleanItemName = config.itemName ?? itemName;
-            const activityId = config.activityId ?? "";
-            const activityName = config.activityName ?? "";
+            const activityId = isDefault ? "" : (config.activityId ?? "");
+            const activityName = isDefault ? "" : (config.activityName ?? "");
             const hasActivity = Boolean(activityId || activityName);
-            const activityDisplay = activityName ? activityName : (activityId ? activityId : "");
-
-            const isDefault = Boolean(config.isDefault);
+            const activityDisplay = activityName || activityId || "";
             const enabled = config.enabled !== false;
 
             results.push({
