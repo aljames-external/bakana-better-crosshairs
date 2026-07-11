@@ -152,7 +152,7 @@ export class BaseFoundryVTTAdapter {
 
     /**
      * Extract normalized placed fill/border styling values and flags from workflow configuration.
-     * Shared across V12 and V14 document updates.
+     * Shared across V13 and V14 document updates.
      * @param {Object} [config={}]
      * @returns {{placedFillColor?: string, placedFillAlpha?: number, placedBorderColor?: string, placedBorderAlpha?: number, flags: Object}}
      */

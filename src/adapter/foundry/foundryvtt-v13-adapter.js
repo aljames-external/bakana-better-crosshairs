@@ -1,13 +1,13 @@
 import { BaseFoundryVTTAdapter } from "./base-foundryvtt-adapter.js";
 
-export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
+export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
     constructor() {
         super();
-        this.version = 12;
+        this.version = 13;
     }
 
     /**
-     * Register Foundry VTT v12/v13 placement hooks for MeasuredTemplates.
+     * Register Foundry VTT v13 placement hooks for MeasuredTemplates.
      * @param {Object} callbacks - { onDrawPreview, onPreCreate, onCreate }
      */
     registerPlacementHooks(callbacks) {
@@ -96,7 +96,7 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Return template pixel multiplier factor for V12 (legacy pixel sizing).
+     * Return template pixel multiplier factor for V13 (legacy pixel sizing).
      * @returns {{factor: number, gridUnits: boolean}}
      */
     getTemplatePixelFactor() {
