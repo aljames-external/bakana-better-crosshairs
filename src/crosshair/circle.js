@@ -25,7 +25,7 @@ function resolveCircleAsset(pathOrKey, effectSize) {
 
 async function create(token, config = {}) {
     const radius = Math.round(config.radius ?? 20);
-    const file = config.file;
+    const file = config.file ?? config.circleFile;
 
     const {
         id = `Circle Crosshair`,
