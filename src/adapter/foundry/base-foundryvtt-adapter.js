@@ -27,6 +27,8 @@ export class BaseFoundryVTTAdapter {
             activity: activityObj,
             activityName: activityObj?.name ?? "",
             activityId: activityObj?.id ?? ""
+        };
+
         const result = systemAdapter.extractCallingContext(doc, baseContext);
 
         log.debug("BaseFoundryVTTAdapter.extractCallingContext | Result from systemAdapter:", {
@@ -139,13 +141,13 @@ export class BaseFoundryVTTAdapter {
             placeable.controlIcon.visible = false;
         }
         if (typeof placeable.highlightGrid === "function") {
-            placeable.highlightGrid = function() {};
+            placeable.highlightGrid = function () { };
         }
         if (placeable.highlightId && canvas.grid?.clearHighlightLayer) {
             try { clearHighlightLayer(placeable.highlightId); } catch (e) { }
         }
 
-        placeable.refresh = function() {
+        placeable.refresh = function () {
             this.visible = false;
             this.renderable = false;
             this.alpha = 0;
@@ -274,7 +276,7 @@ export class BaseFoundryVTTAdapter {
          */
         const snapPt = (pt, mode) => {
             if (canvas?.grid?.getSnappedPoint) {
-                try { return canvas.grid.getSnappedPoint(pt, { mode, resolution: size }); } catch (e) {}
+                try { return canvas.grid.getSnappedPoint(pt, { mode, resolution: size }); } catch (e) { }
             }
             return pt;
         };
