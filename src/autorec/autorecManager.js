@@ -3,6 +3,7 @@ import { log } from '../lib/logger.js';
 import { systemAdapter } from '../adapter/system/index.js';
 import { crosshairAdapter } from '../adapter/foundry/index.js';
 import { socketlib } from '../integration/index.js';
+import { localize } from '../lib/utils.js';
 
 
 export const DEFAULT_AUTOREC_ENTRY = {
@@ -497,13 +498,16 @@ export class AutorecManager {
             let isCustomFunction = false;
             let config = {};
 
+            let rawType = "Auto-Detect";
             if (typeof handlerOrConfig === "function") {
                 isCustomFunction = true;
-                type = "Custom Script";
-                file = "Function Handler";
+                rawType = "Custom Script";
+                type = localize("BBC.Autorec.Type.CustomScript", "Custom Script");
+                file = localize("BBC.Autorec.File.FunctionHandler", "Function Handler");
             } else {
                 config = handlerOrConfig ?? {};
-                type = config.type ?? "Auto-Detect";
+                rawType = config.type ?? "Auto-Detect";
+                type = rawType === "Auto-Detect" ? localize("BBC.Autorec.Type.AutoDetect", "Auto-Detect") : rawType;
                 file = config.file ?? "";
             }
 
@@ -572,8 +576,8 @@ export class AutorecManager {
                 supportsActivities: systemAdapter.supportsActivities,
                 type,
 
-                typeKey: type.toLowerCase(),
-                isAutoDetect: type === "Auto-Detect",
+                typeKey: rawType.toLowerCase(),
+                isAutoDetect: rawType === "Auto-Detect",
                 circleFile,
                 coneFile,
                 rayFile,
