@@ -164,7 +164,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
 
         if (styling.placedFillColor) updateData.color = styling.placedFillColor;
-        if (Boolean(config.hidden || config.hideTemplate)) updateData.hidden = true;
+        if (config.hidden || config.hideTemplate) updateData.hidden = true;
+
 
         doc.updateSource(updateData);
     }
