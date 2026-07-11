@@ -27,12 +27,7 @@
             "preTemplatePlacement": "Pre-Template Placement",
             "regionPlacementConfig": "Region Placement Configuration",
             "templatePlacementConfig": "Template Placement Configuration",
-            "postRegionPlacement": "Post-Region Placement",
             "postTemplatePlacement": "Post-Template Placement",
-            "tag": {
-                "v14Region": "V14+ Region",
-                "v13Template": "V13- MeasuredTemplate"
-            },
             "term": {
                 "region": "region",
                 "template": "template"
