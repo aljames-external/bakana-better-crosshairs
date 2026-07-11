@@ -140,10 +140,10 @@ export class AutorecManager {
     }
 
     /**
-     * Match a template/region document or placeable to a registered autorec workflow.
+     * Match a template/region Document or item name to a registered autorec workflow.
      * Delegates document inspection to the Foundry Adapter, which in turn calls the System Adapter
      * for additional item and activity filtering.
-     * @param {string|Document|PlaceableObject} target - Target item name, document, or placeable object
+     * @param {string|Document} target - Target item name string or candidate Document
      * @returns {Object|null} Registered autorec configuration or null
      */
     getRegisteredEntry(target) {
@@ -151,8 +151,7 @@ export class AutorecManager {
         if (typeof target === "string") {
             return this.fastLookupMap.get(target) ?? this.fastLookupMap.get(target.toLowerCase()) ?? null;
         }
-        const doc = crosshairAdapter.toDocument(target);
-        return crosshairAdapter.matchAutorecEntry(doc, this.registeredHandlers);
+        return crosshairAdapter.matchAutorecEntry(target, this.registeredHandlers);
     }
 
 
