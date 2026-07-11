@@ -243,6 +243,10 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
 
         const formData = new FormData(form);
         const config = {
+            enablePrePlacement: formData.get("enablePrePlacement") === "on",
+            enableAnimation: formData.get("enableAnimation") === "on",
+            enablePlacedStyling: formData.get("enablePlacedStyling") === "on",
+            enablePostPlacement: formData.get("enablePostPlacement") === "on",
             enabled: formData.get("enabled") === "on",
             circleFile: String(formData.get("circleFile") ?? "").trim(),
             coneFile: String(formData.get("coneFile") ?? "").trim(),
@@ -262,6 +266,7 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             postPlacementCode: String(formData.get("postPlacementCode") ?? ""),
             icon: String(formData.get("icon") ?? "").trim()
         };
+
 
         log.debug(`ItemCrosshairConfigApplication | Saving custom configuration to item "${this.item.name}" flags:`, config);
         await this.item.setFlag(MODULE_ID, "customConfig", config);
