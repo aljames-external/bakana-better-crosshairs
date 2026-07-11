@@ -33,8 +33,8 @@ export class CrosshairConfiguration {
         this.borderColor = String(source.borderColor || defaults.borderColor).trim();
         this.borderAlpha = Number.isFinite(Number(source.borderAlpha)) ? Number(source.borderAlpha) : defaults.borderAlpha;
         this.fillColor = String(source.fillColor || defaults.fillColor).trim();
-        this.fillAlpha = Number.isFinite(Number(source.fillAlpha)) ? Number(source.fillAlpha) : (source.fillAlpha ?? 0);
-        this.icon = String(source.icon ?? "").trim();
+        this.icon = String(source.icon ?? defaults.icon).trim();
+
 
         // Placed document styling options
         this.placedFillColor = String(source.placedFillColor || defaults.placedFillColor).trim();
@@ -116,9 +116,9 @@ export class CrosshairConfiguration {
             merged.borderColor = customSource.borderColor ?? "#ffffff";
             merged.borderAlpha = customSource.borderAlpha ?? 0;
             merged.fillColor = customSource.fillColor ?? "#000000";
-            merged.fillAlpha = customSource.fillAlpha ?? 0;
-            merged.icon = customSource.icon ?? "";
+            merged.icon = Boolean(customSource.icon) ? customSource.icon : DEFAULT_AUTOREC_ENTRY.icon;
         }
+
 
         if (isPlacedOverride) {
             merged.enablePlacedStyling = true;

@@ -32,8 +32,9 @@ export const DEFAULT_AUTOREC_ENTRY = {
 
     concurrentCode: "",
     postPlacementCode: "",
-    icon: ""
+    icon: "eskie.crosshair.reticle.generic_02.white"
 };
+
 
 
 
