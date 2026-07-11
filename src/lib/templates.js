@@ -47,7 +47,7 @@ async function handleDrawPreview(placeable) {
         return;
     }
 
-    const entry = autorecManager.getRegisteredEntry(doc);
+    const entry = autorecManager.getEntryForDocument(doc);
     if (!entry) {
         log.debug(`handleDrawPreview | No registered handler matched for preview.`);
         return;
@@ -191,7 +191,7 @@ function handlePreCreate(doc, _data, _options, userId) {
         return true;
     }
 
-    let entry = autorecManager.getRegisteredEntry(doc);
+    let entry = autorecManager.getEntryForDocument(doc);
     let placementKey = null;
     let pending = null;
 
@@ -248,7 +248,7 @@ async function handleCreateDocument(doc, _options, userId) {
     if (userId !== game.user?.id) return;
 
     const flagsConfig = doc.flags?.bbc;
-    const entry = autorecManager.getRegisteredEntry(doc);
+    const entry = autorecManager.getEntryForDocument(doc);
     const config = {
         ...entry,
         ...flagsConfig

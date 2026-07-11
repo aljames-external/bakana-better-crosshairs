@@ -34,7 +34,8 @@ export class AutorecManager {
         this.resolveItemAndActivity = this.resolveItemAndActivity.bind(this);
         this.indexRegistration = this.indexRegistration.bind(this);
         this.rebuildFastLookupMap = this.rebuildFastLookupMap.bind(this);
-        this.getRegisteredEntry = this.getRegisteredEntry.bind(this);
+        this.getEntryByName = this.getEntryByName.bind(this);
+        this.getEntryForDocument = this.getEntryForDocument.bind(this);
         this.onRegister = this.onRegister.bind(this);
         this.initializeReadySync = this.initializeReadySync.bind(this);
         this.persistRegistration = this.persistRegistration.bind(this);
@@ -94,16 +95,13 @@ export class AutorecManager {
             enabled
         };
 
-        this.fastLookupMap.set(registeredKey, entry);
         this.fastLookupMap.set(registeredKey.toLowerCase(), entry);
 
         if (itemName && !activityId && !activityName) {
-            this.fastLookupMap.set(itemName, entry);
             this.fastLookupMap.set(itemName.toLowerCase(), entry);
         }
         if (activityId || activityName) {
             const act = activityId || activityName;
-            this.fastLookupMap.set(`${itemName}|${act}`, entry);
             this.fastLookupMap.set(`${itemName.toLowerCase()}|${act.toLowerCase()}`, entry);
         }
     }
@@ -120,6 +118,8 @@ export class AutorecManager {
      * - Entries WITH an activity filter specified come first (most specific).
      * - Entries WITHOUT an activity filter come last (general item fallback).
      * - Within tiebreaks, order is preserved front-to-back (first registered wins).
+     * @param {string} itemName - Target item/spell name
+     * @returns {Array<Object>} Ordered candidate autorec entries
      */
     getEntriesForItem(itemName) {
         if (!itemName) return [];
@@ -140,18 +140,24 @@ export class AutorecManager {
     }
 
     /**
-     * Match a template/region Document or item name to a registered autorec workflow.
-     * Delegates document inspection to the Foundry Adapter, which in turn calls the System Adapter
-     * for additional item and activity filtering.
-     * @param {string|Document} target - Target item name string or candidate Document
+     * Look up a registered autorec entry by exact or case-insensitive item name.
+     * @param {string} itemName - Target item/spell name (`"Fireball"`)
      * @returns {Object|null} Registered autorec configuration or null
      */
-    getRegisteredEntry(target) {
-        if (!target) return null;
-        if (typeof target === "string") {
-            return this.fastLookupMap.get(target) ?? this.fastLookupMap.get(target.toLowerCase()) ?? null;
-        }
-        return crosshairAdapter.matchAutorecEntry(target, this.registeredHandlers);
+    getEntryByName(itemName) {
+        if (!itemName) return null;
+        return this.fastLookupMap.get(itemName.toLowerCase()) ?? null;
+    }
+
+    /**
+     * Match a canvas Template or Region Document to a registered autorec workflow.
+     * Delegates document inspection to the Foundry Adapter (`crosshairAdapter.matchAutorecEntry`).
+     * @param {Document} doc - Target candidate Document
+     * @returns {Object|null} Registered autorec configuration or null
+     */
+    getEntryForDocument(doc) {
+        if (!doc) return null;
+        return crosshairAdapter.matchAutorecEntry(doc, this.registeredHandlers);
     }
 
 
@@ -175,7 +181,7 @@ export class AutorecManager {
                         const saved = game.settings?.get(MODULE_ID, "registeredTemplates");
                         if (saved) this.loadSavedRegistrations(saved);
                     } catch (e) {
-                        log.warn("Failed to load saved registeredTemplates setting", e);
+                        log.error("Failed to load saved registeredTemplates setting", e);
                     }
                     Object.values(ui.windows || {}).forEach(w => {
                         if (w && w.id === "bbc-autorec-menu") w.render(false);
@@ -188,7 +194,7 @@ export class AutorecManager {
             const saved = game.settings?.get(MODULE_ID, "registeredTemplates");
             if (saved) this.loadSavedRegistrations(saved);
         } catch (e) {
-            log.warn("Failed to load saved registeredTemplates setting", e);
+            log.error("Failed to load saved registeredTemplates setting", e);
         }
     }
 
@@ -206,7 +212,7 @@ export class AutorecManager {
                 this.persistedItemNames.add(itemName);
                 this.broadcastSync();
             } catch (e) {
-                log.warn(`Failed to persist registered template setting for: ${itemName}`, e);
+                log.error(`Failed to persist registered template setting for: ${itemName}`, e);
             }
         } else if (game.socket) {
             game.socket.emit(`module.${MODULE_ID}`, {
@@ -233,7 +239,7 @@ export class AutorecManager {
                     this.broadcastSync();
                 }
             } catch (e) {
-                log.warn(`Failed to unpersist template setting for: ${itemName}`, e);
+                log.error(`Failed to unpersist template setting for: ${itemName}`, e);
             }
         } else if (game.socket) {
             game.socket.emit(`module.${MODULE_ID}`, {
@@ -393,7 +399,7 @@ export class AutorecManager {
                     await game.settings.set(MODULE_ID, "registeredTemplates", saved);
                     this.broadcastSync();
                 } catch (e) {
-                    log.warn("Failed to batch persist template registrations:", e);
+                    log.error("Failed to batch persist template registrations:", e);
                 }
             } else if (game.socket) {
                 for (const [itemName, config] of Object.entries(toPersist)) {
@@ -413,7 +419,7 @@ export class AutorecManager {
                 }
                 this.broadcastSync();
             } catch (e) {
-                log.warn("Failed to overwrite registeredTemplates setting:", e);
+                log.error("Failed to overwrite registeredTemplates setting:", e);
             }
         } else if (game.socket) {
             game.socket.emit(`module.${MODULE_ID}`, {
@@ -424,17 +430,25 @@ export class AutorecManager {
     }
 
     /**
-     * Check if a registered template animation exists for a target document or item name in O(1) time.
+     * Check if a registered template animation exists for a target Document or item name.
+     * @param {string|Document} targetOrName - Item name or candidate Document
+     * @returns {boolean}
      */
     has(targetOrName) {
-        return this.getRegisteredEntry(targetOrName) !== null;
+        return this.get(targetOrName) !== null;
     }
 
     /**
-     * Get the registered handler entry for a target document or item name in O(1) time.
+     * Get the registered handler entry for a target Document or item name.
+     * Normalizes caller entry boundary before dispatching to single-responsibility lookup helpers (Rule 5).
+     * @param {string|Document} targetOrName - Item name or candidate Document
+     * @returns {Object|null}
      */
     get(targetOrName) {
-        return this.getRegisteredEntry(targetOrName);
+        if (typeof targetOrName === "string") {
+            return this.getEntryByName(targetOrName);
+        }
+        return this.getEntryForDocument(targetOrName);
     }
 
     /**
