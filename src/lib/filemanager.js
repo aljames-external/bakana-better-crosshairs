@@ -1,5 +1,7 @@
 import { dependency } from './dependency.js';
 import { log } from './logger.js';
+import { notify } from './notifier.js';
+
 
 /**
  * Traverses the Sequencer database to find the best-fit path for a given set of categories.
@@ -101,7 +103,7 @@ export function closest(path) {
             isPatreonUser = dependency.isActivated({ id: 'psfx-patreon', ref: 'PSFX-Patreon' });
             isFreeUser = dependency.isActivated({ id: 'psfx', ref: "PSFX - Peri's Sound Effects" });
             if (isPatreonUser && isFreeUser) {
-                ui.notifications.warn(localize("BBC.Conflicts.PSFX", "Both PSFX Patreon and Free are activated, both modules use the path `psfx.` to prefix files! This will cause conflicts! Recommend disabling / uninstalling the free version."));
+                notify.warn(localize("BBC.Conflicts.PSFX", "Both PSFX Patreon and Free are activated, both modules use the path `psfx.` to prefix files! This will cause conflicts! Recommend disabling / uninstalling the free version."));
             }
             modulePrefix = 'psfx';
             break;
@@ -121,7 +123,7 @@ export function closest(path) {
             isFreeUser = dependency.isActivated({ id: 'JB2A_DnD5e' });
             isPatreonUser = dependency.isActivated({ id: 'jb2a_patreon' });
             if (isPatreonUser && isFreeUser) {
-                ui.notifications.warn(localize("BBC.Conflicts.JB2A", "Both JB2A Patreon and Free are activated, both modules use the path `jb2a.` to prefix files. This will cause conflicts! Recommend disabling / uninstalling the free version."));
+                notify.warn(localize("BBC.Conflicts.JB2A", "Both JB2A Patreon and Free are activated, both modules use the path `jb2a.` to prefix files. This will cause conflicts! Recommend disabling / uninstalling the free version."));
             }
             modulePrefix = 'jb2a';
             break;
@@ -130,8 +132,9 @@ export function closest(path) {
             isPatreonUser = dependency.isActivated({ id: 'boss-loot-assets-premium' });
             isFreeUser = dependency.isActivated({ id: 'boss-loot-assets-free' });
             if (isPatreonUser && isFreeUser) {
-                ui.notifications.warn(localize("BBC.Conflicts.BLFX", "Both Boss Loot Assets Premium and Free are activated, both modules use the path `blfx.` to prefix files. This will cause conflicts! Recommend disabling / uninstalling the free version."));
+                notify.warn(localize("BBC.Conflicts.BLFX", "Both Boss Loot Assets Premium and Free are activated, both modules use the path `blfx.` to prefix files. This will cause conflicts! Recommend disabling / uninstalling the free version."));
             }
+
             modulePrefix = 'blfx';
             break;
     }

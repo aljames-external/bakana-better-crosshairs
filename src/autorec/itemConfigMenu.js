@@ -1,7 +1,8 @@
 import { MODULE_ID } from "../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY, autorecManager } from "./autorecManager.js";
 import { log } from "../lib/logger.js";
-import { localize } from "../lib/utils.js";
+import { localize, notify } from "../lib/utils.js";
+
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -235,7 +236,8 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
 
                 log.debug(`ItemCrosshairConfigApplication | Deleting custom configuration from item "${this.item.name}" (${this.item.id})`);
                 await this.item.unsetFlag(MODULE_ID, "customConfig");
-                ui.notifications?.info(`Removed custom BBC configuration from "${this.item.name}".`);
+                notify.info(`Removed custom BBC configuration from "${this.item.name}".`);
+
                 this.render(false);
             });
         }
@@ -288,7 +290,8 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
 
         log.debug(`ItemCrosshairConfigApplication | Saving custom configuration to item "${this.item.name}" flags:`, config);
         await this.item.setFlag(MODULE_ID, "customConfig", config);
-        ui.notifications?.info(`Saved custom BBC configuration for "${this.item.name}".`);
+        notify.info(`Saved custom BBC configuration for "${this.item.name}".`);
+
         this.render(false);
     }
 }

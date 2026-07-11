@@ -28,3 +28,6 @@ export const version = {
         return !isNewer(current, max);
     }
 };
+
+export { notify } from "./notifier.js";
+
