@@ -282,57 +282,6 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
 }
 
 /**
- * Calculate point on token boundary edge toward target position along with angle in degrees.
- * @param {Token} tok - Normalized Token object
- * @param {number} targetX
- * @param {number} targetY
- * @param {boolean} [sticky=false]
- */
-export function getTokenEdgePoint(tok, targetX, targetY, sticky = false) {
-    if (!tok) return { x: targetX, y: targetY, direction: 0 };
-    const size = canvas?.grid?.size ?? 100;
-    const cx = tok.center?.x ?? (tok.x + (tok.w ?? 0) / 2);
-    const cy = tok.center?.y ?? (tok.y + (tok.h ?? 0) / 2);
-    const hw = (tok.w ?? size) / 2;
-    const hh = (tok.h ?? size) / 2;
-
-    const dx = targetX - cx;
-    const dy = targetY - cy;
-    const angleRad = Math.atan2(dy, dx);
-    let angleDeg = angleRad * (180 / Math.PI);
-    if (angleDeg < 0) angleDeg += 360;
-
-    if (sticky) {
-        // 8-way sticky perimeter snap (snaps origin to 4 corners and 4 cardinal edge midpoints)
-        const sector = Math.round(angleDeg / 45) % 8;
-        let x = cx, y = cy;
-        switch (sector) {
-            case 0: x = cx + hw; y = cy; break;      // 0 deg (Right)
-            case 1: x = cx + hw; y = cy + hh; break; // 45 deg (Bottom-Right)
-            case 2: x = cx;      y = cy + hh; break; // 90 deg (Bottom)
-            case 3: x = cx - hw; y = cy + hh; break; // 135 deg (Bottom-Left)
-            case 4: x = cx - hw; y = cy; break;      // 180 deg (Left)
-            case 5: x = cx - hw; y = cy - hh; break; // 225 deg (Top-Left)
-            case 6: x = cx;      y = cy - hh; break; // 270 deg (Top)
-            case 7: x = cx + hw; y = cy - hh; break; // 315 deg (Top-Right)
-        }
-        return { x, y, direction: angleDeg };
-    }
-
-    const cosA = Math.cos(angleRad);
-    const sinA = Math.sin(angleRad);
-    const tx = Math.abs(cosA) > 1e-6 ? Math.abs(hw / cosA) : Infinity;
-    const ty = Math.abs(sinA) > 1e-6 ? Math.abs(hh / sinA) : Infinity;
-    const t = Math.min(tx, ty);
-
-    return {
-        x: cx + cosA * t,
-        y: cy + sinA * t,
-        direction: angleDeg
-    };
-}
-
-/**
  * Snap coordinates to grid center, corners, edges, or nearest of all.
  */
 export function snapCoordinates(x, y, mode = "all") {

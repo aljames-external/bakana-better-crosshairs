@@ -4,7 +4,7 @@ import { log } from './lib/logger.js';
 import { autorecManager } from './autorec/autorecManager.js';
 import { systemAdapter, initializeSystemAdapter } from './adapter/system/index.js';
 import { crosshairAdapter, initializeFoundryAdapter } from './adapter/foundry/index.js';
-import { attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement, getTokenEdgePoint, snapCoordinates } from './crosshair/util.js';
+import { attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement, snapCoordinates } from './crosshair/util.js';
 import { initializeHooks } from './lib/templates.js';
 import { localize } from './lib/utils.js';
 import './settings.js';
