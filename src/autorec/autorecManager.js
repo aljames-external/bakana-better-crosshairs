@@ -547,9 +547,9 @@ export class AutorecManager {
             const placedBorderAlpha = config.placedBorderAlpha ?? 1;
             const hasPlacedStyling = Boolean(
                 config.placedFillColor ||
-                config.placedFillAlpha !== undefined ||
+                (config.placedFillAlpha !== undefined && config.placedFillAlpha !== 0.25) ||
                 config.placedBorderColor ||
-                config.placedBorderAlpha !== undefined
+                (config.placedBorderAlpha !== undefined && config.placedBorderAlpha !== 1)
             );
 
             const concurrentCode = config.concurrentCode ?? "";
@@ -558,7 +558,7 @@ export class AutorecManager {
             const activityId = isDefault ? "" : (config.activityId ?? "");
             const activityName = isDefault ? "" : (config.activityName ?? "");
             const hasActivity = Boolean(activityId || activityName);
-            const activityDisplay = activityName || activityId || "";
+            const activityDisplay = activityName !== "" ? activityName : activityId;
             const enabled = config.enabled !== false;
 
             results.push({
@@ -624,5 +624,4 @@ export class AutorecManager {
 }
 
 export const autorecManager = new AutorecManager();
-globalThis.autorecManager = autorecManager;
 
