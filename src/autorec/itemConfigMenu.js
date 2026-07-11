@@ -215,28 +215,45 @@ export function openItemCrosshairConfig(item) {
 }
 
 /**
- * Register Foundry VTT Item sheet header button hooks (`getItemSheetHeaderButtons` and render hooks)
- * so item owners see a BBC top-bar button to configure item crosshairs.
+ * Register Foundry VTT ApplicationV2 Item sheet header controls (`getHeaderControlsItemSheet5e`,
+ * `getHeaderControlsItemSheet5e2`, `dnd5e.getItemContextOptions`, and ApplicationV2 render hooks)
+ * so item owners see a BBC top-bar / menu control to configure item crosshairs.
  * @returns {void}
  */
 export function registerItemSheetHooks() {
-    Hooks.on("getItemSheetHeaderButtons", (sheet, buttons) => {
-        const item = sheet.document ?? sheet.item;
+    const addApplicationV2HeaderControl = (app, controls) => {
+        const item = app.document ?? app.item;
         if (!item || !Boolean(item.isOwner)) return;
 
-        if (!buttons.some(b => b.class === "bbc-item-config")) {
-            const customConfig = item.getFlag?.(MODULE_ID, "customConfig") ?? item.flags?.[MODULE_ID]?.customConfig;
-            const autorecMatch = autorecManager.getEntryByName(item.name);
-            const statusLabel = Boolean(customConfig) ? " [CUSTOM]" : (autorecMatch ? " [AUTOREC]" : "");
+        const customConfig = item.getFlag?.(MODULE_ID, "customConfig") ?? item.flags?.[MODULE_ID]?.customConfig;
+        const autorecMatch = autorecManager.getEntryByName(item.name);
+        const statusLabel = Boolean(customConfig) ? " [CUSTOM]" : (autorecMatch ? " [AUTOREC]" : "");
 
-            buttons.unshift({
-                label: "BBC",
-                class: "bbc-item-config",
-                icon: "fa-solid fa-crosshairs",
-                title: `BBC Crosshair Configuration${statusLabel}`,
-                onclick: () => openItemCrosshairConfig(item)
-            });
-        }
+        controls.push({
+            label: `BBC${statusLabel}`,
+            icon: "fa-solid fa-crosshairs",
+            onClick: () => openItemCrosshairConfig(item)
+        });
+    };
+
+    Hooks.on("getHeaderControlsItemSheet5e", addApplicationV2HeaderControl);
+    Hooks.on("getHeaderControlsItemSheet5e2", addApplicationV2HeaderControl);
+    Hooks.on("getHeaderControlsItemSheetV2", addApplicationV2HeaderControl);
+    Hooks.on("getHeaderControlsDocumentSheetV2", addApplicationV2HeaderControl);
+
+
+    Hooks.on("dnd5e.getItemContextOptions", (item, options) => {
+        if (!item || !Boolean(item.isOwner)) return;
+
+        const customConfig = item.getFlag?.(MODULE_ID, "customConfig") ?? item.flags?.[MODULE_ID]?.customConfig;
+        const autorecMatch = autorecManager.getEntryByName(item.name);
+        const statusLabel = Boolean(customConfig) ? " [CUSTOM]" : (autorecMatch ? " [AUTOREC]" : "");
+
+        options.push({
+            name: `BBC Crosshair Configuration${statusLabel}`,
+            icon: "<i class='fa-solid fa-crosshairs'></i>",
+            callback: () => openItemCrosshairConfig(item)
+        });
     });
 
     const addHeaderControlToDOM = (sheet, html) => {
@@ -272,4 +289,5 @@ export function registerItemSheetHooks() {
     Hooks.on("renderItemSheet", addHeaderControlToDOM);
     Hooks.on("renderItemSheet5e2", addHeaderControlToDOM);
 }
+
 
