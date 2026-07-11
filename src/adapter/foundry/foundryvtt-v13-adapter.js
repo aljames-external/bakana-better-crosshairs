@@ -1,4 +1,5 @@
 import { BaseFoundryVTTAdapter } from "./base-foundryvtt-adapter.js";
+import { localize } from "../../lib/utils.js";
 
 export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
     /**
@@ -8,6 +9,39 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
         super();
         this.version = 13;
     }
+
+    /**
+     * Return canonical document terminology string ("template").
+     * @returns {string} The localized or canonical document type term
+     */
+    get documentTerm() {
+        return "template";
+    }
+
+    /**
+     * Return section title header for pre-placement configuration.
+     * @returns {string} Section header text
+     */
+    get prePlacementTitle() {
+        return localize("BBC.autorecMenu.preTemplatePlacement", "Pre-Template Placement");
+    }
+
+    /**
+     * Return section title header for placement configuration.
+     * @returns {string} Section header text
+     */
+    get placementSectionTitle() {
+        return localize("BBC.autorecMenu.templatePlacementConfig", "Template Placement Configuration");
+    }
+
+    /**
+     * Return section title header for post-placement configuration.
+     * @returns {string} Section header text
+     */
+    get postPlacementTitle() {
+        return localize("BBC.autorecMenu.postTemplatePlacement", "Post-Template Placement");
+    }
+
 
     /**
      * Register Foundry VTT v13 placement hooks for MeasuredTemplates.

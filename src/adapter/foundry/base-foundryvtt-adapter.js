@@ -4,8 +4,6 @@ import { clearHighlightLayer } from "../../lib/compat.js";
 import { MODULE_ID } from "../../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY } from "../../autorec/autorecManager.js";
 import { CrosshairConfiguration } from "../../autorec/CrosshairConfiguration.js";
-import { localize } from "../../lib/utils.js";
-
 export class BaseFoundryVTTAdapter {
     /**
      * Initialize the base Foundry VTT adapter.
@@ -16,36 +14,40 @@ export class BaseFoundryVTTAdapter {
 
     /**
      * Return canonical document terminology string ("template" or "region").
-
+     * @abstract
      * @returns {string} The localized or canonical document type term
      */
     get documentTerm() {
-        return "template";
+        throw new Error("Subclass must implement documentTerm getter");
     }
 
     /**
      * Return section title header for pre-placement configuration.
+     * @abstract
      * @returns {string} Section header text
      */
     get prePlacementTitle() {
-        return localize("BBC.autorecMenu.preTemplatePlacement", "Pre-Template Placement");
+        throw new Error("Subclass must implement prePlacementTitle getter");
     }
 
     /**
      * Return section title header for placement configuration.
+     * @abstract
      * @returns {string} Section header text
      */
     get placementSectionTitle() {
-        return localize("BBC.autorecMenu.templatePlacementConfig", "Template Placement Configuration");
+        throw new Error("Subclass must implement placementSectionTitle getter");
     }
 
     /**
      * Return section title header for post-placement configuration.
+     * @abstract
      * @returns {string} Section header text
      */
     get postPlacementTitle() {
-        return localize("BBC.autorecMenu.postTemplatePlacement", "Post-Template Placement");
+        throw new Error("Subclass must implement postPlacementTitle getter");
     }
+
 
 
     /**
