@@ -234,14 +234,11 @@ export class BaseFoundryVTTAdapter {
 
         const tx = tok.x ?? 0;
         const ty = tok.y ?? 0;
-        const w = tok.w ?? tok.hitArea?.width ?? size;
-        const h = tok.h ?? tok.hitArea?.height ?? size;
+        const w = tok.w ?? size;
+        const h = tok.h ?? size;
 
         const points = [tx, ty, tx + w, ty, tx + w, ty + h, tx, ty + h];
-
-        const centerPoint = typeof tok.getCenterPoint === "function"
-            ? tok.getCenterPoint()
-            : { x: tok.center?.x ?? (tx + w / 2), y: tok.center?.y ?? (ty + h / 2) };
+        const centerPoint = tok.center;
 
         const RayClass = foundry?.canvas?.geometry?.Ray ?? globalThis.Ray;
         if (!RayClass) {
