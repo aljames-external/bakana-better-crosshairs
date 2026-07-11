@@ -121,8 +121,8 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
 
         if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
         if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
-        if ("fillAlpha" in (doc._source || doc) && styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
-        if ("alpha" in (doc._source || doc) && styling.placedFillAlpha !== undefined) updateData.alpha = styling.placedFillAlpha;
+        if ("fillAlpha" in (doc._source ?? doc) && styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
+        if ("alpha" in (doc._source ?? doc) && styling.placedFillAlpha !== undefined) updateData.alpha = styling.placedFillAlpha;
 
         if (styling.placedFillColor || styling.placedFillAlpha !== undefined || styling.placedBorderColor || styling.placedBorderAlpha !== undefined) {
             updateData.flags = styling.flags;

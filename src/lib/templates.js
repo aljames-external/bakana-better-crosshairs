@@ -19,9 +19,8 @@ function isOwner(doc) {
 /**
  * Detect shape type and dimensions from a template or region placeable/document.
  */
-function detectTemplateProperties(target) {
-    const doc = target.document ?? target;
-    return crosshairAdapter.detectProperties(doc);
+function detectTemplateProperties(placeable) {
+    return crosshairAdapter.detectProperties(placeable.document);
 }
 
 
@@ -29,8 +28,8 @@ function detectTemplateProperties(target) {
  * Handle preview drawing (v13 drawMeasuredTemplate / v14 drawRegion).
  */
 async function handleDrawPreview(placeable) {
-    const doc = placeable.document ?? placeable;
-    const isPreview = placeable.isPreview || (canvas.templates?.preview?.children ?? []).includes(placeable) || (canvas.regions?.preview?.children ?? []).includes(placeable) || !canvas.scene?.templates?.has(doc.id);
+    const doc = placeable.document;
+    const isPreview = Boolean(placeable.isPreview);
 
     log.debug(`handleDrawPreview | Hook fired:`, {
         docId: doc.id,
@@ -55,18 +54,23 @@ async function handleDrawPreview(placeable) {
     // 1. Immediately hide the Foundry template/region preview graphic completely so custom Sequencer visuals take over
     crosshairAdapter.hidePreview(placeable);
 
-    // 2. Resolve token context
-    let rawToken = entry.item?.parent?.getActiveTokens?.()[0] ?? doc.item?.parent?.getActiveTokens?.()[0] ?? canvas.tokens?.controlled?.[0] ?? undefined;
+    // 2. Resolve token and item context deterministically through version adapter
+    const callingContext = crosshairAdapter.extractCallingContext(doc);
+    const item = entry.item ?? callingContext.item;
+    let rawToken = item?.parent?.getActiveTokens?.()[0] ?? canvas.tokens?.controlled?.[0];
     const token = rawToken instanceof Token ? rawToken : (rawToken?.object instanceof Token ? rawToken.object : rawToken);
+    const actor = token?.actor ?? item?.actor;
+
     log.debug(`handleDrawPreview | Using token context:`, token?.name);
 
     const placementKey = `${entry.itemName}_${game.user.id}`;
+    const entryConfig = typeof entry.handler === "object" && entry.handler !== null ? entry.handler : entry;
     const pending = {
         itemName: entry.itemName,
         resolved: false,
         cancelled: false,
         coords: null,
-        config: (typeof entry.handler === "object" && entry.handler !== null ? entry.handler : (typeof entry === "object" && entry !== null ? entry : {}))
+        config: entryConfig
     };
     pendingPlacements.set(placementKey, pending);
 
@@ -126,8 +130,6 @@ async function handleDrawPreview(placeable) {
     try {
         // 3. Auto-detect template properties and assemble sequence config
         const detected = detectTemplateProperties(placeable);
-        const item = doc.item ?? entry.item;
-        const actor = token?.actor ?? item?.actor;
         const autoConfig = {
             ...detected,
             context,
@@ -136,23 +138,18 @@ async function handleDrawPreview(placeable) {
             actor,
             scope: { item, actor, token, doc }
         };
-        log.debug(`handleDrawPreview | Config for "${entry.itemName}":`, autoConfig);
 
         if (typeof entry.handler === "function") {
             await entry.handler(token, autoConfig);
         } else {
-            const entryConfig = (typeof entry.handler === "object" && entry.handler !== null ? entry.handler : (typeof entry === "object" && entry !== null ? entry : {}));
             const mergedConfig = {
                 ...autoConfig,
                 ...entryConfig,
                 context: autoConfig.context,
-                item: autoConfig.item ?? entryConfig.item,
-                actor: autoConfig.actor ?? entryConfig.actor,
-                activity: entryConfig.activity ?? entry.activity,
                 scope: autoConfig.scope
             };
             const explicitType = entryConfig.type;
-            const isKnownType = ["circle", "cone", "ray", "square", "rect"].includes(String(explicitType || "").toLowerCase());
+            const isKnownType = ["circle", "cone", "ray", "square", "rect"].includes(String(explicitType ?? "").toLowerCase());
             const crosshairType = isKnownType
                 ? (String(explicitType).toLowerCase() === "rect" ? "square" : String(explicitType).toLowerCase())
                 : (detected.type ?? "circle");
@@ -248,24 +245,21 @@ function handlePreCreate(doc, _data, _options, userId) {
 async function handleCreateDocument(doc, _options, userId) {
     if (userId !== game.user?.id) return;
 
-    const flagsConfig = doc.flags?.bbc ?? {};
-    let entry = autorecManager.getRegisteredEntry(doc);
-    if (!entry && flagsConfig.itemName) {
-        const lookupKey = flagsConfig.activityName ? `${flagsConfig.itemName} | ${flagsConfig.activityName}` : flagsConfig.itemName;
-        entry = autorecManager.getRegisteredEntry(lookupKey);
-    }
+    const flagsConfig = doc.flags?.bbc;
+    const entry = autorecManager.getRegisteredEntry(doc);
     const config = {
-        ...flagsConfig,
-        ...(entry?.handler && typeof entry.handler === "object" ? entry.handler : (entry ?? {}))
+        ...entry,
+        ...flagsConfig
     };
 
-    const code = config.postPlacementCode ?? config.postCode ?? config.postRegionCode ?? config.postTemplateCode;
+    const code = config.postPlacementCode;
     log.debug(`handleCreateDocument | Evaluated post-placement hook for ${doc.documentName} (${doc.id}):`, { hasCode: Boolean(code), code, flagsConfig });
     if (!code || typeof code !== "string" || !code.trim()) return;
 
-    const token = canvas.tokens?.controlled?.[0] ?? undefined;
-    const item = config.item ?? doc.item;
-    const actor = token?.actor ?? item?.actor ?? config.actor;
+    const callingContext = crosshairAdapter.extractCallingContext(doc);
+    const item = config.item ?? callingContext.item;
+    const token = item?.parent?.getActiveTokens?.()[0] ?? canvas.tokens?.controlled?.[0];
+    const actor = token?.actor ?? item?.actor;
     const scope = { doc, token, actor, item, config };
 
     try {
