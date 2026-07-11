@@ -44,11 +44,12 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
         const rawEntries = manager.getAllEntries();
         const entries = rawEntries.map(e => ({
             ...e,
-            circleFile: e.circleFile || DEFAULT_AUTOREC_ENTRY.circleFile,
-            coneFile: e.coneFile || DEFAULT_AUTOREC_ENTRY.coneFile,
-            rayFile: e.rayFile || DEFAULT_AUTOREC_ENTRY.rayFile,
-            squareFile: e.squareFile || DEFAULT_AUTOREC_ENTRY.squareFile,
-            lineFile: e.lineFile || DEFAULT_AUTOREC_ENTRY.lineFile,
+            circleFile: Boolean(e.circleFile) ? e.circleFile : DEFAULT_AUTOREC_ENTRY.circleFile,
+            coneFile: Boolean(e.coneFile) ? e.coneFile : DEFAULT_AUTOREC_ENTRY.coneFile,
+            rayFile: Boolean(e.rayFile) ? e.rayFile : DEFAULT_AUTOREC_ENTRY.rayFile,
+            squareFile: Boolean(e.squareFile) ? e.squareFile : DEFAULT_AUTOREC_ENTRY.squareFile,
+            lineFile: Boolean(e.lineFile) ? e.lineFile : DEFAULT_AUTOREC_ENTRY.lineFile,
+
             borderColorPicker: normalizeHexColor(e.borderColor, "#ffffff"),
             fillColorPicker: normalizeHexColor(e.fillColor, "#000000"),
             placedFillColorPicker: normalizeHexColor(e.placedFillColor, "#000000"),
