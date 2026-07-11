@@ -510,12 +510,11 @@ export class AutorecManager {
             const isLocal = Boolean(handlerOrConfig?.local) || !this.persistedItemNames.has(itemName);
 
             const isDefault = Boolean(config.isDefault);
-            const circleFile = config.circleFile ?? config.file ?? "eskie.crosshair.circle.fantasy_01.white.full";
-            const coneFile = config.coneFile ?? config.file ?? "eskie.crosshair.cone.thin.fantasy_01.white.full";
-            const rayFile = config.rayFile ?? config.file ?? "eskie.crosshair.ray.fantasy_01.white";
-            const squareFile = config.squareFile ?? config.file ?? "eskie.crosshair.ray.fantasy_01.white";
+            const circleFile = config.circleFile ?? "eskie.crosshair.circle.fantasy_01.white.full";
+            const coneFile = config.coneFile ?? "eskie.crosshair.cone.thin.fantasy_01.white.full";
+            const rayFile = config.rayFile ?? "eskie.crosshair.ray.fantasy_01.white";
+            const squareFile = config.squareFile ?? "eskie.crosshair.ray.fantasy_01.white";
 
-            const typeKey = "auto-detect";
             const distVal = config.distance ?? config.radius;
             const distanceDisplay = distVal !== undefined ? `${distVal} ft` : null;
             const widthVal = config.width;
@@ -571,15 +570,15 @@ export class AutorecManager {
                 hasActivity,
                 activityDisplay,
                 supportsActivities: systemAdapter.supportsActivities,
-                type: "Auto-Detect",
+                type,
 
-                typeKey: "auto-detect",
-                isAutoDetect: true,
+                typeKey: type.toLowerCase(),
+                isAutoDetect: type === "Auto-Detect",
                 circleFile,
                 coneFile,
                 rayFile,
                 squareFile,
-                file: circleFile,
+                file,
                 isCustomFunction,
                 isLocal,
                 config,
