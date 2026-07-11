@@ -61,7 +61,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
         const pxPerFoot = (canvas.dimensions?.size ?? 100) / (canvas.dimensions?.distance ?? 5);
         const rawRadius = shape.radius ?? shape.distance ?? shape.length ?? 0;
-        const distance = rawRadius > 20 ? Math.round(rawRadius / pxPerFoot) : rawRadius;
+        const distance = Math.round(rawRadius / pxPerFoot);
 
         const result = {
             type: shapeType,
@@ -120,7 +120,6 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         return { factor: 1 / gridSize, gridUnits: true };
     }
 
-
     /**
      * Update live canvas preview shape coordinates during mouse drag.
      * @param {Document} previewDoc
@@ -165,7 +164,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @param {number} y - Destination y-coordinate
      * @param {number} direction - Rotation angle in degrees
      * @param {Object} [config={}] - Optional sequence placement configuration
-     * @returns {{x: number, y: number, rotation: number, radius: number|undefined, width: number|undefined}}
+     * @returns {{x: number, y: number, rotation: number, radius: number|undefined, width: number|undefined, gridUnits: boolean}}
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
         return {
@@ -173,16 +172,17 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             y,
             rotation: direction,
             radius: config.radius,
-            width: config.width
+            width: config.width,
+            gridUnits: Boolean(config.gridUnits ?? true)
         };
     }
 
     /**
      * Format and clone a V14 Region shape payload (`doc.shapes[0]`) with updated destination coordinates and dimensions.
-     * Converts grid-unit measurements (`radius`, `width`) to canvas pixels when small values indicating grid distance are passed.
+     * Converts grid-unit measurements (`radius`, `width`) to canvas pixels when `coords.gridUnits` is true.
      *
      * @param {Object} originalShape - The base V14 Region shape data object (`doc.shapes[0]`)
-     * @param {Object} coords - The placement coordinates payload (`{ x, y, rotation, radius, width }`)
+     * @param {Object} coords - The placement coordinates payload (`{ x, y, rotation, radius, width, gridUnits }`)
      * @returns {Object} A cloned and formatted Region shape payload
      * @private
      */
@@ -190,20 +190,19 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         // Deep clone shape payload to prevent mutating caller or document source references
         const shape = foundry.utils.deepClone(originalShape);
         const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);
+        const isGridUnits = Boolean(coords.gridUnits ?? true);
 
         // Apply placement origin coordinates and rotation directly
         if (coords.x !== undefined) shape.x = coords.x;
         if (coords.y !== undefined) shape.y = coords.y;
         if (coords.rotation !== undefined) shape.rotation = coords.rotation;
 
-        // Convert radius/width from grid distance units (feet/meters) to canvas pixels if <= 1000 threshold
+        // Convert radius/width from grid distance units (feet/meters) to canvas pixels when placement specifies gridUnits
         if (coords.radius !== undefined) {
-            const rawRadius = coords.radius;
-            shape.radius = rawRadius <= 1000 ? Math.round(rawRadius * pxPerFoot) : rawRadius;
+            shape.radius = isGridUnits ? Math.round(coords.radius * pxPerFoot) : coords.radius;
         }
         if (coords.width !== undefined) {
-            const rawWidth = coords.width;
-            shape.width = rawWidth <= 1000 ? Math.round(rawWidth * pxPerFoot) : rawWidth;
+            shape.width = isGridUnits ? Math.round(coords.width * pxPerFoot) : coords.width;
         }
         return shape;
     }
