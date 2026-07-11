@@ -223,12 +223,10 @@ function handlePreCreate(doc, _data, _options, userId) {
 
     // If the sequencer sequence has resolved with coordinates, update the document
     if (pending.resolved && pending.coords) {
-        log.debug(`handlePreCreate | [APPLY] Sequencer placement resolved for "${entry.itemName}". Formatting updateData with coords:`, pending.coords);
-        const updateData = crosshairAdapter.formatDocumentUpdate(doc, pending.coords, pending.config ?? {});
-        log.debug(`handlePreCreate | [APPLY] Formatted updateData payload:`, updateData);
-        doc.updateSource(updateData);
+        log.debug(`handlePreCreate | [APPLY] Sequencer placement resolved for "${entry.itemName}". Applying placement onto document:`, pending.coords);
+        crosshairAdapter.applyDocumentPlacement(doc, pending.coords, pending.config);
         pendingPlacements.delete(placementKey);
-        log.debug(`handlePreCreate | [APPLY COMPLETE] Document source after updateSource:`, doc._source ?? doc.toObject?.() ?? doc);
+        log.debug(`handlePreCreate | [APPLY COMPLETE] Document updated successfully.`);
         return true;
     }
 

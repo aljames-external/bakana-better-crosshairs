@@ -127,31 +127,29 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Format the complete updateData payload for modifying a Region document source during preCreate.
+     * Apply resolved placement coordinates and workflow flags onto a Region document.
      * @param {Document} doc
      * @param {Object} coords
      * @param {Object} [config={}]
-     * @returns {Object}
      */
-    formatDocumentUpdate(doc, coords = {}, config = {}) {
-        const updateData = {};
+    applyDocumentPlacement(doc, coords = {}, config = {}) {
+        const styling = this.extractPlacedStylingFlags(config);
+        const updateData = {
+            flags: styling.flags
+        };
+
         if (Array.isArray(doc.shapes) && doc.shapes.length > 0) {
-            const originalShape = foundry.utils.deepClone(
-                doc.shapes[0]._source ?? (typeof doc.shapes[0].toObject === "function" ? doc.shapes[0].toObject() : doc.shapes[0])
-            );
+            const shapeObj = typeof doc.shapes[0].toObject === "function" ? doc.shapes[0].toObject() : doc.shapes[0];
+            const originalShape = foundry.utils.deepClone(shapeObj);
             const newShape = this._formatRegionShapeUpdate(originalShape, coords);
             delete newShape._id;
             updateData.shapes = [newShape];
         }
 
-        const styling = this.extractPlacedStylingFlags(config);
         if (styling.placedFillColor) updateData.color = styling.placedFillColor;
+        if (config.hidden || config.hideTemplate) updateData.hidden = true;
 
-        updateData.flags = styling.flags;
-        if (config.hidden || config.hideTemplate) {
-            updateData.hidden = true;
-        }
-        return updateData;
+        doc.updateSource(updateData);
     }
     formatPlacementCoordinates(x, y, direction, config = {}) {
         return {
