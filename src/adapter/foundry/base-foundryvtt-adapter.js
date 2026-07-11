@@ -151,6 +151,17 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
+     * Normalize a canvas PlaceableObject or Document into a canonical Document instance.
+     * Encapsulates polymorphic entry boundary normalization for Foundry VTT.
+     * @param {Document|PlaceableObject} target - Target placeable or document
+     * @returns {Document|null}
+     */
+    toDocument(target) {
+        if (!target) return null;
+        return target instanceof foundry.abstract.Document ? target : (target.document ?? null);
+    }
+
+    /**
      * Extract normalized placed fill/border styling values and flags from workflow configuration.
      * Shared across V12 and V14 document updates.
      * @param {Object} [config={}]
