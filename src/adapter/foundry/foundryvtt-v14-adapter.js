@@ -162,16 +162,25 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Format a Region shape update based on drag destination coordinates.
+     * Format and clone a V14 Region shape payload (`doc.shapes[0]`) with updated destination coordinates and dimensions.
+     * Converts grid-unit measurements (`radius`, `width`) to canvas pixels when small values indicating grid distance are passed.
+     *
+     * @param {Object} originalShape - The base V14 Region shape data object (`doc.shapes[0]`)
+     * @param {Object} coords - The placement coordinates payload (`{ x, y, rotation, radius, width }`)
+     * @returns {Object} A cloned and formatted Region shape payload
      * @private
      */
     _formatRegionShapeUpdate(originalShape, coords) {
+        // Deep clone shape payload to prevent mutating caller or document source references
         const shape = foundry.utils.deepClone(originalShape);
         const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);
 
+        // Apply placement origin coordinates and rotation directly
         if (coords.x !== undefined) shape.x = coords.x;
         if (coords.y !== undefined) shape.y = coords.y;
         if (coords.rotation !== undefined) shape.rotation = coords.rotation;
+
+        // Convert radius/width from grid distance units (feet/meters) to canvas pixels if <= 1000 threshold
         if (coords.radius !== undefined) {
             const rawRadius = coords.radius;
             shape.radius = rawRadius <= 1000 ? Math.round(rawRadius * pxPerFoot) : rawRadius;
