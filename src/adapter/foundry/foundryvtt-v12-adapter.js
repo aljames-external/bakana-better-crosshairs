@@ -102,34 +102,24 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Format the complete updateData payload for modifying a document source during preCreate.
+     * Apply resolved placement coordinates and workflow flags onto a MeasuredTemplate document.
      * @param {Document} doc
      * @param {Object} coords
      * @param {Object} [config={}]
-     * @returns {Object}
      */
-    formatDocumentUpdate(doc, coords = {}, config = {}) {
-        const updateData = {};
-        if (coords.x !== undefined) updateData.x = coords.x;
-        if (coords.y !== undefined) updateData.y = coords.y;
-        if (coords.distance !== undefined) updateData.distance = coords.distance;
-        if (coords.direction !== undefined) updateData.direction = coords.direction;
-        if (coords.width !== undefined) updateData.width = coords.width;
-        if (coords.t !== undefined) updateData.t = coords.t;
-
+    applyDocumentPlacement(doc, coords = {}, config = {}) {
         const styling = this.extractPlacedStylingFlags(config);
+        const updateData = {
+            ...coords,
+            flags: styling.flags
+        };
 
         if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
         if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
         if (styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
+        if (config.hidden || config.hideTemplate) updateData.hidden = true;
 
-        if (styling.placedFillColor || styling.placedFillAlpha !== undefined || styling.placedBorderColor || styling.placedBorderAlpha !== undefined) {
-            updateData.flags = styling.flags;
-        }
-        if (config.hidden || config.hideTemplate) {
-            updateData.hidden = true;
-        }
-        return updateData;
+        doc.updateSource(updateData);
     }
 }
 

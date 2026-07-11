@@ -203,8 +203,8 @@ export class BaseFoundryVTTAdapter {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement updatePreviewShape(previewDoc, coords).");
     }
 
-    formatDocumentUpdate(doc, coords, config) {
-        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement formatDocumentUpdate(doc, coords, config).");
+    applyDocumentPlacement(doc, coords, config) {
+        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement applyDocumentPlacement(doc, coords, config).");
     }
 
     /**
