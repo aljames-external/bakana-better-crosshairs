@@ -79,7 +79,8 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             emptySidebar: localize("BBC.autorecMenu.labels.emptySidebar", "No crosshair animations registered yet."),
             selectWorkflowTitle: localize("BBC.autorecMenu.labels.selectWorkflowTitle", "Select a Registered Workflow"),
             selectWorkflowDesc: localize("BBC.autorecMenu.labels.selectWorkflowDesc", "Click on any item name in the sidebar to inspect its pre-animation, core animation, and post-animation configuration."),
-            preSectionDesc: localize("BBC.autorecMenu.labels.preSectionDesc", `Executes custom Javascript code concurrent with ${docTerm} placement selection.`),
+            preSectionDesc: localize("BBC.autorecMenu.labels.preSectionDesc", `Executes custom Javascript code before starting ${docTerm} placement selection.`),
+
             noScript: localize("BBC.autorecMenu.labels.noScript", "No custom script configured"),
             animationTitle: localize("BBC.autorecMenu.labels.animationTitle", "Animation Configuration"),
             animationDesc: localize("BBC.autorecMenu.labels.animationDesc", "Sequencer crosshair graphic asset and interactive rendering properties."),

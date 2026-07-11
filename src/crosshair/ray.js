@@ -109,11 +109,9 @@ async function create(token, config = {}) {
  */
 async function play(token, config = {}) {
     let [ray] = await create(token, config);
-    return Promise.all([
-        runConcurrentScript(token, config, ray),
-        ray.play()
-    ]);
+    return ray.play();
 }
+
 
 /**
  * Stops and ends any active ray crosshair visual effects associated with a token.

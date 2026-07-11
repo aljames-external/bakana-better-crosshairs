@@ -145,11 +145,9 @@ async function create(token, config = {}) {
  */
 async function play(token, config = {}) {
     let [circle] = await create(token, config);
-    return Promise.all([
-        runConcurrentScript(token, config, circle),
-        circle.play()
-    ]);
+    return circle.play();
 }
+
 
 /**
  * Stops and terminates active circle crosshair visual effects associated with the specified token and effect ID.

@@ -123,11 +123,9 @@ async function create(token, config = {}) {
  */
 async function play(token, config = {}) {
     let [cone] = await create(token, config);
-    return Promise.all([
-        runConcurrentScript(token, config, cone),
-        cone.play()
-    ]);
+    return cone.play();
 }
+
 
 /**
  * Stops and removes active cone crosshair visual effects for a given token and effect identifier.

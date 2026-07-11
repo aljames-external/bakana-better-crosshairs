@@ -100,7 +100,8 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             deleteCustomBtn: localize("BBC.itemConfigMenu.deleteCustomBtn", "Delete"),
             saveCustomBtn: localize("BBC.itemConfigMenu.saveCustomBtn", "Save"),
 
-            preSectionDesc: localize("BBC.itemConfigMenu.preSectionDesc", `Executes custom Javascript code concurrent with ${docTerm} placement selection.`),
+            preSectionDesc: localize("BBC.itemConfigMenu.preSectionDesc", `Executes custom Javascript code before starting ${docTerm} placement selection.`),
+
             animationDesc: localize("BBC.itemConfigMenu.animationDesc", "Sequencer crosshair graphic asset and interactive rendering properties."),
             placedSectionDesc: localize("BBC.itemConfigMenu.placedSectionDesc", `Configure fill and border highlight colors applied to the created ${docTerm}.`),
             postSectionDesc: localize("BBC.itemConfigMenu.postSectionDesc", `Executes custom Javascript code immediately after the ${docTerm} document is created on the canvas.`),

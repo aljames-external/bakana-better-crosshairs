@@ -102,6 +102,35 @@
 
 
                 <div class="bbc-sections-scroll">
+                    <!-- Top Section: Workflow Status -->
+                    <section class="bbc-section-card">
+                        <div class="bbc-section-header">
+                            <div class="bbc-section-title">
+                                <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+                                <i class="fa-solid fa-power-off bbc-section-icon"></i>
+                                <h3>Workflow Status</h3>
+                            </div>
+                        </div>
+                        <div class="bbc-section-body">
+                            <table class="bbc-config-table">
+                                <tbody>
+                                    <tr>
+                                        <th>{{../labels.workflowEnabled}}</th>
+                                        <td>
+                                            <span class="view-only">
+                                                {{#if enabled}}<span class="bbc-pill yes">{{../labels.enabledPill}}</span>{{else}}<span class="bbc-pill no">{{../labels.disabledPill}}</span>{{/if}}
+                                            </span>
+                                            <label class="bbc-toggle-label edit-only">
+                                                <input type="checkbox" class="bbc-edit-input" data-field="enabled" {{#if enabled}}checked{{/if}} />
+                                                <span>{{#if enabled}}{{../labels.enabledPill}}{{else}}{{../labels.disabledPill}}{{/if}}</span>
+                                            </label>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
                     <!-- Section 1: Pre-Region / Pre-Template Placement -->
                     <section class="bbc-section-card">
                         <div class="bbc-section-header">
@@ -122,7 +151,7 @@
                                     {{/if}}
                                 </div>
                                 <div class="edit-only">
-                                    <textarea class="bbc-edit-textarea bbc-code-editor" data-field="concurrentCode" spellcheck="false" placeholder="// Enter Javascript code...&#10;// Available variables: token, actor, item, scope, config, crosshair, canvas, game" rows="5">{{concurrentCode}}</textarea>
+                                    <textarea class="bbc-edit-textarea bbc-code-editor" data-field="concurrentCode" spellcheck="false" placeholder="// Enter Javascript code executed before template placement selection...&#10;// Available variables: token, actor, item, scope, config, crosshair, canvas, game" rows="5">{{concurrentCode}}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -142,18 +171,7 @@
                             <table class="bbc-config-table">
                                 <tbody>
                                     <tr>
-                                        <th>{{../labels.workflowEnabled}}</th>
-                                        <td>
-                                            <span class="view-only">
-                                                {{#if enabled}}<span class="bbc-pill yes">{{../labels.enabledPill}}</span>{{else}}<span class="bbc-pill no">{{../labels.disabledPill}}</span>{{/if}}
-                                            </span>
-                                            <label class="bbc-toggle-label edit-only">
-                                                <input type="checkbox" class="bbc-edit-input" data-field="enabled" {{#if enabled}}checked{{/if}} />
-                                                <span>{{#if enabled}}{{../labels.enabledPill}}{{else}}{{../labels.disabledPill}}{{/if}}</span>
-                                            </label>
-                                        </td>
-                                    </tr>
-                                    <tr>
+
                                         <th>{{../labels.callingItemName}}</th>
                                         <td>
                                             {{#if isDefault}}

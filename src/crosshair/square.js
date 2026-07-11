@@ -107,11 +107,9 @@ async function create(token, config = {}) {
  */
 async function play(token, config = {}) {
     let [square] = await create(token, config);
-    return Promise.all([
-        runConcurrentScript(token, config, square),
-        square.play()
-    ]);
+    return square.play();
 }
+
 
 /**
  * Stops and clears any persistent square crosshair effects associated with the given token.

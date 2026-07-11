@@ -35,6 +35,32 @@
 
     <!-- Scrollable Configuration Body -->
     <div class="bbc-sections-scroll bbc-item-config-body">
+        <!-- Top Section: Workflow Status -->
+        <section class="bbc-section-card">
+            <div class="bbc-section-header">
+                <div class="bbc-section-title">
+                    <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+                    <i class="fa-solid fa-power-off bbc-section-icon"></i>
+                    <h3>Workflow Status</h3>
+                </div>
+            </div>
+            <div class="bbc-section-body">
+                <table class="bbc-config-table">
+                    <tbody>
+                        <tr>
+                            <th>{{labels.workflowEnabled}}</th>
+                            <td>
+                                <label class="bbc-edit-checkbox-label">
+                                    <input type="checkbox" name="enabled" {{#if config.enabled}}checked{{/if}} />
+                                    <span>{{#if config.enabled}}Enabled{{else}}Disabled{{/if}}</span>
+                                </label>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
         <!-- Section 1: Pre-Template / Pre-Region Placement -->
         <section class="bbc-section-card">
             <div class="bbc-section-header">
@@ -47,7 +73,7 @@
             <div class="bbc-section-body">
                 <p class="bbc-section-desc">{{labels.preSectionDesc}}</p>
                 <div class="bbc-code-container">
-                    <textarea class="bbc-edit-textarea bbc-code-editor" name="concurrentCode" rows="4" spellcheck="false" placeholder="// Enter Javascript code executed concurrent with template placement...">{{config.concurrentCode}}</textarea>
+                    <textarea class="bbc-edit-textarea bbc-code-editor" name="concurrentCode" rows="4" spellcheck="false" placeholder="// Enter Javascript code executed before template placement selection...">{{config.concurrentCode}}</textarea>
                 </div>
             </div>
         </section>
@@ -66,15 +92,7 @@
                 <table class="bbc-config-table">
                     <tbody>
                         <tr>
-                            <th>{{labels.workflowEnabled}}</th>
-                            <td>
-                                <label class="bbc-edit-checkbox-label">
-                                    <input type="checkbox" name="enabled" {{#if config.enabled}}checked{{/if}} />
-                                    <span>{{#if config.enabled}}Enabled{{else}}Disabled{{/if}}</span>
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
+
                             <th>{{labels.circleFile}}</th>
                             <td>
                                 <input type="text" class="bbc-edit-input" name="circleFile" value="{{config.circleFile}}" placeholder="eskie.crosshair.circle.fantasy_01.white.full" />

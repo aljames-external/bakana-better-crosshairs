@@ -69,11 +69,13 @@ export class BaseFoundryVTTAdapter {
                         item: context.item,
                         activity: context.activity
                     };
+
                 }
-                log.debug(`matchAutorecEntry | [CUSTOM CONFIG DISABLED] Custom override on "${context.itemName}" is disabled; returning null (FOUNDRY DEFAULT).`);
-                return null;
+                log.debug(`matchAutorecEntry | [CUSTOM CONFIG DISABLED] Custom override on "${context.itemName}" is disabled; skipping custom workflow and falling back to global AUTOREC matching.`);
             }
         }
+
+
 
 
         log.debug("matchAutorecEntry | Comparing calling context against registered entries:", {

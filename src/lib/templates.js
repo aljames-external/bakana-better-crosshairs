@@ -1,9 +1,11 @@
 import { log } from './logger.js';
 import { crosshair } from '../crosshair/_crosshairs.js';
+import { runConcurrentScript } from '../crosshair/util.js';
 import { Token } from './compat.js';
 import { crosshairAdapter } from '../adapter/foundry/index.js';
 import { autorecManager } from '../autorec/autorecManager.js';
 import { registerItemSheetHooks } from '../autorec/itemConfigMenu.js';
+
 
 
 const pendingPlacements = new Map();
@@ -155,15 +157,21 @@ async function handleDrawPreview(placeable) {
             scope: { item, actor, token, doc }
         };
 
+        const mergedConfig = {
+            ...autoConfig,
+            ...entryConfig,
+            context: autoConfig.context,
+            scope: autoConfig.scope
+        };
+
+        if (mergedConfig.concurrentCode) {
+            log.debug(`handleDrawPreview | Executing pre-placement script before template placement selection for "${entry.itemName}"`);
+            await runConcurrentScript(token, mergedConfig, null);
+        }
+
         if (typeof entry.handler === "function") {
-            await entry.handler(token, autoConfig);
+            await entry.handler(token, mergedConfig);
         } else {
-            const mergedConfig = {
-                ...autoConfig,
-                ...entryConfig,
-                context: autoConfig.context,
-                scope: autoConfig.scope
-            };
             const explicitType = entryConfig.type;
             const isKnownType = ["circle", "cone", "ray", "square", "rect"].includes(String(explicitType ?? "").toLowerCase());
             const crosshairType = isKnownType
@@ -184,6 +192,7 @@ async function handleDrawPreview(placeable) {
             log.debug(`handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}" with config:`, finalConfig);
             await builder.play(token, finalConfig);
         }
+
         log.debug(`handleDrawPreview | Sequencer crosshair sequence completed for "${entry.itemName}".`);
     } catch (err) {
         log.error(`handleDrawPreview | Error running sequencer sequence for "${entry.itemName}":`, err);
