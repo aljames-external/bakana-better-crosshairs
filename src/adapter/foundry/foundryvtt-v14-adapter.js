@@ -76,6 +76,13 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         return result;
     }
 
+    /**
+     * Compute canvas graphic dimensions in grid units for a V14 Region shape.
+     * @param {number} [distance=30] - Shape distance/length
+     * @param {number} [widthOrAngle=5] - Shape width (ray/square) or angle in degrees (cone)
+     * @param {string} [shapeType="ray"] - Canonical shape type ('circle', 'cone', 'ray', 'square')
+     * @returns {{size: {width: number, height: number}, gridUnits: boolean}}
+     */
     formatGraphicSize(distance = 30, widthOrAngle = 5, shapeType = "ray") {
         const gridDist = canvas?.dimensions?.distance ?? 5;
         const lengthGridUnits = distance / gridDist;
@@ -106,6 +113,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
     /**
      * Return template pixel multiplier factor for V14 (converts pixels to exact grid units).
+     * @returns {{factor: number, gridUnits: boolean}}
      */
     getTemplatePixelFactor() {
         const gridSize = canvas?.dimensions?.size ?? 100;
@@ -151,6 +159,14 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
         doc.updateSource(updateData);
     }
+    /**
+     * Format drag destination coordinates into a V14 Region placement coordinates payload.
+     * @param {number} x - Destination x-coordinate
+     * @param {number} y - Destination y-coordinate
+     * @param {number} direction - Rotation angle in degrees
+     * @param {Object} [config={}] - Optional sequence placement configuration
+     * @returns {{x: number, y: number, rotation: number, radius: number|undefined, width: number|undefined}}
+     */
     formatPlacementCoordinates(x, y, direction, config = {}) {
         return {
             x,

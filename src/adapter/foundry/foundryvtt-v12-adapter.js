@@ -41,6 +41,14 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
         };
     }
 
+    /**
+     * Format drag destination coordinates into a V12 MeasuredTemplate placement coordinates payload.
+     * @param {number} x - Destination x-coordinate
+     * @param {number} y - Destination y-coordinate
+     * @param {number} direction - Direction angle in degrees
+     * @param {Object} [config={}] - Optional sequence placement configuration
+     * @returns {{x: number, y: number, direction: number, distance: number|undefined, width: number|undefined}}
+     */
     formatPlacementCoordinates(x, y, direction, config = {}) {
         return {
             x,
@@ -51,6 +59,13 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
         };
     }
 
+    /**
+     * Compute canvas graphic dimensions in pixel units for a V12 MeasuredTemplate shape.
+     * @param {number} [distance=30] - Shape distance/length
+     * @param {number} [widthOrAngle=5] - Shape width (ray/square) or angle in degrees (cone)
+     * @param {string} [shapeType="ray"] - Canonical shape type ('circle', 'cone', 'ray', 'square')
+     * @returns {{size: {width: number, height: number}, gridUnits: boolean}}
+     */
     formatGraphicSize(distance = 30, widthOrAngle = 5, shapeType = "ray") {
         const gridDist = canvas?.dimensions?.distance ?? 5;
         const gridSize = canvas?.dimensions?.size ?? 100;
@@ -82,6 +97,7 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
 
     /**
      * Return template pixel multiplier factor for V12 (legacy pixel sizing).
+     * @returns {{factor: number, gridUnits: boolean}}
      */
     getTemplatePixelFactor() {
         return { factor: 1, gridUnits: false };

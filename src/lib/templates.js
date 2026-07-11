@@ -8,7 +8,9 @@ const pendingPlacements = new Map();
 let hooksInitialized = false;
 
 /**
- * Check if the current user is the owner/author of the document or preview.
+ * Check if the current user is the author or owner of the document or preview.
+ * @param {Document} doc - Template or Region document
+ * @returns {boolean} True if the current user owns or authored the document
  */
 function isOwner(doc) {
     if (!doc.id) return true; // Preview templates on canvas are always local to the drawing client
@@ -17,7 +19,9 @@ function isOwner(doc) {
 }
 
 /**
- * Detect shape type and dimensions from a template or region placeable/document.
+ * Detect shape type and dimensions from a template or region placeable on canvas.
+ * @param {PlaceableObject} placeable - Canvas PlaceableObject (MeasuredTemplate or Region)
+ * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}}
  */
 function detectTemplateProperties(placeable) {
     return crosshairAdapter.detectProperties(placeable.document);
