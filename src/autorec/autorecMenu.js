@@ -107,7 +107,7 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                             </form>
                         `,
                         ok: {
-                            label: "Add Workflow",
+                            label: localize("BBC.autorecMenu.addWorkflow.label", "Add Workflow"),
                             callback: (event, button, html) => {
                                 const rootEl = button.form ?? html;
                                 const itemInput = rootEl.querySelector ? rootEl.querySelector("input[name='workflowName']") : null;
@@ -130,7 +130,7 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                     const config = activity ? { itemName, activityId: activity, activityName: activity } : { itemName };
                     manager.register(regKey, config, { persist: true });
                     manager.broadcastSync();
-                    ui.notifications?.info(`Added workflow: "${regKey}".`);
+                    ui.notifications?.info(localize("BBC.autorecMenu.notify.added", `Added workflow: "${regKey}".`));
                 }
 
                 this.selectItem(root, regKey);
@@ -150,13 +150,13 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             removeSelectedBtn.addEventListener("click", async () => {
                 const checked = root.querySelectorAll(".bbc-item-select-checkbox:checked");
                 if (checked.length === 0) {
-                    ui.notifications?.warn("Please select one or more workflows to remove.");
+                    ui.notifications?.warn(localize("BBC.autorecMenu.notify.selectRemove", "Please select one or more workflows to remove."));
                     return;
                 }
                 const names = [];
                 checked.forEach(el => names.push(el.dataset.itemName));
                 await manager.unregisterMany(names, { persist: true });
-                ui.notifications?.info(`Removed ${names.length} workflow(s).`);
+                ui.notifications?.info(localize("BBC.autorecMenu.notify.removedMany", `Removed ${names.length} workflow(s).`));
                 this.render(false);
             });
         }
@@ -168,7 +168,7 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                 if (itemName) {
                     manager.unregister(itemName, { persist: true });
                     manager.broadcastSync();
-                    ui.notifications?.info(`Removed workflow "${itemName}".`);
+                    ui.notifications?.info(localize("BBC.autorecMenu.notify.removedOne", `Removed workflow "${itemName}".`));
                     this.render(false);
                 }
             });
@@ -225,7 +225,7 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                 const text = ev.currentTarget.dataset.copyText;
                 if (text && navigator.clipboard) {
                     navigator.clipboard.writeText(text);
-                    ui.notifications?.info(`Copied "${text}" to clipboard.`);
+                    ui.notifications?.info(localize("BBC.autorecMenu.notify.copied", `Copied "${text}" to clipboard.`));
                 }
             });
         });
@@ -316,7 +316,7 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                 }
             }
             await manager.overwrite(persistedDict);
-            ui.notifications?.info("Saved workflow configurations and synced across all clients.");
+            ui.notifications?.info(localize("BBC.autorecMenu.notify.saved", "Saved workflow configurations and synced across all clients."));
             this.render(false);
         }
     }
