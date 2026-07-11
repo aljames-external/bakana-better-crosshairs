@@ -135,7 +135,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      */
     updatePreviewShape(previewDoc, coords) {
         if (Array.isArray(previewDoc.shapes) && previewDoc.shapes.length > 0) {
-            const orig = previewDoc.shapes[0]._source ?? previewDoc.shapes[0];
+            const orig = previewDoc.shapes[0].toObject();
             const updatedShape = this._formatRegionShapeUpdate(orig, coords);
             previewDoc.shapes = [updatedShape];
         }
@@ -155,12 +155,13 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         };
 
         if (Array.isArray(doc.shapes) && doc.shapes.length > 0) {
-            const shapeObj = doc.shapes[0].toObject?.() ?? doc.shapes[0];
+            const shapeObj = doc.shapes[0].toObject();
             const originalShape = foundry.utils.deepClone(shapeObj);
             const newShape = this._formatRegionShapeUpdate(originalShape, coords);
             delete newShape._id;
             updateData.shapes = [newShape];
         }
+
 
         if (styling.placedFillColor) updateData.color = styling.placedFillColor;
         if (Boolean(config.hidden || config.hideTemplate)) updateData.hidden = true;
