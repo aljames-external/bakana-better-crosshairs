@@ -67,36 +67,54 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         };
 
         const baseFallback = autorecMatch ?? DEFAULT_AUTOREC_ENTRY;
-        const rawConfig = {
-            ...DEFAULT_AUTOREC_ENTRY,
-            ...baseFallback,
-            ...(customConfig ?? {})
-        };
-
         const hasGranularFlags = customConfig && ("enableAnimation" in customConfig || "enablePrePlacement" in customConfig || "enablePlacedStyling" in customConfig || "enablePostPlacement" in customConfig);
         const enablePrePlacement = hasGranularFlags ? Boolean(customConfig.enablePrePlacement) : Boolean(customConfig?.concurrentCode);
         const enableAnimation = hasGranularFlags ? Boolean(customConfig.enableAnimation) : Boolean(customConfig && customConfig.enabled !== false);
         const enablePlacedStyling = hasGranularFlags ? Boolean(customConfig.enablePlacedStyling) : Boolean(customConfig?.placedFillColor || customConfig?.placedBorderColor);
         const enablePostPlacement = hasGranularFlags ? Boolean(customConfig.enablePostPlacement) : Boolean(customConfig?.postPlacementCode);
 
+        const animSource = enableAnimation ? (customConfig ?? {}) : baseFallback;
+        const preSource = enablePrePlacement ? (customConfig ?? {}) : baseFallback;
+        const placedSource = enablePlacedStyling ? (customConfig ?? {}) : baseFallback;
+        const postSource = enablePostPlacement ? (customConfig ?? {}) : baseFallback;
+
         const mergedConfig = {
-            ...rawConfig,
+            ...DEFAULT_AUTOREC_ENTRY,
+            ...baseFallback,
             enablePrePlacement,
             enableAnimation,
             enablePlacedStyling,
             enablePostPlacement,
-            circleFile: Boolean(rawConfig.circleFile) ? rawConfig.circleFile : DEFAULT_AUTOREC_ENTRY.circleFile,
-            coneFile: Boolean(rawConfig.coneFile) ? rawConfig.coneFile : DEFAULT_AUTOREC_ENTRY.coneFile,
-            rayFile: Boolean(rawConfig.rayFile) ? rawConfig.rayFile : DEFAULT_AUTOREC_ENTRY.rayFile,
-            squareFile: Boolean(rawConfig.squareFile) ? rawConfig.squareFile : DEFAULT_AUTOREC_ENTRY.squareFile,
-            lineFile: Boolean(rawConfig.lineFile) ? rawConfig.lineFile : DEFAULT_AUTOREC_ENTRY.lineFile,
 
+            concurrentCode: preSource.concurrentCode ?? "",
 
-            borderColorPicker: normalizeHexColor(rawConfig.borderColor, "#ffffff"),
-            fillColorPicker: normalizeHexColor(rawConfig.fillColor, "#000000"),
-            placedFillColorPicker: normalizeHexColor(rawConfig.placedFillColor, "#000000"),
-            placedBorderColorPicker: normalizeHexColor(rawConfig.placedBorderColor, "#000000")
+            enabled: Boolean(animSource.enabled !== false),
+            circleFile: Boolean(animSource.circleFile) ? animSource.circleFile : DEFAULT_AUTOREC_ENTRY.circleFile,
+            coneFile: Boolean(animSource.coneFile) ? animSource.coneFile : DEFAULT_AUTOREC_ENTRY.coneFile,
+            rayFile: Boolean(animSource.rayFile) ? animSource.rayFile : DEFAULT_AUTOREC_ENTRY.rayFile,
+            squareFile: Boolean(animSource.squareFile) ? animSource.squareFile : DEFAULT_AUTOREC_ENTRY.squareFile,
+            lineFile: Boolean(animSource.lineFile) ? animSource.lineFile : DEFAULT_AUTOREC_ENTRY.lineFile,
+            stickToToken: animSource.stickToToken ?? "default",
+            showLine: Boolean(animSource.showLine),
+            borderColor: animSource.borderColor ?? "#ffffff",
+            borderAlpha: animSource.borderAlpha ?? 0,
+            fillColor: animSource.fillColor ?? "#000000",
+            fillAlpha: animSource.fillAlpha ?? 0,
+            icon: animSource.icon ?? "",
+
+            placedFillColor: placedSource.placedFillColor ?? "#000000",
+            placedFillAlpha: placedSource.placedFillAlpha ?? 0,
+            placedBorderColor: placedSource.placedBorderColor ?? "#ffffff",
+            placedBorderAlpha: placedSource.placedBorderAlpha ?? 0,
+
+            postPlacementCode: postSource.postPlacementCode ?? "",
+
+            borderColorPicker: normalizeHexColor(animSource.borderColor, "#ffffff"),
+            fillColorPicker: normalizeHexColor(animSource.fillColor, "#000000"),
+            placedFillColorPicker: normalizeHexColor(placedSource.placedFillColor, "#000000"),
+            placedBorderColorPicker: normalizeHexColor(placedSource.placedBorderColor, "#000000")
         };
+
 
 
         const isV14 = typeof game !== "undefined" && (game.release?.generation >= 14 || parseInt(game.version, 10) >= 14);
