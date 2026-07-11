@@ -2,6 +2,7 @@ import { MODULE_ID } from '../lib/constants.js';
 import { log } from '../lib/logger.js';
 import { systemAdapter } from '../adapter/system/index.js';
 import { crosshairAdapter } from '../adapter/foundry/index.js';
+import { socketlib } from '../integration/index.js';
 
 
 export const DEFAULT_AUTOREC_ENTRY = {
@@ -177,8 +178,7 @@ export class AutorecManager {
         if (this.readySyncInitialized) return;
         this.readySyncInitialized = true;
 
-        if (game.socket) {
-            game.socket.on(`module.${MODULE_ID}`, (data) => {
+        socketlib.on((data) => {
                 if (!data || typeof data !== "object") return;
                 if (data.type === "REGISTER_TEMPLATE") {
                     if (game.user?.isGM) {
@@ -200,7 +200,6 @@ export class AutorecManager {
                     });
                 }
             });
-        }
 
         try {
             const saved = game.settings?.get(MODULE_ID, "registeredTemplates");
@@ -232,7 +231,7 @@ export class AutorecManager {
                 log.error(`Failed to persist registered template setting for: ${itemName}`, e);
             }
         } else {
-            game.socket.emit(`module.${MODULE_ID}`, {
+            socketlib.emit({
                 type: "REGISTER_TEMPLATE",
                 itemName,
                 config
@@ -263,7 +262,7 @@ export class AutorecManager {
                 log.error(`Failed to unpersist template setting for: ${itemName}`, e);
             }
         } else {
-            game.socket.emit(`module.${MODULE_ID}`, {
+            socketlib.emit({
                 type: "UNREGISTER_TEMPLATE",
                 itemName
             });
@@ -451,7 +450,7 @@ export class AutorecManager {
                 }
             } else {
                 for (const [itemName, config] of Object.entries(toPersist)) {
-                    game.socket.emit(`module.${MODULE_ID}`, { type: "REGISTER_TEMPLATE", itemName, config });
+                    socketlib.emit({ type: "REGISTER_TEMPLATE", itemName, config });
                 }
             }
         }
@@ -474,7 +473,7 @@ export class AutorecManager {
                 log.error("Failed to overwrite registeredTemplates setting:", e);
             }
         } else {
-            game.socket.emit(`module.${MODULE_ID}`, {
+            socketlib.emit({
                 type: "OVERWRITE_TEMPLATES",
                 persistedDict
             });
@@ -645,9 +644,7 @@ export class AutorecManager {
      * Broadcast a socket synchronization event (`SYNC_AUTORECS`) to all connected clients.
      */
     broadcastSync() {
-        if (game.socket) {
-            game.socket.emit(`module.${MODULE_ID}`, { type: "SYNC_AUTORECS" });
-        }
+        socketlib.emit({ type: "SYNC_AUTORECS" });
     }
 }
 
