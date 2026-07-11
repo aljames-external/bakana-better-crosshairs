@@ -122,8 +122,8 @@ export function attachWheelRotation(crosshair, config = {}) {
         if (crosshair) {
             if (crosshair.sprite) {
                 if (isRay && crosshair.sprite.anchor && crosshair.sprite.anchor.x !== 0) {
-                    const curRad = crosshair.sprite.rotation || 0;
-                    const halfLen = (crosshair.sprite.width || 0) / 2;
+                    const curRad = crosshair.sprite.rotation ?? 0;
+                    const halfLen = (crosshair.sprite.width ?? 0) / 2;
                     crosshair.sprite.x -= Math.cos(curRad) * halfLen;
                     crosshair.sprite.y -= Math.sin(curRad) * halfLen;
                     crosshair.sprite.anchor.set(0, 0.5);
@@ -148,8 +148,8 @@ export function attachWheelRotation(crosshair, config = {}) {
                 for (const eff of effects) {
                     if (eff.sprite) {
                         if (isRay && eff.sprite.anchor && eff.sprite.anchor.x !== 0) {
-                            const curRad = eff.sprite.rotation || 0;
-                            const halfLen = (eff.sprite.width || 0) / 2;
+                            const curRad = eff.sprite.rotation ?? 0;
+                            const halfLen = (eff.sprite.width ?? 0) / 2;
                             eff.sprite.x -= Math.cos(curRad) * halfLen;
                             eff.sprite.y -= Math.sin(curRad) * halfLen;
                             eff.sprite.anchor.set(0, 0.5);

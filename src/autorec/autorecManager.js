@@ -231,11 +231,7 @@ export class AutorecManager {
                 log.error(`Failed to persist registered template setting for: ${itemName}`, e);
             }
         } else {
-            socketlib.emit({
-                type: "REGISTER_TEMPLATE",
-                itemName,
-                config
-            });
+            socketlib.emit({ type: "REGISTER_TEMPLATE", itemName, config });
         }
     }
 
@@ -262,10 +258,7 @@ export class AutorecManager {
                 log.error(`Failed to unpersist template setting for: ${itemName}`, e);
             }
         } else {
-            socketlib.emit({
-                type: "UNREGISTER_TEMPLATE",
-                itemName
-            });
+            socketlib.emit({ type: "UNREGISTER_TEMPLATE", itemName });
         }
     }
 
@@ -291,7 +284,7 @@ export class AutorecManager {
         }
 
         for (const [itemName, rawConfig] of Object.entries(savedRegistrations)) {
-            const config = rawConfig?.handler || rawConfig?.config || rawConfig;
+            const config = rawConfig?.handler ?? rawConfig?.config ?? rawConfig;
             const current = this.registeredHandlers.get(itemName);
             const isCurrentLocal = Boolean(current?.local);
             if (!isCurrentLocal) {
@@ -473,10 +466,7 @@ export class AutorecManager {
                 log.error("Failed to overwrite registeredTemplates setting:", e);
             }
         } else {
-            socketlib.emit({
-                type: "OVERWRITE_TEMPLATES",
-                persistedDict
-            });
+            socketlib.emit({ type: "OVERWRITE_TEMPLATES", persistedDict });
         }
     }
 
@@ -527,9 +517,9 @@ export class AutorecManager {
                 type = "Custom Script";
                 file = "Function Handler";
             } else if (typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
-                config = handlerOrConfig.handler || handlerOrConfig.config || handlerOrConfig;
-                type = config.type || "Auto-Detect";
-                file = config.file || config.animationFile || "";
+                config = handlerOrConfig.handler ?? handlerOrConfig.config ?? handlerOrConfig;
+                type = config.type ?? "Auto-Detect";
+                file = config.file ?? config.animationFile ?? "";
             }
 
             const isLocal = Boolean(handlerOrConfig?.local) || !this.persistedItemNames.has(itemName);
