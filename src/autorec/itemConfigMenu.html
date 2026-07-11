@@ -103,7 +103,7 @@
             <div class="bbc-form-group">
                 <label for="bbc-item-bordercolor">{{labels.borderColor}}</label>
                 <div class="bbc-form-fields bbc-color-fields">
-                    <input type="color" value="{{config.borderColor}}" data-color-target="bbc-item-bordercolor" />
+                    <input type="color" value="{{config.borderColorPicker}}" data-color-target="bbc-item-bordercolor" />
                     <input type="text" id="bbc-item-bordercolor" name="borderColor" value="{{config.borderColor}}" />
                     <span class="bbc-alpha-label">Alpha:</span>
                     <input type="number" step="0.05" min="0" max="1" name="borderAlpha" value="{{config.borderAlpha}}" />
@@ -112,12 +112,13 @@
             <div class="bbc-form-group">
                 <label for="bbc-item-fillcolor">{{labels.fillColor}}</label>
                 <div class="bbc-form-fields bbc-color-fields">
-                    <input type="color" value="{{config.fillColor}}" data-color-target="bbc-item-fillcolor" />
+                    <input type="color" value="{{config.fillColorPicker}}" data-color-target="bbc-item-fillcolor" />
                     <input type="text" id="bbc-item-fillcolor" name="fillColor" value="{{config.fillColor}}" />
                     <span class="bbc-alpha-label">Alpha:</span>
                     <input type="number" step="0.05" min="0" max="1" name="fillAlpha" value="{{config.fillAlpha}}" />
                 </div>
             </div>
+
             <div class="bbc-form-group">
                 <label for="bbc-item-icon">{{labels.customIcon}}</label>
                 <div class="bbc-form-fields">
@@ -134,7 +135,7 @@
             <div class="bbc-form-group">
                 <label for="bbc-item-placedfill">{{labels.placedFill}}</label>
                 <div class="bbc-form-fields bbc-color-fields">
-                    <input type="color" value="{{config.placedFillColor}}" data-color-target="bbc-item-placedfill" />
+                    <input type="color" value="{{config.placedFillColorPicker}}" data-color-target="bbc-item-placedfill" />
                     <input type="text" id="bbc-item-placedfill" name="placedFillColor" value="{{config.placedFillColor}}" />
                     <span class="bbc-alpha-label">Alpha:</span>
                     <input type="number" step="0.05" min="0" max="1" name="placedFillAlpha" value="{{config.placedFillAlpha}}" />
@@ -143,12 +144,13 @@
             <div class="bbc-form-group">
                 <label for="bbc-item-placedborder">{{labels.placedBorder}}</label>
                 <div class="bbc-form-fields bbc-color-fields">
-                    <input type="color" value="{{config.placedBorderColor}}" data-color-target="bbc-item-placedborder" />
+                    <input type="color" value="{{config.placedBorderColorPicker}}" data-color-target="bbc-item-placedborder" />
                     <input type="text" id="bbc-item-placedborder" name="placedBorderColor" value="{{config.placedBorderColor}}" />
                     <span class="bbc-alpha-label">Alpha:</span>
                     <input type="number" step="0.05" min="0" max="1" name="placedBorderAlpha" value="{{config.placedBorderAlpha}}" />
                 </div>
             </div>
+
         </section>
 
         <!-- 4. Post-Placement Code -->
