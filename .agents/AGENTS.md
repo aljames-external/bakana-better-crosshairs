@@ -11,3 +11,7 @@
 ## 11. No Inline Ad-Hoc Type Inspection (`instanceof`) in Domain & Hook Handlers
 - **Domain Handler Purity**: Event callbacks and domain logic handlers (`handleDrawPreview`, `detectTemplateProperties`) must never contain ad-hoc inline type-switching (`target instanceof Document ? ... : ...`).
 - **Encapsulate Normalization in Adapters**: If polymorphic normalization is legitimately required at a public boundary, encapsulate it cleanly inside an explicit adapter or boundary helper method (`e.g. crosshairAdapter.toDocument(target)`). Within deterministic hook callbacks, access the expected property directly (`placeable.document`).
+
+## 12. Boolean Primitive Conversion (`Boolean(x)`) Over Verbose Equality (`=== true`)
+- **Crisp Boolean Primitive Conversion**: When normalizing or converting an object property or flag into a strict boolean primitive value (`e.g. const isPreview = Boolean(placeable.isPreview)`), strictly prefer explicit `Boolean(foo)` conversion over verbose strict equality checks (`foo === true` / `foo === false`).
+- **Complement to Rule 7**: While direct conditional evaluation (`if (foo)`) is preferred inside branching statements (Rule 7), variable assignments that demand a guaranteed boolean primitive (`true` / `false`) must use `Boolean(foo)`.
