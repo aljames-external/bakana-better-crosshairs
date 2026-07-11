@@ -25,10 +25,16 @@ export const DEFAULT_AUTOREC_ENTRY = {
     placedBorderColor: "#ffffff",
     placedBorderAlpha: 0,
 
+    enablePrePlacement: false,
+    enableAnimation: false,
+    enablePlacedStyling: false,
+    enablePostPlacement: false,
+
     concurrentCode: "",
     postPlacementCode: "",
     icon: ""
 };
+
 
 
 /**

@@ -73,13 +73,24 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             ...(customConfig ?? {})
         };
 
+        const hasGranularFlags = customConfig && ("enableAnimation" in customConfig || "enablePrePlacement" in customConfig || "enablePlacedStyling" in customConfig || "enablePostPlacement" in customConfig);
+        const enablePrePlacement = hasGranularFlags ? Boolean(customConfig.enablePrePlacement) : Boolean(customConfig?.concurrentCode);
+        const enableAnimation = hasGranularFlags ? Boolean(customConfig.enableAnimation) : Boolean(customConfig && customConfig.enabled !== false);
+        const enablePlacedStyling = hasGranularFlags ? Boolean(customConfig.enablePlacedStyling) : Boolean(customConfig?.placedFillColor || customConfig?.placedBorderColor);
+        const enablePostPlacement = hasGranularFlags ? Boolean(customConfig.enablePostPlacement) : Boolean(customConfig?.postPlacementCode);
+
         const mergedConfig = {
             ...rawConfig,
+            enablePrePlacement,
+            enableAnimation,
+            enablePlacedStyling,
+            enablePostPlacement,
             circleFile: Boolean(rawConfig.circleFile) ? rawConfig.circleFile : DEFAULT_AUTOREC_ENTRY.circleFile,
             coneFile: Boolean(rawConfig.coneFile) ? rawConfig.coneFile : DEFAULT_AUTOREC_ENTRY.coneFile,
             rayFile: Boolean(rawConfig.rayFile) ? rawConfig.rayFile : DEFAULT_AUTOREC_ENTRY.rayFile,
             squareFile: Boolean(rawConfig.squareFile) ? rawConfig.squareFile : DEFAULT_AUTOREC_ENTRY.squareFile,
             lineFile: Boolean(rawConfig.lineFile) ? rawConfig.lineFile : DEFAULT_AUTOREC_ENTRY.lineFile,
+
 
             borderColorPicker: normalizeHexColor(rawConfig.borderColor, "#ffffff"),
             fillColorPicker: normalizeHexColor(rawConfig.fillColor, "#000000"),
@@ -101,7 +112,13 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             deleteCustomBtn: localize("BBC.itemConfigMenu.deleteCustomBtn", "Delete"),
             saveCustomBtn: localize("BBC.itemConfigMenu.saveCustomBtn", "Save"),
 
+            overridePrePlacement: localize("BBC.itemConfigMenu.overridePrePlacement", "Override Pre-Placement Script"),
+            overrideAnimation: localize("BBC.itemConfigMenu.overrideAnimation", "Override Animation Configuration"),
+            overridePlacedStyling: localize("BBC.itemConfigMenu.overridePlacedStyling", "Override Placed Document Styling"),
+            overridePostPlacement: localize("BBC.itemConfigMenu.overridePostPlacement", "Override Post-Placement Script"),
+
             preSectionDesc: localize("BBC.itemConfigMenu.preSectionDesc", `Executes custom Javascript code before starting ${docTerm} placement selection.`),
+
 
             animationDesc: localize("BBC.itemConfigMenu.animationDesc", "Sequencer crosshair graphic asset and interactive rendering properties."),
             placedSectionDesc: localize("BBC.itemConfigMenu.placedSectionDesc", `Configure fill and border highlight colors applied to the created ${docTerm}.`),

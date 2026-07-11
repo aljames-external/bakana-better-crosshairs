@@ -56,35 +56,6 @@ export class BaseFoundryVTTAdapter {
             return null;
         }
 
-        // 1. CUSTOM CONFIG: Inspect calling item flags for explicit item custom configuration
-        if (context.item) {
-            const customConfig = context.item.getFlag?.(MODULE_ID, "customConfig") ?? context.item.flags?.[MODULE_ID]?.customConfig;
-            if (customConfig) {
-                if (customConfig.enabled !== false) {
-                    log.debug(`matchAutorecEntry | [CUSTOM CONFIG] Found custom item flag crosshair override on "${context.itemName}" (${context.itemId})`);
-                    return {
-                        ...DEFAULT_AUTOREC_ENTRY,
-                        ...customConfig,
-                        isCustom: true,
-                        item: context.item,
-                        activity: context.activity
-                    };
-
-                }
-                log.debug(`matchAutorecEntry | [CUSTOM CONFIG DISABLED] Custom override on "${context.itemName}" is disabled; skipping custom workflow and falling back to global AUTOREC matching.`);
-            }
-        }
-
-
-
-
-        log.debug("matchAutorecEntry | Comparing calling context against registered entries:", {
-            callingItemName: context.itemName,
-            callingActivityName: context.activityName,
-            entriesCount: entries.size
-        });
-
-        // 1. Group candidate entries for this item and order: activity-specific rules first, item fallbacks last
         const callingItemName = context.itemName.trim().toLowerCase();
         const candidateEntries = [];
         for (const entry of entries.values()) {
@@ -100,23 +71,80 @@ export class BaseFoundryVTTAdapter {
             return 0;
         });
 
+        let baseEntry = null;
         for (const entry of candidateEntries) {
             if (systemAdapter.isMatch(context, entry)) {
-                log.debug(`matchAutorecEntry | [MATCH FOUND] Specific entry "${entry.itemName}" (activity: "${entry.activityName ?? 'ANY'}") matched calling item "${context.itemName}" (activity: "${context.activityName}")`);
-                return { ...entry, item: context.item, activity: context.activity };
+                log.debug(`matchAutorecEntry | [MATCH FOUND] Specific global entry "${entry.itemName}" matched calling item "${context.itemName}"`);
+                baseEntry = { ...entry, item: context.item, activity: context.activity };
+                break;
             }
         }
 
-        // 2. If no specific match was found, fall back to the DEFAULT entry if enabled
-        const defaultEntry = entries.get("DEFAULT");
-        if (defaultEntry && defaultEntry.enabled) {
-            log.debug(`matchAutorecEntry | [DEFAULT FALLBACK] No specific item match found for "${context.itemName}"; applying DEFAULT crosshair entry.`);
-            return { ...defaultEntry, item: context.item, activity: context.activity };
+        if (!baseEntry) {
+            const defaultEntry = entries.get("DEFAULT");
+            if (defaultEntry && defaultEntry.enabled) {
+                baseEntry = { ...defaultEntry, item: context.item, activity: context.activity };
+            }
         }
 
-        log.debug(`matchAutorecEntry | [NO MATCH] No matching autorec entry or enabled DEFAULT entry for calling item "${context.itemName}" (activity: "${context.activityName}")`);
-        return null;
+        const customConfig = context.item?.getFlag?.(MODULE_ID, "customConfig") ?? context.item?.flags?.[MODULE_ID]?.customConfig;
+        if (!customConfig) {
+            return baseEntry;
+        }
+
+        const hasGranularFlags = "enableAnimation" in customConfig || "enablePrePlacement" in customConfig || "enablePlacedStyling" in customConfig || "enablePostPlacement" in customConfig;
+        const isPreOverride = hasGranularFlags ? Boolean(customConfig.enablePrePlacement) : Boolean(customConfig.concurrentCode);
+        const isAnimOverride = hasGranularFlags ? Boolean(customConfig.enableAnimation) : Boolean(customConfig.enabled !== false);
+        const isPlacedOverride = hasGranularFlags ? Boolean(customConfig.enablePlacedStyling) : Boolean(customConfig.placedFillColor || customConfig.placedBorderColor);
+        const isPostOverride = hasGranularFlags ? Boolean(customConfig.enablePostPlacement) : Boolean(customConfig.postPlacementCode);
+
+        if (!isPreOverride && !isAnimOverride && !isPlacedOverride && !isPostOverride) {
+            log.debug(`matchAutorecEntry | [CUSTOM CONFIG] All section overrides disabled on "${context.itemName}"; inheriting global AUTOREC entry.`);
+            return baseEntry;
+        }
+
+        const resolved = {
+            ...(baseEntry ?? DEFAULT_AUTOREC_ENTRY),
+            isCustom: true,
+            item: context.item,
+            activity: context.activity
+        };
+
+        if (isPreOverride) {
+            resolved.concurrentCode = customConfig.concurrentCode ?? "";
+        }
+
+        if (isAnimOverride) {
+            resolved.enabled = Boolean(customConfig.enabled !== false);
+            resolved.circleFile = Boolean(customConfig.circleFile) ? customConfig.circleFile : DEFAULT_AUTOREC_ENTRY.circleFile;
+            resolved.coneFile = Boolean(customConfig.coneFile) ? customConfig.coneFile : DEFAULT_AUTOREC_ENTRY.coneFile;
+            resolved.rayFile = Boolean(customConfig.rayFile) ? customConfig.rayFile : DEFAULT_AUTOREC_ENTRY.rayFile;
+            resolved.squareFile = Boolean(customConfig.squareFile) ? customConfig.squareFile : DEFAULT_AUTOREC_ENTRY.squareFile;
+            resolved.stickToToken = customConfig.stickToToken ?? "default";
+            resolved.showLine = Boolean(customConfig.showLine);
+            resolved.lineFile = Boolean(customConfig.lineFile) ? customConfig.lineFile : DEFAULT_AUTOREC_ENTRY.lineFile;
+            resolved.borderColor = customConfig.borderColor ?? "#ffffff";
+            resolved.borderAlpha = customConfig.borderAlpha ?? 0;
+            resolved.fillColor = customConfig.fillColor ?? "#000000";
+            resolved.fillAlpha = customConfig.fillAlpha ?? 0;
+            resolved.icon = customConfig.icon ?? "";
+        }
+
+        if (isPlacedOverride) {
+            resolved.placedFillColor = customConfig.placedFillColor ?? "#000000";
+            resolved.placedFillAlpha = customConfig.placedFillAlpha ?? 0;
+            resolved.placedBorderColor = customConfig.placedBorderColor ?? "#ffffff";
+            resolved.placedBorderAlpha = customConfig.placedBorderAlpha ?? 0;
+        }
+
+        if (isPostOverride) {
+            resolved.postPlacementCode = customConfig.postPlacementCode ?? "";
+        }
+
+        log.debug(`matchAutorecEntry | [CUSTOM CONFIG] Merged item custom overrides for "${context.itemName}" (Pre:${isPreOverride} Anim:${isAnimOverride} Placed:${isPlacedOverride} Post:${isPostOverride})`);
+        return resolved;
     }
+
 
     /**
      * Hide a live placeable preview graphic during interactive drawing.
