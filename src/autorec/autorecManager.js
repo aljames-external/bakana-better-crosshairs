@@ -80,9 +80,19 @@ export class AutorecManager {
         const hasActivity = Boolean(activityId || activityName);
         const isDefault = Boolean(handler?.isDefault || registeredKey === "DEFAULT");
         const enabled = handler?.enabled !== false;
-        const entry = typeof handler === "object" && handler !== null
-            ? { ...handler, id: registeredKey, regKey: registeredKey, itemName, activityId, activityName, hasActivity, isDefault, enabled }
-            : { id: registeredKey, regKey: registeredKey, itemName, activityId, activityName, hasActivity, isDefault, enabled, handler };
+        const baseConfig = typeof handler === "object" && handler !== null ? handler : { handler };
+        const entry = {
+            ...DEFAULT_AUTOREC_ENTRY,
+            ...baseConfig,
+            id: registeredKey,
+            regKey: registeredKey,
+            itemName,
+            activityId,
+            activityName,
+            hasActivity,
+            isDefault,
+            enabled
+        };
 
         this.fastLookupMap.set(registeredKey, entry);
         this.fastLookupMap.set(registeredKey.toLowerCase(), entry);
