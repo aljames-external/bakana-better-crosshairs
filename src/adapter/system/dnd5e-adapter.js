@@ -70,6 +70,10 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      */
     isMatch(context, entry) {
         if (!super.isMatch(context, entry)) return false;
+        if (entry.isDefault) {
+            log.debug("Dnd5eSystemAdapter.isMatch | Candidate entry is canonical default fallback (isDefault: true) -> MATCHED");
+            return true;
+        }
 
         const entryFilterId = (entry.activityId ?? "").trim();
         const entryFilterName = (entry.activityName ?? "").trim().toLowerCase();

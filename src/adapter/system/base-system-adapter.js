@@ -30,6 +30,8 @@ export class BaseSystemAdapter {
      */
     isMatch(context, entry) {
         if (!context || !entry) return false;
+        if (entry.isDefault) return true;
+
         const callingName = (context.itemName ?? "").trim().toLowerCase();
         const callingId = (context.itemId ?? "").trim();
         const entryName = (entry.itemName ?? "").trim().toLowerCase();
