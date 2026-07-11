@@ -821,7 +821,50 @@
     gap: 8px;
 }
 
+.bbc-scope-selector-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    background: rgba(30, 41, 59, 0.45);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+    font-size: 13px;
+    flex-wrap: wrap;
+}
+
+.bbc-scope-selector-banner label {
+    font-weight: 600;
+    color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.bbc-scope-select {
+    flex: 1;
+    min-width: 220px;
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    color: #f8fafc;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+}
+
+.bbc-scope-select:focus {
+    outline: none;
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.bbc-scope-hint {
+    font-size: 12px;
+    color: #94a3b8;
+    width: 100%;
+}
+
 .bbc-item-config-body {
+
     flex: 1;
     min-height: 0;
     overflow-y: auto;

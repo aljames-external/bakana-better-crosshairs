@@ -125,24 +125,35 @@ export class BaseFoundryVTTAdapter {
             }
         }
 
-        const customConfig = context.item?.getFlag?.(MODULE_ID, "customConfig") ?? context.item?.flags?.[MODULE_ID]?.customConfig;
-        if (!customConfig) {
+        const itemConfig = context.item?.getFlag?.(MODULE_ID, "customConfig") ?? context.item?.flags?.[MODULE_ID]?.customConfig ?? null;
+        const activityConfig = context.activityId
+            ? (context.item?.getFlag?.(MODULE_ID, "activityConfigs")?.[context.activityId] ?? context.item?.flags?.[MODULE_ID]?.activityConfigs?.[context.activityId] ?? null)
+            : null;
+
+        if (!itemConfig && !activityConfig) {
             return baseEntry ? CrosshairConfiguration.fromSource(baseEntry) : null;
         }
 
-        const baseConfig = CrosshairConfiguration.fromSource({
+        let baseConfig = CrosshairConfiguration.fromSource({
             ...(baseEntry ?? DEFAULT_AUTOREC_ENTRY),
             item: context.item,
             activity: context.activity
         });
 
-        const overridden = baseConfig.overrideWith(customConfig);
-        overridden.item = context.item;
-        overridden.activity = context.activity;
+        if (itemConfig) {
+            baseConfig = baseConfig.overrideWith(itemConfig);
+        }
+        if (activityConfig) {
+            baseConfig = baseConfig.overrideWith(activityConfig);
+        }
 
-        log.debug(`matchAutorecEntry | [CUSTOM CONFIG] Merged item custom overrides for "${context.itemName}"`);
-        return overridden;
+        baseConfig.item = context.item;
+        baseConfig.activity = context.activity;
+
+        log.debug(`matchAutorecEntry | [CUSTOM CONFIG] Merged custom overrides (item: ${Boolean(itemConfig)}, activity: ${Boolean(activityConfig)}) for "${context.itemName}"`);
+        return baseConfig;
     }
+
 
     /**
      * Hide a live placeable preview graphic during interactive drawing.

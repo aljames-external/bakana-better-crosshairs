@@ -3,8 +3,10 @@ import { DEFAULT_AUTOREC_ENTRY, autorecManager } from "./autorecManager.js";
 import { log } from "../lib/logger.js";
 import { localize, notify } from "../lib/utils.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
+import { systemAdapter } from "../adapter/system/index.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+
 
 /**
  * Normalize a hex color string, returning a valid 6-digit hex string or the provided fallback.
@@ -61,7 +63,9 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             id: `bbc-item-crosshair-config-${options.item?.id ?? "unknown"}`
         });
         this.item = options.item ?? null;
+        this.selectedScope = options.selectedScope ?? "item";
     }
+
 
     /**
      * Prepare the rendering context for the item crosshair configuration form template.
@@ -74,14 +78,52 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         const itemName = item?.name ?? "Unknown Item";
         const itemImg = item?.img ?? null;
 
-        const customConfig = item?.getFlag(MODULE_ID, "customConfig") ?? null;
+        const selectedScope = this.selectedScope ?? "item";
+        const itemCustomConfig = item?.getFlag(MODULE_ID, "customConfig") ?? null;
+        const activityConfigs = item?.getFlag(MODULE_ID, "activityConfigs") ?? {};
+
+        const activities = [];
+        if (Boolean(systemAdapter.supportsActivities) && item?.system?.activities) {
+            for (const act of item.system.activities.values()) {
+                if (!act?.id) continue;
+                activities.push({
+                    id: act.id,
+                    name: act.name ?? act.id,
+                    hasCustom: Boolean(activityConfigs[act.id])
+                });
+            }
+        }
+        const showActivityDropdown = Boolean(systemAdapter.supportsActivities) && activities.length > 0;
+
+        const hasItemCustom = Boolean(itemCustomConfig);
+        const overrideScopes = [
+            {
+                value: "item",
+                label: `Item-Level Overrides${hasItemCustom ? " [CUSTOM]" : ""}`,
+                selected: selectedScope === "item"
+            }
+        ];
+        for (const act of activities) {
+            overrideScopes.push({
+                value: act.id,
+                label: `Activity: ${act.name}${act.hasCustom ? " [CUSTOM]" : ""}`,
+                selected: selectedScope === act.id
+            });
+        }
+
+        const customConfig = selectedScope === "item"
+            ? itemCustomConfig
+            : (activityConfigs[selectedScope] ?? null);
         const hasCustom = Boolean(customConfig);
         const isCustom = Boolean(customConfig && customConfig.enabled !== false);
 
         const autorecMatch = autorecManager.getEntryByName(itemName);
         const isAutorec = Boolean(!hasCustom && autorecMatch && !autorecMatch.isDefault && autorecMatch.enabled);
 
-        const baseFallback = autorecMatch ?? DEFAULT_AUTOREC_ENTRY;
+        const baseFallback = selectedScope === "item"
+            ? (autorecMatch ?? DEFAULT_AUTOREC_ENTRY)
+            : { ...(autorecMatch ?? DEFAULT_AUTOREC_ENTRY), ...(itemCustomConfig ?? {}) };
+
         const hasGranularFlags = Boolean(
             customConfig &&
             ("enableAnimation" in customConfig ||
@@ -191,12 +233,17 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             isAutorec,
             autorecMatchName: autorecMatch?.itemName ?? "",
             config: mergedConfig,
+            showActivityDropdown,
+            overrideScopes,
+            scopeHint,
+            selectedScope,
             prePlacementTitle,
             placementSectionTitle,
             postPlacementTitle,
             labels
         };
     }
+
 
     /**
      * Attach interactive DOM event listeners after rendering completes.
@@ -238,6 +285,16 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             });
         });
 
+        // Handle Target Scope Dropdown Change
+        const scopeSelect = root.querySelector("select[name='overrideScope']");
+        if (scopeSelect) {
+            scopeSelect.addEventListener("change", (ev) => {
+                ev.preventDefault();
+                this.selectedScope = ev.currentTarget.value ?? "item";
+                this.render(false);
+            });
+        }
+
         // Handle Delete CUSTOM Configuration action button
         const deleteBtn = root.querySelector("button[data-action='delete-custom']");
         if (deleteBtn) {
@@ -246,13 +303,27 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
                 ev.stopPropagation();
                 if (!this.item) return;
 
-                log.debug(`ItemCrosshairConfigApplication | Deleting custom configuration from item "${this.item.name}" (${this.item.id})`);
-                await this.item.unsetFlag(MODULE_ID, "customConfig");
-                notify.info(`Removed custom BBC configuration from "${this.item.name}".`);
+                const scope = this.selectedScope ?? "item";
+                if (scope === "item") {
+                    log.debug(`ItemCrosshairConfigApplication | Deleting custom item-level configuration from "${this.item.name}"`);
+                    await this.item.unsetFlag(MODULE_ID, "customConfig");
+                    notify.info(localize("BBC.itemConfigMenu.removedItemCustom", `Removed custom Item-level crosshair configuration from "${this.item.name}".`));
+                } else {
+                    log.debug(`ItemCrosshairConfigApplication | Deleting custom activity-level configuration (${scope}) from "${this.item.name}"`);
+                    const existingMap = foundry.utils.deepClone(this.item.getFlag(MODULE_ID, "activityConfigs") ?? {});
+                    delete existingMap[scope];
+                    if (Object.keys(existingMap).length === 0) {
+                        await this.item.unsetFlag(MODULE_ID, "activityConfigs");
+                    } else {
+                        await this.item.setFlag(MODULE_ID, "activityConfigs", existingMap);
+                    }
+                    notify.info(localize("BBC.itemConfigMenu.removedActivityCustom", `Removed custom Activity-level crosshair configuration on "${this.item.name}".`));
+                }
 
                 this.render(false);
             });
         }
+
 
         // Handle Form Submission / Save CUSTOM Configuration
         const form = root.tagName === "FORM" ? root : root.querySelector("form");
@@ -300,11 +371,21 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             icon: String(formData.get("icon") ?? "").trim()
         };
 
-        log.debug(`ItemCrosshairConfigApplication | Saving custom configuration to item "${this.item.name}" flags:`, config);
-        await this.item.setFlag(MODULE_ID, "customConfig", config);
-        notify.info(`Saved custom BBC configuration for "${this.item.name}".`);
+        const scope = this.selectedScope ?? "item";
+        if (scope === "item") {
+            log.debug(`ItemCrosshairConfigApplication | Saving custom item-level configuration for "${this.item.name}":`, config);
+            await this.item.setFlag(MODULE_ID, "customConfig", config);
+            notify.info(localize("BBC.itemConfigMenu.savedItemCustom", `Saved custom Item-level crosshair configuration for "${this.item.name}".`));
+        } else {
+            log.debug(`ItemCrosshairConfigApplication | Saving custom activity-level configuration (${scope}) for "${this.item.name}":`, config);
+            const existingMap = foundry.utils.deepClone(this.item.getFlag(MODULE_ID, "activityConfigs") ?? {});
+            existingMap[scope] = config;
+            await this.item.setFlag(MODULE_ID, "activityConfigs", existingMap);
+            notify.info(localize("BBC.itemConfigMenu.savedActivityCustom", `Saved custom Activity-level crosshair configuration for "${this.item.name}".`));
+        }
 
         this.render(false);
+
     }
 }
 

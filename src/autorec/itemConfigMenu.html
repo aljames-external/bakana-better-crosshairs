@@ -33,7 +33,20 @@
         </div>
     </div>
 
+    {{#if showActivityDropdown}}
+    <div class="bbc-scope-selector-banner">
+        <label for="bbc-override-scope"><i class="fa-solid fa-layer-group"></i> Configure Target Scope:</label>
+        <select name="overrideScope" id="bbc-override-scope" class="bbc-scope-select">
+            {{#each overrideScopes}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+        </select>
+        <span class="bbc-scope-hint">{{scopeHint}}</span>
+    </div>
+    {{/if}}
+
     <!-- Scrollable Configuration Body -->
+
     <div class="bbc-sections-scroll bbc-item-config-body">
         <!-- Section 1: Pre-Template / Pre-Region Placement -->
         <section class="bbc-section-card">
