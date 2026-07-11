@@ -322,7 +322,7 @@ export class AutorecManager {
      * Turning off any previous registration for that item name and registering the new one.
      *
      * @param {string} itemName - Name of the item/spell (e.g., 'Fireball')
-     * @param {Function|Object|string} [handlerOrConfig={}] - Optional string file path, config object (e.g. { file: '...', local: true }), or custom async function(token, autoConfig)
+     * @param {Object|Function} [handlerOrConfig={}] - Config object (`{ file: '...', local: true }`) or custom async function (`(token, autoConfig) => ...`)
      * @param {Object} [options={}]
      * @param {boolean} [options.persist=true] - Whether to persist registration to world settings across reboots/clients
      * @param {boolean} [options.local=false] - Whether this registration should only exist locally on this client and not persist or sync
@@ -330,9 +330,6 @@ export class AutorecManager {
     register(itemName, handlerOrConfig = {}, { persist = true, local = false } = {}) {
         if (this._onRegisterCallback) {
             this._onRegisterCallback();
-        }
-        if (typeof handlerOrConfig === "string") {
-            handlerOrConfig = { file: handlerOrConfig };
         }
         const isLocal = Boolean(local || (typeof handlerOrConfig === "object" && handlerOrConfig !== null && handlerOrConfig.local));
 
@@ -514,9 +511,6 @@ export class AutorecManager {
                 isCustomFunction = true;
                 type = "Custom Script";
                 file = "Function Handler";
-            } else if (typeof handlerOrConfig === "string") {
-                file = handlerOrConfig;
-                type = "Auto-Detect";
             } else if (typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
                 config = handlerOrConfig.handler || handlerOrConfig.config || handlerOrConfig;
                 type = config.type || "Auto-Detect";
