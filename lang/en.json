@@ -6,6 +6,9 @@
                 "label": "View Autorecognition",
                 "hint": "Inspect and explore all registered crosshair animation workflows."
             },
+            "registeredTemplates": {
+                "name": "Registered Templates"
+            },
             "logVerbosity": {
                 "name": "Log Verbosity Level",
                 "hint": "Controls the level of detail printed to the browser console.",
@@ -19,7 +22,114 @@
         },
         "autorecMenu": {
             "title": "Bakana's Better Crosshairs — Autorecognition Menu",
-            "menuHint": "Inspect registered crosshair animation workflows and their configuration."
+            "menuHint": "Inspect registered crosshair animation workflows and their configuration.",
+            "preRegionPlacement": "Pre-Region Placement",
+            "preTemplatePlacement": "Pre-Template Placement",
+            "regionPlacementConfig": "Region Placement Configuration",
+            "templatePlacementConfig": "Template Placement Configuration",
+            "postRegionPlacement": "Post-Region Placement",
+            "postTemplatePlacement": "Post-Template Placement",
+            "tag": {
+                "v14Region": "V14+ Region",
+                "v13Template": "V13- MeasuredTemplate"
+            },
+            "term": {
+                "region": "region",
+                "template": "template"
+            },
+            "addWorkflow": {
+                "title": "Add New Crosshair Workflow",
+                "label": "Add Workflow",
+                "itemName": "Workflow Item Name:",
+                "itemNameHint": "e.g. Fireball or Longbow",
+                "activityName": "Activity ID or Name (Optional):",
+                "activityNameHint": "e.g. Attack or Save"
+            },
+            "notify": {
+                "added": "Added workflow:",
+                "selectRemove": "Please select one or more workflows to remove.",
+                "removedMany": "Removed workflow(s).",
+                "removedOne": "Removed workflow",
+                "copied": "Copied to clipboard.",
+                "saved": "Saved workflow configurations and synced across all clients."
+            },
+            "labels": {
+                "searchPlaceholder": "Filter registered workflows (e.g. Fireball)...",
+                "editMode": "Edit Mode",
+                "registeredWorkflows": "Registered Workflows",
+                "addBtn": "Add",
+                "removeBtn": "Remove",
+                "emptySidebar": "No crosshair animations registered yet.",
+                "selectWorkflowTitle": "Select a Registered Workflow",
+                "selectWorkflowDesc": "Click on any item name in the sidebar to inspect its pre-animation, core animation, and post-animation configuration.",
+                "preSectionDesc": "Executes custom Javascript code concurrent with placement selection.",
+                "noScript": "No custom script configured",
+                "animationTitle": "Animation Configuration",
+                "animationDesc": "Sequencer crosshair graphic asset and interactive rendering properties.",
+                "workflowEnabled": "Workflow Enabled",
+                "callingItemName": "Calling Item Name",
+                "callingActivity": "Calling Activity ID / Name (DnD5e)",
+                "registrationScope": "Registration Scope",
+                "circleFile": "Circle Sequencer Filepath",
+                "coneFile": "Cone Sequencer Filepath",
+                "rayFile": "Ray Sequencer Filepath",
+                "squareFile": "Square Sequencer Filepath",
+                "customHandler": "Custom Function Handler",
+                "lockToToken": "Lock to Token (Stick)",
+                "originLine": "Origin Stretch Line",
+                "borderStyling": "Border Styling (Tile Highlight)",
+                "fillStyling": "Fill Styling (Tile Highlight)",
+                "customIcon": "Custom Cursor Icon",
+                "placedSectionDesc": "Configures the fill color, border color, and alpha opacities of the final placed document on the canvas.",
+                "placedFill": "Placed Fill Styling",
+                "placedBorder": "Placed Border Styling",
+                "defaultPlacementNote": "Using default Foundry / Game System placement colors (Enable Edit Mode to customize).",
+                "postSectionDesc": "Executes custom Javascript code after final document creation.",
+                "noPostScript": "No custom post-placement script configured",
+                "showLine": "Show Line",
+                "alpha": "Alpha:"
+            },
+            "pills": {
+                "enabled": "Enabled",
+                "disabled": "Disabled",
+                "allActivities": "All Activities",
+                "localOnly": "Local Only (Session Scope)",
+                "worldSynced": "World Synced (Persisted)",
+                "yesCustomScript": "Yes (Custom Script)",
+                "noDeclarative": "No (Declarative Config)",
+                "stickOn": "On (Locked to Origin Token)",
+                "stickOff": "Off (Free Cursor Placement)",
+                "stickDefault": "Default (Cone: On, Others: Off)"
+            },
+            "hints": {
+                "selectToRemove": "Select workflow to remove",
+                "globalFallback": "Global Fallback Entry",
+                "activityPrefix": "Activity: ",
+                "deleteWorkflow": "Delete Workflow",
+                "localOnly": "Local Only (Session Scope)"
+            },
+            "badges": {
+                "default": "DEFAULT",
+                "globalFallback": "Global Fallback",
+                "local": "Local"
+            }
+        },
+        "Autorec": {
+            "Type": {
+                "CustomScript": "Custom Script",
+                "AutoDetect": "Auto-Detect"
+            },
+            "File": {
+                "FunctionHandler": "Function Handler"
+            }
+        },
+        "Conflicts": {
+            "PSFX": "Both PSFX Patreon and Free are activated, both modules use the path `psfx.` to prefix files! This will cause conflicts! Recommend disabling / uninstalling the free version.",
+            "JB2A": "Both JB2A Patreon and Free are activated, both modules use the path `jb2a.` to prefix files. This will cause conflicts! Recommend disabling / uninstalling the free version.",
+            "BLFX": "Both Boss Loot Assets Premium and Free are activated, both modules use the path `blfx.` to prefix files. This will cause conflicts! Recommend disabling / uninstalling the free version."
+        },
+        "Units": {
+            "Feet": "ft"
         }
     }
 }

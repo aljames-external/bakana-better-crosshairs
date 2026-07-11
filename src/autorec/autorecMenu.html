@@ -41,23 +41,23 @@
                 {{#each entries}}
                 <div class="bbc-item-card" data-item-name="{{regKey}}">
                     {{#unless isDefault}}
-                    <input type="checkbox" class="bbc-item-select-checkbox edit-only" data-item-name="{{regKey}}" title="Select workflow to remove" />
+                    <input type="checkbox" class="bbc-item-select-checkbox edit-only" data-item-name="{{regKey}}" title="{{../labels.selectToRemoveHint}}" />
                     {{/unless}}
                     <div class="bbc-card-main">
                         <i class="fa-solid fa-crosshairs bbc-item-icon"></i>
                         <span class="bbc-item-name">{{itemName}}</span>
                         {{#if isDefault}}
-                        <span class="bbc-type-badge default" title="Global Fallback Entry">DEFAULT</span>
+                        <span class="bbc-type-badge default" title="{{../labels.globalFallbackHint}}">{{../labels.defaultBadge}}</span>
                         {{/if}}
                         {{#if ../supportsActivities}}
                         {{#if hasActivity}}
-                        <span class="bbc-activity-pill" title="Activity: {{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
+                        <span class="bbc-activity-pill" title="{{../labels.activityHintPrefix}}{{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
                         {{/if}}
                         {{/if}}
                     </div>
                     {{#if isLocal}}
                     <div class="bbc-card-meta">
-                        <span class="bbc-type-badge local" title="Local Only (Session Scope)">Local</span>
+                        <span class="bbc-type-badge local" title="{{../labels.localOnlyHint}}">{{../labels.localBadge}}</span>
                     </div>
                     {{/if}}
                 </div>
@@ -87,14 +87,14 @@
                         <h2>{{itemName}}</h2>
                         {{#if ../supportsActivities}}
                         {{#if hasActivity}}
-                        <span class="bbc-activity-pill" title="Activity: {{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
+                        <span class="bbc-activity-pill" title="{{../labels.activityHintPrefix}}{{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
                         {{/if}}
                         {{/if}}
                     </div>
                     <div class="bbc-detail-actions edit-only">
                         {{#unless isDefault}}
-                        <button type="button" class="bbc-delete-single-btn" data-item-name="{{regKey}}" title="Delete Workflow">
-                            <i class="fa-solid fa-trash-can"></i> Remove
+                        <button type="button" class="bbc-delete-single-btn" data-item-name="{{regKey}}" title="{{../labels.deleteWorkflowHint}}">
+                            <i class="fa-solid fa-trash-can"></i> {{../labels.removeBtn}}
                         </button>
                         {{/unless}}
                     </div>
@@ -157,7 +157,7 @@
                                         <th>{{../labels.callingItemName}}</th>
                                         <td>
                                             {{#if isDefault}}
-                                            <span><code>DEFAULT</code> <span class="bbc-type-badge default" style="margin-left:6px;">Global Fallback</span></span>
+                                            <span><code>DEFAULT</code> <span class="bbc-type-badge default" style="margin-left:6px;">{{../labels.globalFallbackBadge}}</span></span>
                                             {{else}}
                                             <span class="view-only"><code>{{itemName}}</code></span>
                                             <input type="text" class="bbc-edit-input edit-only" data-field="itemName" value="{{itemName}}" placeholder="e.g. Longbow" />
