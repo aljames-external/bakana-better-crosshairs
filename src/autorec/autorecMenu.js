@@ -91,7 +91,15 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             stickOff: localize("BBC.autorecMenu.pills.stickOff", "Off (Free Cursor Placement)"),
             stickDefault: localize("BBC.autorecMenu.pills.stickDefault", "Default (Cone: On, Others: Off)"),
             showLineLabel: localize("BBC.autorecMenu.labels.showLine", "Show Line"),
-            alphaLabel: localize("BBC.autorecMenu.labels.alpha", "Alpha:")
+            alphaLabel: localize("BBC.autorecMenu.labels.alpha", "Alpha:"),
+            selectToRemoveHint: localize("BBC.autorecMenu.hints.selectToRemove", "Select workflow to remove"),
+            globalFallbackHint: localize("BBC.autorecMenu.hints.globalFallback", "Global Fallback Entry"),
+            activityHintPrefix: localize("BBC.autorecMenu.hints.activityPrefix", "Activity: "),
+            deleteWorkflowHint: localize("BBC.autorecMenu.hints.deleteWorkflow", "Delete Workflow"),
+            localOnlyHint: localize("BBC.autorecMenu.hints.localOnly", "Local Only (Session Scope)"),
+            globalFallbackBadge: localize("BBC.autorecMenu.badges.globalFallback", "Global Fallback"),
+            localBadge: localize("BBC.autorecMenu.badges.local", "Local"),
+            defaultBadge: localize("BBC.autorecMenu.badges.default", "DEFAULT")
         };
 
         return {

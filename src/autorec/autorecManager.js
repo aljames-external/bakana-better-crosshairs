@@ -519,10 +519,11 @@ export class AutorecManager {
             const rayFile = config.rayFile ?? "eskie.crosshair.ray.fantasy_01.white";
             const squareFile = config.squareFile ?? "eskie.crosshair.ray.fantasy_01.white";
 
+            const unitFt = localize("BBC.Units.Feet", "ft");
             const distVal = config.distance ?? config.radius;
-            const distanceDisplay = distVal !== undefined ? `${distVal} ft` : null;
+            const distanceDisplay = distVal !== undefined ? `${distVal} ${unitFt}` : null;
             const widthVal = config.width;
-            const widthDisplay = widthVal !== undefined ? `${widthVal} ft` : null;
+            const widthDisplay = widthVal !== undefined ? `${widthVal} ${unitFt}` : null;
             const angleVal = config.angle;
             const angleDisplay = angleVal !== undefined ? `${angleVal}°` : null;
             const stickToToken = Boolean(config.stickToToken);
