@@ -499,23 +499,19 @@ export class AutorecManager {
             );
             const icon = config.icon ?? null;
 
-            const placedFillColor = config.placedFillColor ?? config.templateFillColor ?? "#0099ff";
-            const placedFillAlpha = config.placedFillAlpha ?? config.templateFillAlpha ?? 0.25;
-            const placedBorderColor = config.placedBorderColor ?? config.templateBorderColor ?? "#000000";
-            const placedBorderAlpha = config.placedBorderAlpha ?? config.templateBorderAlpha ?? 1;
+            const placedFillColor = config.placedFillColor ?? "#0099ff";
+            const placedFillAlpha = config.placedFillAlpha ?? 0.25;
+            const placedBorderColor = config.placedBorderColor ?? "#000000";
+            const placedBorderAlpha = config.placedBorderAlpha ?? 1;
             const hasPlacedStyling = Boolean(
                 config.placedFillColor ||
                 config.placedFillAlpha !== undefined ||
-                config.templateFillColor ||
-                config.templateFillAlpha !== undefined ||
                 config.placedBorderColor ||
-                config.placedBorderAlpha !== undefined ||
-                config.templateBorderColor ||
-                config.templateBorderAlpha !== undefined
+                config.placedBorderAlpha !== undefined
             );
 
-            const concurrentCode = config.concurrentCode ?? config.preAnimationCode ?? config.customCode ?? "";
-            const postPlacementCode = config.postPlacementCode ?? config.postCode ?? config.postRegionCode ?? config.postTemplateCode ?? "";
+            const concurrentCode = config.concurrentCode ?? "";
+            const postPlacementCode = config.postPlacementCode ?? "";
             const cleanItemName = config.itemName ?? itemName;
             const activityId = config.activityId ?? "";
             const activityName = config.activityName ?? "";
