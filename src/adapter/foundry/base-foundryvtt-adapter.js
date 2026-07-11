@@ -3,6 +3,8 @@ import { log } from "../../lib/logger.js";
 import { clearHighlightLayer } from "../../lib/compat.js";
 import { MODULE_ID } from "../../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY } from "../../autorec/autorecManager.js";
+import { CrosshairConfiguration } from "../../autorec/CrosshairConfiguration.js";
+
 
 
 export class BaseFoundryVTTAdapter {
@@ -92,65 +94,22 @@ export class BaseFoundryVTTAdapter {
 
         const customConfig = context.item?.getFlag?.(MODULE_ID, "customConfig") ?? context.item?.flags?.[MODULE_ID]?.customConfig;
         if (!customConfig) {
-            return baseEntry;
+            return baseEntry ? CrosshairConfiguration.fromSource(baseEntry) : null;
         }
 
-        const hasGranularFlags = "enableAnimation" in customConfig || "enablePrePlacement" in customConfig || "enablePlacedStyling" in customConfig || "enablePostPlacement" in customConfig;
-        const isPreOverride = hasGranularFlags ? Boolean(customConfig.enablePrePlacement) : Boolean(customConfig.concurrentCode);
-        const isAnimOverride = hasGranularFlags ? Boolean(customConfig.enableAnimation) : Boolean(customConfig.enabled !== false);
-        const isPlacedOverride = hasGranularFlags ? Boolean(customConfig.enablePlacedStyling) : Boolean(customConfig.placedFillColor || customConfig.placedBorderColor);
-        const isPostOverride = hasGranularFlags ? Boolean(customConfig.enablePostPlacement) : Boolean(customConfig.postPlacementCode);
-
-        if (!isPreOverride && !isAnimOverride && !isPlacedOverride && !isPostOverride) {
-            log.debug(`matchAutorecEntry | [CUSTOM CONFIG] All section overrides disabled on "${context.itemName}"; inheriting global AUTOREC entry.`);
-            return baseEntry;
-        }
-
-        const resolved = {
+        const baseConfig = CrosshairConfiguration.fromSource({
             ...(baseEntry ?? DEFAULT_AUTOREC_ENTRY),
-            isCustom: true,
             item: context.item,
             activity: context.activity
-        };
+        });
 
-        if (isPreOverride) {
-            resolved.concurrentCode = customConfig.concurrentCode ?? "";
-        }
+        const overridden = baseConfig.overrideWith(customConfig);
+        overridden.item = context.item;
+        overridden.activity = context.activity;
 
-        if (isAnimOverride) {
-            resolved.enabled = true;
+        log.debug(`matchAutorecEntry | [CUSTOM CONFIG] Merged item custom overrides for "${context.itemName}"`);
+        return overridden;
 
-            resolved.circleFile = Boolean(customConfig.circleFile) ? customConfig.circleFile : DEFAULT_AUTOREC_ENTRY.circleFile;
-            resolved.coneFile = Boolean(customConfig.coneFile) ? customConfig.coneFile : DEFAULT_AUTOREC_ENTRY.coneFile;
-            resolved.rayFile = Boolean(customConfig.rayFile) ? customConfig.rayFile : DEFAULT_AUTOREC_ENTRY.rayFile;
-            resolved.squareFile = Boolean(customConfig.squareFile) ? customConfig.squareFile : DEFAULT_AUTOREC_ENTRY.squareFile;
-
-            resolved.stickToToken = (customConfig.stickToToken && customConfig.stickToToken !== "default")
-                ? customConfig.stickToToken
-                : (baseEntry?.stickToToken ?? "default");
-
-            resolved.showLine = Boolean(customConfig.showLine);
-            resolved.lineFile = Boolean(customConfig.lineFile) ? customConfig.lineFile : DEFAULT_AUTOREC_ENTRY.lineFile;
-            resolved.borderColor = customConfig.borderColor ?? "#ffffff";
-            resolved.borderAlpha = customConfig.borderAlpha ?? 0;
-            resolved.fillColor = customConfig.fillColor ?? "#000000";
-            resolved.fillAlpha = customConfig.fillAlpha ?? 0;
-            resolved.icon = customConfig.icon ?? "";
-        }
-
-        if (isPlacedOverride) {
-            resolved.placedFillColor = customConfig.placedFillColor ?? "#000000";
-            resolved.placedFillAlpha = customConfig.placedFillAlpha ?? 0;
-            resolved.placedBorderColor = customConfig.placedBorderColor ?? "#ffffff";
-            resolved.placedBorderAlpha = customConfig.placedBorderAlpha ?? 0;
-        }
-
-        if (isPostOverride) {
-            resolved.postPlacementCode = customConfig.postPlacementCode ?? "";
-        }
-
-        log.debug(`matchAutorecEntry | [CUSTOM CONFIG] Merged item custom overrides for "${context.itemName}" (Pre:${isPreOverride} Anim:${isAnimOverride} Placed:${isPlacedOverride} Post:${isPostOverride})`);
-        return resolved;
     }
 
 
