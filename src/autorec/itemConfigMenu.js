@@ -74,47 +74,48 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         const enablePlacedStyling = hasGranularFlags ? Boolean(customConfig.enablePlacedStyling) : Boolean(customConfig?.placedFillColor || customConfig?.placedBorderColor);
         const enablePostPlacement = hasGranularFlags ? Boolean(customConfig.enablePostPlacement) : Boolean(customConfig?.postPlacementCode);
 
-        const animSource = enableAnimation ? (customConfig ?? {}) : baseFallback;
-        const preSource = enablePrePlacement ? (customConfig ?? {}) : baseFallback;
-        const placedSource = enablePlacedStyling ? (customConfig ?? {}) : baseFallback;
-        const postSource = enablePostPlacement ? (customConfig ?? {}) : baseFallback;
-
-        const mergedConfig = {
+        const source = {
             ...DEFAULT_AUTOREC_ENTRY,
             ...baseFallback,
+            ...(customConfig ?? {})
+        };
+
+        const mergedConfig = {
+            ...source,
             enablePrePlacement,
             enableAnimation,
             enablePlacedStyling,
             enablePostPlacement,
 
-            concurrentCode: preSource.concurrentCode ?? "",
+            concurrentCode: source.concurrentCode ?? "",
 
-            enabled: Boolean(animSource.enabled !== false),
-            circleFile: Boolean(animSource.circleFile) ? animSource.circleFile : DEFAULT_AUTOREC_ENTRY.circleFile,
-            coneFile: Boolean(animSource.coneFile) ? animSource.coneFile : DEFAULT_AUTOREC_ENTRY.coneFile,
-            rayFile: Boolean(animSource.rayFile) ? animSource.rayFile : DEFAULT_AUTOREC_ENTRY.rayFile,
-            squareFile: Boolean(animSource.squareFile) ? animSource.squareFile : DEFAULT_AUTOREC_ENTRY.squareFile,
-            lineFile: Boolean(animSource.lineFile) ? animSource.lineFile : DEFAULT_AUTOREC_ENTRY.lineFile,
-            stickToToken: animSource.stickToToken ?? "default",
-            showLine: Boolean(animSource.showLine),
-            borderColor: animSource.borderColor ?? "#ffffff",
-            borderAlpha: animSource.borderAlpha ?? 0,
-            fillColor: animSource.fillColor ?? "#000000",
-            fillAlpha: animSource.fillAlpha ?? 0,
-            icon: animSource.icon ?? "",
+            enabled: Boolean(source.enabled !== false),
+            circleFile: Boolean(source.circleFile) ? source.circleFile : DEFAULT_AUTOREC_ENTRY.circleFile,
+            coneFile: Boolean(source.coneFile) ? source.coneFile : DEFAULT_AUTOREC_ENTRY.coneFile,
+            rayFile: Boolean(source.rayFile) ? source.rayFile : DEFAULT_AUTOREC_ENTRY.rayFile,
+            squareFile: Boolean(source.squareFile) ? source.squareFile : DEFAULT_AUTOREC_ENTRY.squareFile,
+            lineFile: Boolean(source.lineFile) ? source.lineFile : DEFAULT_AUTOREC_ENTRY.lineFile,
+            stickToToken: source.stickToToken ?? "default",
+            showLine: Boolean(source.showLine),
+            borderColor: source.borderColor ?? "#ffffff",
+            borderAlpha: source.borderAlpha ?? 0,
+            fillColor: source.fillColor ?? "#000000",
+            fillAlpha: source.fillAlpha ?? 0,
+            icon: source.icon ?? "",
 
-            placedFillColor: placedSource.placedFillColor ?? "#000000",
-            placedFillAlpha: placedSource.placedFillAlpha ?? 0,
-            placedBorderColor: placedSource.placedBorderColor ?? "#ffffff",
-            placedBorderAlpha: placedSource.placedBorderAlpha ?? 0,
+            placedFillColor: source.placedFillColor ?? "#000000",
+            placedFillAlpha: source.placedFillAlpha ?? 0,
+            placedBorderColor: source.placedBorderColor ?? "#ffffff",
+            placedBorderAlpha: source.placedBorderAlpha ?? 0,
 
-            postPlacementCode: postSource.postPlacementCode ?? "",
+            postPlacementCode: source.postPlacementCode ?? "",
 
-            borderColorPicker: normalizeHexColor(animSource.borderColor, "#ffffff"),
-            fillColorPicker: normalizeHexColor(animSource.fillColor, "#000000"),
-            placedFillColorPicker: normalizeHexColor(placedSource.placedFillColor, "#000000"),
-            placedBorderColorPicker: normalizeHexColor(placedSource.placedBorderColor, "#000000")
+            borderColorPicker: normalizeHexColor(source.borderColor, "#ffffff"),
+            fillColorPicker: normalizeHexColor(source.fillColor, "#000000"),
+            placedFillColorPicker: normalizeHexColor(source.placedFillColor, "#000000"),
+            placedBorderColorPicker: normalizeHexColor(source.placedBorderColor, "#000000")
         };
+
 
 
 
