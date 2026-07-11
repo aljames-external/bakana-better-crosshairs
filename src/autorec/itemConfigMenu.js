@@ -61,12 +61,26 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         const autorecMatch = autorecManager.getEntryByName(itemName);
         const isAutorec = Boolean(!hasCustom && autorecMatch && !autorecMatch.isDefault && autorecMatch.enabled);
 
+        const normalizeHexColor = (val, fallback = "#000000") => {
+            if (typeof val === "string" && /^#[0-9A-Fa-f]{6}$/.test(val)) return val;
+            return fallback;
+        };
+
         const baseFallback = autorecMatch ?? DEFAULT_AUTOREC_ENTRY;
-        const mergedConfig = {
+        const rawConfig = {
             ...DEFAULT_AUTOREC_ENTRY,
             ...baseFallback,
             ...(customConfig ?? {})
         };
+
+        const mergedConfig = {
+            ...rawConfig,
+            borderColorPicker: normalizeHexColor(rawConfig.borderColor, "#ffffff"),
+            fillColorPicker: normalizeHexColor(rawConfig.fillColor, "#000000"),
+            placedFillColorPicker: normalizeHexColor(rawConfig.placedFillColor, "#000000"),
+            placedBorderColorPicker: normalizeHexColor(rawConfig.placedBorderColor, "#000000")
+        };
+
 
         const labels = {
             subtitle: localize("BBC.itemConfigMenu.subtitle", "Customize crosshair visual sequence and placement behavior specifically for this item."),
@@ -139,6 +153,18 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
                 if (targetInput) targetInput.value = ev.currentTarget.value;
             });
         });
+
+        // Synchronize text inputs back to adjacent HTML color pickers when valid hex entered
+        root.querySelectorAll("input[type='text'][id^='bbc-item-']").forEach(textInput => {
+            textInput.addEventListener("input", (ev) => {
+                const val = ev.currentTarget.value?.trim();
+                const targetPicker = root.querySelector(`input[type='color'][data-color-target='${ev.currentTarget.id}']`);
+                if (targetPicker && /^#[0-9A-Fa-f]{6}$/.test(val)) {
+                    targetPicker.value = val;
+                }
+            });
+        });
+
 
         // Handle Delete CUSTOM Configuration action button
         const deleteBtn = root.querySelector("button[data-action='delete-custom']");

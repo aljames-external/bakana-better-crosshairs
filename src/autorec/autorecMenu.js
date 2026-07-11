@@ -37,8 +37,20 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
      * @returns {Promise<object>} Context data object passed to the Handlebars template.
      */
     async _prepareContext(options) {
-        const entries = manager.getAllEntries();
+        const normalizeHexColor = (val, fallback = "#000000") => {
+            if (typeof val === "string" && /^#[0-9A-Fa-f]{6}$/.test(val)) return val;
+            return fallback;
+        };
+        const rawEntries = manager.getAllEntries();
+        const entries = rawEntries.map(e => ({
+            ...e,
+            borderColorPicker: normalizeHexColor(e.borderColor, "#ffffff"),
+            fillColorPicker: normalizeHexColor(e.fillColor, "#000000"),
+            placedFillColorPicker: normalizeHexColor(e.placedFillColor, "#000000"),
+            placedBorderColorPicker: normalizeHexColor(e.placedBorderColor, "#000000")
+        }));
         const isV14 = typeof game !== "undefined" && (game.release?.generation >= 14 || parseInt(game.version, 10) >= 14);
+
         const prePlacementTitle = isV14
             ? localize("BBC.autorecMenu.preRegionPlacement", "Pre-Region Placement")
             : localize("BBC.autorecMenu.preTemplatePlacement", "Pre-Template Placement");
