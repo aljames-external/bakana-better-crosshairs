@@ -63,19 +63,14 @@ export class AutorecManager {
     }
 
     /**
-     * Resolve the parent Item and Activity (if present) from a template/region target.
+     * Resolve the normalized calling Item and Activity context from a document and workflow payload.
+     * Delegates directly to the active system adapter (`systemAdapter.extractCallingContext`).
+     * @param {Document} document - Template or Region document
+     * @param {Object} [baseContext={}] - Upstream workflow calling context
+     * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}}
      */
-    resolveItemAndActivity(target) {
-        if (systemAdapter.supportsActivities && typeof systemAdapter.resolveItemAndActivity === "function") {
-            return systemAdapter.resolveItemAndActivity(target);
-        }
-        const base = systemAdapter.resolveItem(target);
-        return {
-            ...base,
-            activity: null,
-            activityName: "",
-            activityId: ""
-        };
+    resolveItemAndActivity(document, baseContext = {}) {
+        return systemAdapter.extractCallingContext(document, baseContext);
     }
 
     indexRegistration(registeredKey, handler) {
