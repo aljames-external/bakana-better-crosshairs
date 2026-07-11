@@ -293,12 +293,19 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         // Handle Target Scope Dropdown Change
         const scopeSelect = root.querySelector("select[name='overrideScope']");
         if (scopeSelect) {
-            scopeSelect.addEventListener("change", (ev) => {
+            const onScopeChange = (ev) => {
                 ev.preventDefault();
-                this.selectedScope = ev.currentTarget.value ?? "item";
-                this.render(false);
-            });
+                ev.stopPropagation();
+                const newVal = ev.currentTarget.value ?? "item";
+                if (this.selectedScope !== newVal) {
+                    this.selectedScope = newVal;
+                    this.render(false);
+                }
+            };
+            scopeSelect.addEventListener("change", onScopeChange);
+            scopeSelect.addEventListener("input", onScopeChange);
         }
+
 
         // Handle Delete CUSTOM Configuration action button
         const deleteBtn = root.querySelector("button[data-action='delete-custom']");
@@ -389,7 +396,11 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             notify.info(localize("BBC.itemConfigMenu.savedActivityCustom", `Saved custom Activity-level crosshair configuration for "${this.item.name}".`));
         }
 
-        this.render(false);
+        await this.render({ force: true });
+        this.element?.querySelectorAll?.("input, select, button, textarea").forEach(el => {
+            el.disabled = false;
+        });
+
 
     }
 }
