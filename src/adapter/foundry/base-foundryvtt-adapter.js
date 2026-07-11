@@ -1,6 +1,9 @@
 import { systemAdapter } from "../system/index.js";
 import { log } from "../../lib/logger.js";
 import { clearHighlightLayer } from "../../lib/compat.js";
+import { MODULE_ID } from "../../lib/constants.js";
+import { DEFAULT_AUTOREC_ENTRY } from "../../autorec/autorecManager.js";
+
 
 export class BaseFoundryVTTAdapter {
     /**
