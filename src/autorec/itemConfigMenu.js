@@ -129,11 +129,11 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             placedBorderColorPicker: normalizeHexColor(source.placedBorderColor, "#000000")
         };
 
-        const isV14 = crosshairAdapter.isV14;
         const docTerm = crosshairAdapter.documentTerm;
         const prePlacementTitle = crosshairAdapter.prePlacementTitle;
         const placementSectionTitle = crosshairAdapter.placementSectionTitle;
         const postPlacementTitle = crosshairAdapter.postPlacementTitle;
+
 
 
         const labels = {

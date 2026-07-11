@@ -64,11 +64,11 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             placedBorderColorPicker: normalizeHexColor(e.placedBorderColor, "#000000")
         }));
 
-        const isV14 = crosshairAdapter.isV14;
         const prePlacementTitle = crosshairAdapter.prePlacementTitle;
         const placementSectionTitle = crosshairAdapter.placementSectionTitle;
         const postPlacementTitle = crosshairAdapter.postPlacementTitle;
         const docTerm = crosshairAdapter.documentTerm;
+
 
 
         const labels = {
@@ -137,12 +137,11 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             isEmpty: entries.length === 0,
             isGM: typeof game !== "undefined" ? Boolean(game.user?.isGM) : true,
             supportsActivities: systemAdapter.supportsActivities,
-            isV14,
-
             prePlacementTitle,
             placementSectionTitle,
             postPlacementTitle,
             docTerm,
+
             labels,
             menuHint: localize("BBC.autorecMenu.menuHint")
         };

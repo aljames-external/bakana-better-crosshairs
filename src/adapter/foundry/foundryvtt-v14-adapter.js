@@ -15,15 +15,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Return whether the active Foundry generation is V14 or newer.
-     * @returns {boolean} True for V14+
-     */
-    get isV14() {
-        return true;
-    }
-
-    /**
      * Return canonical document terminology string for V14+ ("region").
+
      * @returns {string} Document type term
      */
     get documentTerm() {

@@ -15,15 +15,8 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
-     * Return whether the active Foundry generation is V14 or newer.
-     * @returns {boolean} True if V14+ Regions are active, false for legacy V12/V13 templates
-     */
-    get isV14() {
-        return false;
-    }
-
-    /**
      * Return canonical document terminology string ("template" or "region").
+
      * @returns {string} The localized or canonical document type term
      */
     get documentTerm() {
