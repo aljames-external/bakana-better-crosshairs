@@ -141,7 +141,8 @@
             "RecommendInstalling": "Recommend installing the following:",
             "RecommendInstallingOne": "Recommend installing one of the following:",
             "RequiresAll": "Requires all of the following to be installed and activated:\n",
-            "RequiresOne": "Requires at least one of the following to be installed and activated:\n"
+            "RequiresOne": "Requires at least one of the following to be installed and activated:\n",
+            "ModuleLabel": "Module: "
         },
         "Units": {
             "Feet": "ft"
