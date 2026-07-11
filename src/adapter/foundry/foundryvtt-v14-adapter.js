@@ -1,5 +1,6 @@
 import { BaseFoundryVTTAdapter } from "./base-foundryvtt-adapter.js";
 import { log } from "../../lib/logger.js";
+import { localize } from "../../lib/utils.js";
 
 /**
  * Adapter subclass encapsulating Foundry VTT v14+ Region and MeasuredTemplate placement behavior.
@@ -12,6 +13,47 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         super();
         this.version = 14;
     }
+
+    /**
+     * Return whether the active Foundry generation is V14 or newer.
+     * @returns {boolean} True for V14+
+     */
+    get isV14() {
+        return true;
+    }
+
+    /**
+     * Return canonical document terminology string for V14+ ("region").
+     * @returns {string} Document type term
+     */
+    get documentTerm() {
+        return "region";
+    }
+
+    /**
+     * Return section title header for pre-region placement configuration.
+     * @returns {string} Section header text
+     */
+    get prePlacementTitle() {
+        return localize("BBC.autorecMenu.preRegionPlacement", "Pre-Region Placement");
+    }
+
+    /**
+     * Return section title header for region placement configuration.
+     * @returns {string} Section header text
+     */
+    get placementSectionTitle() {
+        return localize("BBC.autorecMenu.regionPlacementConfig", "Region Placement Configuration");
+    }
+
+    /**
+     * Return section title header for post-region placement configuration.
+     * @returns {string} Section header text
+     */
+    get postPlacementTitle() {
+        return localize("BBC.autorecMenu.postRegionPlacement", "Post-Region Placement");
+    }
+
 
     /**
      * Register Foundry VTT v14+ placement hooks for Regions.

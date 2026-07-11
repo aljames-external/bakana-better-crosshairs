@@ -2,6 +2,8 @@ import { MODULE_ID } from "../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY, autorecManager } from "./autorecManager.js";
 import { log } from "../lib/logger.js";
 import { localize, notify } from "../lib/utils.js";
+import { crosshairAdapter } from "../adapter/foundry/index.js";
+
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -127,11 +129,12 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             placedBorderColorPicker: normalizeHexColor(source.placedBorderColor, "#000000")
         };
 
-        const isV14 = Boolean(typeof game !== "undefined" && (game.release?.generation >= 14 || parseInt(game.version ?? "0", 10) >= 14));
-        const docTerm = isV14 ? "region" : "template";
-        const prePlacementTitle = isV14 ? "Pre-Region Placement" : "Pre-Template Placement";
-        const placementSectionTitle = isV14 ? "Region Placement Configuration" : "Template Placement Configuration";
-        const postPlacementTitle = isV14 ? "Post-Region Placement" : "Post-Template Placement";
+        const isV14 = crosshairAdapter.isV14;
+        const docTerm = crosshairAdapter.documentTerm;
+        const prePlacementTitle = crosshairAdapter.prePlacementTitle;
+        const placementSectionTitle = crosshairAdapter.placementSectionTitle;
+        const postPlacementTitle = crosshairAdapter.postPlacementTitle;
+
 
         const labels = {
             badgeCustom: localize("BBC.itemConfigMenu.badges.custom", "CUSTOM"),

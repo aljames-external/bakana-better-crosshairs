@@ -4,6 +4,7 @@ import { clearHighlightLayer } from "../../lib/compat.js";
 import { MODULE_ID } from "../../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY } from "../../autorec/autorecManager.js";
 import { CrosshairConfiguration } from "../../autorec/CrosshairConfiguration.js";
+import { localize } from "../../lib/utils.js";
 
 export class BaseFoundryVTTAdapter {
     /**
@@ -12,6 +13,47 @@ export class BaseFoundryVTTAdapter {
     constructor() {
         this.version = 0;
     }
+
+    /**
+     * Return whether the active Foundry generation is V14 or newer.
+     * @returns {boolean} True if V14+ Regions are active, false for legacy V12/V13 templates
+     */
+    get isV14() {
+        return false;
+    }
+
+    /**
+     * Return canonical document terminology string ("template" or "region").
+     * @returns {string} The localized or canonical document type term
+     */
+    get documentTerm() {
+        return "template";
+    }
+
+    /**
+     * Return section title header for pre-placement configuration.
+     * @returns {string} Section header text
+     */
+    get prePlacementTitle() {
+        return localize("BBC.autorecMenu.preTemplatePlacement", "Pre-Template Placement");
+    }
+
+    /**
+     * Return section title header for placement configuration.
+     * @returns {string} Section header text
+     */
+    get placementSectionTitle() {
+        return localize("BBC.autorecMenu.templatePlacementConfig", "Template Placement Configuration");
+    }
+
+    /**
+     * Return section title header for post-placement configuration.
+     * @returns {string} Section header text
+     */
+    get postPlacementTitle() {
+        return localize("BBC.autorecMenu.postTemplatePlacement", "Post-Template Placement");
+    }
+
 
     /**
      * Extract normalized calling item and activity context from a Foundry document.

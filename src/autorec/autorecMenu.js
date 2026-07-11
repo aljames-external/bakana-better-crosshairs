@@ -2,6 +2,8 @@ import { MODULE_ID } from "../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY, autorecManager as manager } from "./autorecManager.js";
 import { systemAdapter } from "../adapter/system/index.js";
 import { localize, notify } from "../lib/utils.js";
+import { crosshairAdapter } from "../adapter/foundry/index.js";
+
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
@@ -62,20 +64,12 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             placedBorderColorPicker: normalizeHexColor(e.placedBorderColor, "#000000")
         }));
 
-        const isV14 = typeof game !== "undefined" && (game.release?.generation >= 14 || parseInt(game.version, 10) >= 14);
+        const isV14 = crosshairAdapter.isV14;
+        const prePlacementTitle = crosshairAdapter.prePlacementTitle;
+        const placementSectionTitle = crosshairAdapter.placementSectionTitle;
+        const postPlacementTitle = crosshairAdapter.postPlacementTitle;
+        const docTerm = crosshairAdapter.documentTerm;
 
-        const prePlacementTitle = isV14
-            ? localize("BBC.autorecMenu.preRegionPlacement", "Pre-Region Placement")
-            : localize("BBC.autorecMenu.preTemplatePlacement", "Pre-Template Placement");
-        const placementSectionTitle = isV14
-            ? localize("BBC.autorecMenu.regionPlacementConfig", "Region Placement Configuration")
-            : localize("BBC.autorecMenu.templatePlacementConfig", "Template Placement Configuration");
-        const postPlacementTitle = isV14
-            ? localize("BBC.autorecMenu.postRegionPlacement", "Post-Region Placement")
-            : localize("BBC.autorecMenu.postTemplatePlacement", "Post-Template Placement");
-        const docTerm = isV14
-            ? localize("BBC.autorecMenu.term.region", "region")
-            : localize("BBC.autorecMenu.term.template", "template");
 
         const labels = {
             searchPlaceholder: localize("BBC.autorecMenu.labels.searchPlaceholder", "Filter registered workflows (e.g. Fireball)..."),
