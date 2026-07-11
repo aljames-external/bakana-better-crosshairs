@@ -8,7 +8,7 @@ import { AutorecMenuApplication } from './autorec/autorecMenu.js';
  *
  * @returns {void}
  */
-function registerModuleSettings() {
+export function registerModuleSettings() {
     log.info(`Initializing ${MODULE_NAME} settings`);
 
     game.settings.registerMenu(MODULE_ID, 'autorecMenu', {
@@ -60,4 +60,3 @@ function registerModuleSettings() {
     });
 }
 
-Hooks.once('init', registerModuleSettings);

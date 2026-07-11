@@ -7,7 +7,7 @@ import { crosshairAdapter, initializeFoundryAdapter } from './adapter/foundry/in
 import { attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement, getTokenEdgePoint, snapCoordinates } from './crosshair/util.js';
 import { initializeHooks } from './lib/templates.js';
 import { localize } from './lib/utils.js';
-import './settings.js';
+import { registerModuleSettings } from './settings.js';
 import { MODULE_ID, MODULE_NAME } from './lib/constants.js';
 
 /**
@@ -22,12 +22,14 @@ Hooks.once('init', () => {
      * @returns {void}
      */
     function setupModule() {
+        registerModuleSettings();
         initializeSystemAdapter();
         initializeFoundryAdapter();
         initializeHooks();
 
         /**
          * Merges exported module functions and utilities into the global `bbc` namespace object.
+
          *
          * @param {Record<string, unknown>} exportedFunctions - Object containing functions or utilities to export globally.
          * @returns {void}
