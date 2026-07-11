@@ -127,7 +127,7 @@ export class FoundryVTTV12Adapter extends BaseFoundryVTTAdapter {
         if (styling.placedFillColor || styling.placedFillAlpha !== undefined || styling.placedBorderColor || styling.placedBorderAlpha !== undefined) {
             updateData.flags = styling.flags;
         }
-        if (config.hidden === true || config.hideTemplate === true) {
+        if (config.hidden || config.hideTemplate) {
             updateData.hidden = true;
         }
         return updateData;

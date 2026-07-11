@@ -246,7 +246,7 @@ export class AutorecManager {
             if (itemName === "DEFAULT") continue;
             if (!(itemName in savedRegistrations)) {
                 const current = this.registeredHandlers.get(itemName);
-                const isCurrentLocal = typeof current === "object" && current !== null && current.local === true;
+                const isCurrentLocal = Boolean(typeof current === "object" && current !== null && current.local);
                 if (!isCurrentLocal) {
                     this.unregister(itemName, { persist: false });
                 }
@@ -257,7 +257,7 @@ export class AutorecManager {
         for (const [itemName, rawConfig] of Object.entries(savedRegistrations)) {
             const config = rawConfig?.handler || rawConfig?.config || rawConfig;
             const current = this.registeredHandlers.get(itemName);
-            const isCurrentLocal = typeof current === "object" && current !== null && current.local === true;
+            const isCurrentLocal = Boolean(typeof current === "object" && current !== null && current.local);
             if (!isCurrentLocal) {
                 this.register(itemName, config, { persist: false });
                 this.persistedItemNames.add(itemName);
@@ -297,7 +297,7 @@ export class AutorecManager {
         if (typeof handlerOrConfig === "string") {
             handlerOrConfig = { file: handlerOrConfig };
         }
-        const isLocal = local || (typeof handlerOrConfig === "object" && handlerOrConfig !== null && handlerOrConfig.local === true);
+        const isLocal = Boolean(local || (typeof handlerOrConfig === "object" && handlerOrConfig !== null && handlerOrConfig.local));
 
         if (itemName === "DEFAULT" && typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
             handlerOrConfig = { ...DEFAULT_AUTOREC_ENTRY, ...handlerOrConfig, id: "DEFAULT", itemName: "DEFAULT", isDefault: true };
@@ -463,7 +463,7 @@ export class AutorecManager {
             }
 
             let isLocal = !this.persistedItemNames.has(itemName);
-            if (typeof handlerOrConfig === "object" && handlerOrConfig !== null && handlerOrConfig.local === true) {
+            if (typeof handlerOrConfig === "object" && handlerOrConfig !== null && handlerOrConfig.local) {
                 isLocal = true;
             }
 
