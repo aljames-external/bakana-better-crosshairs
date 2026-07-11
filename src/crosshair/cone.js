@@ -3,7 +3,7 @@ import { crosshairAdapter } from "../adapter/foundry/index.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
 
 async function create(token, config = {}) {
-    const distance = config.distance ?? config.length ?? config.radius ?? 30;
+    const distance = config.distance ?? 30;
     const angle = config.angle ?? 53.13;
 
     const {
@@ -11,7 +11,7 @@ async function create(token, config = {}) {
         coneSize = "thin",
         stickToToken = shouldStickToToken(config, true),
         file,
-        coneFile = file ?? config.animationFile ?? closest(`eskie.crosshair.cone.${coneSize}.fantasy_01.white.full`),
+        coneFile = file ?? closest(`eskie.crosshair.cone.${coneSize}.fantasy_01.white.full`),
         icon = config.icon,
         borderColor = "#ffffff",
         borderAlpha = 0,

@@ -1,6 +1,6 @@
 import { systemAdapter } from "../system/index.js";
 import { log } from "../../lib/logger.js";
-import { clearHighLightLayer } from "../../lib/compat.js";
+import { clearHighlightLayer } from "../../lib/compat.js";
 
 export class BaseFoundryVTTAdapter {
     constructor() {
