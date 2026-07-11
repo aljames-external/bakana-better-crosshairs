@@ -179,10 +179,19 @@ export class BaseFoundryVTTAdapter {
         return { placedFillColor, placedFillAlpha, placedBorderColor, placedBorderAlpha, flags };
     }
 
+    /**
+     * Register Foundry VTT canvas placement hooks for live previewing and document creation.
+     * @param {Object} callbacks - Placement hook callbacks (`{ onDrawPreview, onPreCreate, onCreate }`)
+     */
     registerPlacementHooks(callbacks) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement registerPlacementHooks(callbacks).");
     }
 
+    /**
+     * Detect geometric properties and dimensions from a canvas PlaceableObject or Document.
+     * @param {Document} doc - Template or Region document
+     * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}}
+     */
     detectProperties(doc) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement detectProperties(doc).");
     }
@@ -199,10 +208,21 @@ export class BaseFoundryVTTAdapter {
         return { x, y, direction };
     }
 
+    /**
+     * Mutate a live preview placeable document's shape coordinates during mouse drag.
+     * @param {Document} previewDoc - Preview MeasuredTemplate or Region document
+     * @param {Object} coords - Destination coordinates payload
+     */
     updatePreviewShape(previewDoc, coords) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement updatePreviewShape(previewDoc, coords).");
     }
 
+    /**
+     * Apply placement coordinates and workflow metadata onto a newly created document.
+     * @param {Document} doc - MeasuredTemplate or Region document
+     * @param {Object} coords - Resolved placement coordinates
+     * @param {Object} [config={}] - Workflow placement configuration
+     */
     applyDocumentPlacement(doc, coords, config) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement applyDocumentPlacement(doc, coords, config).");
     }
