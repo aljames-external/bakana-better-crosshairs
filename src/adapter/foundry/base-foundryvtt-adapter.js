@@ -118,7 +118,8 @@ export class BaseFoundryVTTAdapter {
         }
 
         if (isAnimOverride) {
-            resolved.enabled = Boolean(customConfig.enabled !== false);
+            resolved.enabled = true;
+
             resolved.circleFile = Boolean(customConfig.circleFile) ? customConfig.circleFile : DEFAULT_AUTOREC_ENTRY.circleFile;
             resolved.coneFile = Boolean(customConfig.coneFile) ? customConfig.coneFile : DEFAULT_AUTOREC_ENTRY.coneFile;
             resolved.rayFile = Boolean(customConfig.rayFile) ? customConfig.rayFile : DEFAULT_AUTOREC_ENTRY.rayFile;

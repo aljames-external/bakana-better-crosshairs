@@ -268,7 +268,8 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             enableAnimation: formData.get("enableAnimation") === "on",
             enablePlacedStyling: formData.get("enablePlacedStyling") === "on",
             enablePostPlacement: formData.get("enablePostPlacement") === "on",
-            enabled: formData.get("enabled") === "on",
+            enabled: true,
+
             circleFile: String(formData.get("circleFile") ?? "").trim(),
             coneFile: String(formData.get("coneFile") ?? "").trim(),
             rayFile: String(formData.get("rayFile") ?? "").trim(),
