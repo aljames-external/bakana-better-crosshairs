@@ -81,6 +81,11 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             placedBorderColorPicker: normalizeHexColor(rawConfig.placedBorderColor, "#000000")
         };
 
+        const isV14 = typeof game !== "undefined" && (game.release?.generation >= 14 || parseInt(game.version, 10) >= 14);
+        const docTerm = isV14 ? "region" : "template";
+        const prePlacementTitle = isV14 ? "Pre-Region Placement" : "Pre-Template Placement";
+        const placementSectionTitle = isV14 ? "Region Placement Configuration" : "Template Placement Configuration";
+        const postPlacementTitle = isV14 ? "Post-Region Placement" : "Post-Template Placement";
 
         const labels = {
             badgeCustom: localize("BBC.itemConfigMenu.badges.custom", "CUSTOM"),
@@ -89,24 +94,26 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             deleteCustomBtn: localize("BBC.itemConfigMenu.deleteCustomBtn", "Delete"),
             saveCustomBtn: localize("BBC.itemConfigMenu.saveCustomBtn", "Save"),
 
-            sectionGeneral: localize("BBC.autorecMenu.labels.sectionGeneral", "General Workflow"),
-            sectionAnimation: localize("BBC.autorecMenu.labels.animationTitle", "Animation Configuration"),
-            sectionPlaced: localize("BBC.autorecMenu.labels.placedSectionDesc", "Placed Document Styling"),
-            sectionPost: localize("BBC.autorecMenu.labels.postSectionDesc", "Post-Placement Execution"),
+            preSectionDesc: localize("BBC.itemConfigMenu.preSectionDesc", `Executes custom Javascript code concurrent with ${docTerm} placement selection.`),
+            animationDesc: localize("BBC.itemConfigMenu.animationDesc", "Sequencer crosshair graphic asset and interactive rendering properties."),
+            placedSectionDesc: localize("BBC.itemConfigMenu.placedSectionDesc", `Configure fill and border highlight colors applied to the created ${docTerm}.`),
+            postSectionDesc: localize("BBC.itemConfigMenu.postSectionDesc", `Executes custom Javascript code immediately after the ${docTerm} document is created on the canvas.`),
+
+            animationTitle: localize("BBC.autorecMenu.labels.animationTitle", "Animation Configuration"),
             workflowEnabled: localize("BBC.autorecMenu.labels.workflowEnabled", "Workflow Enabled"),
-            prePlacementCode: localize("BBC.autorecMenu.labels.preSectionDesc", "Pre-Placement Script"),
-            postPlacementCode: localize("BBC.autorecMenu.labels.postSectionDesc", "Post-Placement Script"),
             circleFile: localize("BBC.autorecMenu.labels.circleFile", "Circle Sequencer Filepath"),
             coneFile: localize("BBC.autorecMenu.labels.coneFile", "Cone Sequencer Filepath"),
             rayFile: localize("BBC.autorecMenu.labels.rayFile", "Ray Sequencer Filepath"),
             squareFile: localize("BBC.autorecMenu.labels.squareFile", "Square Sequencer Filepath"),
             lockToToken: localize("BBC.autorecMenu.labels.lockToToken", "Lock to Token (Stick)"),
-            showLine: localize("BBC.autorecMenu.labels.showLine", "Show Origin Line"),
-            borderColor: localize("BBC.autorecMenu.labels.borderColor", "Border Color"),
-            fillColor: localize("BBC.autorecMenu.labels.fillColor", "Fill Color"),
+            originLine: localize("BBC.autorecMenu.labels.originLine", "Origin Stretch Line"),
+            showLineLabel: localize("BBC.autorecMenu.labels.showLine", "Show Line"),
+            borderStyling: localize("BBC.autorecMenu.labels.borderStyling", "Border Styling (Tile Highlight)"),
+            fillStyling: localize("BBC.autorecMenu.labels.fillStyling", "Fill Styling (Tile Highlight)"),
             customIcon: localize("BBC.autorecMenu.labels.customIcon", "Custom Cursor Icon"),
             placedFill: localize("BBC.autorecMenu.labels.placedFill", "Placed Fill Color"),
             placedBorder: localize("BBC.autorecMenu.labels.placedBorder", "Placed Border Color"),
+            alphaLabel: localize("BBC.autorecMenu.labels.alpha", "Alpha:"),
             stickDefault: localize("BBC.autorecMenu.pills.stickDefault", "Default (Cone: On, Others: Off)"),
             stickOn: localize("BBC.autorecMenu.pills.stickOn", "On (Locked to Origin Token)"),
             stickOff: localize("BBC.autorecMenu.pills.stickOff", "Off (Free Cursor Placement)")
@@ -121,9 +128,13 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             isAutorec,
             autorecMatchName: autorecMatch?.itemName ?? "",
             config: mergedConfig,
+            prePlacementTitle,
+            placementSectionTitle,
+            postPlacementTitle,
             labels
         };
     }
+
 
     /**
      * Attach interactive DOM event listeners after rendering completes.

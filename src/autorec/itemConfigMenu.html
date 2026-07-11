@@ -8,7 +8,6 @@
             <div class="bbc-item-header-titles">
                 <h2>{{itemName}}</h2>
             </div>
-
             <div class="bbc-item-badges">
                 {{#if isCustom}}
                 <span class="bbc-type-badge custom-badge" title="Custom configuration stored on item flags">
@@ -27,7 +26,7 @@
         </div>
         <div class="bbc-item-header-actions">
             {{#if hasCustom}}
-            <button type="button" class="bbc-delete-single-btn" data-action="delete-custom" title="Delete custom item flags configuration and revert to AUTOREC or default">
+            <button type="button" class="bbc-delete-single-btn" data-action="delete-custom" title="Delete custom item configuration">
                 <i class="fa-solid fa-trash-can"></i> {{labels.deleteCustomBtn}}
             </button>
             {{/if}}
@@ -36,15 +35,34 @@
 
     <!-- Scrollable Configuration Body -->
     <div class="bbc-sections-scroll bbc-item-config-body">
-        <!-- 1. General & Behavior Configuration -->
+        <!-- Section 1: Pre-Template / Pre-Region Placement -->
         <section class="bbc-section-card">
             <div class="bbc-section-header">
                 <div class="bbc-section-title">
-                    <i class="fa-solid fa-gear bbc-section-icon"></i>
-                    <h3>{{labels.sectionGeneral}}</h3>
+                    <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+                    <i class="fa-solid fa-code bbc-section-icon"></i>
+                    <h3>{{prePlacementTitle}}</h3>
                 </div>
             </div>
             <div class="bbc-section-body">
+                <p class="bbc-section-desc">{{labels.preSectionDesc}}</p>
+                <div class="bbc-code-container">
+                    <textarea class="bbc-edit-textarea bbc-code-editor" name="concurrentCode" rows="4" spellcheck="false" placeholder="// Enter Javascript code executed concurrent with template placement...">{{config.concurrentCode}}</textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Animation Configuration -->
+        <section class="bbc-section-card">
+            <div class="bbc-section-header">
+                <div class="bbc-section-title">
+                    <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+                    <i class="fa-solid fa-film bbc-section-icon"></i>
+                    <h3>{{labels.animationTitle}}</h3>
+                </div>
+            </div>
+            <div class="bbc-section-body">
+                <p class="bbc-section-desc">{{labels.animationDesc}}</p>
                 <table class="bbc-config-table">
                     <tbody>
                         <tr>
@@ -56,47 +74,6 @@
                                 </label>
                             </td>
                         </tr>
-                        <tr>
-                            <th>{{labels.lockToToken}}</th>
-                            <td>
-                                <select class="bbc-edit-select" name="stickToToken">
-                                    <option value="default" {{#if (eq config.stickToToken "default")}}selected{{/if}}>{{labels.stickDefault}}</option>
-                                    <option value="true" {{#if (eq config.stickToToken "true")}}selected{{/if}}>{{labels.stickOn}}</option>
-                                    <option value="false" {{#if (eq config.stickToToken "false")}}selected{{/if}}>{{labels.stickOff}}</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>{{labels.showLine}}</th>
-                            <td>
-                                <label class="bbc-edit-checkbox-label">
-                                    <input type="checkbox" name="showLine" {{#if config.showLine}}checked{{/if}} />
-                                    <span>Show stretch line from token to targeting origin</span>
-                                </label>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>{{labels.customIcon}}</th>
-                            <td>
-                                <input type="text" class="bbc-edit-input" name="icon" value="{{config.icon}}" placeholder="icons/svg/target.svg" />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- 2. Sequencer Animation Configuration -->
-        <section class="bbc-section-card">
-            <div class="bbc-section-header">
-                <div class="bbc-section-title">
-                    <i class="fa-solid fa-film bbc-section-icon"></i>
-                    <h3>{{labels.sectionAnimation}}</h3>
-                </div>
-            </div>
-            <div class="bbc-section-body">
-                <table class="bbc-config-table">
-                    <tbody>
                         <tr>
                             <th>{{labels.circleFile}}</th>
                             <td>
@@ -121,40 +98,52 @@
                                 <input type="text" class="bbc-edit-input" name="squareFile" value="{{config.squareFile}}" placeholder="jb2a.template_square.aura.01" />
                             </td>
                         </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- 3. Border & Fill Styling -->
-        <section class="bbc-section-card">
-            <div class="bbc-section-header">
-                <div class="bbc-section-title">
-                    <i class="fa-solid fa-palette bbc-section-icon"></i>
-                    <h3>Visual Theme & Highlights</h3>
-                </div>
-            </div>
-            <div class="bbc-section-body">
-                <table class="bbc-config-table">
-                    <tbody>
                         <tr>
-                            <th>{{labels.borderColor}}</th>
+                            <th>{{labels.lockToToken}}</th>
+                            <td>
+                                <select class="bbc-edit-select" name="stickToToken">
+                                    <option value="default" {{#if (eq config.stickToToken "default")}}selected{{/if}}>{{labels.stickDefault}}</option>
+                                    <option value="true" {{#if (eq config.stickToToken "true")}}selected{{/if}}>{{labels.stickOn}}</option>
+                                    <option value="false" {{#if (eq config.stickToToken "false")}}selected{{/if}}>{{labels.stickOff}}</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{labels.originLine}}</th>
+                            <td>
+                                <div class="bbc-edit-row">
+                                    <label class="bbc-edit-checkbox-label">
+                                        <input type="checkbox" name="showLine" {{#if config.showLine}}checked{{/if}} />
+                                        <span>{{labels.showLineLabel}}</span>
+                                    </label>
+                                    <input type="text" class="bbc-edit-input" name="lineFile" value="{{config.lineFile}}" placeholder="eskie.crosshair.line..." />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{labels.borderStyling}}</th>
                             <td>
                                 <div class="bbc-edit-color-row">
                                     <input type="color" class="bbc-edit-color" data-color-target="bbc-item-bordercolor" value="{{config.borderColorPicker}}" />
                                     <input type="text" id="bbc-item-bordercolor" class="bbc-edit-input" name="borderColor" value="{{config.borderColor}}" placeholder="#ffffff" />
-                                    <label>Alpha: <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="borderAlpha" value="{{config.borderAlpha}}" /></label>
+                                    <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="borderAlpha" value="{{config.borderAlpha}}" /></label>
                                 </div>
                             </td>
                         </tr>
                         <tr>
-                            <th>{{labels.fillColor}}</th>
+                            <th>{{labels.fillStyling}}</th>
                             <td>
                                 <div class="bbc-edit-color-row">
                                     <input type="color" class="bbc-edit-color" data-color-target="bbc-item-fillcolor" value="{{config.fillColorPicker}}" />
                                     <input type="text" id="bbc-item-fillcolor" class="bbc-edit-input" name="fillColor" value="{{config.fillColor}}" placeholder="#000000" />
-                                    <label>Alpha: <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="fillAlpha" value="{{config.fillAlpha}}" /></label>
+                                    <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="fillAlpha" value="{{config.fillAlpha}}" /></label>
                                 </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{{labels.customIcon}}</th>
+                            <td>
+                                <input type="text" class="bbc-edit-input" name="icon" value="{{config.icon}}" placeholder="icons/svg/target.svg" />
                             </td>
                         </tr>
                     </tbody>
@@ -162,15 +151,17 @@
             </div>
         </section>
 
-        <!-- 4. Placed Document Styling -->
+        <!-- Section 3: Template / Region Placement Configuration -->
         <section class="bbc-section-card">
             <div class="bbc-section-header">
                 <div class="bbc-section-title">
+                    <i class="fa-solid fa-chevron-down bbc-chevron"></i>
                     <i class="fa-solid fa-shapes bbc-section-icon"></i>
-                    <h3>{{labels.sectionPlaced}}</h3>
+                    <h3>{{placementSectionTitle}}</h3>
                 </div>
             </div>
             <div class="bbc-section-body">
+                <p class="bbc-section-desc">{{labels.placedSectionDesc}}</p>
                 <table class="bbc-config-table">
                     <tbody>
                         <tr>
@@ -179,7 +170,7 @@
                                 <div class="bbc-edit-color-row">
                                     <input type="color" class="bbc-edit-color" data-color-target="bbc-item-placedfill" value="{{config.placedFillColorPicker}}" />
                                     <input type="text" id="bbc-item-placedfill" class="bbc-edit-input" name="placedFillColor" value="{{config.placedFillColor}}" placeholder="#000000" />
-                                    <label>Alpha: <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="placedFillAlpha" value="{{config.placedFillAlpha}}" /></label>
+                                    <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="placedFillAlpha" value="{{config.placedFillAlpha}}" /></label>
                                 </div>
                             </td>
                         </tr>
@@ -189,7 +180,7 @@
                                 <div class="bbc-edit-color-row">
                                     <input type="color" class="bbc-edit-color" data-color-target="bbc-item-placedborder" value="{{config.placedBorderColorPicker}}" />
                                     <input type="text" id="bbc-item-placedborder" class="bbc-edit-input" name="placedBorderColor" value="{{config.placedBorderColor}}" placeholder="#ffffff" />
-                                    <label>Alpha: <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="placedBorderAlpha" value="{{config.placedBorderAlpha}}" /></label>
+                                    <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="placedBorderAlpha" value="{{config.placedBorderAlpha}}" /></label>
                                 </div>
                             </td>
                         </tr>
@@ -198,22 +189,19 @@
             </div>
         </section>
 
-        <!-- 5. Pre & Post Placement Execution Scripts -->
+        <!-- Section 4: Post-Template / Post-Region Placement -->
         <section class="bbc-section-card">
             <div class="bbc-section-header">
                 <div class="bbc-section-title">
-                    <i class="fa-solid fa-code bbc-section-icon"></i>
-                    <h3>{{labels.sectionPost}}</h3>
+                    <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+                    <i class="fa-solid fa-flag-checkered bbc-section-icon"></i>
+                    <h3>{{postPlacementTitle}}</h3>
                 </div>
             </div>
             <div class="bbc-section-body">
-                <div style="margin-bottom: 14px;">
-                    <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">{{labels.prePlacementCode}}</label>
-                    <textarea class="bbc-edit-textarea bbc-code-editor" name="concurrentCode" rows="3" placeholder="// Custom Javascript executed during template placement preview...">{{config.concurrentCode}}</textarea>
-                </div>
-                <div>
-                    <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 6px;">{{labels.postPlacementCode}}</label>
-                    <textarea class="bbc-edit-textarea bbc-code-editor" name="postPlacementCode" rows="3" placeholder="// Custom Javascript executed immediately after document creation...">{{config.postPlacementCode}}</textarea>
+                <p class="bbc-section-desc">{{labels.postSectionDesc}}</p>
+                <div class="bbc-code-container">
+                    <textarea class="bbc-edit-textarea bbc-code-editor" name="postPlacementCode" rows="4" spellcheck="false" placeholder="// Enter Javascript code executed after document creation...">{{config.postPlacementCode}}</textarea>
                 </div>
             </div>
         </section>
