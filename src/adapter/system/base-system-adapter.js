@@ -11,10 +11,11 @@ export class BaseSystemAdapter {
     }
 
     /**
-     * Extract or refine calling context for the specific system.
-     * @param {Document} document
-     * @param {Object} baseContext
-     * @returns {Object}
+     * Extract or refine calling context for the specific game system.
+     * Base implementation returns the standard calling context passed by upstream workflow.
+     * @param {Document} document - Template or Region document placed on canvas
+     * @param {Object} [baseContext={}] - Initial calling context (`{ item, itemName, itemId, activity, activityName, activityId }`)
+     * @returns {{item?: Item|null, itemName?: string, itemId?: string, activity?: Object|null, activityName?: string, activityId?: string}}
      */
     extractCallingContext(document, baseContext = {}) {
         return baseContext;
@@ -22,16 +23,16 @@ export class BaseSystemAdapter {
 
     /**
      * Evaluate whether a calling context matches a candidate autorec entry.
-     * Base implementation compares item name or item id.
+     * Compares exact canonical item name (`itemName`) or item id (`itemId`).
      * @param {{item?: Item, itemName?: string, itemId?: string}} context - Normalized calling item context
-     * @param {Object} entry - Registered autorec entry
-     * @returns {boolean}
+     * @param {Object} entry - Registered autorec entry configuration (`{ itemName, itemId }`)
+     * @returns {boolean} True if the calling context matches candidate entry item rules
      */
     isMatch(context, entry) {
         if (!context || !entry) return false;
-        const callingName = (context.itemName ?? context.item?.name ?? "").trim().toLowerCase();
-        const callingId = (context.itemId ?? context.item?.id ?? "").trim();
-        const entryName = (entry.itemName ?? entry.name ?? "").trim().toLowerCase();
+        const callingName = (context.itemName ?? "").trim().toLowerCase();
+        const callingId = (context.itemId ?? "").trim();
+        const entryName = (entry.itemName ?? "").trim().toLowerCase();
         const entryId = (entry.itemId ?? "").trim();
 
         const match = Boolean(

@@ -12,6 +12,12 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
         this.supportsActivities = true;
     }
 
+    /**
+     * Extract normalized calling item and activity context from a DnD5e Document and flags.
+     * @param {Document} document - Template or Region document placed on canvas
+     * @param {Object} [baseContext={}] - Initial calling context (`{ item, itemName, itemId, activity, activityName, activityId }`)
+     * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}}
+     */
     extractCallingContext(document, baseContext = {}) {
         let itemObj = baseContext.item ?? null;
         let activityObj = baseContext.activity ?? null;
@@ -19,23 +25,19 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
         if (!itemObj && document?.flags?.dnd5e?.origin && typeof fromUuidSync === "function") {
             try { itemObj = fromUuidSync(document.flags.dnd5e.origin); } catch (e) {}
         }
-        if (!itemObj && document?.flags?.dnd5e?.item && typeof fromUuidSync === "function") {
-            try { itemObj = typeof document.flags.dnd5e.item === "string" ? fromUuidSync(document.flags.dnd5e.item) : document.flags.dnd5e.item; } catch (e) {}
-        }
 
         if (itemObj && (itemObj.item || (itemObj.parent && itemObj.parent.documentName === "Item"))) {
             activityObj = activityObj ?? itemObj;
             itemObj = itemObj.item ?? itemObj.parent;
         }
 
-        const actIdentifier = document?.flags?.dnd5e?.activity ?? document?.flags?.dnd5e?.activityUuid ?? document?.flags?.dnd5e?.activityId;
+        const actIdentifier = document?.flags?.dnd5e?.activity;
         if (!activityObj && actIdentifier) {
             if (typeof fromUuidSync === "function" && typeof actIdentifier === "string" && actIdentifier.includes(".")) {
                 try { activityObj = fromUuidSync(actIdentifier); } catch (e) {}
             }
             if (!activityObj && itemObj?.system?.activities) {
-                activityObj = itemObj.system.activities.get?.(actIdentifier)
-                    ?? (typeof itemObj.system.activities.find === "function" ? itemObj.system.activities.find(a => a.id === actIdentifier || a._id === actIdentifier || a.uuid === actIdentifier || a.name === actIdentifier) : null);
+                activityObj = itemObj.system.activities.get?.(actIdentifier) ?? null;
             }
         }
 
@@ -62,31 +64,31 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
     /**
      * Evaluate whether a calling context matches a candidate autorec entry in DnD5e.
      * Checks item match AND validates calling activity against entry activity filters.
-     * @param {{item?: Item, itemName?: string, itemId?: string, activity?: Object, activityName?: string, activityId?: string}} context
-     * @param {Object} entry
-     * @returns {boolean}
+     * @param {{item?: Item, itemName?: string, itemId?: string, activity?: Object, activityName?: string, activityId?: string}} context - Normalized calling context
+     * @param {Object} entry - Registered autorec entry configuration
+     * @returns {boolean} True if the calling context matches item and activity rules
      */
     isMatch(context, entry) {
         if (!super.isMatch(context, entry)) return false;
 
-        const entryFilterExact = (entry.activityId ?? "").trim();
-        const entryFilterLower = (entry.activityId ?? entry.activityName ?? "").trim().toLowerCase();
+        const entryFilterId = (entry.activityId ?? "").trim();
+        const entryFilterName = (entry.activityName ?? "").trim().toLowerCase();
 
-        // If the entry specifies no activity filter, it applies to any activity on this item
-        if (!entryFilterLower) {
+        // If the entry specifies no activity filter (no ID or Name filter), it applies to any activity on this item
+        if (!entryFilterId && !entryFilterName) {
             log.debug(`Dnd5eSystemAdapter.isMatch | Entry "${entry.itemName}" specifies no activity filter -> MATCHED`);
             return true;
         }
 
-        const callingActivityId = (context?.activityId ?? context?.activity?.id ?? "").trim();
-        const callingActivityName = (context?.activityName ?? context?.activity?.name ?? "").trim().toLowerCase();
+        const callingActivityId = (context.activityId ?? "").trim();
+        const callingActivityName = (context.activityName ?? "").trim().toLowerCase();
 
         const match = Boolean(
-            (entryFilterExact && callingActivityId && entryFilterExact === callingActivityId) ||
-            (entryFilterLower && callingActivityName && entryFilterLower === callingActivityName)
+            (entryFilterId && callingActivityId && entryFilterId === callingActivityId) ||
+            (entryFilterName && callingActivityName && entryFilterName === callingActivityName)
         );
 
-        log.debug(`Dnd5eSystemAdapter.isMatch | Activity comparison (${match ? 'MATCHED' : 'FAILED'}): calling activity ("${callingActivityName}" / "${callingActivityId}") vs entry activity filter ("${entryFilterLower}" / "${entryFilterExact}")`);
+        log.debug(`Dnd5eSystemAdapter.isMatch | Activity comparison (${match ? 'MATCHED' : 'FAILED'}): calling activity ("${callingActivityName}" / "${callingActivityId}") vs entry activity filters ("${entryFilterName}" / "${entryFilterId}")`);
         return match;
     }
 }
