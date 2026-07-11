@@ -283,7 +283,7 @@ export class AutorecManager {
             if (itemName === "DEFAULT") continue;
             if (!(itemName in savedRegistrations)) {
                 const current = this.registeredHandlers.get(itemName);
-                const isCurrentLocal = Boolean(typeof current === "object" && current !== null && current.local);
+                const isCurrentLocal = Boolean(current?.local);
                 if (!isCurrentLocal) {
                     this.unregister(itemName, { persist: false });
                 }
@@ -294,7 +294,7 @@ export class AutorecManager {
         for (const [itemName, rawConfig] of Object.entries(savedRegistrations)) {
             const config = rawConfig?.handler || rawConfig?.config || rawConfig;
             const current = this.registeredHandlers.get(itemName);
-            const isCurrentLocal = Boolean(typeof current === "object" && current !== null && current.local);
+            const isCurrentLocal = Boolean(current?.local);
             if (!isCurrentLocal) {
                 this.register(itemName, config, { persist: false });
                 this.persistedItemNames.add(itemName);
@@ -334,9 +334,9 @@ export class AutorecManager {
         if (this._onRegisterCallback) {
             this._onRegisterCallback();
         }
-        const isLocal = Boolean(local || (typeof handlerOrConfig === "object" && handlerOrConfig !== null && handlerOrConfig.local));
+        const isLocal = Boolean(local || handlerOrConfig?.local);
 
-        if (itemName === "DEFAULT" && typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
+        if (itemName === "DEFAULT" && typeof handlerOrConfig !== "function") {
             handlerOrConfig = {
                 ...DEFAULT_AUTOREC_ENTRY,
                 ...handlerOrConfig,
@@ -411,7 +411,7 @@ export class AutorecManager {
         if (persist && !local) {
             const persistedDict = {};
             for (const [itemName, config] of this.registeredHandlers.entries()) {
-                if (typeof config === "object" && config !== null && !config.local) {
+                if (typeof config !== "function" && !config?.local) {
                     persistedDict[itemName] = config;
                 }
             }
@@ -531,10 +531,7 @@ export class AutorecManager {
                 file = config.file || config.animationFile || "";
             }
 
-            let isLocal = !this.persistedItemNames.has(itemName);
-            if (typeof handlerOrConfig === "object" && handlerOrConfig !== null && handlerOrConfig.local) {
-                isLocal = true;
-            }
+            const isLocal = Boolean(handlerOrConfig?.local) || !this.persistedItemNames.has(itemName);
 
             const isDefault = Boolean(config.isDefault);
             const circleFile = config.circleFile ?? config.file ?? "eskie.crosshair.circle.fantasy_01.white.full";
