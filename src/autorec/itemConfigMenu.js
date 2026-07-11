@@ -75,11 +75,17 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
 
         const mergedConfig = {
             ...rawConfig,
+            circleFile: rawConfig.circleFile || DEFAULT_AUTOREC_ENTRY.circleFile,
+            coneFile: rawConfig.coneFile || DEFAULT_AUTOREC_ENTRY.coneFile,
+            rayFile: rawConfig.rayFile || DEFAULT_AUTOREC_ENTRY.rayFile,
+            squareFile: rawConfig.squareFile || DEFAULT_AUTOREC_ENTRY.squareFile,
+            lineFile: rawConfig.lineFile || DEFAULT_AUTOREC_ENTRY.lineFile,
             borderColorPicker: normalizeHexColor(rawConfig.borderColor, "#ffffff"),
             fillColorPicker: normalizeHexColor(rawConfig.fillColor, "#000000"),
             placedFillColorPicker: normalizeHexColor(rawConfig.placedFillColor, "#000000"),
             placedBorderColorPicker: normalizeHexColor(rawConfig.placedBorderColor, "#000000")
         };
+
 
         const isV14 = typeof game !== "undefined" && (game.release?.generation >= 14 || parseInt(game.version, 10) >= 14);
         const docTerm = isV14 ? "region" : "template";
