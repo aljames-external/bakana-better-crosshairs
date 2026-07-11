@@ -109,7 +109,7 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                         ok: {
                             label: "Add Workflow",
                             callback: (event, button, html) => {
-                                const rootEl = button.form || html;
+                                const rootEl = button.form ?? html;
                                 const itemInput = rootEl.querySelector ? rootEl.querySelector("input[name='workflowName']") : null;
                                 const actInput = supportsActivities && rootEl.querySelector ? rootEl.querySelector("input[name='activityName']") : null;
                                 const itemName = itemInput?.value?.trim() || null;
