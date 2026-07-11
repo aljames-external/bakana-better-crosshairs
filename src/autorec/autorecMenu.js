@@ -40,9 +40,6 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
         const postPlacementTitle = isV14
             ? localize("BBC.autorecMenu.postRegionPlacement", "Post-Region Placement")
             : localize("BBC.autorecMenu.postTemplatePlacement", "Post-Template Placement");
-        const placementSectionTag = isV14
-            ? localize("BBC.autorecMenu.tag.v14Region", "V14+ Region")
-            : localize("BBC.autorecMenu.tag.v13Template", "V13- MeasuredTemplate");
         const docTerm = isV14
             ? localize("BBC.autorecMenu.term.region", "region")
             : localize("BBC.autorecMenu.term.template", "template");
@@ -113,7 +110,6 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             prePlacementTitle,
             placementSectionTitle,
             postPlacementTitle,
-            placementSectionTag,
             docTerm,
             labels,
             menuHint: localize("BBC.autorecMenu.menuHint")
