@@ -76,10 +76,11 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             searchPlaceholder: localize("BBC.autorecMenu.labels.searchPlaceholder", "Filter registered workflows (e.g. Fireball)..."),
             editMode: localize("BBC.autorecMenu.labels.editMode", "Edit Mode"),
             registeredWorkflows: localize("BBC.autorecMenu.labels.registeredWorkflows", "Registered Workflows"),
-            addBtn: localize("BBC.autorecMenu.labels.addBtn", "Add"),
+            addBtn: localize("BBC.autorecMenu.labels.addBtn", "Insert"),
             removeBtn: localize("BBC.autorecMenu.labels.deleteBtn", "Delete"),
             deleteBtn: localize("BBC.autorecMenu.labels.deleteBtn", "Delete"),
             saveBtn: localize("BBC.autorecMenu.labels.saveBtn", "Save"),
+
             emptySidebar: localize("BBC.autorecMenu.labels.emptySidebar", "No crosshair animations registered yet."),
 
             selectWorkflowTitle: localize("BBC.autorecMenu.labels.selectWorkflowTitle", "Select a Registered Workflow"),
