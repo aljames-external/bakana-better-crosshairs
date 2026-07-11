@@ -74,6 +74,12 @@ export class AutorecManager {
         return systemAdapter.extractCallingContext(document, baseContext);
     }
 
+    /**
+     * Index a registered handler in the fast lookup map under its canonical lowercase keys.
+     * Normalizes partial configuration objects against canonical DEFAULT_AUTOREC_ENTRY schema.
+     * @param {string} registeredKey - Unique registration key (e.g. "Fireball" or "Fireball | 123")
+     * @param {Object|Function|string} handler - Autorec configuration or callback
+     */
     indexRegistration(registeredKey, handler) {
         const itemName = handler?.itemName ?? registeredKey.split(" | ")[0].trim();
         const activityId = (handler?.activityId ?? "").trim();
@@ -106,6 +112,9 @@ export class AutorecManager {
         }
     }
 
+    /**
+     * Rebuild the fast O(1) lookup map from all currently registered handlers.
+     */
     rebuildFastLookupMap() {
         this.fastLookupMap.clear();
         for (const [key, handler] of this.registeredHandlers.entries()) {
@@ -161,6 +170,9 @@ export class AutorecManager {
     }
 
 
+    /**
+     * Initialize world settings listener hooks and socket synchronization for autorec registrations.
+     */
     initializeReadySync() {
         if (this.readySyncInitialized) return;
         this.readySyncInitialized = true;
@@ -198,6 +210,11 @@ export class AutorecManager {
         }
     }
 
+    /**
+     * Persist an autorec configuration to world settings and broadcast socket sync to all connected clients.
+     * @param {string} itemName - Registered item/spell name
+     * @param {Object} config - Autorec entry configuration
+     */
     persistRegistration(itemName, config) {
         if (!game.ready) {
             Hooks.once("ready", () => this.persistRegistration(itemName, config));
@@ -223,6 +240,10 @@ export class AutorecManager {
         }
     }
 
+    /**
+     * Delete a persisted autorec registration from world settings and broadcast socket sync.
+     * @param {string} itemName - Item/spell name to unpersist
+     */
     persistUnregistration(itemName) {
         if (!game.ready) {
             Hooks.once("ready", () => this.persistUnregistration(itemName));
@@ -249,6 +270,10 @@ export class AutorecManager {
         }
     }
 
+    /**
+     * Load and synchronize saved registrations from world settings into the active runtime registry.
+     * @param {Object<string, Object>} [savedRegistrations={}] - Dictionary of saved registrations keyed by item name
+     */
     loadSavedRegistrations(savedRegistrations = {}) {
         if (!savedRegistrations || typeof savedRegistrations !== "object") {
             savedRegistrations = {};
@@ -357,6 +382,11 @@ export class AutorecManager {
         return deleted;
     }
 
+    /**
+     * Batch unregister multiple template placement handlers by item name.
+     * @param {Array<string>} itemNames - List of item names to unregister
+     * @param {Object} [options={}] - Options (`{ persist: boolean, local: boolean }`)
+     */
     async unregisterMany(itemNames, { persist = true, local = false } = {}) {
         if (!Array.isArray(itemNames)) return;
         for (const itemName of itemNames) {
@@ -379,6 +409,11 @@ export class AutorecManager {
         }
     }
 
+    /**
+     * Batch register multiple template placement handlers.
+     * @param {Array<{itemName: string, config: Object, local?: boolean}>} entries - Array of registration entries
+     * @param {Object} [options={}] - Options (`{ persist: boolean }`)
+     */
     async registerMany(entries, { persist = true } = {}) {
         if (!Array.isArray(entries)) return;
         const toPersist = {};
@@ -409,6 +444,10 @@ export class AutorecManager {
         }
     }
 
+    /**
+     * Overwrite the entire persisted template registration dictionary in world settings.
+     * @param {Object<string, Object>} [persistedDict={}] - Entire dictionary of configurations to save
+     */
     async overwrite(persistedDict = {}) {
         if (game.user?.isGM) {
             try {
@@ -453,13 +492,15 @@ export class AutorecManager {
 
     /**
      * List all currently registered item names.
+     * @returns {Array<string>} Array of registered item/spell names
      */
     list() {
         return Array.from(this.registeredHandlers.keys());
     }
 
     /**
-     * Get all registered entries with structured metadata for UI inspection.
+     * Get all registered entries with structured metadata for UI display and inspection.
+     * @returns {Array<Object>} Array of UI-formatted autorec entry dictionaries
      */
     getAllEntries() {
         const results = [];
@@ -595,6 +636,9 @@ export class AutorecManager {
         });
     }
 
+    /**
+     * Broadcast a socket synchronization event (`SYNC_AUTORECS`) to all connected clients.
+     */
     broadcastSync() {
         if (game.socket) {
             game.socket.emit(`module.${MODULE_ID}`, { type: "SYNC_AUTORECS" });
