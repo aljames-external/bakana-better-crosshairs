@@ -355,14 +355,15 @@ export class AutorecManager {
             log.info(`Registering template sequence for item: ${itemName}${isLocal ? " (local only)" : ""}`);
         }
         this.registeredHandlers.set(itemName, handlerOrConfig);
-        this.indexRegistration(itemName, handlerOrConfig);
+        const registered = this.registeredHandlers.get(itemName);
+        this.indexRegistration(itemName, registered);
 
         if (isLocal) {
             if (this.persistedItemNames.has(itemName)) {
                 this.persistUnregistration(itemName);
             }
-        } else if (persist && typeof handlerOrConfig !== "function") {
-            this.persistRegistration(itemName, handlerOrConfig);
+        } else if (persist && typeof registered !== "function") {
+            this.persistRegistration(itemName, registered);
         }
     }
 
