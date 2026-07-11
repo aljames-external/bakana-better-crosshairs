@@ -3,7 +3,7 @@ import { crosshairAdapter } from "../adapter/foundry/index.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
 
 async function create(token, config = {}) {
-    const distance = config.distance ?? config.length ?? config.radius ?? 30;
+    const distance = config.distance ?? 30;
     const width = config.width ?? distance;
 
     const {
