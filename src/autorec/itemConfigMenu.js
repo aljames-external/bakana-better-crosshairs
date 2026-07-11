@@ -224,6 +224,7 @@ export function registerItemSheetHooks() {
     const addApplicationV2HeaderControl = (app, controls) => {
         const item = app.document ?? app.item;
         if (!item || !Boolean(item.isOwner)) return;
+        if (controls.some(c => c.label?.startsWith("BBC") || c.icon === "fa-solid fa-crosshairs")) return;
 
         const customConfig = item.getFlag?.(MODULE_ID, "customConfig") ?? item.flags?.[MODULE_ID]?.customConfig;
         const autorecMatch = autorecManager.getEntryByName(item.name);
@@ -238,12 +239,10 @@ export function registerItemSheetHooks() {
 
     Hooks.on("getHeaderControlsItemSheet5e", addApplicationV2HeaderControl);
     Hooks.on("getHeaderControlsItemSheet5e2", addApplicationV2HeaderControl);
-    Hooks.on("getHeaderControlsItemSheetV2", addApplicationV2HeaderControl);
-    Hooks.on("getHeaderControlsDocumentSheetV2", addApplicationV2HeaderControl);
-
 
     Hooks.on("dnd5e.getItemContextOptions", (item, options) => {
         if (!item || !Boolean(item.isOwner)) return;
+        if (options.some(o => o.name?.startsWith("BBC Crosshair"))) return;
 
         const customConfig = item.getFlag?.(MODULE_ID, "customConfig") ?? item.flags?.[MODULE_ID]?.customConfig;
         const autorecMatch = autorecManager.getEntryByName(item.name);
@@ -255,39 +254,7 @@ export function registerItemSheetHooks() {
             callback: () => openItemCrosshairConfig(item)
         });
     });
-
-    const addHeaderControlToDOM = (sheet, html) => {
-        const item = sheet.document ?? sheet.item;
-        if (!item || !Boolean(item.isOwner)) return;
-
-        const root = html?.[0] ?? html;
-        const header = root?.closest?.(".app")?.querySelector(".window-header") ?? root?.querySelector?.(".window-header");
-        if (!header || header.querySelector(".bbc-item-config")) return;
-
-        const customConfig = item.getFlag?.(MODULE_ID, "customConfig") ?? item.flags?.[MODULE_ID]?.customConfig;
-        const autorecMatch = autorecManager.getEntryByName(item.name);
-        const statusLabel = Boolean(customConfig) ? " [CUSTOM]" : (autorecMatch ? " [AUTOREC]" : "");
-
-        const btn = document.createElement("a");
-        btn.className = "header-control bbc-item-config";
-        btn.title = `BBC Crosshair Configuration${statusLabel}`;
-        btn.innerHTML = '<i class="fa-solid fa-crosshairs"></i> BBC';
-        btn.addEventListener("click", (ev) => {
-            ev.preventDefault();
-            ev.stopPropagation();
-            openItemCrosshairConfig(item);
-        });
-
-        const closeBtn = header.querySelector(".close");
-        if (closeBtn) {
-            header.insertBefore(btn, closeBtn);
-        } else {
-            header.appendChild(btn);
-        }
-    };
-
-    Hooks.on("renderItemSheet", addHeaderControlToDOM);
-    Hooks.on("renderItemSheet5e2", addHeaderControlToDOM);
 }
+
 
 
