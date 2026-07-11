@@ -43,21 +43,19 @@ function rotateCrosshairInstance(crosshair, newDirDeg) {
     if (!crosshair) return;
     const rad = newDirDeg * (Math.PI / 180);
 
-    if ("direction" in crosshair) crosshair.direction = newDirDeg;
-    if ("_direction" in crosshair) crosshair._direction = newDirDeg;
-    if ("rotation" in crosshair) crosshair.rotation = rad;
-    if ("_rotation" in crosshair) crosshair._rotation = rad;
+    crosshair.direction = newDirDeg;
+    crosshair.rotation = rad;
 
     if (crosshair.config) {
         crosshair.config.direction = newDirDeg;
-        if ("rotation" in crosshair.config) crosshair.config.rotation = rad;
+        crosshair.config.rotation = rad;
     }
     if (crosshair.data) {
         crosshair.data.direction = newDirDeg;
-        if ("rotation" in crosshair.data) crosshair.data.rotation = rad;
+        crosshair.data.rotation = rad;
     }
 
-    const tmpl = crosshair.template || crosshair._template || crosshair.placeable;
+    const tmpl = crosshair.template ?? crosshair._template ?? crosshair.placeable;
     if (tmpl) {
         refreshTemplateHighlights(tmpl, newDirDeg, rad);
     }
