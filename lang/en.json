@@ -20,7 +20,27 @@
                 }
             }
         },
+        "itemConfigMenu": {
+
+            "title": "Bakana's Better Crosshairs Custom Item Configuration",
+            "deleteCustomBtn": "Delete",
+            "saveCustomBtn": "Save",
+            "overridePrePlacement": "Override Pre-Placement Script",
+            "overrideAnimation": "Override Animation Configuration",
+            "overridePlacedStyling": "Override Placed Document Styling",
+            "overridePostPlacement": "Override Post-Placement Script",
+            "preSectionDesc": "Executes custom Javascript code before starting placement selection.",
+            "animationDesc": "Sequencer crosshair graphic asset and interactive rendering properties.",
+            "placedSectionDesc": "Configure fill and border highlight colors applied to the created document.",
+            "postSectionDesc": "Executes custom Javascript code immediately after the document is created on the canvas.",
+            "badges": {
+                "custom": "CUSTOM",
+                "autorec": "AUTOREC",
+                "default": "DEFAULT"
+            }
+        },
         "autorecMenu": {
+
             "title": "Bakana's Better Crosshairs — Autorecognition Menu",
             "menuHint": "Inspect registered crosshair animation workflows and their configuration.",
             "preRegionPlacement": "Pre-Region Placement",
