@@ -157,15 +157,15 @@ export class BaseFoundryVTTAdapter {
      * @returns {{placedFillColor?: string, placedFillAlpha?: number, placedBorderColor?: string, placedBorderAlpha?: number, flags: Object}}
      */
     extractPlacedStylingFlags(config = {}) {
-        const placedFillColor = config.placedFillColor ?? config.templateFillColor;
-        const placedFillAlpha = config.placedFillAlpha ?? config.templateFillAlpha;
-        const placedBorderColor = config.placedBorderColor ?? config.templateBorderColor;
-        const placedBorderAlpha = config.placedBorderAlpha ?? config.templateBorderAlpha;
-        const postPlacementCode = config.postPlacementCode ?? config.postCode ?? config.postRegionCode ?? config.postTemplateCode ?? "";
+        const placedFillColor = config.placedFillColor;
+        const placedFillAlpha = config.placedFillAlpha;
+        const placedBorderColor = config.placedBorderColor;
+        const placedBorderAlpha = config.placedBorderAlpha;
+        const postPlacementCode = config.postPlacementCode ?? "";
 
         const flags = {
             bbc: {
-                itemName: config.itemName ?? config.regKey ?? "",
+                itemName: config.itemName ?? "",
                 activityName: config.activityName ?? "",
                 activityId: config.activityId ?? "",
                 postPlacementCode,
@@ -209,18 +209,19 @@ export class BaseFoundryVTTAdapter {
 
     /**
      * Resolve placement anchor coordinates {x, y, direction} on a token's edge toward a click coordinate.
-     * Takes only the token object and {x, y} click coordinates.
+     * Takes only a normalized Token object and {x, y} click coordinates.
      * Implements 1-to-1 the exact algorithm from Sequencer 4.2.2 (#handleLockedEdge in CrosshairsPlaceable.js).
+     * @param {Token} tok
+     * @param {{x?: number, y?: number}} [clickCoords={}]
      */
-    resolveAnchorPlacement(token, clickCoords = {}) {
+    resolveAnchorPlacement(tok, clickCoords = {}) {
         const rawClickX = clickCoords.x ?? 0;
         const rawClickY = clickCoords.y ?? 0;
-        if (!token) return { x: rawClickX, y: rawClickY, direction: 0 };
+        if (!tok) return { x: rawClickX, y: rawClickY, direction: 0 };
 
-        const tok = token instanceof Token ? token : (token.object instanceof Token ? token.object : token);
         const centerMode = typeof CONST !== "undefined" && CONST.GRID_SNAPPING_MODES ? CONST.GRID_SNAPPING_MODES.CENTER : 1;
         const edgeMidpointMode = typeof CONST !== "undefined" && CONST.GRID_SNAPPING_MODES ? CONST.GRID_SNAPPING_MODES.EDGE_MIDPOINT : 16;
-        const size = canvas?.grid?.size || 100;
+        const size = canvas?.grid?.size ?? 100;
 
         const snapPt = (pt, mode) => {
             if (canvas?.grid?.getSnappedPoint) {
@@ -231,10 +232,10 @@ export class BaseFoundryVTTAdapter {
 
         const snappedMouse = snapPt({ x: rawClickX, y: rawClickY }, centerMode);
 
-        const tx = tok.x || 0;
-        const ty = tok.y || 0;
-        const w = tok.w || tok.hitArea?.width || size;
-        const h = tok.h || tok.hitArea?.height || size;
+        const tx = tok.x ?? 0;
+        const ty = tok.y ?? 0;
+        const w = tok.w ?? tok.hitArea?.width ?? size;
+        const h = tok.h ?? tok.hitArea?.height ?? size;
 
         const points = [tx, ty, tx + w, ty, tx + w, ty + h, tx, ty + h];
 
