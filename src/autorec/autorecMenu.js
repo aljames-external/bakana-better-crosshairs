@@ -77,8 +77,11 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             editMode: localize("BBC.autorecMenu.labels.editMode", "Edit Mode"),
             registeredWorkflows: localize("BBC.autorecMenu.labels.registeredWorkflows", "Registered Workflows"),
             addBtn: localize("BBC.autorecMenu.labels.addBtn", "Add"),
-            removeBtn: localize("BBC.autorecMenu.labels.removeBtn", "Remove"),
+            removeBtn: localize("BBC.autorecMenu.labels.deleteBtn", "Delete"),
+            deleteBtn: localize("BBC.autorecMenu.labels.deleteBtn", "Delete"),
+            saveBtn: localize("BBC.autorecMenu.labels.saveBtn", "Save"),
             emptySidebar: localize("BBC.autorecMenu.labels.emptySidebar", "No crosshair animations registered yet."),
+
             selectWorkflowTitle: localize("BBC.autorecMenu.labels.selectWorkflowTitle", "Select a Registered Workflow"),
             selectWorkflowDesc: localize("BBC.autorecMenu.labels.selectWorkflowDesc", "Click on any item name in the sidebar to inspect its pre-animation, core animation, and post-animation configuration."),
             preSectionDesc: localize("BBC.autorecMenu.labels.preSectionDesc", `Executes custom Javascript code before starting ${docTerm} placement selection.`),
@@ -177,13 +180,9 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                 const turningOn = ev.currentTarget.checked;
                 this._editModeActive = turningOn;
                 container.classList.toggle("edit-mode", turningOn);
-
-                // When switching back to non-edit mode, save the page and sync all clients
-                if (!turningOn) {
-                    this.saveAllEditedConfigurations(root);
-                }
             });
         }
+
 
         // Add New Workflow Button
         const addWorkflowBtn = root.querySelector(".bbc-add-workflow-btn");
@@ -264,8 +263,21 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             });
         }
 
+        // Single Save Workflow button in header and footer
+        root.querySelectorAll(".bbc-save-single-btn").forEach(btn => {
+            btn.addEventListener("click", async (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                const itemName = ev.currentTarget.dataset.itemName;
+                if (itemName) {
+                    await this.saveSingleConfiguration(root, itemName);
+                }
+            });
+        });
+
         // Single Remove Workflow button in header
         root.querySelectorAll(".bbc-delete-single-btn").forEach(btn => {
+
             btn.addEventListener("click", (ev) => {
                 const itemName = ev.currentTarget.dataset.itemName;
                 if (itemName) {
@@ -375,11 +387,69 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
     }
 
     /**
+     * Saves configuration changes for only the currently specified workflow item and syncs across connected clients.
+     * @param {HTMLElement} root - Root HTML element of the rendered application form.
+     * @param {string} regKey - Registration key or item name to save.
+     * @returns {Promise<void>}
+     */
+    async saveSingleConfiguration(root, regKey) {
+        if (!root || !regKey) return;
+        const detailEl = root.querySelector(`.bbc-inspector-detail[data-item-name="${CSS.escape(regKey)}"]`);
+        if (!detailEl) return;
+
+        const existingEntry = manager.registeredHandlers.get(regKey) ?? manager.get(regKey) ?? {};
+        const existingHandler = existingEntry.handler ?? existingEntry.config ?? existingEntry;
+        const config = foundry.utils.deepClone(typeof existingHandler === "object" ? existingHandler : {});
+        let modified = false;
+
+        detailEl.querySelectorAll("[data-field]").forEach(inputEl => {
+            const field = inputEl.dataset.field;
+            if (!field) return;
+
+            let val;
+            if (inputEl.type === "checkbox") {
+                val = inputEl.checked;
+            } else if (inputEl.type === "number") {
+                const parsed = parseFloat(inputEl.value);
+                val = isNaN(parsed) ? undefined : parsed;
+            } else {
+                val = inputEl.value ?? "";
+                if (inputEl.tagName === "SELECT" && val === "default") val = undefined;
+                else if (val === "true") val = true;
+                else if (val === "false") val = false;
+            }
+
+            if (config[field] !== val) {
+                config[field] = val;
+                modified = true;
+            }
+        });
+
+        if (modified) {
+            manager.register(regKey, config, { persist: false, local: Boolean(config.local) });
+        }
+
+        const persistedDict = {};
+        for (const k of manager.list()) {
+            const entry = manager.registeredHandlers.get(k) ?? manager.get(k);
+            const handler = entry?.handler ?? entry?.config ?? entry;
+            if (handler && typeof handler === "object" && !handler.local && typeof handler !== "function") {
+                persistedDict[k] = handler;
+            }
+        }
+        await manager.overwrite(persistedDict);
+        notify.info(localize("BBC.autorecMenu.notify.savedOne", `Saved workflow "${regKey}".`));
+
+        this.render(false);
+    }
+
+    /**
      * Saves all modified workflow configurations from the inspector form fields and syncs across connected clients.
      * @param {HTMLElement} root - Root HTML element of the rendered application form.
      * @returns {Promise<void>}
      */
     async saveAllEditedConfigurations(root) {
+
         let modifiedAny = false;
         root.querySelectorAll(".bbc-inspector-detail").forEach(detailEl => {
             const regKey = detailEl.dataset.itemName;
