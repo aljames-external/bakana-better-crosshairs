@@ -26,12 +26,13 @@ import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, ru
 async function create(token, config = {}) {
     const distance = config.distance ?? 30;
     const angle = config.angle ?? 53.13;
+    const stickToToken = shouldStickToToken(config, true);
 
     const {
         id = `Cone Crosshair`,
         coneSize = "thin",
-        stickToToken = shouldStickToToken(config, true),
         file,
+
         coneFile = file ?? closest(`eskie.crosshair.cone.${coneSize}.fantasy_01.white.full`),
         icon = config.icon,
         borderColor = "#ffffff",

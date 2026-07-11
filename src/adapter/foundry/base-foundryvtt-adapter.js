@@ -124,7 +124,11 @@ export class BaseFoundryVTTAdapter {
             resolved.coneFile = Boolean(customConfig.coneFile) ? customConfig.coneFile : DEFAULT_AUTOREC_ENTRY.coneFile;
             resolved.rayFile = Boolean(customConfig.rayFile) ? customConfig.rayFile : DEFAULT_AUTOREC_ENTRY.rayFile;
             resolved.squareFile = Boolean(customConfig.squareFile) ? customConfig.squareFile : DEFAULT_AUTOREC_ENTRY.squareFile;
-            resolved.stickToToken = customConfig.stickToToken ?? "default";
+
+            resolved.stickToToken = (customConfig.stickToToken && customConfig.stickToToken !== "default")
+                ? customConfig.stickToToken
+                : (baseEntry?.stickToToken ?? "default");
+
             resolved.showLine = Boolean(customConfig.showLine);
             resolved.lineFile = Boolean(customConfig.lineFile) ? customConfig.lineFile : DEFAULT_AUTOREC_ENTRY.lineFile;
             resolved.borderColor = customConfig.borderColor ?? "#ffffff";

@@ -14,10 +14,11 @@ import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, ru
 async function create(token, config = {}) {
     const distance = config.distance ?? 30;
     const width = config.width ?? 5;
+    const stickToToken = shouldStickToToken(config, false);
 
     const {
         id = config.id ?? `Ray Crosshair`,
-        stickToToken = shouldStickToToken(config, false),
+
         showLine = config.showLine ?? true,
         rayFile = config.rayFile ?? closest(`eskie.crosshair.ray.fantasy_01.white`),
         lineFile = config.lineFile ?? closest(`eskie.crosshair.line.generic_01.white`),

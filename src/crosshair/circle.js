@@ -48,14 +48,15 @@ function resolveCircleAsset(pathOrKey, effectSize) {
 async function create(token, config = {}) {
     const radius = Math.round(config.radius ?? 20);
     const file = config.file;
+    const stickToToken = shouldStickToToken(config, false);
 
     const {
         id = `Circle Crosshair`,
         showLine = true,
         lineFile = "eskie.crosshair.line.generic_01.white",
         circleFile = resolveCircleAsset(file, radius),
-        stickToToken = shouldStickToToken(config, false),
         icon = config.icon,
+
         borderColor = "#ffffff",
         borderAlpha = 0,
         fillColor = "#000000",
