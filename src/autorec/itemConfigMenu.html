@@ -51,12 +51,20 @@
                         <tr>
                             <th>{{labels.overridePrePlacement}}</th>
                             <td>
-                                <label class="bbc-edit-checkbox-label">
-                                    <input type="checkbox" name="enablePrePlacement" {{#if config.enablePrePlacement}}checked{{/if}} />
-                                    <span>{{#if config.enablePrePlacement}}Override Enabled (Uses Custom Script Below){{else}}Inherit from Global AUTOREC{{/if}}</span>
-                                </label>
+                                <div class="bbc-edit-row">
+                                    <label class="bbc-edit-checkbox-label">
+                                        <input type="checkbox" name="enablePrePlacement" {{#if config.enablePrePlacement}}checked{{/if}} />
+                                        <span>{{labels.overrideCheckboxLabel}}</span>
+                                    </label>
+                                    {{#if config.enablePrePlacement}}
+                                    <span class="bbc-type-badge custom-badge">{{labels.badgeCustomOverride}}</span>
+                                    {{else}}
+                                    <span class="bbc-type-badge default-badge">{{labels.badgeInherited}}</span>
+                                    {{/if}}
+                                </div>
                             </td>
                         </tr>
+
                     </tbody>
                 </table>
                 <div class="bbc-code-container">
@@ -81,12 +89,20 @@
                         <tr>
                             <th>{{labels.overrideAnimation}}</th>
                             <td>
-                                <label class="bbc-edit-checkbox-label">
-                                    <input type="checkbox" name="enableAnimation" {{#if config.enableAnimation}}checked{{/if}} />
-                                    <span>{{#if config.enableAnimation}}Override Enabled (Uses Custom Animation Below){{else}}Inherit from Global AUTOREC{{/if}}</span>
-                                </label>
+                                <div class="bbc-edit-row">
+                                    <label class="bbc-edit-checkbox-label">
+                                        <input type="checkbox" name="enableAnimation" {{#if config.enableAnimation}}checked{{/if}} />
+                                        <span>{{labels.overrideCheckboxLabel}}</span>
+                                    </label>
+                                    {{#if config.enableAnimation}}
+                                    <span class="bbc-type-badge custom-badge">{{labels.badgeCustomOverride}}</span>
+                                    {{else}}
+                                    <span class="bbc-type-badge default-badge">{{labels.badgeInherited}}</span>
+                                    {{/if}}
+                                </div>
                             </td>
                         </tr>
+
                         <tr>
                             <th>{{labels.workflowEnabled}}</th>
                             <td>
@@ -189,12 +205,20 @@
                         <tr>
                             <th>{{labels.overridePlacedStyling}}</th>
                             <td>
-                                <label class="bbc-edit-checkbox-label">
-                                    <input type="checkbox" name="enablePlacedStyling" {{#if config.enablePlacedStyling}}checked{{/if}} />
-                                    <span>{{#if config.enablePlacedStyling}}Override Enabled (Uses Custom Colors Below){{else}}Inherit from Global AUTOREC{{/if}}</span>
-                                </label>
+                                <div class="bbc-edit-row">
+                                    <label class="bbc-edit-checkbox-label">
+                                        <input type="checkbox" name="enablePlacedStyling" {{#if config.enablePlacedStyling}}checked{{/if}} />
+                                        <span>{{labels.overrideCheckboxLabel}}</span>
+                                    </label>
+                                    {{#if config.enablePlacedStyling}}
+                                    <span class="bbc-type-badge custom-badge">{{labels.badgeCustomOverride}}</span>
+                                    {{else}}
+                                    <span class="bbc-type-badge default-badge">{{labels.badgeInherited}}</span>
+                                    {{/if}}
+                                </div>
                             </td>
                         </tr>
+
                         <tr>
                             <th>{{labels.placedFill}}</th>
                             <td>
@@ -236,12 +260,20 @@
                         <tr>
                             <th>{{labels.overridePostPlacement}}</th>
                             <td>
-                                <label class="bbc-edit-checkbox-label">
-                                    <input type="checkbox" name="enablePostPlacement" {{#if config.enablePostPlacement}}checked{{/if}} />
-                                    <span>{{#if config.enablePostPlacement}}Override Enabled (Uses Custom Script Below){{else}}Inherit from Global AUTOREC{{/if}}</span>
-                                </label>
+                                <div class="bbc-edit-row">
+                                    <label class="bbc-edit-checkbox-label">
+                                        <input type="checkbox" name="enablePostPlacement" {{#if config.enablePostPlacement}}checked{{/if}} />
+                                        <span>{{labels.overrideCheckboxLabel}}</span>
+                                    </label>
+                                    {{#if config.enablePostPlacement}}
+                                    <span class="bbc-type-badge custom-badge">{{labels.badgeCustomOverride}}</span>
+                                    {{else}}
+                                    <span class="bbc-type-badge default-badge">{{labels.badgeInherited}}</span>
+                                    {{/if}}
+                                </div>
                             </td>
                         </tr>
+
                     </tbody>
                 </table>
                 <div class="bbc-code-container">
