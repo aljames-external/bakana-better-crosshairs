@@ -4,24 +4,34 @@ import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, ru
 
 function resolveCircleAsset(pathOrKey, effectSize) {
     const cleanSize = Math.round(effectSize);
-    if (!pathOrKey) {
-        return closest(`eskie.crosshair.circle.fantasy_01.white.full.radius_${cleanSize}ft`);
+    function isEskie(pathOrKey) {
+        return pathOrKey.startsWith("eskie.crosshair.circle.fantasy_01");
     }
-    if (pathOrKey.includes("/") || pathOrKey.includes(".radius_")) {
-        return closest(pathOrKey);
+
+    if (pathOrKey && !isEskie(pathOrKey)) return closest(pathOrKey);
+    if (!pathOrKey) pathOrKey = `eskie.crosshair.circle.fantasy_01.white.full`;
+
+    const radiusIndex = pathOrKey.lastIndexOf(".radius_");
+    if (radiusIndex !== -1) {
+        pathOrKey = pathOrKey.slice(0, radiusIndex);
     }
-    return closest(`${pathOrKey}.radius_${cleanSize}ft`);
+
+    let possibleSizes = [10, 20, 30, 60];
+    possibleSizes.sort((a, b) => Math.abs(a - cleanSize) - Math.abs(b - cleanSize));
+    let suggestedSize = possibleSizes[0];
+    pathOrKey = `eskie.crosshair.circle.fantasy_01.white.full.radius_${suggestedSize}ft`;
+    return closest(pathOrKey);
 }
 
 async function create(token, config = {}) {
     const radius = Math.round(config.radius ?? 20);
-    const fileArg = config.file;
+    const file = config.file;
 
     const {
         id = `Circle Crosshair`,
         showLine = true,
         lineFile = "eskie.crosshair.line.generic_01.white",
-        circleFile = resolveCircleAsset(fileArg, radius),
+        circleFile = resolveCircleAsset(file, radius),
         stickToToken = shouldStickToToken(config, false),
         icon = config.icon,
         borderColor = "#ffffff",
