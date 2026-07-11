@@ -3,12 +3,19 @@ import { log } from "../lib/logger.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
 
+/**
+ * Creates and configures a ray crosshair sequence and associated graphics.
+ *
+ * @param {object|null} token - The token the ray originates from or adheres to
+ * @param {object} [config={}] - Configuration options for the ray crosshair
+ * @returns {Promise<Array>} A promise resolving to a tuple of [ray, targets]
+ */
 async function create(token, config = {}) {
     const distance = config.distance ?? 30;
     const width = config.width ?? 5;
 
     const {
-        id = `Ray Crosshair`,
+        id = config.id ?? `Ray Crosshair`,
         stickToToken = shouldStickToToken(config, false),
         showLine = config.showLine ?? true,
         rayFile = config.rayFile ?? closest(`eskie.crosshair.ray.fantasy_01.white`),
@@ -26,6 +33,12 @@ async function create(token, config = {}) {
 
     let targets;
 
+    /**
+     * Creates and plays the visual Sequence effect for the ray graphic attached to the crosshair.
+     *
+     * @param {object} crosshair - The Sequencer crosshair instance to attach the ray graphic to
+     * @returns {Promise<Sequence>} A promise resolving to the played sequence effect
+     */
     async function rayGraphic(crosshair) {
         const seq = new Sequence().wait(50);
         const gridDist = canvas?.dimensions?.distance ?? 5;
@@ -87,6 +100,13 @@ async function create(token, config = {}) {
     return [ray, targets];
 }
 
+/**
+ * Creates and plays a ray crosshair sequence while executing any concurrent scripts.
+ *
+ * @param {object|null} token - The token the ray originates from or adheres to
+ * @param {object} [config={}] - Configuration options for the ray crosshair
+ * @returns {Promise<Array>} A promise resolving to an array of [scriptResult, rayPlayResult]
+ */
 async function play(token, config = {}) {
     let [ray] = await create(token, config);
     return Promise.all([
@@ -95,6 +115,14 @@ async function play(token, config = {}) {
     ]);
 }
 
+/**
+ * Stops and ends any active ray crosshair visual effects associated with a token.
+ *
+ * @param {object|null} token - The token object whose ray crosshair effects should be terminated
+ * @param {object} [options={}] - Options for stopping the effect
+ * @param {string} [options.id="Ray Crosshair"] - The identifier of the effect to end
+ * @returns {Promise} A promise resolving when the matching crosshair effects have been terminated
+ */
 async function stop(token, { id = `Ray Crosshair` } = {}) {
     return Sequencer.EffectManager.endEffects({ name: id, object: token });
 }

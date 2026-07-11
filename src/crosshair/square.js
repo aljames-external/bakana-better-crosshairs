@@ -2,6 +2,13 @@ import { closest } from "../lib/filemanager.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
 
+/**
+ * Creates and configures a square crosshair sequence.
+ *
+ * @param {object|null} token - The token or object to associate with the crosshair
+ * @param {object} [config={}] - Configuration options for the square crosshair
+ * @returns {Promise<Array<*>>} A promise resolving to an array containing the configured square sequence and targets
+ */
 async function create(token, config = {}) {
     const distance = config.distance ?? 30;
     const width = config.width ?? 30;
@@ -25,6 +32,12 @@ async function create(token, config = {}) {
 
     let targets;
 
+    /**
+     * Attaches and plays a persistent square graphic sequence effect on the crosshair.
+     *
+     * @param {object} crosshair - The crosshair placeable or object to attach the effect to
+     * @returns {Promise<*>} A promise resolving when the graphic effect sequence plays
+     */
     async function squareGraphic(crosshair) {
         const seq = new Sequence().wait(50);
 
@@ -85,6 +98,13 @@ async function create(token, config = {}) {
     return [square, targets];
 }
 
+/**
+ * Creates and plays a square crosshair along with any concurrent scripts.
+ *
+ * @param {object|null} token - The token or object to associate with the crosshair
+ * @param {object} [config={}] - Configuration options for the square crosshair
+ * @returns {Promise<Array<*>>} A promise resolving to the results of the concurrent script and crosshair execution
+ */
 async function play(token, config = {}) {
     let [square] = await create(token, config);
     return Promise.all([
@@ -93,6 +113,14 @@ async function play(token, config = {}) {
     ]);
 }
 
+/**
+ * Stops and clears any persistent square crosshair effects associated with the given token.
+ *
+ * @param {object|null} token - The token or object whose square crosshair effects should be ended
+ * @param {object} [options={}] - Options for stopping the crosshair effects
+ * @param {string} [options.id="Square Crosshair"] - The name or identifier of the effect to stop
+ * @returns {Promise<*>} A promise resolving when the effects have been ended
+ */
 async function stop(token, { id = `Square Crosshair` } = {}) {
     return Sequencer.EffectManager.endEffects({ name: id, object: token });
 }

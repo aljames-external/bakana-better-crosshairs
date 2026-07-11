@@ -1,6 +1,9 @@
 import { BaseFoundryVTTAdapter } from "./base-foundryvtt-adapter.js";
 
 export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
+    /**
+     * Construct a Foundry VTT V13 adapter instance.
+     */
     constructor() {
         super();
         this.version = 13;
@@ -9,18 +12,18 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
     /**
      * Register Foundry VTT v13 placement hooks for MeasuredTemplates.
      * @param {Object} callbacks - { onDrawPreview, onPreCreate, onCreate }
+     * @returns {void}
      */
     registerPlacementHooks(callbacks) {
         Hooks.on("drawMeasuredTemplate", (template) => callbacks.onDrawPreview(template));
         Hooks.on("preCreateMeasuredTemplate", (doc, _data, _options, userId) => callbacks.onPreCreate(doc, _data, _options, userId));
         Hooks.on("createMeasuredTemplate", (doc, _options, userId) => callbacks.onCreate(doc, _options, userId));
-
     }
 
     /**
      * Detect shape type and geometric dimensions from a MeasuredTemplate document.
-     * @param {Document} doc
-     * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}}
+     * @param {Document} doc - MeasuredTemplate document
+     * @returns {{type: string, distance: number, radius: number, width: number, angle: number, x: number, y: number}} Detected shape properties and dimensions
      */
     detectProperties(doc) {
         const shapeMap = {
@@ -47,7 +50,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {number} y - Destination y-coordinate
      * @param {number} direction - Direction angle in degrees
      * @param {Object} [config={}] - Optional sequence placement configuration
-     * @returns {{x: number, y: number, direction: number, distance: number|undefined, width: number|undefined}}
+     * @returns {{x: number, y: number, direction: number, distance: number|undefined, width: number|undefined}} Formatted placement coordinates payload
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
         return {
@@ -64,7 +67,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {number} [distance=30] - Shape distance/length
      * @param {number} [widthOrAngle=5] - Shape width (ray/square) or angle in degrees (cone)
      * @param {string} [shapeType="ray"] - Canonical shape type ('circle', 'cone', 'ray', 'square')
-     * @returns {{size: {width: number, height: number}, gridUnits: boolean}}
+     * @returns {{size: {width: number, height: number}, gridUnits: boolean}} Graphic dimensions in pixel units and gridUnits flag
      */
     formatGraphicSize(distance = 30, widthOrAngle = 5, shapeType = "ray") {
         const gridDist = canvas?.dimensions?.distance ?? 5;
@@ -97,17 +100,17 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
 
     /**
      * Return template pixel multiplier factor for V13 (legacy pixel sizing).
-     * @returns {{factor: number, gridUnits: boolean}}
+     * @returns {{factor: number, gridUnits: boolean}} Template pixel multiplier factor and gridUnits mode
      */
     getTemplatePixelFactor() {
         return { factor: 1, gridUnits: false };
     }
 
-
     /**
      * Update live canvas preview shape coordinates during mouse drag.
-     * @param {Document} previewDoc
-     * @param {{x: number, y: number}} coords
+     * @param {Document} previewDoc - Preview MeasuredTemplate document
+     * @param {{x?: number, y?: number, direction?: number, distance?: number}} coords - Destination preview coordinates
+     * @returns {void}
      */
     updatePreviewShape(previewDoc, coords) {
         if (!previewDoc || !coords) return;
@@ -119,9 +122,10 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
 
     /**
      * Apply resolved placement coordinates and workflow flags onto a MeasuredTemplate document.
-     * @param {Document} doc
-     * @param {Object} coords
-     * @param {Object} [config={}]
+     * @param {Document} doc - MeasuredTemplate document
+     * @param {Object} [coords={}] - Resolved placement coordinates
+     * @param {Object} [config={}] - Workflow placement configuration
+     * @returns {void}
      */
     applyDocumentPlacement(doc, coords = {}, config = {}) {
         const styling = this.extractPlacedStylingFlags(config);
@@ -138,4 +142,3 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
         doc.updateSource(updateData);
     }
 }
-

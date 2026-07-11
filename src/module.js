@@ -10,12 +10,28 @@ import { localize } from './lib/utils.js';
 import './settings.js';
 import { MODULE_ID, MODULE_NAME } from './lib/constants.js';
 
+/**
+ * Handles module initialization during the Foundry VTT 'init' hook.
+ *
+ * @returns {Promise<void>}
+ */
 Hooks.once('init', async () => {
+    /**
+     * Initializes system and Foundry adapters, templates, global API endpoints, and registers API methods on the module instance.
+     *
+     * @returns {void}
+     */
     function setupModule() {
         initializeSystemAdapter();
         initializeFoundryAdapter();
         initializeHooks();
 
+        /**
+         * Merges exported module functions and utilities into the global `bbc` namespace object.
+         *
+         * @param {Record<string, unknown>} exportedFunctions - Object containing functions or utilities to export globally.
+         * @returns {void}
+         */
         function setupApiCalls(exportedFunctions) {
             globalThis.bbc = foundry.utils.mergeObject(
                 globalThis.bbc ?? {},
@@ -55,18 +71,19 @@ Hooks.once('init', async () => {
             log,
         };
 
-
         const mod = game.modules.get(MODULE_ID);
         if (mod) mod.api = moduleApi;
     }
-
 
     setupModule();
     log.info(`${MODULE_NAME} module ready`);
 });
 
-
+/**
+ * Handles module readiness tasks during the Foundry VTT 'ready' hook.
+ *
+ * @returns {void}
+ */
 Hooks.once('ready', () => {
     autorecManager.initializeReadySync();
 });
-

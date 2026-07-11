@@ -21,15 +21,16 @@ function isOwner(doc) {
 /**
  * Detect shape type and dimensions from a template or region placeable on canvas.
  * @param {PlaceableObject} placeable - Canvas PlaceableObject (MeasuredTemplate or Region)
- * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}}
+ * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}} Detected shape properties and dimensions
  */
 function detectTemplateProperties(placeable) {
     return crosshairAdapter.detectProperties(placeable.document);
 }
 
-
 /**
  * Handle preview drawing (v13 drawMeasuredTemplate / v14 drawRegion).
+ * @param {PlaceableObject} placeable - Canvas PlaceableObject representing the preview template or region
+ * @returns {Promise<void>} Resolves when preview handling is complete
  */
 async function handleDrawPreview(placeable) {
     const doc = placeable.document;
@@ -90,6 +91,11 @@ async function handleDrawPreview(placeable) {
         cancelled: false,
         resolved: false,
         promise: null,
+        /**
+         * Resolve the pending sequencer crosshair placement with specified coordinates.
+         * @param {Object} [coords={}] - Placed coordinates and properties
+         * @returns {Promise<void>} Resolves when deferred document placement is processed
+         */
         async resolve(coords = {}) {
             log.debug(`context.resolve | Sequencer crosshair PLACED at (${coords.x}, ${coords.y}):`, coords);
             Object.assign(this, coords);
@@ -118,6 +124,10 @@ async function handleDrawPreview(placeable) {
                 }
             }
         },
+        /**
+         * Cancel the pending sequencer crosshair placement.
+         * @returns {void}
+         */
         cancel() {
             log.debug(`context.cancel | Sequencer crosshair CANCELLED for "${entry.itemName}"`);
             this.cancelled = true;
@@ -182,6 +192,11 @@ async function handleDrawPreview(placeable) {
 
 /**
  * Handle document preCreate (v13 preCreateMeasuredTemplate / v14 preCreateRegion).
+ * @param {Document} doc - Template or Region document being created
+ * @param {Object} _data - Initial document creation data
+ * @param {Object} _options - Document creation options
+ * @param {string} userId - ID of the user creating the document
+ * @returns {boolean} True to proceed with normal creation, false to abort or defer
  */
 function handlePreCreate(doc, _data, _options, userId) {
     log.debug(`handlePreCreate | [ENTRY] preCreate hook triggered for docName=${doc.documentName}, id=${doc.id}, userId=${userId}, localUser=${game.user.id}`);
@@ -243,6 +258,10 @@ function handlePreCreate(doc, _data, _options, userId) {
 /**
  * Handle document post-creation hook (v13 createMeasuredTemplate / v14 createRegion).
  * Executes user-configured post-placement Javascript inside a try/catch block with standard context variables.
+ * @param {Document} doc - Template or Region document that was created
+ * @param {Object} _options - Document creation options
+ * @param {string} userId - ID of the user creating the document
+ * @returns {Promise<void>} Resolves when post-placement execution completes
  */
 async function handleCreateDocument(doc, _options, userId) {
     if (userId !== game.user?.id) return;
@@ -283,6 +302,10 @@ async function handleCreateDocument(doc, _options, userId) {
     }
 }
 
+/**
+ * Initialize crosshair placement hooks and ready synchronization.
+ * @returns {void}
+ */
 function initializeHooks() {
     if (hooksInitialized) return;
     hooksInitialized = true;
@@ -304,4 +327,3 @@ function initializeHooks() {
 autorecManager.onRegister(() => initializeHooks());
 
 export { initializeHooks };
-

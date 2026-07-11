@@ -3,6 +3,9 @@ import { log } from "../../lib/logger.js";
 import { clearHighlightLayer } from "../../lib/compat.js";
 
 export class BaseFoundryVTTAdapter {
+    /**
+     * Initialize the base Foundry VTT adapter.
+     */
     constructor() {
         this.version = 0;
     }
@@ -10,7 +13,7 @@ export class BaseFoundryVTTAdapter {
     /**
      * Extract normalized calling item and activity context from a Foundry document.
      * @param {Document} doc - The template or region document
-     * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}}
+     * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}} Normalized calling context object containing item and activity details
      */
     extractCallingContext(doc) {
         if (!doc) return { item: null, itemName: "", itemId: "", activity: null, activityName: "", activityId: "" };
@@ -93,14 +96,11 @@ export class BaseFoundryVTTAdapter {
         return null;
     }
 
-
-
-
     /**
      * Hide a live placeable preview graphic during interactive drawing.
-
      * Common across Foundry v12..v14+ placement previews.
-     * @param {PlaceableObject} placeable
+     * @param {PlaceableObject} placeable - The placeable graphic object to hide
+     * @returns {void} No return value
      */
     hidePreview(placeable) {
         if (!placeable) return;
@@ -154,8 +154,8 @@ export class BaseFoundryVTTAdapter {
     /**
      * Extract normalized placed fill/border styling values and flags from workflow configuration.
      * Shared across V13 and V14 document updates.
-     * @param {Object} [config={}]
-     * @returns {{placedFillColor?: string, placedFillAlpha?: number, placedBorderColor?: string, placedBorderAlpha?: number, flags: Object}}
+     * @param {Object} [config={}] - Workflow placement configuration options
+     * @returns {{placedFillColor?: string, placedFillAlpha?: number, placedBorderColor?: string, placedBorderAlpha?: number, flags: Object}} Extracted placement styling properties and flags
      */
     extractPlacedStylingFlags(config = {}) {
         const placedFillColor = config.placedFillColor;
@@ -183,6 +183,7 @@ export class BaseFoundryVTTAdapter {
     /**
      * Register Foundry VTT canvas placement hooks for live previewing and document creation.
      * @param {Object} callbacks - Placement hook callbacks (`{ onDrawPreview, onPreCreate, onCreate }`)
+     * @returns {void} No return value
      */
     registerPlacementHooks(callbacks) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement registerPlacementHooks(callbacks).");
@@ -191,7 +192,7 @@ export class BaseFoundryVTTAdapter {
     /**
      * Detect geometric properties and dimensions from a canvas PlaceableObject or Document.
      * @param {Document} doc - Template or Region document
-     * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}}
+     * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}} Detected geometric properties including type, distance, width, angle, and coordinates
      */
     detectProperties(doc) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement detectProperties(doc).");
@@ -199,11 +200,11 @@ export class BaseFoundryVTTAdapter {
 
     /**
      * Format placement coordinates into a version-specific schema data structure.
-     * @param {number} x
-     * @param {number} y
-     * @param {number} direction
-     * @param {Object} [config={}]
-     * @returns {Object}
+     * @param {number} x - Target x-coordinate
+     * @param {number} y - Target y-coordinate
+     * @param {number} direction - Target direction angle in degrees
+     * @param {Object} [config={}] - Optional placement configuration
+     * @returns {{x: number, y: number, direction: number}} Formatted placement coordinates object
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
         return { x, y, direction };
@@ -213,6 +214,7 @@ export class BaseFoundryVTTAdapter {
      * Mutate a live preview placeable document's shape coordinates during mouse drag.
      * @param {Document} previewDoc - Preview MeasuredTemplate or Region document
      * @param {Object} coords - Destination coordinates payload
+     * @returns {void} No return value
      */
     updatePreviewShape(previewDoc, coords) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement updatePreviewShape(previewDoc, coords).");
@@ -223,6 +225,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Document} doc - MeasuredTemplate or Region document
      * @param {Object} coords - Resolved placement coordinates
      * @param {Object} [config={}] - Workflow placement configuration
+     * @returns {void} No return value
      */
     applyDocumentPlacement(doc, coords, config) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement applyDocumentPlacement(doc, coords, config).");
@@ -232,8 +235,9 @@ export class BaseFoundryVTTAdapter {
      * Resolve placement anchor coordinates {x, y, direction} on a token's edge toward a click coordinate.
      * Takes only a normalized Token object and {x, y} click coordinates.
      * Implements 1-to-1 the exact algorithm from Sequencer 4.2.2 (#handleLockedEdge in CrosshairsPlaceable.js).
-     * @param {Token} tok
-     * @param {{x?: number, y?: number}} [clickCoords={}]
+     * @param {Token} tok - The source token object to anchor placement against
+     * @param {{x?: number, y?: number}} [clickCoords={}] - Optional mouse click coordinates
+     * @returns {{x: number, y: number, direction: number}} Resolved anchor placement coordinates and facing direction
      */
     resolveAnchorPlacement(tok, clickCoords = {}) {
         const rawClickX = clickCoords.x ?? 0;
@@ -244,6 +248,12 @@ export class BaseFoundryVTTAdapter {
         const edgeMidpointMode = typeof CONST !== "undefined" && CONST.GRID_SNAPPING_MODES ? CONST.GRID_SNAPPING_MODES.EDGE_MIDPOINT : 16;
         const size = canvas?.grid?.size ?? 100;
 
+        /**
+         * Helper to snap a point using the canvas grid if available.
+         * @param {{x: number, y: number}} pt - Point coordinates to snap
+         * @param {number} mode - Snapping mode constant
+         * @returns {{x: number, y: number}} The snapped or original point coordinates
+         */
         const snapPt = (pt, mode) => {
             if (canvas?.grid?.getSnappedPoint) {
                 try { return canvas.grid.getSnappedPoint(pt, { mode, resolution: size }); } catch (e) {}
@@ -323,9 +333,9 @@ export class BaseFoundryVTTAdapter {
 
     /**
      * Return template pixel multiplier factor and gridUnits mode for Sequencer effects.
+     * @returns {{factor: number, gridUnits: boolean}} Template pixel scaling factor and grid units flag
      */
     getTemplatePixelFactor() {
         return { factor: 1, gridUnits: false };
     }
 }
-

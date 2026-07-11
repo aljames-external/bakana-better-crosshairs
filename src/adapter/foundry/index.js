@@ -12,7 +12,7 @@ export let crosshairAdapter = new BaseFoundryVTTAdapter();
  * Initialize the active Foundry VTT version adapter (v13 or v14).
  * Evaluates supported generation boundaries using boolean version.clamp.
  * Should be called during the 'init' hook.
- * @returns {FoundryVTTV13Adapter|FoundryVTTV14Adapter}
+ * @returns {FoundryVTTV13Adapter|FoundryVTTV14Adapter} The initialized Foundry VTT adapter instance.
  */
 export function initializeFoundryAdapter() {
     const ver = game.version;

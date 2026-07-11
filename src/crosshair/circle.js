@@ -2,8 +2,22 @@ import { closest } from "../lib/filemanager.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
 
+/**
+ * Resolves the circle crosshair asset path based on the provided file path or key and the effect size.
+ *
+ * @param {string} pathOrKey - The asset file path or Sequencer database key.
+ * @param {number} effectSize - The target effect size in feet or grid distance.
+ * @returns {string} The resolved file path or asset key for the circle crosshair.
+ */
 function resolveCircleAsset(pathOrKey, effectSize) {
     const cleanSize = Math.round(effectSize);
+
+    /**
+     * Checks whether the provided path or key belongs to the Eskie circle fantasy asset collection.
+     *
+     * @param {string} pathOrKey - The asset file path or Sequencer database key to check.
+     * @returns {boolean} True if the asset is an Eskie circle fantasy asset, false otherwise.
+     */
     function isEskie(pathOrKey) {
         return pathOrKey.startsWith("eskie.crosshair.circle.fantasy_01");
     }
@@ -23,6 +37,13 @@ function resolveCircleAsset(pathOrKey, effectSize) {
     return closest(pathOrKey);
 }
 
+/**
+ * Creates and configures a circle crosshair Sequence instance along with any associated target data.
+ *
+ * @param {object|null} token - The token object or document to attach or center the circle crosshair on.
+ * @param {object} [config={}] - Configuration options for the circle crosshair.
+ * @returns {Promise<Array>} A promise resolving to an array containing the configured circle Sequence and targets.
+ */
 async function create(token, config = {}) {
     const radius = Math.round(config.radius ?? 20);
     const file = config.file;
@@ -46,6 +67,12 @@ async function create(token, config = {}) {
 
     let targets;
 
+    /**
+     * Plays the visual graphic effects for the circle crosshair and optional line from the token.
+     *
+     * @param {object} crosshair - The placed crosshair object or position coordinates.
+     * @returns {Promise<any>} A promise resolving when the graphic sequence finishes playing.
+     */
     async function circleGraphic(crosshair) {
         const seq = new Sequence().wait(50);
 
@@ -109,6 +136,13 @@ async function create(token, config = {}) {
     return [circle, targets];
 }
 
+/**
+ * Creates and immediately plays the circle crosshair sequence alongside any concurrent placement scripts.
+ *
+ * @param {object|null} token - The token object or document associated with the circle crosshair.
+ * @param {object} [config={}] - Configuration options for the circle crosshair.
+ * @returns {Promise<Array>} A promise resolving when both the concurrent script and crosshair sequence execution finish.
+ */
 async function play(token, config = {}) {
     let [circle] = await create(token, config);
     return Promise.all([
@@ -117,6 +151,14 @@ async function play(token, config = {}) {
     ]);
 }
 
+/**
+ * Stops and terminates active circle crosshair visual effects associated with the specified token and effect ID.
+ *
+ * @param {object|null} token - The token object or document on which to end active effects.
+ * @param {object} [options={}] - Options for stopping the crosshair effects.
+ * @param {string} [options.id="Circle Crosshair"] - The effect name identifier to terminate.
+ * @returns {Promise<any>} A promise resolving when the matching effects have ended.
+ */
 async function stop(token, { id = `Circle Crosshair` } = {}) {
     return Sequencer.EffectManager.endEffects({ name: id, object: token });
 }

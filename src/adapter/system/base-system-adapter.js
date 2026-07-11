@@ -5,6 +5,9 @@ import { log } from "../../lib/logger.js";
  * Makes no assumptions about placeable document types (template vs region).
  */
 export class BaseSystemAdapter {
+    /**
+     * Initialize base system adapter properties (`systemId` and `supportsActivities`).
+     */
     constructor() {
         this.systemId = "base";
         this.supportsActivities = false;
@@ -15,7 +18,7 @@ export class BaseSystemAdapter {
      * Base implementation returns the standard calling context passed by upstream workflow.
      * @param {Document} document - Template or Region document placed on canvas
      * @param {Object} [baseContext={}] - Initial calling context (`{ item, itemName, itemId, activity, activityName, activityId }`)
-     * @returns {{item?: Item|null, itemName?: string, itemId?: string, activity?: Object|null, activityName?: string, activityId?: string}}
+     * @returns {{item?: Item|null, itemName?: string, itemId?: string, activity?: Object|null, activityName?: string, activityId?: string}} Refined calling context object
      */
     extractCallingContext(document, baseContext = {}) {
         return baseContext;
@@ -47,5 +50,4 @@ export class BaseSystemAdapter {
         }
         return match;
     }
-
 }

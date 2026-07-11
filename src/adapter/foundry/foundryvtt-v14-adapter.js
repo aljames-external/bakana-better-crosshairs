@@ -2,6 +2,9 @@ import { BaseFoundryVTTAdapter } from "./base-foundryvtt-adapter.js";
 import { log } from "../../lib/logger.js";
 
 export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
+    /**
+     * Initialize the Foundry VTT v14+ adapter instance and set its version identifier.
+     */
     constructor() {
         super();
         this.version = 14;
@@ -9,7 +12,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
     /**
      * Register Foundry VTT v14+ placement hooks for Regions.
-     * @param {Object} callbacks - { onDrawPreview, onPreCreate, onCreate }
+     * @param {Object} callbacks - Placement callback handlers ({ onDrawPreview, onPreCreate, onCreate })
+     * @returns {void}
      */
     registerPlacementHooks(callbacks) {
         Hooks.on("drawMeasuredTemplate", (template) => callbacks.onDrawPreview(template));
@@ -19,8 +23,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
     /**
      * Detect shape type and geometric dimensions from a Region document.
-     * @param {Document} doc
-     * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}}
+     * @param {Document} doc - The Region or MeasuredTemplate document to inspect
+     * @returns {{type: string, distance: number, radius: number, width: number, angle: number, x: number, y: number}} Detected geometric properties and shape type
      */
     detectProperties(doc) {
         log.debug("FoundryVTTV14Adapter.detectProperties | Inspecting raw document:", {
@@ -60,7 +64,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         else if (shape.type === "rectangle" || shape.type === "polygon") shapeType = "square";
 
         const pxPerFoot = (canvas.dimensions?.size ?? 100) / (canvas.dimensions?.distance ?? 5);
-        const rawRadius = shape.radius ?? shape.distance ?? shape.length ?? 0;
+        const rawRadius = shape.radius ?? 0;
         const distance = Math.round(rawRadius / pxPerFoot);
 
         const result = {
@@ -81,7 +85,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @param {number} [distance=30] - Shape distance/length
      * @param {number} [widthOrAngle=5] - Shape width (ray/square) or angle in degrees (cone)
      * @param {string} [shapeType="ray"] - Canonical shape type ('circle', 'cone', 'ray', 'square')
-     * @returns {{size: {width: number, height: number}, gridUnits: boolean}}
+     * @returns {{size: {width: number, height: number}, gridUnits: boolean}} Computed graphic dimensions and gridUnits flag
      */
     formatGraphicSize(distance = 30, widthOrAngle = 5, shapeType = "ray") {
         const gridDist = canvas?.dimensions?.distance ?? 5;
@@ -113,7 +117,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
     /**
      * Return template pixel multiplier factor for V14 (converts pixels to exact grid units).
-     * @returns {{factor: number, gridUnits: boolean}}
+     * @returns {{factor: number, gridUnits: boolean}} The template scaling factor and grid units flag
      */
     getTemplatePixelFactor() {
         const gridSize = canvas?.dimensions?.size ?? 100;
@@ -122,8 +126,9 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
     /**
      * Update live canvas preview shape coordinates during mouse drag.
-     * @param {Document} previewDoc
-     * @param {{x: number, y: number}} coords
+     * @param {Document} previewDoc - The Region preview document being updated
+     * @param {{x: number, y: number}} coords - The target canvas coordinates
+     * @returns {void}
      */
     updatePreviewShape(previewDoc, coords) {
         if (Array.isArray(previewDoc.shapes) && previewDoc.shapes.length > 0) {
@@ -135,9 +140,10 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
     /**
      * Apply resolved placement coordinates and workflow flags onto a Region document.
-     * @param {Document} doc
-     * @param {Object} coords
-     * @param {Object} [config={}]
+     * @param {Document} doc - The target Region document to update
+     * @param {Object} [coords={}] - The resolved placement coordinates
+     * @param {Object} [config={}] - Optional placement styling and behavior configuration
+     * @returns {void}
      */
     applyDocumentPlacement(doc, coords = {}, config = {}) {
         const styling = this.extractPlacedStylingFlags(config);
@@ -158,13 +164,14 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
         doc.updateSource(updateData);
     }
+
     /**
      * Format drag destination coordinates into a V14 Region placement coordinates payload.
      * @param {number} x - Destination x-coordinate
      * @param {number} y - Destination y-coordinate
      * @param {number} direction - Rotation angle in degrees
      * @param {Object} [config={}] - Optional sequence placement configuration
-     * @returns {{x: number, y: number, rotation: number, radius: number|undefined, width: number|undefined, gridUnits: boolean}}
+     * @returns {{x: number, y: number, rotation: number, radius: number|undefined, width: number|undefined, gridUnits: boolean}} Formatted Region placement coordinates payload
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
         return {
@@ -207,4 +214,3 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         return shape;
     }
 }
-

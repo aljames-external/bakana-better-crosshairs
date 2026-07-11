@@ -3,9 +3,12 @@ import { autorecManager as manager } from "./autorecManager.js";
 import { systemAdapter } from "../adapter/system/index.js";
 import { localize } from "../lib/utils.js";
 
-
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
+/**
+ * Form application for viewing, modifying, adding, and removing automated crosshair recognition (autorec) workflows.
+ * Extends the Foundry V2 Application API with Handlebars template rendering.
+ */
 export class AutorecMenuApplication extends HandlebarsApplicationMixin(ApplicationV2) {
     static DEFAULT_OPTIONS = {
         id: "bbc-autorec-menu",
@@ -28,9 +31,14 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
         }
     };
 
+    /**
+     * Prepares the rendering context data for the Autorec menu template.
+     * @param {object} options - Application rendering options.
+     * @returns {Promise<object>} Context data object passed to the Handlebars template.
+     */
     async _prepareContext(options) {
         const entries = manager.getAllEntries();
-        const isV14 = typeof game !== "undefined" && (game.release?.generation >= 14 || parseInt(game.version) >= 14);
+        const isV14 = typeof game !== "undefined" && (game.release?.generation >= 14 || parseInt(game.version, 10) >= 14);
         const prePlacementTitle = isV14
             ? localize("BBC.autorecMenu.preRegionPlacement", "Pre-Region Placement")
             : localize("BBC.autorecMenu.preTemplatePlacement", "Pre-Template Placement");
@@ -116,11 +124,22 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
         };
     }
 
+    /**
+     * Lifecycle hook executed after rendering completes. Attaches interactive DOM event listeners.
+     * @param {object} context - Prepared rendering context data.
+     * @param {object} options - Render options provided during rendering.
+     * @returns {void}
+     */
     _onRender(context, options) {
         super._onRender(context, options);
         this._attachEventListeners(this.element);
     }
 
+    /**
+     * Attaches interactive event handlers to elements within the rendered application DOM.
+     * @param {HTMLElement} root - Root HTML element of the rendered application form.
+     * @returns {void}
+     */
     _attachEventListeners(root) {
         if (!root) return;
 
@@ -174,8 +193,9 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                                 const rootEl = button.form ?? html;
                                 const itemInput = rootEl.querySelector ? rootEl.querySelector("input[name='workflowName']") : null;
                                 const actInput = supportsActivities && rootEl.querySelector ? rootEl.querySelector("input[name='activityName']") : null;
-                                const itemName = itemInput?.value?.trim() || null;
-                                const activity = actInput?.value?.trim() || "";
+                                const trimmedName = itemInput?.value?.trim() ?? "";
+                                const itemName = trimmedName !== "" ? trimmedName : null;
+                                const activity = actInput?.value?.trim() ?? "";
                                 return itemName ? { itemName, activity } : null;
                             }
                         }
@@ -199,7 +219,6 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                 this.render(false);
             });
         }
-
 
         // Prevent checkbox click from switching sidebar tab
         root.querySelectorAll(".bbc-item-select-checkbox").forEach(chk => {
@@ -239,7 +258,6 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
         // 1. Search Filter
         const searchInput = root.querySelector("#bbc-autorec-search");
         const cards = root.querySelectorAll(".bbc-item-card");
-
 
         if (searchInput) {
             searchInput.addEventListener("input", (ev) => {
@@ -300,6 +318,12 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
         });
     }
 
+    /**
+     * Highlights the selected item in the sidebar and displays its configuration panel in the inspector view.
+     * @param {HTMLElement} root - Root HTML element of the rendered application form.
+     * @param {string} itemName - Registration key or name of the workflow item to select.
+     * @returns {void}
+     */
     selectItem(root, itemName) {
         if (!root || !itemName) return;
         this._selectedItemName = itemName;
@@ -326,6 +350,11 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
         }
     }
 
+    /**
+     * Saves all modified workflow configurations from the inspector form fields and syncs across connected clients.
+     * @param {HTMLElement} root - Root HTML element of the rendered application form.
+     * @returns {Promise<void>}
+     */
     async saveAllEditedConfigurations(root) {
         let modifiedAny = false;
         root.querySelectorAll(".bbc-inspector-detail").forEach(detailEl => {
@@ -383,8 +412,11 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
         }
     }
 
+    /**
+     * Handles standard form submission lifecycle. Configuration changes are saved explicitly on Edit Mode exit.
+     * @returns {Promise<void>}
+     */
     async _updateObject() {
         return;
     }
-
 }

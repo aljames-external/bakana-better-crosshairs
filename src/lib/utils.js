@@ -1,7 +1,7 @@
 /**
  * Helper to safely localize a key, falling back to a default string if the key is not found.
- * @param {string} key The translation key
- * @param {string} [fallback] The fallback string if the key is not found (defaults to key)
+ * @param {string} key - The translation key
+ * @param {string} [fallback=key] - The fallback string if the key is not found (defaults to key)
  * @returns {string} The localized string or fallback
  */
 export function localize(key, fallback = key) {

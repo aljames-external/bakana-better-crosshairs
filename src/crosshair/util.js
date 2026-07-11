@@ -5,15 +5,28 @@ import { crosshairAdapter } from "../adapter/foundry/index.js";
 let activeWheelHandler = null;
 let activePointerHandler = null;
 
+/**
+ * Determine whether a crosshair should remain attached/stuck to its source token.
+ * @param {object} config - Configuration object containing placement options
+ * @param {boolean} [defaultVal=false] - Default boolean fallback value
+ * @returns {boolean} Whether the crosshair should stick to the token
+ */
 export function shouldStickToToken(config, defaultVal = false) {
     if (!config || typeof config !== "object") return defaultVal;
-    const val = config.stickToToken ?? config.attachToToken ?? config.lockToToken;
+    const val = config.stickToToken;
     if (val === undefined || val === null || val === "" || val === "default") return defaultVal;
     if (val === false || val === "false" || val === "off" || val === "no" || val === 0 || val === "0") return false;
     if (val === true || val === "true" || val === "on" || val === "yes" || val === 1 || val === "1") return true;
     return Boolean(val);
 }
 
+/**
+ * Refresh the shape and grid highlights of a measured template overlay.
+ * @param {object} tmpl - Template placeable or overlay object to refresh
+ * @param {number} newDirDeg - New direction angle in degrees
+ * @param {number} rad - New direction angle in radians
+ * @returns {void}
+ */
 function refreshTemplateHighlights(tmpl, newDirDeg, rad) {
     if (!tmpl) return;
     tmpl.direction = newDirDeg;
@@ -39,6 +52,12 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad) {
     }
 }
 
+/**
+ * Rotate an active crosshair instance and its associated template highlights to a new direction.
+ * @param {object} crosshair - The active crosshair instance to rotate
+ * @param {number} newDirDeg - New direction angle in degrees
+ * @returns {void}
+ */
 function rotateCrosshairInstance(crosshair, newDirDeg) {
     if (!crosshair) return;
     const rad = newDirDeg * (Math.PI / 180);
@@ -55,7 +74,7 @@ function rotateCrosshairInstance(crosshair, newDirDeg) {
         crosshair.data.rotation = rad;
     }
 
-    const tmpl = crosshair.template ?? crosshair._template ?? crosshair.placeable;
+    const tmpl = crosshair.template;
     if (tmpl) {
         refreshTemplateHighlights(tmpl, newDirDeg, rad);
     }
@@ -87,6 +106,9 @@ function rotateCrosshairInstance(crosshair, newDirDeg) {
 
 /**
  * Attach a mousewheel event listener to rotate a Sequencer crosshair interactively.
+ * @param {object} crosshair - Active Sequencer crosshair instance to rotate
+ * @param {object} [config={}] - Configuration object for the crosshair
+ * @returns {void}
  */
 export function attachWheelRotation(crosshair, config = {}) {
     detachWheelRotation();
@@ -194,6 +216,7 @@ export function attachWheelRotation(crosshair, config = {}) {
 
 /**
  * Detach the active mousewheel event listener.
+ * @returns {void}
  */
 export function detachWheelRotation() {
     if (activeWheelHandler) {
@@ -211,6 +234,10 @@ export function detachWheelRotation() {
  * Shared utility to resolve crosshair coordinates and direction upon placement.
  * Sequencer passes coordinates or the crosshair object to CALLBACKS.PLACED.
  * We inspect all arguments and fall back to canvas.mousePosition if needed.
+ * @param {object} crosshair - The placed Sequencer crosshair instance or placement object
+ * @param {object} [config={}] - Configuration object containing placement options
+ * @param {...*} extraArgs - Additional arguments passed by placement callback
+ * @returns {object} Formatted placement coordinates and direction `{ x, y, direction }`
  */
 export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) {
     detachWheelRotation();
@@ -222,7 +249,7 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     const allArgs = [crosshair, config, ...extraArgs];
     for (const arg of allArgs) {
         if (!arg || typeof arg !== "object") continue;
-        let foundDir = arg.direction ?? arg.data?.direction ?? arg.template?.direction ?? arg.placeable?.direction ?? arg._direction;
+        let foundDir = arg.direction ?? arg.data?.direction ?? arg.template?.direction;
         if (typeof foundDir === "number" && direction === undefined) {
             direction = foundDir;
         } else if (arg.ray && typeof arg.ray.angle === "number" && direction === undefined) {
@@ -285,9 +312,10 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
 /**
  * Calculate point on token boundary edge toward target position along with angle in degrees.
  * @param {Token} tok - Normalized Token object
- * @param {number} targetX
- * @param {number} targetY
- * @param {boolean} [sticky=false]
+ * @param {number} targetX - Target X coordinate
+ * @param {number} targetY - Target Y coordinate
+ * @param {boolean} [sticky=false] - Whether to snap to 8-way sticky perimeter points
+ * @returns {object} Edge point coordinates and angle `{ x, y, direction }`
  */
 export function getTokenEdgePoint(tok, targetX, targetY, sticky = false) {
     if (!tok) return { x: targetX, y: targetY, direction: 0 };
@@ -335,6 +363,10 @@ export function getTokenEdgePoint(tok, targetX, targetY, sticky = false) {
 
 /**
  * Snap coordinates to grid center, corners, edges, or nearest of all.
+ * @param {number} x - Raw X coordinate to snap
+ * @param {number} y - Raw Y coordinate to snap
+ * @param {string|boolean} [mode="all"] - Snapping mode ("all", "center", "corner", "edges")
+ * @returns {object} Snapped coordinates `{ x, y }`
  */
 export function snapCoordinates(x, y, mode = "all") {
     if (!canvas?.grid) return { x, y };
@@ -377,9 +409,13 @@ const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
 /**
  * Execute custom concurrent Javascript code before running the Sequencer .play() sequence.
  * Wrapped in try/catch block with standard context variables.
+ * @param {Token} token - Token associated with the placement
+ * @param {object} [config={}] - Configuration object containing code and scope
+ * @param {object|null} [crosshairSequence=null] - Active Sequencer crosshair sequence instance
+ * @returns {Promise<void>}
  */
 export async function runConcurrentScript(token, config = {}, crosshairSequence = null) {
-    const code = config.concurrentCode ?? config.preAnimationCode ?? config.customCode;
+    const code = config.concurrentCode;
     if (!code || typeof code !== "string" || !code.trim()) return;
 
     const actor = token?.actor ?? config.actor;

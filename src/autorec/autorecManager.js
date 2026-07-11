@@ -5,7 +5,6 @@ import { crosshairAdapter } from '../adapter/foundry/index.js';
 import { socketlib } from '../integration/index.js';
 import { localize } from '../lib/utils.js';
 
-
 export const DEFAULT_AUTOREC_ENTRY = {
     id: "DEFAULT",
     itemName: "DEFAULT",
@@ -24,6 +23,9 @@ export const DEFAULT_AUTOREC_ENTRY = {
  * Encapsulated as a class instead of free-floating module-level functions.
  */
 export class AutorecManager {
+    /**
+     * Initialize the AutorecManager instance with default registrations and bind methods.
+     */
     constructor() {
         this.registeredHandlers = new Map([
             ["DEFAULT", { ...DEFAULT_AUTOREC_ENTRY }]
@@ -57,7 +59,8 @@ export class AutorecManager {
 
     /**
      * Set a callback to be invoked when registration occurs (e.g. to initialize placement hooks).
-     * @param {Function} callback
+     * @param {Function} callback - Callback function to execute on registration
+     * @returns {void}
      */
     onRegister(callback) {
         if (typeof callback === "function") {
@@ -70,7 +73,7 @@ export class AutorecManager {
      * Delegates directly to the active system adapter (`systemAdapter.extractCallingContext`).
      * @param {Document} document - Template or Region document
      * @param {Object} [baseContext={}] - Upstream workflow calling context
-     * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}}
+     * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}} Normalized calling context containing item and activity details
      */
     resolveItemAndActivity(document, baseContext = {}) {
         return systemAdapter.extractCallingContext(document, baseContext);
@@ -81,6 +84,7 @@ export class AutorecManager {
      * Normalizes partial configuration objects against canonical DEFAULT_AUTOREC_ENTRY schema.
      * @param {string} registeredKey - Unique registration key (e.g. "Fireball" or "Fireball | 123")
      * @param {Object|Function} handler - Autorec configuration or callback
+     * @returns {void}
      */
     indexRegistration(registeredKey, handler) {
         const itemName = handler?.itemName ?? registeredKey.split(" | ")[0].trim();
@@ -109,13 +113,14 @@ export class AutorecManager {
             this.fastLookupMap.set(itemName.toLowerCase(), entry);
         }
         if (activityId || activityName) {
-            const act = activityId || activityName;
+            const act = Boolean(activityId) ? activityId : activityName;
             this.fastLookupMap.set(`${itemName.toLowerCase()}|${act.toLowerCase()}`, entry);
         }
     }
 
     /**
      * Rebuild the fast O(1) lookup map from all currently registered handlers.
+     * @returns {void}
      */
     rebuildFastLookupMap() {
         this.fastLookupMap.clear();
@@ -171,9 +176,9 @@ export class AutorecManager {
         return crosshairAdapter.matchAutorecEntry(doc, this.registeredHandlers);
     }
 
-
     /**
      * Initialize world settings listener hooks and socket synchronization for autorec registrations.
+     * @returns {void}
      */
     initializeReadySync() {
         if (this.readySyncInitialized) return;
@@ -196,7 +201,7 @@ export class AutorecManager {
                     } catch (e) {
                         log.error("Failed to load saved registeredTemplates setting", e);
                     }
-                    Object.values(ui.windows || {}).forEach(w => {
+                    Object.values(ui.windows ?? {}).forEach(w => {
                         if (w && w.id === "bbc-autorec-menu") w.render(false);
                     });
                 }
@@ -214,6 +219,7 @@ export class AutorecManager {
      * Persist an autorec configuration to world settings and broadcast socket sync to all connected clients.
      * @param {string} itemName - Registered item/spell name
      * @param {Object} config - Autorec entry configuration
+     * @returns {void}
      */
     persistRegistration(itemName, config) {
         if (!game.ready) {
@@ -239,6 +245,7 @@ export class AutorecManager {
     /**
      * Delete a persisted autorec registration from world settings and broadcast socket sync.
      * @param {string} itemName - Item/spell name to unpersist
+     * @returns {void}
      */
     persistUnregistration(itemName) {
         if (!game.ready) {
@@ -266,6 +273,7 @@ export class AutorecManager {
     /**
      * Load and synchronize saved registrations from world settings into the active runtime registry.
      * @param {Object<string, Object>} [savedRegistrations={}] - Dictionary of saved registrations keyed by item name
+     * @returns {void}
      */
     loadSavedRegistrations(savedRegistrations = {}) {
         if (!savedRegistrations || typeof savedRegistrations !== "object") {
@@ -304,9 +312,10 @@ export class AutorecManager {
      *
      * @param {string} itemName - Name of the item/spell (e.g., 'Fireball')
      * @param {Object|Function} [handlerOrConfig={}] - Config object (`{ file: '...', local: true }`) or custom async function (`(token, autoConfig) => ...`)
-     * @param {Object} [options={}]
+     * @param {Object} [options={}] - Registration options
      * @param {boolean} [options.persist=true] - Whether to persist registration to world settings across reboots/clients
      * @param {boolean} [options.local=false] - Whether this registration should only exist locally on this client and not persist or sync
+     * @returns {void}
      */
     register(itemName, handlerOrConfig = {}, { persist = true, local = false } = {}) {
         if (this._onRegisterCallback) {
@@ -349,9 +358,10 @@ export class AutorecManager {
      * Unregister a template placement handler for an item.
      *
      * @param {string} itemName - Name of the item/spell
-     * @param {Object} [options={}]
+     * @param {Object} [options={}] - Unregistration options
      * @param {boolean} [options.persist=true] - Whether to remove registration from world settings across reboots/clients
      * @param {boolean} [options.local=false] - If true, only unregister locally
+     * @returns {boolean} True if the item registration was successfully deleted, false otherwise
      */
     unregister(itemName, { persist = true, local = false } = {}) {
         const existing = this.registeredHandlers.get(itemName);
@@ -375,6 +385,9 @@ export class AutorecManager {
      * Batch unregister multiple template placement handlers by item name.
      * @param {Array<string>} itemNames - List of item names to unregister
      * @param {Object} [options={}] - Options (`{ persist: boolean, local: boolean }`)
+     * @param {boolean} [options.persist=true] - Whether to persist unregistration to world settings
+     * @param {boolean} [options.local=false] - Whether to only unregister locally
+     * @returns {Promise<void>}
      */
     async unregisterMany(itemNames, { persist = true, local = false } = {}) {
         if (!Array.isArray(itemNames)) return;
@@ -403,7 +416,9 @@ export class AutorecManager {
     /**
      * Batch register multiple template placement handlers.
      * @param {Array<{itemName: string, config: Object, local?: boolean}>} entries - Array of registration entries
-     * @param {Object} [options={}] - Options (`{ persist: boolean }`)
+     * @param {Object} [options={}] - Registration options (`{ persist: boolean }`)
+     * @param {boolean} [options.persist=true] - Whether to persist registrations to world settings
+     * @returns {Promise<void>}
      */
     async registerMany(entries, { persist = true } = {}) {
         if (!Array.isArray(entries)) return;
@@ -438,6 +453,7 @@ export class AutorecManager {
     /**
      * Overwrite the entire persisted template registration dictionary in world settings.
      * @param {Object<string, Object>} [persistedDict={}] - Entire dictionary of configurations to save
+     * @returns {Promise<void>}
      */
     async overwrite(persistedDict = {}) {
         if (game.user?.isGM) {
@@ -459,7 +475,7 @@ export class AutorecManager {
     /**
      * Check if a registered template animation exists for a target Document or item name.
      * @param {string|Document} targetOrName - Item name or candidate Document
-     * @returns {boolean}
+     * @returns {boolean} True if a registered handler exists for the target or name
      */
     has(targetOrName) {
         return this.get(targetOrName) !== null;
@@ -469,7 +485,7 @@ export class AutorecManager {
      * Get the registered handler entry for a target Document or item name.
      * Normalizes caller entry boundary before dispatching to single-responsibility lookup helpers (Rule 5).
      * @param {string|Document} targetOrName - Item name or candidate Document
-     * @returns {Object|null}
+     * @returns {Object|null} Registered autorec entry configuration or null if not found
      */
     get(targetOrName) {
         if (typeof targetOrName === "string") {
@@ -621,6 +637,7 @@ export class AutorecManager {
 
     /**
      * Broadcast a socket synchronization event (`SYNC_AUTORECS`) to all connected clients.
+     * @returns {void}
      */
     broadcastSync() {
         socketlib.emit({ type: "SYNC_AUTORECS" });
@@ -628,4 +645,3 @@ export class AutorecManager {
 }
 
 export const autorecManager = new AutorecManager();
-

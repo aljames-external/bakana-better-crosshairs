@@ -15,6 +15,11 @@ function bestFit(modulePrefix, ...categories) {
     let remainingOptions = Sequencer.Database.getPathsUnder(currentPath);
     let divergenceOptions = '';
 
+    /**
+     * Checks whether a path component is a handlebars-style mustache template token.
+     * @param {string} component - The path component to inspect.
+     * @returns {boolean} True if the component is enclosed in mustache braces, false otherwise.
+     */
     function isMustache(component) {
         return component.startsWith('{{') && component.endsWith('}}');
     }
@@ -73,16 +78,18 @@ function bestFit(modulePrefix, ...categories) {
 /**
  * Finds the closest matching file path in the Sequencer database, handling different module prefixes and versions (e.g., free vs. patreon).
  * @param {string} path - The path to the file, using dot notation (e.g., 'jb2a.fireball.blue').
- * @returns {string} The resolved file path.
+ * @returns {string|undefined} The resolved file path, or undefined if no path categories exist.
  */
 export function closest(path) {
+    if (!path) return undefined;
+
     // Support http:// and https:// addresses
     // Support direct filepaths
     if (path.includes('/')) return path;
 
     // Support Sequencer Database paths (. seperated)
     let categories = path.split('.');
-    if (categories.length === 0) return;
+    if (categories.length === 0) return undefined;
     let isPatreonUser = false;
     let isFreeUser = false;
     let modulePrefix = categories.shift();
@@ -93,8 +100,9 @@ export function closest(path) {
             dependency.someRequired([{ id: 'psfx-patreon', ref: 'PSFX-Patreon' }, { id: 'psfx', ref: "PSFX - Peri's Sound Effects" }]);
             isPatreonUser = dependency.isActivated({ id: 'psfx-patreon', ref: 'PSFX-Patreon' });
             isFreeUser = dependency.isActivated({ id: 'psfx', ref: "PSFX - Peri's Sound Effects" });
-            if (isPatreonUser && isFreeUser)
+            if (isPatreonUser && isFreeUser) {
                 ui.notifications.warn(localize("BBC.Conflicts.PSFX", "Both PSFX Patreon and Free are activated, both modules use the path `psfx.` to prefix files! This will cause conflicts! Recommend disabling / uninstalling the free version."));
+            }
             modulePrefix = 'psfx';
             break;
         case 'psfx-ambience':
@@ -106,23 +114,25 @@ export function closest(path) {
         case 'eskie-free':
             dependency.someRequired([{ id: 'eskie-effects', ref: 'Eskie Effects' }, { id: 'eskie-effects-free', ref: 'Eskie Effects Free' }]);
             isPatreonUser = dependency.isActivated({ id: 'eskie-effects', ref: 'Eskie Effects' });
-            modulePrefix = (isPatreonUser) ? `eskie` : `eskie-free`;
+            modulePrefix = isPatreonUser ? 'eskie' : 'eskie-free';
             break;
         case 'jb2a':
             dependency.someRequired([{ id: 'jb2a_patreon', ref: 'JB2A Patreon' }, { id: 'JB2A_DnD5e', ref: 'JB2A Free' }]);
             isFreeUser = dependency.isActivated({ id: 'JB2A_DnD5e' });
             isPatreonUser = dependency.isActivated({ id: 'jb2a_patreon' });
-            if (isPatreonUser && isFreeUser)
+            if (isPatreonUser && isFreeUser) {
                 ui.notifications.warn(localize("BBC.Conflicts.JB2A", "Both JB2A Patreon and Free are activated, both modules use the path `jb2a.` to prefix files. This will cause conflicts! Recommend disabling / uninstalling the free version."));
-            modulePrefix = `jb2a`;
+            }
+            modulePrefix = 'jb2a';
             break;
         case 'blfx':
             dependency.someRequired([{ id: 'boss-loot-assets-premium', ref: 'Boss Loot Assets Premium' }, { id: 'boss-loot-assets-free', ref: 'Boss Loot Assets Free' }]);
             isPatreonUser = dependency.isActivated({ id: 'boss-loot-assets-premium' });
             isFreeUser = dependency.isActivated({ id: 'boss-loot-assets-free' });
-            if (isPatreonUser && isFreeUser)
+            if (isPatreonUser && isFreeUser) {
                 ui.notifications.warn(localize("BBC.Conflicts.BLFX", "Both Boss Loot Assets Premium and Free are activated, both modules use the path `blfx.` to prefix files. This will cause conflicts! Recommend disabling / uninstalling the free version."));
-            modulePrefix = `blfx`;
+            }
+            modulePrefix = 'blfx';
             break;
     }
 
@@ -139,14 +149,17 @@ export function absolutePath(configPath) {
     const resolvedConfig = closest(configPath);
     try {
         const entry = Sequencer.Database.getEntry(resolvedConfig, { softFail: true });
-        return (typeof entry === 'string') ? entry : (entry?.file ?? entry?.files?.[0] ?? resolvedConfig);
+        return typeof entry === 'string' ? entry : (entry?.file ?? entry?.files?.[0] ?? resolvedConfig);
     } catch (e) {
         log.debug(`filemanager | Failed to resolve Sequencer entry for: ${resolvedConfig}`, e);
         return resolvedConfig;
     }
 }
 
+/**
+ * File manager utility object containing path resolution methods.
+ */
 export const file = {
     closest,
-    absolutePath,
+    absolutePath
 };
