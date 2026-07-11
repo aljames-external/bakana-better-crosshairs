@@ -77,7 +77,8 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             editMode: localize("BBC.autorecMenu.labels.editMode", "Edit Mode"),
             registeredWorkflows: localize("BBC.autorecMenu.labels.registeredWorkflows", "Registered Workflows"),
             addBtn: localize("BBC.autorecMenu.labels.addBtn", "Insert"),
-            removeBtn: localize("BBC.autorecMenu.labels.deleteBtn", "Delete"),
+            removeBtn: localize("BBC.autorecMenu.labels.removeBtn", "Remove"),
+
             deleteBtn: localize("BBC.autorecMenu.labels.deleteBtn", "Delete"),
             saveBtn: localize("BBC.autorecMenu.labels.saveBtn", "Save"),
 
