@@ -31,11 +31,21 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
     async _prepareContext(options) {
         const entries = manager.getAllEntries();
         const isV14 = typeof game !== "undefined" && (game.release?.generation >= 14 || parseInt(game.version) >= 14);
-        const prePlacementTitle = isV14 ? "Pre-Region Placement" : "Pre-Template Placement";
-        const placementSectionTitle = isV14 ? "Region Placement Configuration" : "Template Placement Configuration";
-        const postPlacementTitle = isV14 ? "Post-Region Placement" : "Post-Template Placement";
-        const placementSectionTag = isV14 ? "V14+ Region" : "V13- MeasuredTemplate";
-        const docTerm = isV14 ? "region" : "template";
+        const prePlacementTitle = isV14
+            ? localize("BBC.autorecMenu.preRegionPlacement", "Pre-Region Placement")
+            : localize("BBC.autorecMenu.preTemplatePlacement", "Pre-Template Placement");
+        const placementSectionTitle = isV14
+            ? localize("BBC.autorecMenu.regionPlacementConfig", "Region Placement Configuration")
+            : localize("BBC.autorecMenu.templatePlacementConfig", "Template Placement Configuration");
+        const postPlacementTitle = isV14
+            ? localize("BBC.autorecMenu.postRegionPlacement", "Post-Region Placement")
+            : localize("BBC.autorecMenu.postTemplatePlacement", "Post-Template Placement");
+        const placementSectionTag = isV14
+            ? localize("BBC.autorecMenu.tag.v14Region", "V14+ Region")
+            : localize("BBC.autorecMenu.tag.v13Template", "V13- MeasuredTemplate");
+        const docTerm = isV14
+            ? localize("BBC.autorecMenu.term.region", "region")
+            : localize("BBC.autorecMenu.term.template", "template");
 
         return {
             entries,
@@ -92,17 +102,17 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
 
                 try {
                     result = await DialogV2.prompt({
-                        window: { title: "Add New Crosshair Workflow" },
+                        window: { title: localize("BBC.autorecMenu.addWorkflow.title", "Add New Crosshair Workflow") },
                         content: `
                             <form>
                                 <div class="form-group">
-                                    <label>Workflow Item Name:</label>
-                                    <input type="text" name="workflowName" placeholder="e.g. Fireball or Longbow" autofocus />
+                                    <label>${localize("BBC.autorecMenu.addWorkflow.itemName", "Workflow Item Name:")}</label>
+                                    <input type="text" name="workflowName" placeholder="${localize("BBC.autorecMenu.addWorkflow.itemNameHint", "e.g. Fireball or Longbow")}" autofocus />
                                 </div>
                                 ${supportsActivities ? `
                                 <div class="form-group">
-                                    <label>Activity ID or Name (Optional):</label>
-                                    <input type="text" name="activityName" placeholder="e.g. Attack or Save" />
+                                    <label>${localize("BBC.autorecMenu.addWorkflow.activityName", "Activity ID or Name (Optional):")}</label>
+                                    <input type="text" name="activityName" placeholder="${localize("BBC.autorecMenu.addWorkflow.activityNameHint", "e.g. Attack or Save")}" />
                                 </div>` : ""}
                             </form>
                         `,
