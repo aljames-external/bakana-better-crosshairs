@@ -542,19 +542,18 @@ export class AutorecManager {
     }
 
     /**
-     * Get the registered handler entry for a target item name, Document, or PlaceableObject.
+     * Get the registered handler entry for a target item name or Document.
      * Normalizes caller entry boundary before dispatching to single-responsibility lookup helpers (Rule 5).
-     * @param {string|Document|PlaceableObject} targetOrName - Item name, Document, or PlaceableObject (which exposes `.document`)
+     * @param {string|Document} targetOrName - Item name or candidate Document
      * @returns {Object|null} Registered autorec entry configuration or null if not found
      */
     get(targetOrName) {
         if (typeof targetOrName === "string") {
-
             return this.getEntryByName(targetOrName);
         }
-        const doc = targetOrName instanceof Document ? targetOrName : targetOrName?.document;
-        return this.getEntryForDocument(doc);
+        return this.getEntryForDocument(targetOrName);
     }
+
 
     /**
      * List all currently registered item names.
