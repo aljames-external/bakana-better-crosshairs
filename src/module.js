@@ -21,11 +21,6 @@ Hooks.once('init', async () => {
                 globalThis.bbc ?? {},
                 exportedFunctions
             );
-            globalThis.bakanaBetterCrosshairs = globalThis.bbc;
-            globalThis.bakana = foundry.utils.mergeObject(
-                globalThis.bakana ?? {},
-                exportedFunctions
-            );
         }
 
         const manager = autorecManager;
