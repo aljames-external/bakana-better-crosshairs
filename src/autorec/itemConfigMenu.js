@@ -83,12 +83,12 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
 
 
         const labels = {
-            subtitle: localize("BBC.itemConfigMenu.subtitle", "Customize crosshair visual sequence and placement behavior specifically for this item."),
             badgeCustom: localize("BBC.itemConfigMenu.badges.custom", "CUSTOM"),
             badgeAutorec: localize("BBC.itemConfigMenu.badges.autorec", "AUTOREC"),
             badgeDefault: localize("BBC.itemConfigMenu.badges.default", "DEFAULT"),
-            deleteCustomBtn: localize("BBC.itemConfigMenu.deleteCustomBtn", "Delete CUSTOM Configuration"),
-            saveCustomBtn: localize("BBC.itemConfigMenu.saveCustomBtn", "Save CUSTOM Configuration"),
+            deleteCustomBtn: localize("BBC.itemConfigMenu.deleteCustomBtn", "Delete"),
+            saveCustomBtn: localize("BBC.itemConfigMenu.saveCustomBtn", "Save"),
+
             sectionGeneral: localize("BBC.autorecMenu.labels.sectionGeneral", "General Workflow"),
             sectionAnimation: localize("BBC.autorecMenu.labels.animationTitle", "Animation Configuration"),
             sectionPlaced: localize("BBC.autorecMenu.labels.placedSectionDesc", "Placed Document Styling"),
