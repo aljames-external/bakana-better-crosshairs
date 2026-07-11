@@ -431,8 +431,9 @@ export class AutorecManager {
         const toPersist = {};
         for (const { itemName, config, local } of entries) {
             this.register(itemName, config, { persist: false, local });
-            if (persist && !local && typeof config !== "function") {
-                toPersist[itemName] = this.registeredHandlers.get(itemName);
+            const registered = this.registeredHandlers.get(itemName);
+            if (persist && !local && typeof registered !== "function") {
+                toPersist[itemName] = registered;
                 this.persistedItemNames.add(itemName);
             }
         }
