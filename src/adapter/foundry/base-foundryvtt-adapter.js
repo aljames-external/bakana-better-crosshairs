@@ -1,5 +1,6 @@
 import { systemAdapter } from "../system/index.js";
 import { log } from "../../lib/logger.js";
+import { clearHighLightLayer } from "../../lib/compat.js";
 
 export class BaseFoundryVTTAdapter {
     constructor() {
@@ -123,7 +124,7 @@ export class BaseFoundryVTTAdapter {
             placeable.highlightGrid = function() {};
         }
         if (placeable.highlightId && canvas.grid?.clearHighlightLayer) {
-            try { canvas.grid.clearHighlightLayer(placeable.highlightId); } catch (e) {}
+            try { clearHighlightLayer(placeable.highlightId); } catch (e) { }
         }
 
         placeable.refresh = function() {
@@ -144,7 +145,7 @@ export class BaseFoundryVTTAdapter {
                 this.controlIcon.visible = false;
             }
             if (this.highlightId && canvas.grid?.clearHighlightLayer) {
-                try { canvas.grid.clearHighlightLayer(this.highlightId); } catch (e) {}
+                try { clearHighlightLayer(this.highlightId); } catch (e) { }
             }
             return this;
         };
