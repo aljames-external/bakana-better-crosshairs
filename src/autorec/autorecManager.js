@@ -5,6 +5,10 @@ import { crosshairAdapter } from '../adapter/foundry/index.js';
 import { socketlib } from '../integration/index.js';
 import { localize } from '../lib/utils.js';
 
+/**
+ * Canonical default configuration schema for an automatic recognition (autorec) registration entry.
+ * @type {Object}
+ */
 export const DEFAULT_AUTOREC_ENTRY = {
     id: "DEFAULT",
     itemName: "DEFAULT",
@@ -56,6 +60,7 @@ export class AutorecManager {
         this.resolveItemAndActivity = this.resolveItemAndActivity.bind(this);
         this.indexRegistration = this.indexRegistration.bind(this);
         this.rebuildFastLookupMap = this.rebuildFastLookupMap.bind(this);
+        this.getEntriesForItem = this.getEntriesForItem.bind(this);
         this.getEntryByName = this.getEntryByName.bind(this);
         this.getEntryForDocument = this.getEntryForDocument.bind(this);
         this.onRegister = this.onRegister.bind(this);
@@ -554,7 +559,6 @@ export class AutorecManager {
         return this.getEntryForDocument(targetOrName);
     }
 
-
     /**
      * List all currently registered item names.
      * @returns {Array<string>} Array of registered item/spell names
@@ -594,11 +598,9 @@ export class AutorecManager {
             const circleFile = config.circleFile ?? "eskie.crosshair.circle.fantasy_01.white.full";
             const coneFile = config.coneFile ?? "eskie.crosshair.cone.thin.fantasy_01.white.full";
             const rayFile = config.rayFile ?? "eskie.crosshair.ray.fantasy_01.white";
-            const squareFile = config.squareFile ?? "eskie.crosshair.ray.fantasy_01.white";
+            const squareFile = config.squareFile ?? "eskie.crosshair.square.fantasy_01.white";
 
             const unitFt = localize("BBC.Units.Feet", "ft");
-
-
             const distVal = config.distance ?? config.radius;
             const distanceDisplay = distVal !== undefined ? `${distVal} ${unitFt}` : null;
             const widthVal = config.width;
@@ -707,4 +709,8 @@ export class AutorecManager {
     }
 }
 
+/**
+ * Singleton instance of AutorecManager for managing template and region autorec registrations.
+ * @type {AutorecManager}
+ */
 export const autorecManager = new AutorecManager();

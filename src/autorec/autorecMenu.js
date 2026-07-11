@@ -4,7 +4,6 @@ import { systemAdapter } from "../adapter/system/index.js";
 import { localize, notify } from "../lib/utils.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
 
-
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
 /**
@@ -12,6 +11,10 @@ const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applicat
  * Extends the Foundry V2 Application API with Handlebars template rendering.
  */
 export class AutorecMenuApplication extends HandlebarsApplicationMixin(ApplicationV2) {
+    /**
+     * Default application configuration options.
+     * @type {object}
+     */
     static DEFAULT_OPTIONS = {
         id: "bbc-autorec-menu",
         tag: "form",
@@ -27,6 +30,10 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
         classes: ["bbc-app", "bbc-autorec-form"]
     };
 
+    /**
+     * Template parts rendered by the application.
+     * @type {object}
+     */
     static PARTS = {
         main: {
             template: `modules/${MODULE_ID}/src/autorec/autorecMenu.html`
@@ -68,8 +75,6 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
         const placementSectionTitle = crosshairAdapter.placementSectionTitle;
         const postPlacementTitle = crosshairAdapter.postPlacementTitle;
         const docTerm = crosshairAdapter.documentTerm;
-
-
 
         const labels = {
             searchPlaceholder: localize("BBC.autorecMenu.labels.searchPlaceholder", "Filter registered workflows (e.g. Fireball)..."),
@@ -136,7 +141,7 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             count: entries.length,
             isEmpty: entries.length === 0,
             isGM: typeof game !== "undefined" ? Boolean(game.user?.isGM) : true,
-            supportsActivities: systemAdapter.supportsActivities,
+            supportsActivities: Boolean(systemAdapter.supportsActivities),
             prePlacementTitle,
             placementSectionTitle,
             postPlacementTitle,

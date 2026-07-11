@@ -59,4 +59,3 @@ export function registerModuleSettings() {
         onChange: (value) => log.setVerbosity(value)
     });
 }
-

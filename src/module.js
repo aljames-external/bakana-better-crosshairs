@@ -29,7 +29,6 @@ Hooks.once('init', () => {
 
         /**
          * Merges exported module functions and utilities into the global `bbc` namespace object.
-
          *
          * @param {Record<string, unknown>} exportedFunctions - Object containing functions or utilities to export globally.
          * @returns {void}

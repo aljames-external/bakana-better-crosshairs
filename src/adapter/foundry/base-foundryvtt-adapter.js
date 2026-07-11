@@ -48,8 +48,6 @@ export class BaseFoundryVTTAdapter {
         throw new Error("Subclass must implement postPlacementTitle getter");
     }
 
-
-
     /**
      * Extract normalized calling item and activity context from a Foundry document.
      * @param {Document} doc - The template or region document

@@ -42,7 +42,6 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
         return localize("BBC.autorecMenu.postTemplatePlacement", "Post-Template Placement");
     }
 
-
     /**
      * Register Foundry VTT v13 placement hooks for MeasuredTemplates.
      * @param {Object} callbacks - { onDrawPreview, onPreCreate, onCreate }

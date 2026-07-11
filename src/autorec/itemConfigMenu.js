@@ -4,7 +4,6 @@ import { log } from "../lib/logger.js";
 import { localize, notify } from "../lib/utils.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
 
-
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 /**
@@ -23,6 +22,10 @@ function normalizeHexColor(val, fallback = "#000000") {
  * Allows any item owner to view badge status (CUSTOM vs AUTOREC vs DEFAULT) and modify or delete custom item overrides.
  */
 export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(ApplicationV2) {
+    /**
+     * Default application configuration options.
+     * @type {object}
+     */
     static DEFAULT_OPTIONS = {
         id: "bbc-item-crosshair-config",
         tag: "form",
@@ -38,6 +41,10 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         classes: ["bbc-app", "bbc-autorec-form", "bbc-item-config-form"]
     };
 
+    /**
+     * Application rendering template parts.
+     * @type {object}
+     */
     static PARTS = {
         main: {
             template: `modules/${MODULE_ID}/src/autorec/itemConfigMenu.html`
@@ -133,8 +140,6 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         const prePlacementTitle = crosshairAdapter.prePlacementTitle;
         const placementSectionTitle = crosshairAdapter.placementSectionTitle;
         const postPlacementTitle = crosshairAdapter.postPlacementTitle;
-
-
 
         const labels = {
             badgeCustom: localize("BBC.itemConfigMenu.badges.custom", "CUSTOM"),
@@ -343,10 +348,13 @@ export function registerItemSheetHooks() {
         });
     }
 
-    Hooks.on("getHeaderControlsItemSheet5e", addApplicationV2HeaderControl);
-    Hooks.on("getHeaderControlsItemSheet5e2", addApplicationV2HeaderControl);
-
-    Hooks.on("dnd5e.getItemContextOptions", (item, options) => {
+    /**
+     * Add a Better Crosshairs context menu option for items owned by the user.
+     * @param {Document} item - Target Item document
+     * @param {Array<object>} options - Context menu options array
+     * @returns {void}
+     */
+    function addItemContextOption(item, options) {
         if (!item || !Boolean(item.isOwner)) return;
         if (options.some(o => o.name?.startsWith("BBC Crosshair"))) return;
 
@@ -359,5 +367,9 @@ export function registerItemSheetHooks() {
             icon: "<i class='fa-solid fa-crosshairs'></i>",
             callback: () => openItemCrosshairConfig(item)
         });
-    });
+    }
+
+    Hooks.on("getHeaderControlsItemSheet5e", addApplicationV2HeaderControl);
+    Hooks.on("getHeaderControlsItemSheet5e2", addApplicationV2HeaderControl);
+    Hooks.on("dnd5e.getItemContextOptions", addItemContextOption);
 }

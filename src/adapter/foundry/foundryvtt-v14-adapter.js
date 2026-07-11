@@ -16,7 +16,6 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
     /**
      * Return canonical document terminology string for V14+ ("region").
-
      * @returns {string} Document type term
      */
     get documentTerm() {
@@ -46,7 +45,6 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     get postPlacementTitle() {
         return localize("BBC.autorecMenu.postRegionPlacement", "Post-Region Placement");
     }
-
 
     /**
      * Register Foundry VTT v14+ placement hooks for Regions.
@@ -197,10 +195,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             updateData.shapes = [newShape];
         }
 
-
         if (styling.placedFillColor) updateData.color = styling.placedFillColor;
         if (config.hidden || config.hideTemplate) updateData.hidden = true;
-
 
         doc.updateSource(updateData);
     }
