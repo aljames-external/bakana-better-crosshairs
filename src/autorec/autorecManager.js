@@ -272,9 +272,9 @@ export class AutorecManager {
         }
 
         for (const itemName of Array.from(this.persistedItemNames)) {
-            if (itemName === "DEFAULT") continue;
+            const current = this.registeredHandlers.get(itemName);
+            if (current?.isDefault) continue;
             if (!(itemName in savedRegistrations)) {
-                const current = this.registeredHandlers.get(itemName);
                 const isCurrentLocal = Boolean(current?.local);
                 if (!isCurrentLocal) {
                     this.unregister(itemName, { persist: false });
@@ -293,23 +293,8 @@ export class AutorecManager {
             }
         }
 
-        if (!this.registeredHandlers.has("DEFAULT")) {
-            this.registeredHandlers.set("DEFAULT", { ...DEFAULT_AUTOREC_ENTRY });
-            this.indexRegistration("DEFAULT", { ...DEFAULT_AUTOREC_ENTRY });
-        } else {
-            const currentDefault = this.registeredHandlers.get("DEFAULT") ?? {};
-            this.registeredHandlers.set("DEFAULT", {
-                ...DEFAULT_AUTOREC_ENTRY,
-                ...(typeof currentDefault === "object" ? currentDefault : {}),
-                id: "DEFAULT",
-                itemName: "DEFAULT",
-                isDefault: true,
-                activityId: "",
-                activityName: "",
-                hasActivity: false
-            });
-            this.indexRegistration("DEFAULT", this.registeredHandlers.get("DEFAULT"));
-        }
+        const currentDefault = this.registeredHandlers.get("DEFAULT") ?? {};
+        this.register("DEFAULT", currentDefault, { persist: false });
     }
 
     /**
@@ -550,9 +535,9 @@ export class AutorecManager {
             const fillAlpha = config.fillAlpha ?? 0;
             const hasCustomStyling = Boolean(
                 config.borderColor ||
-                config.borderAlpha !== undefined ||
+                (config.borderAlpha !== undefined && config.borderAlpha !== 0) ||
                 config.fillColor ||
-                config.fillAlpha !== undefined
+                (config.fillAlpha !== undefined && config.fillAlpha !== 0)
             );
             const icon = config.icon ?? null;
 
