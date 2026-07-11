@@ -3,9 +3,9 @@ import { localize } from "./utils.js";
 
 /**
  * Checks if the versions are in ascending order.
- * @param {string} min - The minimum version.
- * @param {string} version - The version to check.
- * @param {string} max - The maximum version.
+ * @param {string} [min] - The minimum version.
+ * @param {string} [version] - The version to check.
+ * @param {string} [max] - The maximum version.
  * @returns {boolean} Whether the versions are in ascending order.
  * @private
  */
@@ -13,7 +13,7 @@ function _isAscending(min, version, max) {
     let isValidVersion = true;
     if (min) isValidVersion = isValidVersion && !foundry.utils.isNewerVersion(min, version);
     if (max) isValidVersion = isValidVersion && !foundry.utils.isNewerVersion(version, max);
-    return isValidVersion;
+    return Boolean(isValidVersion);
 }
 
 /**
@@ -26,7 +26,7 @@ function _isAscending(min, version, max) {
 function _getEntity(dependency) {
     const isModule = Boolean(game.modules.get(dependency?.id));
     const entity = isModule ? game.modules.get(dependency?.id) : globalThis[dependency?.id];
-    if (dependency?.id === 'foundry') return game;
+    if (dependency?.id === "foundry") return game;
     return entity;
 }
 
@@ -42,7 +42,7 @@ function _getEntity(dependency) {
 function _isInstalled(dependency) {
     const entity = _getEntity(dependency);
     if (!entity) return false;
-    return _isAscending(dependency.min, entity?.version, dependency.max);
+    return Boolean(_isAscending(dependency.min, entity?.version, dependency.max));
 }
 
 /**
@@ -62,23 +62,25 @@ function _isActivated(dependency) {
 /**
  * Appends version information to a message.
  * @param {object} dependency - The dependency to get version information from.
- * @param {string} version - The current version of the dependency.
+ * @param {string} [dependency.min] - Minimum allowable version.
+ * @param {string} [dependency.max] - Maximum allowable version.
+ * @param {string} [version] - The current version of the dependency.
  * @returns {string} The message with version information appended.
  * @private
  */
 function _versionMessageAppend(dependency, version) {
-    let msg = '';
+    let msg = "";
     if (dependency?.min) msg += `\n\t${localize("BBC.Dependency.MinVersion", "Minimum version: ")}${dependency?.min}`;
     if (dependency?.max) msg += `\n\t${localize("BBC.Dependency.MaxVersion", "Maximum version: ")}${dependency?.max}`;
-    msg += (version) ? `\n\t${localize("BBC.Dependency.CurVersion", "Current version: ")}${version}` : ``;
+    msg += version ? `\n\t${localize("BBC.Dependency.CurVersion", "Current version: ")}${version}` : "";
     msg += `\n\t${localize("BBC.Dependency.CurState", "Current state: ")}`;
 
     const entity = _getEntity(dependency);
-    const compatible = _isAscending(dependency.min, version, dependency.max);
-    if (!entity) return (msg + localize("BBC.Dependency.StateNotInstalled", "NOT INSTALLED"));
-    else if (!compatible) msg += localize("BBC.Dependency.StateIncompatible", "INCOMPATIBLE");
+    const compatible = _isAscending(dependency?.min, version, dependency?.max);
+    if (!entity) return msg + localize("BBC.Dependency.StateNotInstalled", "NOT INSTALLED");
+    if (!compatible) msg += localize("BBC.Dependency.StateIncompatible", "INCOMPATIBLE");
     else if (!entity.active) msg += localize("BBC.Dependency.StateNotActivated", "NOT ACTIVATED");
-    else msg += '[AN UNKNOWN ERROR OCCURRED]';
+    else msg += "[AN UNKNOWN ERROR OCCURRED]";
 
     return msg;
 }
@@ -86,6 +88,8 @@ function _versionMessageAppend(dependency, version) {
 /**
  * Checks if a dependency is activated and optionally logs a warning if it is not.
  * @param {object} dependency - The dependency to check.
+ * @param {string} dependency.id - The identifier of the dependency.
+ * @param {string} [dependency.ref] - Optional human-readable reference name.
  * @param {string} [warnMessage] - Optional warning message prefix to log if not activated.
  * @returns {boolean} Whether the dependency is activated.
  */
@@ -93,8 +97,8 @@ function isActivated(dependency, warnMessage) {
     if (!dependency?.id) return false;
     const valid = _isActivated(dependency);
     if (!valid && warnMessage) {
-        if (warnMessage.length) warnMessage += '\n';
-        const depRef = dependency?.id + ((dependency?.ref) ? ` (${dependency?.ref})` : '');
+        if (warnMessage.length) warnMessage += "\n";
+        const depRef = dependency?.id + (dependency?.ref ? ` (${dependency?.ref})` : "");
         warnMessage += `${localize("BBC.Dependency.WarnNotActivated", "Warning: not activated and between expected versions:")} ${depRef}`;
         warnMessage += _versionMessageAppend(dependency, _getEntity(dependency)?.version);
         log.warn(warnMessage);
@@ -105,14 +109,17 @@ function isActivated(dependency, warnMessage) {
 /**
  * Checks if a dependency is installed and optionally logs a warning if it is not.
  * @param {object} dependency - The dependency to check.
+ * @param {string} dependency.id - The identifier of the dependency.
+ * @param {string} [dependency.ref] - Optional human-readable reference name.
  * @param {string} [warnMessage] - Optional warning message prefix to log if not installed.
  * @returns {boolean} Whether the dependency is installed.
  */
 function isInstalled(dependency, warnMessage) {
+    if (!dependency?.id) return false;
     const valid = _isInstalled(dependency);
     if (!valid && warnMessage) {
-        if (warnMessage.length) warnMessage += '\n';
-        const depRef = dependency?.id + ((dependency?.ref) ? ` (${dependency?.ref})` : '');
+        if (warnMessage.length) warnMessage += "\n";
+        const depRef = dependency?.id + (dependency?.ref ? ` (${dependency?.ref})` : "");
         warnMessage += `${localize("BBC.Dependency.WarnNotInstalled", "Warning: not installed and between expected versions:")} ${depRef}`;
         warnMessage += _versionMessageAppend(dependency, _getEntity(dependency)?.version);
         log.warn(warnMessage);
@@ -123,6 +130,7 @@ function isInstalled(dependency, warnMessage) {
 /**
  * Checks if a recommended dependency is activated.
  * @param {object} dependency - The dependency to check.
+ * @param {string} dependency.id - The identifier of the dependency.
  * @returns {boolean} Whether the dependency is activated.
  */
 function hasRecommended(dependency) {
@@ -135,11 +143,12 @@ function hasRecommended(dependency) {
  * @returns {boolean} Whether at least one dependency is activated.
  */
 function hasSomeRecommended(dependencyList) {
-    for (let dependency of dependencyList)
+    for (const dependency of dependencyList) {
         if (isActivated(dependency)) return true;
+    }
 
     let warnMsg = localize("BBC.Dependency.RecommendInstallingOne", "Recommend installing one of the following:");
-    for (let dependency of dependencyList) {
+    for (const dependency of dependencyList) {
         warnMsg += `\n${localize("BBC.Dependency.ModuleLabel", "Module: ")}${dependency?.id}`;
         if (dependency?.ref) warnMsg += ` (${dependency?.ref})`;
     }
@@ -157,11 +166,11 @@ function required(dependencyList) {
     let errorMsg = localize("BBC.Dependency.RequiresAll", "Requires all of the following to be installed and activated:\n");
     let dependencyMet = true;
 
-    for (let dependency of dependencyList) {
+    for (const dependency of dependencyList) {
         if (_isActivated(dependency)) continue;
         dependencyMet = false;
 
-        const depRef = dependency?.id + ((dependency?.ref) ? ` (${dependency?.ref})` : '');
+        const depRef = dependency?.id + (dependency?.ref ? ` (${dependency?.ref})` : "");
         errorMsg += `\n${localize("BBC.Dependency.ModuleLabel", "Module: ")}${depRef}`;
         errorMsg += _versionMessageAppend(dependency, _getEntity(dependency)?.version);
     }
@@ -177,10 +186,10 @@ function required(dependencyList) {
 function someRequired(dependencyList) {
     let errorMsg = localize("BBC.Dependency.RequiresOne", "Requires at least one of the following to be installed and activated:\n");
 
-    for (let dependency of dependencyList) {
+    for (const dependency of dependencyList) {
         if (_isActivated(dependency)) return;
-        if (errorMsg.length) errorMsg += '\n';
-        const depRef = dependency?.id + ((dependency?.ref) ? ` (${dependency?.ref})` : '');
+        if (errorMsg.length) errorMsg += "\n";
+        const depRef = dependency?.id + (dependency?.ref ? ` (${dependency?.ref})` : "");
         errorMsg += `${localize("BBC.Dependency.ModuleLabel", "Module: ")}${depRef}`;
         errorMsg += _versionMessageAppend(dependency, _getEntity(dependency)?.version);
     }

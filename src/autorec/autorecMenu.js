@@ -1,8 +1,7 @@
 import { MODULE_ID } from "../lib/constants.js";
-import { autorecManager as manager } from "./autorecManager.js";
+import { DEFAULT_AUTOREC_ENTRY, autorecManager as manager } from "./autorecManager.js";
 import { systemAdapter } from "../adapter/system/index.js";
 import { localize, notify } from "../lib/utils.js";
-
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 
@@ -38,6 +37,12 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
      * @returns {Promise<object>} Context data object passed to the Handlebars template.
      */
     async _prepareContext(options) {
+        /**
+         * Normalizes a candidate color string to a valid 6-digit hex color or returns a fallback.
+         * @param {*} val - Candidate color value.
+         * @param {string} [fallback="#000000"] - Fallback hex string.
+         * @returns {string} Valid 6-digit hex color string.
+         */
         const normalizeHexColor = (val, fallback = "#000000") => {
             if (typeof val === "string" && /^#[0-9A-Fa-f]{6}$/.test(val)) return val;
             return fallback;
@@ -45,11 +50,11 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
         const rawEntries = manager.getAllEntries();
         const entries = rawEntries.map(e => ({
             ...e,
-            circleFile: Boolean(e.circleFile) ? e.circleFile : DEFAULT_AUTOREC_ENTRY.circleFile,
-            coneFile: Boolean(e.coneFile) ? e.coneFile : DEFAULT_AUTOREC_ENTRY.coneFile,
-            rayFile: Boolean(e.rayFile) ? e.rayFile : DEFAULT_AUTOREC_ENTRY.rayFile,
-            squareFile: Boolean(e.squareFile) ? e.squareFile : DEFAULT_AUTOREC_ENTRY.squareFile,
-            lineFile: Boolean(e.lineFile) ? e.lineFile : DEFAULT_AUTOREC_ENTRY.lineFile,
+            circleFile: e.circleFile ?? DEFAULT_AUTOREC_ENTRY.circleFile,
+            coneFile: e.coneFile ?? DEFAULT_AUTOREC_ENTRY.coneFile,
+            rayFile: e.rayFile ?? DEFAULT_AUTOREC_ENTRY.rayFile,
+            squareFile: e.squareFile ?? DEFAULT_AUTOREC_ENTRY.squareFile,
+            lineFile: e.lineFile ?? DEFAULT_AUTOREC_ENTRY.lineFile,
 
             borderColorPicker: normalizeHexColor(e.borderColor, "#ffffff"),
             fillColorPicker: normalizeHexColor(e.fillColor, "#000000"),
@@ -78,7 +83,6 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             registeredWorkflows: localize("BBC.autorecMenu.labels.registeredWorkflows", "Registered Workflows"),
             addBtn: localize("BBC.autorecMenu.labels.addBtn", "Insert"),
             removeBtn: localize("BBC.autorecMenu.labels.removeBtn", "Remove"),
-
             deleteBtn: localize("BBC.autorecMenu.labels.deleteBtn", "Delete"),
             saveBtn: localize("BBC.autorecMenu.labels.saveBtn", "Save"),
 
@@ -179,19 +183,18 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             }
 
             editToggle.addEventListener("change", (ev) => {
-                const turningOn = ev.currentTarget.checked;
+                const turningOn = Boolean(ev.currentTarget.checked);
                 this._editModeActive = turningOn;
                 container.classList.toggle("edit-mode", turningOn);
             });
         }
-
 
         // Add New Workflow Button
         const addWorkflowBtn = root.querySelector(".bbc-add-workflow-btn");
         if (addWorkflowBtn) {
             addWorkflowBtn.addEventListener("click", async () => {
                 let result = null;
-                const supportsActivities = systemAdapter.supportsActivities;
+                const supportsActivities = Boolean(systemAdapter.supportsActivities);
 
                 try {
                     result = await DialogV2.prompt({
@@ -235,7 +238,6 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                     manager.register(regKey, config, { persist: true });
                     manager.broadcastSync();
                     notify.info(localize("BBC.autorecMenu.notify.added", `Added workflow: "${regKey}".`));
-
                 }
 
                 this.selectItem(root, regKey);
@@ -279,14 +281,12 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
 
         // Single Remove Workflow button in header
         root.querySelectorAll(".bbc-delete-single-btn").forEach(btn => {
-
             btn.addEventListener("click", (ev) => {
                 const itemName = ev.currentTarget.dataset.itemName;
                 if (itemName) {
                     manager.unregister(itemName, { persist: true });
                     manager.broadcastSync();
                     notify.info(localize("BBC.autorecMenu.notify.removedOne", `Removed workflow "${itemName}".`));
-
                     this.render(false);
                 }
             });
@@ -343,7 +343,6 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                 if (text && navigator.clipboard) {
                     navigator.clipboard.writeText(text);
                     notify.info(localize("BBC.autorecMenu.notify.copied", `Copied "${text}" to clipboard.`));
-
                 }
             });
         });
@@ -410,7 +409,7 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
 
             let val;
             if (inputEl.type === "checkbox") {
-                val = inputEl.checked;
+                val = Boolean(inputEl.checked);
             } else if (inputEl.type === "number") {
                 const parsed = parseFloat(inputEl.value);
                 val = isNaN(parsed) ? undefined : parsed;
@@ -451,7 +450,6 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
      * @returns {Promise<void>}
      */
     async saveAllEditedConfigurations(root) {
-
         let modifiedAny = false;
         root.querySelectorAll(".bbc-inspector-detail").forEach(detailEl => {
             const regKey = detailEl.dataset.itemName;
@@ -469,7 +467,7 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
 
                 let val;
                 if (inputEl.type === "checkbox") {
-                    val = inputEl.checked;
+                    val = Boolean(inputEl.checked);
                 } else if (inputEl.type === "number") {
                     const parsed = parseFloat(inputEl.value);
                     val = isNaN(parsed) ? undefined : parsed;
@@ -504,16 +502,17 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             }
             await manager.overwrite(persistedDict);
             notify.info(localize("BBC.autorecMenu.notify.saved", "Saved workflow configurations and synced across all clients."));
-
             this.render(false);
         }
     }
 
     /**
      * Handles standard form submission lifecycle. Configuration changes are saved explicitly on Edit Mode exit.
+     * @param {Event} [event] - Form submission event.
+     * @param {object} [formData] - Form submission data object.
      * @returns {Promise<void>}
      */
-    async _updateObject() {
+    async _updateObject(event, formData) {
         return;
     }
 }

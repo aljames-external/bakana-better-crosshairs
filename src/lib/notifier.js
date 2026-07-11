@@ -17,6 +17,7 @@ let flushTimeout = null;
 /**
  * Schedule a debounced flush of all queued notifications.
  * @private
+ * @returns {void}
  */
 function _scheduleFlush() {
     if (flushTimeout !== null) return;
@@ -29,6 +30,7 @@ function _scheduleFlush() {
 /**
  * Flush and display grouped notifications for each severity level (`info`, `warn`, `error`).
  * @private
+ * @returns {void}
  */
 function _flushQueues() {
     if (typeof ui === "undefined" || !ui.notifications) {
@@ -46,7 +48,7 @@ function _flushQueues() {
         queue.length = 0;
 
         if (messages.length === 1) {
-            ui.notifications[level]?.(messages[0]);
+            ui.notifications[level](messages[0]);
         } else {
             const header = level === "error"
                 ? `Bakana's Better Crosshairs — Errors (${messages.length}):`
@@ -55,7 +57,7 @@ function _flushQueues() {
                 : `Bakana's Better Crosshairs (${messages.length}):`;
 
             const groupedMessage = `${header}\n` + messages.map(m => `• ${m}`).join("\n");
-            ui.notifications[level]?.(groupedMessage);
+            ui.notifications[level](groupedMessage);
         }
     }
 }
@@ -67,8 +69,7 @@ function _flushQueues() {
  * @returns {void}
  */
 export function notifyInfo(message) {
-    if (!message) return;
-    const trimmed = String(message).trim();
+    const trimmed = String(message ?? "").trim();
     if (!trimmed) return;
     if (!queues.info.includes(trimmed)) {
         queues.info.push(trimmed);
@@ -83,8 +84,7 @@ export function notifyInfo(message) {
  * @returns {void}
  */
 export function notifyWarn(message) {
-    if (!message) return;
-    const trimmed = String(message).trim();
+    const trimmed = String(message ?? "").trim();
     if (!trimmed) return;
     if (!queues.warn.includes(trimmed)) {
         queues.warn.push(trimmed);
@@ -99,8 +99,7 @@ export function notifyWarn(message) {
  * @returns {void}
  */
 export function notifyError(message) {
-    if (!message) return;
-    const trimmed = String(message).trim();
+    const trimmed = String(message ?? "").trim();
     if (!trimmed) return;
     if (!queues.error.includes(trimmed)) {
         queues.error.push(trimmed);

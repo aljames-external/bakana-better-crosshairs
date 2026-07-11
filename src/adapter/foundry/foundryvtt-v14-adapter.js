@@ -1,6 +1,9 @@
 import { BaseFoundryVTTAdapter } from "./base-foundryvtt-adapter.js";
 import { log } from "../../lib/logger.js";
 
+/**
+ * Adapter subclass encapsulating Foundry VTT v14+ Region and MeasuredTemplate placement behavior.
+ */
 export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     /**
      * Initialize the Foundry VTT v14+ adapter instance and set its version identifier.
@@ -33,7 +36,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             distance: doc.distance,
             width: doc.width,
             shapes: doc.shapes,
-            rawObject: typeof doc.toObject === "function" ? doc.toObject() : doc
+            rawObject: doc.toObject?.() ?? doc
         });
 
         if (doc.t) {
@@ -152,7 +155,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         };
 
         if (Array.isArray(doc.shapes) && doc.shapes.length > 0) {
-            const shapeObj = typeof doc.shapes[0].toObject === "function" ? doc.shapes[0].toObject() : doc.shapes[0];
+            const shapeObj = doc.shapes[0].toObject?.() ?? doc.shapes[0];
             const originalShape = foundry.utils.deepClone(shapeObj);
             const newShape = this._formatRegionShapeUpdate(originalShape, coords);
             delete newShape._id;
@@ -160,7 +163,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         }
 
         if (styling.placedFillColor) updateData.color = styling.placedFillColor;
-        if (config.hidden || config.hideTemplate) updateData.hidden = true;
+        if (Boolean(config.hidden || config.hideTemplate)) updateData.hidden = true;
 
         doc.updateSource(updateData);
     }

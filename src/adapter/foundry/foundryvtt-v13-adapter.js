@@ -45,7 +45,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Format drag destination coordinates into a V12 MeasuredTemplate placement coordinates payload.
+     * Format drag destination coordinates into a V13 MeasuredTemplate placement coordinates payload.
      * @param {number} x - Destination x-coordinate
      * @param {number} y - Destination y-coordinate
      * @param {number} direction - Direction angle in degrees
@@ -63,7 +63,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Compute canvas graphic dimensions in pixel units for a V12 MeasuredTemplate shape.
+     * Compute canvas graphic dimensions in pixel units for a V13 MeasuredTemplate shape.
      * @param {number} [distance=30] - Shape distance/length
      * @param {number} [widthOrAngle=5] - Shape width (ray/square) or angle in degrees (cone)
      * @param {string} [shapeType="ray"] - Canonical shape type ('circle', 'cone', 'ray', 'square')

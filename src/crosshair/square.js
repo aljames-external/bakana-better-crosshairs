@@ -1,7 +1,6 @@
 import { closest } from "../lib/filemanager.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken, resolveCrosshairIcon } from "./util.js";
-
+import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, resolveCrosshairIcon } from "./util.js";
 
 /**
  * Creates and configures a square crosshair sequence.
@@ -15,19 +14,16 @@ async function create(token, config = {}) {
     const width = config.width ?? 30;
     const stickToToken = shouldStickToToken(config, false);
 
-    const {
-        id = `Square Crosshair`,
-
-        showLine = config.showLine ?? true,
-        squareFile = config.squareFile ?? closest(`eskie.crosshair.square.fantasy_01.white`),
-        lineFile = config.lineFile ?? closest(`eskie.crosshair.line.generic_01.white`),
-        borderColor = config.borderColor ?? "#ffffff",
-        borderAlpha = config.borderAlpha ?? 0,
-        fillColor = config.fillColor ?? "#000000",
-        fillAlpha = config.fillAlpha ?? 0,
-        icon = config.icon,
-        context = null
-    } = config;
+    const id = config.id ?? "Square Crosshair";
+    const showLine = config.showLine ?? true;
+    const squareFile = config.squareFile ?? closest("eskie.crosshair.square.fantasy_01.white");
+    const lineFile = config.lineFile ?? closest("eskie.crosshair.line.generic_01.white");
+    const borderColor = config.borderColor ?? "#ffffff";
+    const borderAlpha = config.borderAlpha ?? 0;
+    const fillColor = config.fillColor ?? "#000000";
+    const fillAlpha = config.fillAlpha ?? 0;
+    const icon = config.icon;
+    const context = config.context ?? null;
 
     config.token = token;
     config.stickToToken = stickToToken;
@@ -54,7 +50,7 @@ async function create(token, config = {}) {
             .file(squareFile)
             .attachTo(crosshair)
             .anchor({ x: 0, y: 0.5 })
-            .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits })
+            .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
             .belowTokens()
             .locally()
@@ -65,7 +61,7 @@ async function create(token, config = {}) {
 
     attachWheelRotation(null, config);
 
-    let square = new Sequence()
+    const square = new Sequence()
         .crosshair("position")
             .type("rect")
             .distance(distance)
@@ -80,7 +76,6 @@ async function create(token, config = {}) {
     if (icon) {
         square.icon(resolveCrosshairIcon(icon));
     }
-
 
     square
         .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {
@@ -102,17 +97,16 @@ async function create(token, config = {}) {
 }
 
 /**
- * Creates and plays a square crosshair along with any concurrent scripts.
+ * Creates and plays a square crosshair sequence.
  *
  * @param {object|null} token - The token or object to associate with the crosshair
  * @param {object} [config={}] - Configuration options for the square crosshair
- * @returns {Promise<Array<*>>} A promise resolving to the results of the concurrent script and crosshair execution
+ * @returns {Promise<*>} A promise resolving when the crosshair sequence finishes playing
  */
 async function play(token, config = {}) {
-    let [square] = await create(token, config);
+    const [square] = await create(token, config);
     return square.play();
 }
-
 
 /**
  * Stops and clears any persistent square crosshair effects associated with the given token.
@@ -122,7 +116,8 @@ async function play(token, config = {}) {
  * @param {string} [options.id="Square Crosshair"] - The name or identifier of the effect to stop
  * @returns {Promise<*>} A promise resolving when the effects have been ended
  */
-async function stop(token, { id = `Square Crosshair` } = {}) {
+async function stop(token, options = {}) {
+    const id = options?.id ?? "Square Crosshair";
     return Sequencer.EffectManager.endEffects({ name: id, object: token });
 }
 

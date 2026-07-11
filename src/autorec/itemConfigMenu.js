@@ -3,8 +3,18 @@ import { DEFAULT_AUTOREC_ENTRY, autorecManager } from "./autorecManager.js";
 import { log } from "../lib/logger.js";
 import { localize, notify } from "../lib/utils.js";
 
-
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
+
+/**
+ * Normalize a hex color string, returning a valid 6-digit hex string or the provided fallback.
+ * @param {unknown} val - Input color value to validate
+ * @param {string} [fallback="#000000"] - Fallback hex color if validation fails
+ * @returns {string} Normalized 6-digit hex color string
+ */
+function normalizeHexColor(val, fallback = "#000000") {
+    if (typeof val === "string" && /^#[0-9A-Fa-f]{6}$/.test(val)) return val;
+    return fallback;
+}
 
 /**
  * Form application for configuring item-specific Better Crosshairs (BBC) settings stored on item flags.
@@ -55,20 +65,21 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         const itemName = item?.name ?? "Unknown Item";
         const itemImg = item?.img ?? null;
 
-        const customConfig = item?.getFlag?.(MODULE_ID, "customConfig") ?? item?.flags?.[MODULE_ID]?.customConfig ?? null;
+        const customConfig = item?.getFlag(MODULE_ID, "customConfig") ?? null;
         const hasCustom = Boolean(customConfig);
         const isCustom = Boolean(customConfig && customConfig.enabled !== false);
 
         const autorecMatch = autorecManager.getEntryByName(itemName);
         const isAutorec = Boolean(!hasCustom && autorecMatch && !autorecMatch.isDefault && autorecMatch.enabled);
 
-        const normalizeHexColor = (val, fallback = "#000000") => {
-            if (typeof val === "string" && /^#[0-9A-Fa-f]{6}$/.test(val)) return val;
-            return fallback;
-        };
-
         const baseFallback = autorecMatch ?? DEFAULT_AUTOREC_ENTRY;
-        const hasGranularFlags = customConfig && ("enableAnimation" in customConfig || "enablePrePlacement" in customConfig || "enablePlacedStyling" in customConfig || "enablePostPlacement" in customConfig);
+        const hasGranularFlags = Boolean(
+            customConfig &&
+            ("enableAnimation" in customConfig ||
+             "enablePrePlacement" in customConfig ||
+             "enablePlacedStyling" in customConfig ||
+             "enablePostPlacement" in customConfig)
+        );
         const enablePrePlacement = hasGranularFlags ? Boolean(customConfig.enablePrePlacement) : Boolean(customConfig?.concurrentCode);
         const enableAnimation = hasGranularFlags ? Boolean(customConfig.enableAnimation) : Boolean(customConfig && customConfig.enabled !== false);
         const enablePlacedStyling = hasGranularFlags ? Boolean(customConfig.enablePlacedStyling) : Boolean(customConfig?.placedFillColor || customConfig?.placedBorderColor);
@@ -116,10 +127,7 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             placedBorderColorPicker: normalizeHexColor(source.placedBorderColor, "#000000")
         };
 
-
-
-
-        const isV14 = typeof game !== "undefined" && (game.release?.generation >= 14 || parseInt(game.version, 10) >= 14);
+        const isV14 = Boolean(typeof game !== "undefined" && (game.release?.generation >= 14 || parseInt(game.version ?? "0", 10) >= 14));
         const docTerm = isV14 ? "region" : "template";
         const prePlacementTitle = isV14 ? "Pre-Region Placement" : "Pre-Template Placement";
         const placementSectionTitle = isV14 ? "Region Placement Configuration" : "Template Placement Configuration";
@@ -141,10 +149,7 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             badgeCustomOverride: localize("BBC.itemConfigMenu.badgeCustomOverride", "CUSTOM OVERRIDE"),
             badgeInherited: localize("BBC.itemConfigMenu.badgeInherited", "INHERITED"),
 
-
             preSectionDesc: localize("BBC.itemConfigMenu.preSectionDesc", `Executes custom Javascript code before starting ${docTerm} placement selection.`),
-
-
             animationDesc: localize("BBC.itemConfigMenu.animationDesc", "Sequencer crosshair graphic asset and interactive rendering properties."),
             placedSectionDesc: localize("BBC.itemConfigMenu.placedSectionDesc", `Configure fill and border highlight colors applied to the created ${docTerm}.`),
             postSectionDesc: localize("BBC.itemConfigMenu.postSectionDesc", `Executes custom Javascript code immediately after the ${docTerm} document is created on the canvas.`),
@@ -185,7 +190,6 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         };
     }
 
-
     /**
      * Attach interactive DOM event listeners after rendering completes.
      * Binds Delete CUSTOM Configuration button and color inputs.
@@ -225,7 +229,6 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
                 }
             });
         });
-
 
         // Handle Delete CUSTOM Configuration action button
         const deleteBtn = root.querySelector("button[data-action='delete-custom']");
@@ -289,7 +292,6 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             icon: String(formData.get("icon") ?? "").trim()
         };
 
-
         log.debug(`ItemCrosshairConfigApplication | Saving custom configuration to item "${this.item.name}" flags:`, config);
         await this.item.setFlag(MODULE_ID, "customConfig", config);
         notify.info(`Saved custom BBC configuration for "${this.item.name}".`);
@@ -316,12 +318,18 @@ export function openItemCrosshairConfig(item) {
  * @returns {void}
  */
 export function registerItemSheetHooks() {
-    const addApplicationV2HeaderControl = (app, controls) => {
-        const item = app.document ?? app.item;
+    /**
+     * Add a Better Crosshairs header control to ApplicationV2 item sheets for item owners.
+     * @param {foundry.applications.api.ApplicationV2} app - Item sheet application instance
+     * @param {Array<object>} controls - Array of header control button items
+     * @returns {void}
+     */
+    function addApplicationV2HeaderControl(app, controls) {
+        const item = app.document;
         if (!item || !Boolean(item.isOwner)) return;
         if (controls.some(c => c.label?.startsWith("BBC") || c.icon === "fa-solid fa-crosshairs")) return;
 
-        const customConfig = item.getFlag?.(MODULE_ID, "customConfig") ?? item.flags?.[MODULE_ID]?.customConfig;
+        const customConfig = item.getFlag(MODULE_ID, "customConfig") ?? null;
         const autorecMatch = autorecManager.getEntryByName(item.name);
         const statusLabel = Boolean(customConfig) ? " [CUSTOM]" : (autorecMatch ? " [AUTOREC]" : "");
 
@@ -330,7 +338,7 @@ export function registerItemSheetHooks() {
             icon: "fa-solid fa-crosshairs",
             onClick: () => openItemCrosshairConfig(item)
         });
-    };
+    }
 
     Hooks.on("getHeaderControlsItemSheet5e", addApplicationV2HeaderControl);
     Hooks.on("getHeaderControlsItemSheet5e2", addApplicationV2HeaderControl);
@@ -339,7 +347,7 @@ export function registerItemSheetHooks() {
         if (!item || !Boolean(item.isOwner)) return;
         if (options.some(o => o.name?.startsWith("BBC Crosshair"))) return;
 
-        const customConfig = item.getFlag?.(MODULE_ID, "customConfig") ?? item.flags?.[MODULE_ID]?.customConfig;
+        const customConfig = item.getFlag(MODULE_ID, "customConfig") ?? null;
         const autorecMatch = autorecManager.getEntryByName(item.name);
         const statusLabel = Boolean(customConfig) ? " [CUSTOM]" : (autorecMatch ? " [AUTOREC]" : "");
 
@@ -350,6 +358,3 @@ export function registerItemSheetHooks() {
         });
     });
 }
-
-
-

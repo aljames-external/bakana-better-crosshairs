@@ -6,8 +6,6 @@ import { crosshairAdapter } from '../adapter/foundry/index.js';
 import { autorecManager } from '../autorec/autorecManager.js';
 import { registerItemSheetHooks } from '../autorec/itemConfigMenu.js';
 
-
-
 const pendingPlacements = new Map();
 let hooksInitialized = false;
 
@@ -18,7 +16,7 @@ let hooksInitialized = false;
  */
 function isOwner(doc) {
     if (!doc.id) return true; // Preview templates on canvas are always local to the drawing client
-    const userId = doc.author?.id ?? doc.author ?? doc.user?.id ?? doc.user ?? game.user.id;
+    const userId = doc.author?.id ?? doc.author ?? game.user.id;
     return userId === game.user.id;
 }
 
@@ -29,6 +27,18 @@ function isOwner(doc) {
  */
 function detectTemplateProperties(placeable) {
     return crosshairAdapter.detectProperties(placeable.document);
+}
+
+/**
+ * Normalize a Token or TokenDocument reference into a canvas Token placeable object.
+ * @param {Token|TokenDocument|Object|null} target - Potential Token placeable or TokenDocument
+ * @returns {Token|Object|null} The normalized Token placeable or original target
+ */
+function toToken(target) {
+    if (!target) return null;
+    if (target instanceof Token) return target;
+    if (target.object instanceof Token) return target.object;
+    return target;
 }
 
 /**
@@ -66,8 +76,8 @@ async function handleDrawPreview(placeable) {
     // 2. Resolve token and item context deterministically through version adapter
     const callingContext = crosshairAdapter.extractCallingContext(doc);
     const item = entry.item ?? callingContext.item;
-    let rawToken = item?.parent?.getActiveTokens?.()[0] ?? canvas.tokens?.controlled?.[0];
-    const token = rawToken instanceof Token ? rawToken : (rawToken?.object instanceof Token ? rawToken.object : rawToken);
+    const rawToken = item?.parent?.getActiveTokens?.()[0] ?? canvas.tokens?.controlled?.[0];
+    const token = toToken(rawToken);
     const actor = token?.actor ?? item?.actor;
 
     log.debug(`handleDrawPreview | Using token context:`, token?.name);
@@ -290,7 +300,8 @@ async function handleCreateDocument(doc, _options, userId) {
 
     const callingContext = crosshairAdapter.extractCallingContext(doc);
     const item = config.item ?? callingContext.item;
-    const token = item?.parent?.getActiveTokens?.()[0] ?? canvas.tokens?.controlled?.[0];
+    const rawToken = item?.parent?.getActiveTokens?.()[0] ?? canvas.tokens?.controlled?.[0];
+    const token = toToken(rawToken);
     const actor = token?.actor ?? item?.actor;
     const scope = { doc, token, actor, item, config };
 
@@ -309,7 +320,7 @@ async function handleCreateDocument(doc, _options, userId) {
         );
         await fn(doc, token, actor, item, scope, config, canvas, game);
     } catch (e) {
-        log.error(`Error executing post-placement script for ${doc.documentName}:`, e);
+        log.error(`handleCreateDocument | Error executing post-placement script for ${doc.documentName}:`, e);
     }
 }
 

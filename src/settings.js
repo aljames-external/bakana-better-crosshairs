@@ -1,12 +1,14 @@
-import { MODULE_ID, MODULE_NAME } from "./lib/constants.js";
+import { MODULE_ID, MODULE_NAME } from './lib/constants.js';
 import { log } from './lib/logger.js';
 import { autorecManager } from './autorec/autorecManager.js';
-import { AutorecMenuApplication } from "./autorec/autorecMenu.js";
+import { AutorecMenuApplication } from './autorec/autorecMenu.js';
 
 /**
  * Registers module settings and menus during Foundry VTT initialization.
+ *
+ * @returns {void}
  */
-Hooks.once('init', function() {
+function registerModuleSettings() {
     log.info(`Initializing ${MODULE_NAME} settings`);
 
     game.settings.registerMenu(MODULE_ID, 'autorecMenu', {
@@ -27,7 +29,7 @@ Hooks.once('init', function() {
         /**
          * Reloads saved autorec registrations when the registeredTemplates setting changes.
          *
-         * @param {object} savedRegistrations - The updated dictionary of saved template registrations.
+         * @param {Object<string, Object>} savedRegistrations - The updated dictionary of saved template registrations.
          * @returns {void}
          */
         onChange: (savedRegistrations) => {
@@ -56,4 +58,6 @@ Hooks.once('init', function() {
          */
         onChange: (value) => log.setVerbosity(value)
     });
-});
+}
+
+Hooks.once('init', registerModuleSettings);

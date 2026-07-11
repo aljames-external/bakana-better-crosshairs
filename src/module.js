@@ -13,9 +13,9 @@ import { MODULE_ID, MODULE_NAME } from './lib/constants.js';
 /**
  * Handles module initialization during the Foundry VTT 'init' hook.
  *
- * @returns {Promise<void>}
+ * @returns {void}
  */
-Hooks.once('init', async () => {
+Hooks.once('init', () => {
     /**
      * Initializes system and Foundry adapters, templates, global API endpoints, and registers API methods on the module instance.
      *
@@ -53,14 +53,6 @@ Hooks.once('init', async () => {
             snapCoordinates,
         };
 
-        setupApiCalls({ crosshair });
-        setupApiCalls({ util });
-        setupApiCalls({ manager });
-        setupApiCalls({ autorecManager });
-        setupApiCalls({ systemAdapter });
-        setupApiCalls({ crosshairAdapter });
-        setupApiCalls({ log });
-
         const moduleApi = {
             crosshair,
             util,
@@ -70,6 +62,8 @@ Hooks.once('init', async () => {
             crosshairAdapter,
             log,
         };
+
+        setupApiCalls(moduleApi);
 
         const mod = game.modules.get(MODULE_ID);
         if (mod) mod.api = moduleApi;

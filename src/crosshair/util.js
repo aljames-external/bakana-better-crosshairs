@@ -48,7 +48,6 @@ export function resolveCrosshairIcon(iconPath) {
     return trimmed;
 }
 
-
 /**
  * Refresh the shape and grid highlights of a measured template overlay.
  * @param {object} tmpl - Template placeable or overlay object to refresh
@@ -295,7 +294,6 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     const clickX = mousePos.x ?? 0;
     const clickY = mousePos.y ?? 0;
 
-    const isRayOrCone = config.type === "ray" || config.type === "cone" || config.t === "ray" || config.t === "cone";
     const isCone = config.type === "cone" || config.t === "cone";
     const isAnchored = shouldStickToToken(config, isCone) && Boolean(config.token);
 

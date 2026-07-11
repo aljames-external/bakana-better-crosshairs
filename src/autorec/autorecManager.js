@@ -35,9 +35,6 @@ export const DEFAULT_AUTOREC_ENTRY = {
     icon: "eskie.crosshair.reticle.generic_02.white"
 };
 
-
-
-
 /**
  * AutorecManager manages automatic recognition (autorec) registrations for template/region items.
  * Encapsulated as a class instead of free-floating module-level functions.
@@ -45,6 +42,7 @@ export const DEFAULT_AUTOREC_ENTRY = {
 export class AutorecManager {
     /**
      * Initialize the AutorecManager instance with default registrations and bind methods.
+     * @returns {void}
      */
     constructor() {
         this.registeredHandlers = new Map([
@@ -100,10 +98,8 @@ export class AutorecManager {
         return { ...DEFAULT_AUTOREC_ENTRY };
     }
 
-
     /**
      * Customize item-specific crosshair override configuration stored on item flags.
-
      * Invokable by any user with ownership of the passed Item.
      * Passing config === undefined (or null) clears any existing custom item override.
      * @param {Document} item - Target Item document
@@ -131,7 +127,6 @@ export class AutorecManager {
         await item.setFlag(MODULE_ID, "customConfig", config);
         return true;
     }
-
 
     /**
      * Resolve the normalized calling Item and Activity context from a document and workflow payload.
@@ -250,27 +245,27 @@ export class AutorecManager {
         this.readySyncInitialized = true;
 
         socketlib.on((data) => {
-                if (!data || typeof data !== "object") return;
-                if (data.type === "REGISTER_TEMPLATE") {
-                    if (game.user?.isGM) {
-                        this.register(data.itemName, data.config, { persist: true });
-                    }
-                } else if (data.type === "UNREGISTER_TEMPLATE") {
-                    if (game.user?.isGM) {
-                        this.unregister(data.itemName, { persist: true });
-                    }
-                } else if (data.type === "SYNC_AUTORECS") {
-                    try {
-                        const saved = game.settings?.get(MODULE_ID, "registeredTemplates");
-                        if (saved) this.loadSavedRegistrations(saved);
-                    } catch (e) {
-                        log.error("Failed to load saved registeredTemplates setting", e);
-                    }
-                    Object.values(ui.windows ?? {}).forEach(w => {
-                        if (w && w.id === "bbc-autorec-menu") w.render(false);
-                    });
+            if (!data || typeof data !== "object") return;
+            if (data.type === "REGISTER_TEMPLATE") {
+                if (game.user?.isGM) {
+                    this.register(data.itemName, data.config, { persist: true });
                 }
-            });
+            } else if (data.type === "UNREGISTER_TEMPLATE") {
+                if (game.user?.isGM) {
+                    this.unregister(data.itemName, { persist: true });
+                }
+            } else if (data.type === "SYNC_AUTORECS") {
+                try {
+                    const saved = game.settings?.get(MODULE_ID, "registeredTemplates");
+                    if (saved) this.loadSavedRegistrations(saved);
+                } catch (e) {
+                    log.error("Failed to load saved registeredTemplates setting", e);
+                }
+                Object.values(ui.windows ?? {}).forEach(w => {
+                    if (w && w.id === "bbc-autorec-menu") w.render(false);
+                });
+            }
+        });
 
         try {
             const saved = game.settings?.get(MODULE_ID, "registeredTemplates");
@@ -402,9 +397,9 @@ export class AutorecManager {
         }
 
         if (this.registeredHandlers.has(itemName)) {
-            log.info(`Re-registering template sequence for item: ${itemName}${isLocal ? " (local only)" : ""}`);
+            log.debug(`Re-registering template sequence for item: ${itemName}${isLocal ? " (local only)" : ""}`);
         } else {
-            log.info(`Registering template sequence for item: ${itemName}${isLocal ? " (local only)" : ""}`);
+            log.debug(`Registering template sequence for item: ${itemName}${isLocal ? " (local only)" : ""}`);
         }
         this.registeredHandlers.set(itemName, handlerOrConfig);
         const registered = this.registeredHandlers.get(itemName);
@@ -438,7 +433,7 @@ export class AutorecManager {
         const wasPersisted = this.persistedItemNames.has(itemName);
         if (deleted) {
             this.rebuildFastLookupMap();
-            log.info(`Unregistered template sequence for item: ${itemName}`);
+            log.debug(`Unregistered template sequence for item: ${itemName}`);
         }
         if (persist && !local && wasPersisted && typeof itemName === "string") {
             this.persistUnregistration(itemName);
@@ -461,7 +456,7 @@ export class AutorecManager {
             if (existing?.isDefault) continue;
             this.registeredHandlers.delete(itemName);
             this.persistedItemNames.delete(itemName);
-            log.info(`Unregistered template sequence for item: ${itemName}`);
+            log.debug(`Unregistered template sequence for item: ${itemName}`);
         }
         this.rebuildFastLookupMap();
 
@@ -543,7 +538,7 @@ export class AutorecManager {
      * @returns {boolean} True if a registered handler exists for the target or name
      */
     has(targetOrName) {
-        return this.get(targetOrName) !== null;
+        return Boolean(this.get(targetOrName));
     }
 
     /**
@@ -556,7 +551,8 @@ export class AutorecManager {
         if (typeof targetOrName === "string") {
             return this.getEntryByName(targetOrName);
         }
-        return this.getEntryForDocument(targetOrName);
+        const doc = targetOrName instanceof Document ? targetOrName : targetOrName?.document;
+        return this.getEntryForDocument(doc);
     }
 
     /**
@@ -598,7 +594,7 @@ export class AutorecManager {
             const circleFile = config.circleFile ?? "eskie.crosshair.circle.fantasy_01.white.full";
             const coneFile = config.coneFile ?? "eskie.crosshair.cone.thin.fantasy_01.white.full";
             const rayFile = config.rayFile ?? "eskie.crosshair.ray.fantasy_01.white";
-            const squareFile = config.squareFile ?? "eskie.crosshair.ray.fantasy_01.white";
+            const squareFile = config.squareFile ?? "eskie.crosshair.square.fantasy_01.white";
 
             const unitFt = localize("BBC.Units.Feet", "ft");
             const distVal = config.distance ?? config.radius;

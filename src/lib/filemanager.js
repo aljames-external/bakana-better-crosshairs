@@ -1,7 +1,7 @@
 import { dependency } from './dependency.js';
 import { log } from './logger.js';
 import { notify } from './notifier.js';
-
+import { localize } from './utils.js';
 
 /**
  * Traverses the Sequencer database to find the best-fit path for a given set of categories.
@@ -13,7 +13,7 @@ import { notify } from './notifier.js';
 function bestFit(modulePrefix, ...categories) {
     let diverged = false;
     let currentPath = modulePrefix;
-    let originalPath = `${modulePrefix}.${categories.join('.')}`;
+    const originalPath = `${modulePrefix}.${categories.join('.')}`;
     let remainingOptions = Sequencer.Database.getPathsUnder(currentPath);
     let divergenceOptions = '';
 
@@ -40,7 +40,7 @@ function bestFit(modulePrefix, ...categories) {
             }
             const targetCat = categories[0];
             const numMatch = targetCat.match(/\d+(?:\.\d+)?/);
-            let bestOption = remainingOptions[0];
+            let bestOption = remainingOptions[0] ?? '';
             if (numMatch) {
                 const targetNum = parseFloat(numMatch[0]);
                 let minDiff = Infinity;
@@ -90,7 +90,7 @@ export function closest(path) {
     if (path.includes('/')) return path;
 
     // Support Sequencer Database paths (. seperated)
-    let categories = path.split('.');
+    const categories = path.split('.');
     if (categories.length === 0) return undefined;
     let isPatreonUser = false;
     let isFreeUser = false;
@@ -100,8 +100,8 @@ export function closest(path) {
         // Sounds
         case 'psfx':
             dependency.someRequired([{ id: 'psfx-patreon', ref: 'PSFX-Patreon' }, { id: 'psfx', ref: "PSFX - Peri's Sound Effects" }]);
-            isPatreonUser = dependency.isActivated({ id: 'psfx-patreon', ref: 'PSFX-Patreon' });
-            isFreeUser = dependency.isActivated({ id: 'psfx', ref: "PSFX - Peri's Sound Effects" });
+            isPatreonUser = Boolean(dependency.isActivated({ id: 'psfx-patreon', ref: 'PSFX-Patreon' }));
+            isFreeUser = Boolean(dependency.isActivated({ id: 'psfx', ref: "PSFX - Peri's Sound Effects" }));
             if (isPatreonUser && isFreeUser) {
                 notify.warn(localize("BBC.Conflicts.PSFX", "Both PSFX Patreon and Free are activated, both modules use the path `psfx.` to prefix files! This will cause conflicts! Recommend disabling / uninstalling the free version."));
             }
@@ -115,13 +115,13 @@ export function closest(path) {
         case 'eskie':
         case 'eskie-free':
             dependency.someRequired([{ id: 'eskie-effects', ref: 'Eskie Effects' }, { id: 'eskie-effects-free', ref: 'Eskie Effects Free' }]);
-            isPatreonUser = dependency.isActivated({ id: 'eskie-effects', ref: 'Eskie Effects' });
+            isPatreonUser = Boolean(dependency.isActivated({ id: 'eskie-effects', ref: 'Eskie Effects' }));
             modulePrefix = isPatreonUser ? 'eskie' : 'eskie-free';
             break;
         case 'jb2a':
             dependency.someRequired([{ id: 'jb2a_patreon', ref: 'JB2A Patreon' }, { id: 'JB2A_DnD5e', ref: 'JB2A Free' }]);
-            isFreeUser = dependency.isActivated({ id: 'JB2A_DnD5e' });
-            isPatreonUser = dependency.isActivated({ id: 'jb2a_patreon' });
+            isFreeUser = Boolean(dependency.isActivated({ id: 'JB2A_DnD5e' }));
+            isPatreonUser = Boolean(dependency.isActivated({ id: 'jb2a_patreon' }));
             if (isPatreonUser && isFreeUser) {
                 notify.warn(localize("BBC.Conflicts.JB2A", "Both JB2A Patreon and Free are activated, both modules use the path `jb2a.` to prefix files. This will cause conflicts! Recommend disabling / uninstalling the free version."));
             }
@@ -129,12 +129,11 @@ export function closest(path) {
             break;
         case 'blfx':
             dependency.someRequired([{ id: 'boss-loot-assets-premium', ref: 'Boss Loot Assets Premium' }, { id: 'boss-loot-assets-free', ref: 'Boss Loot Assets Free' }]);
-            isPatreonUser = dependency.isActivated({ id: 'boss-loot-assets-premium' });
-            isFreeUser = dependency.isActivated({ id: 'boss-loot-assets-free' });
+            isPatreonUser = Boolean(dependency.isActivated({ id: 'boss-loot-assets-premium' }));
+            isFreeUser = Boolean(dependency.isActivated({ id: 'boss-loot-assets-free' }));
             if (isPatreonUser && isFreeUser) {
                 notify.warn(localize("BBC.Conflicts.BLFX", "Both Boss Loot Assets Premium and Free are activated, both modules use the path `blfx.` to prefix files. This will cause conflicts! Recommend disabling / uninstalling the free version."));
             }
-
             modulePrefix = 'blfx';
             break;
     }

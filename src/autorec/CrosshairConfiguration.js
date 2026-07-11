@@ -19,27 +19,27 @@ export class CrosshairConfiguration {
         this.enabled = source.enabled !== undefined ? Boolean(source.enabled) : defaults.enabled;
 
         // Animation shape filepaths
-        this.circleFile = String(source.circleFile || defaults.circleFile).trim();
-        this.coneFile = String(source.coneFile || defaults.coneFile).trim();
-        this.rayFile = String(source.rayFile || defaults.rayFile).trim();
-        this.squareFile = String(source.squareFile || defaults.squareFile).trim();
-        this.lineFile = String(source.lineFile || defaults.lineFile).trim();
+        this.circleFile = String(source.circleFile ?? defaults.circleFile).trim();
+        this.coneFile = String(source.coneFile ?? defaults.coneFile).trim();
+        this.rayFile = String(source.rayFile ?? defaults.rayFile).trim();
+        this.squareFile = String(source.squareFile ?? defaults.squareFile).trim();
+        this.lineFile = String(source.lineFile ?? defaults.lineFile).trim();
 
         // Lock to Token option ("true" | "false" | "default")
         this.stickToToken = String(source.stickToToken ?? defaults.stickToToken);
 
         // Core animation rendering options
         this.showLine = source.showLine !== undefined ? Boolean(source.showLine) : defaults.showLine;
-        this.borderColor = String(source.borderColor || defaults.borderColor).trim();
+        this.borderColor = String(source.borderColor ?? defaults.borderColor).trim();
         this.borderAlpha = Number.isFinite(Number(source.borderAlpha)) ? Number(source.borderAlpha) : defaults.borderAlpha;
-        this.fillColor = String(source.fillColor || defaults.fillColor).trim();
+        this.fillColor = String(source.fillColor ?? defaults.fillColor).trim();
+        this.fillAlpha = Number.isFinite(Number(source.fillAlpha)) ? Number(source.fillAlpha) : (defaults.fillAlpha ?? 0);
         this.icon = String(source.icon ?? defaults.icon).trim();
 
-
         // Placed document styling options
-        this.placedFillColor = String(source.placedFillColor || defaults.placedFillColor).trim();
+        this.placedFillColor = String(source.placedFillColor ?? defaults.placedFillColor).trim();
         this.placedFillAlpha = Number.isFinite(Number(source.placedFillAlpha)) ? Number(source.placedFillAlpha) : defaults.placedFillAlpha;
-        this.placedBorderColor = String(source.placedBorderColor || defaults.placedBorderColor).trim();
+        this.placedBorderColor = String(source.placedBorderColor ?? defaults.placedBorderColor).trim();
         this.placedBorderAlpha = Number.isFinite(Number(source.placedBorderAlpha)) ? Number(source.placedBorderAlpha) : defaults.placedBorderAlpha;
 
         // Custom script hooks
@@ -70,7 +70,7 @@ export class CrosshairConfiguration {
     /**
      * Layer a custom override configuration onto this base configuration.
      * Respects granular section enablement flags (`enableAnimation`, `enablePrePlacement`, etc.).
-     * @param {Object} customSource - Custom configuration object (e.g. from item flags)
+     * @param {Object} [customSource={}] - Custom configuration object (e.g. from item flags)
      * @returns {CrosshairConfiguration} New merged CrosshairConfiguration instance
      */
     overrideWith(customSource = {}) {
@@ -118,7 +118,6 @@ export class CrosshairConfiguration {
             merged.fillColor = customSource.fillColor ?? "#000000";
             merged.icon = Boolean(customSource.icon) ? customSource.icon : DEFAULT_AUTOREC_ENTRY.icon;
         }
-
 
         if (isPlacedOverride) {
             merged.enablePlacedStyling = true;

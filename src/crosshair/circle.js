@@ -1,7 +1,6 @@
 import { closest } from "../lib/filemanager.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken, resolveCrosshairIcon } from "./util.js";
-
+import { resolveCrosshairPlacement, shouldStickToToken, resolveCrosshairIcon } from "./util.js";
 
 /**
  * Resolves the circle crosshair asset path based on the provided file path or key and the effect size.
@@ -31,9 +30,9 @@ function resolveCircleAsset(pathOrKey, effectSize) {
         pathOrKey = pathOrKey.slice(0, radiusIndex);
     }
 
-    let possibleSizes = [10, 20, 30, 60];
+    const possibleSizes = [10, 20, 30, 60];
     possibleSizes.sort((a, b) => Math.abs(a - cleanSize) - Math.abs(b - cleanSize));
-    let suggestedSize = possibleSizes[0];
+    const suggestedSize = possibleSizes[0];
     pathOrKey = `eskie.crosshair.circle.fantasy_01.white.full.radius_${suggestedSize}ft`;
     return closest(pathOrKey);
 }
@@ -43,6 +42,19 @@ function resolveCircleAsset(pathOrKey, effectSize) {
  *
  * @param {object|null} token - The token object or document to attach or center the circle crosshair on.
  * @param {object} [config={}] - Configuration options for the circle crosshair.
+ * @param {number} [config.radius=20] - The radius of the circle crosshair.
+ * @param {string} [config.file] - Explicit file path or Sequencer key for the circle graphic.
+ * @param {boolean} [config.stickToToken] - Whether the crosshair should stick to the target token.
+ * @param {string} [config.id="Circle Crosshair"] - Identifier for the circle crosshair effect.
+ * @param {boolean} [config.showLine=true] - Whether to show a line stretching from the token to the crosshair.
+ * @param {string} [config.lineFile="eskie.crosshair.line.generic_01.white"] - File path or key for the line graphic.
+ * @param {string} [config.circleFile] - Resolved file path or key for the circle graphic.
+ * @param {string} [config.icon] - Icon to display on the crosshair.
+ * @param {string} [config.borderColor="#ffffff"] - Border color for the circle.
+ * @param {number} [config.borderAlpha=0] - Border alpha transparency.
+ * @param {string} [config.fillColor="#000000"] - Fill color for the circle.
+ * @param {number} [config.fillAlpha=0] - Fill alpha transparency.
+ * @param {object|null} [config.context=null] - Context object for placement callbacks.
  * @returns {Promise<Array>} A promise resolving to an array containing the configured circle Sequence and targets.
  */
 async function create(token, config = {}) {
@@ -56,7 +68,6 @@ async function create(token, config = {}) {
         lineFile = "eskie.crosshair.line.generic_01.white",
         circleFile = resolveCircleAsset(file, radius),
         icon = config.icon,
-
         borderColor = "#ffffff",
         borderAlpha = 0,
         fillColor = "#000000",
@@ -107,7 +118,7 @@ async function create(token, config = {}) {
         return seq.play();
     }
 
-    let circle = new Sequence()
+    const circle = new Sequence()
         .crosshair("position")
             .type("circle")
             .distance(radius)
@@ -121,7 +132,6 @@ async function create(token, config = {}) {
     if (icon) {
         circle.icon(resolveCrosshairIcon(icon));
     }
-
 
     circle
         .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {
@@ -144,13 +154,12 @@ async function create(token, config = {}) {
  *
  * @param {object|null} token - The token object or document associated with the circle crosshair.
  * @param {object} [config={}] - Configuration options for the circle crosshair.
- * @returns {Promise<Array>} A promise resolving when both the concurrent script and crosshair sequence execution finish.
+ * @returns {Promise<any>} A promise resolving when the crosshair sequence finishes playing.
  */
 async function play(token, config = {}) {
-    let [circle] = await create(token, config);
+    const [circle] = await create(token, config);
     return circle.play();
 }
-
 
 /**
  * Stops and terminates active circle crosshair visual effects associated with the specified token and effect ID.

@@ -5,8 +5,6 @@ import { MODULE_ID } from "../../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY } from "../../autorec/autorecManager.js";
 import { CrosshairConfiguration } from "../../autorec/CrosshairConfiguration.js";
 
-
-
 export class BaseFoundryVTTAdapter {
     /**
      * Initialize the base Foundry VTT adapter.
@@ -109,9 +107,7 @@ export class BaseFoundryVTTAdapter {
 
         log.debug(`matchAutorecEntry | [CUSTOM CONFIG] Merged item custom overrides for "${context.itemName}"`);
         return overridden;
-
     }
-
 
     /**
      * Hide a live placeable preview graphic during interactive drawing.

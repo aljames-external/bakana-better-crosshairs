@@ -30,4 +30,3 @@ export const version = {
 };
 
 export { notify } from "./notifier.js";
-
