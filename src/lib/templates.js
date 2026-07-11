@@ -30,7 +30,7 @@ function detectTemplateProperties(target) {
  */
 async function handleDrawPreview(placeable) {
     const doc = placeable.document ?? placeable;
-    const isPreview = placeable.isPreview || (canvas.templates?.preview?.children || []).includes(placeable) || (canvas.regions?.preview?.children || []).includes(placeable) || !canvas.scene?.templates?.has(doc.id);
+    const isPreview = placeable.isPreview || (canvas.templates?.preview?.children ?? []).includes(placeable) || (canvas.regions?.preview?.children ?? []).includes(placeable) || !canvas.scene?.templates?.has(doc.id);
 
     log.debug(`handleDrawPreview | Hook fired:`, {
         docId: doc.id,
@@ -56,7 +56,7 @@ async function handleDrawPreview(placeable) {
     crosshairAdapter.hidePreview(placeable);
 
     // 2. Resolve token context
-    let rawToken = entry.item?.parent?.getActiveTokens?.()[0] || doc.item?.parent?.getActiveTokens?.()[0] || canvas.tokens?.controlled?.[0] || undefined;
+    let rawToken = entry.item?.parent?.getActiveTokens?.()[0] ?? doc.item?.parent?.getActiveTokens?.()[0] ?? canvas.tokens?.controlled?.[0] ?? undefined;
     const token = rawToken instanceof Token ? rawToken : (rawToken?.object instanceof Token ? rawToken.object : rawToken);
     log.debug(`handleDrawPreview | Using token context:`, token?.name);
 
@@ -101,7 +101,7 @@ async function handleDrawPreview(placeable) {
                     log.debug(`context.resolve | Resuming deferred document creation on scene "${canvas.scene.name}"`);
                     const deferredData = foundry.utils.deepClone(pending.deferredCreateData);
                     delete deferredData._id;
-                    const docName = previewDoc?.documentName || (deferredData.shapes ? "Region" : "MeasuredTemplate");
+                    const docName = previewDoc?.documentName ?? (deferredData.shapes ? "Region" : "MeasuredTemplate");
                     try {
                         await canvas.scene.createEmbeddedDocuments(docName, [deferredData]);
                     } catch (err) {
@@ -126,12 +126,12 @@ async function handleDrawPreview(placeable) {
     try {
         // 3. Auto-detect template properties and assemble sequence config
         const detected = detectTemplateProperties(placeable);
-        const item = doc.item || entry.item;
-        const actor = token?.actor || item?.actor;
+        const item = doc.item ?? entry.item;
+        const actor = token?.actor ?? item?.actor;
         const autoConfig = {
             ...detected,
             context,
-            icon: doc.item?.img || doc.flags?.['midi-qol']?.itemImg,
+            icon: doc.item?.img ?? doc.flags?.['midi-qol']?.itemImg,
             item,
             actor,
             scope: { item, actor, token, doc }
@@ -146,26 +146,26 @@ async function handleDrawPreview(placeable) {
                 ...autoConfig,
                 ...entryConfig,
                 context: autoConfig.context,
-                item: autoConfig.item || entryConfig.item,
-                actor: autoConfig.actor || entryConfig.actor,
-                activity: entryConfig.activity || entry.activity,
+                item: autoConfig.item ?? entryConfig.item,
+                actor: autoConfig.actor ?? entryConfig.actor,
+                activity: entryConfig.activity ?? entry.activity,
                 scope: autoConfig.scope
             };
             const explicitType = entryConfig.type;
             const isKnownType = ["circle", "cone", "ray", "square", "rect"].includes(String(explicitType || "").toLowerCase());
             const crosshairType = isKnownType
                 ? (String(explicitType).toLowerCase() === "rect" ? "square" : String(explicitType).toLowerCase())
-                : (detected.type || "circle");
-            const builder = crosshair[crosshairType] || crosshair.circle;
+                : (detected.type ?? "circle");
+            const builder = crosshair[crosshairType] ?? crosshair.circle;
 
             const shapeFileKey = `${crosshairType}File`;
             const shapeSpecificFile = entryConfig[shapeFileKey]
-                || (typeof entryConfig.file === "string" && entryConfig.file.includes(crosshairType) ? entryConfig.file : null);
+                ?? (typeof entryConfig.file === "string" && entryConfig.file.includes(crosshairType) ? entryConfig.file : null);
 
             const finalConfig = {
                 ...mergedConfig,
                 type: crosshairType,
-                file: shapeSpecificFile || mergedConfig.file
+                file: shapeSpecificFile ?? mergedConfig.file
             };
 
             log.debug(`handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}" with config:`, finalConfig);
@@ -248,7 +248,7 @@ function handlePreCreate(doc, _data, _options, userId) {
 async function handleCreateDocument(doc, _options, userId) {
     if (userId !== game.user?.id) return;
 
-    const flagsConfig = doc.flags?.bbc || {};
+    const flagsConfig = doc.flags?.bbc ?? {};
     let entry = autorecManager.getRegisteredEntry(doc);
     if (!entry && flagsConfig.itemName) {
         const lookupKey = flagsConfig.activityName ? `${flagsConfig.itemName} | ${flagsConfig.activityName}` : flagsConfig.itemName;
@@ -256,16 +256,16 @@ async function handleCreateDocument(doc, _options, userId) {
     }
     const config = {
         ...flagsConfig,
-        ...(entry?.handler && typeof entry.handler === "object" ? entry.handler : (entry || {}))
+        ...(entry?.handler && typeof entry.handler === "object" ? entry.handler : (entry ?? {}))
     };
 
-    const code = config.postPlacementCode || config.postCode || config.postRegionCode || config.postTemplateCode;
+    const code = config.postPlacementCode ?? config.postCode ?? config.postRegionCode ?? config.postTemplateCode;
     log.debug(`handleCreateDocument | Evaluated post-placement hook for ${doc.documentName} (${doc.id}):`, { hasCode: Boolean(code), code, flagsConfig });
     if (!code || typeof code !== "string" || !code.trim()) return;
 
-    const token = canvas.tokens?.controlled?.[0] || undefined;
-    const item = config.item || doc.item;
-    const actor = token?.actor || item?.actor || config.actor;
+    const token = canvas.tokens?.controlled?.[0] ?? undefined;
+    const item = config.item ?? doc.item;
+    const actor = token?.actor ?? item?.actor ?? config.actor;
     const scope = { doc, token, actor, item, config };
 
     try {

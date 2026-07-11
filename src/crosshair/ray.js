@@ -11,11 +11,11 @@ async function create(token, config = {}) {
         id = `Ray Crosshair`,
         stickToToken = shouldStickToToken(config, false),
         showLine = config.showLine ?? true,
-        rayFile = config.rayFile || closest(`eskie.crosshair.ray.fantasy_01.white`),
-        lineFile = config.lineFile || closest(`eskie.crosshair.line.fantasy_01.white`),
-        borderColor = config.borderColor || "#ffffff",
+        rayFile = config.rayFile ?? closest(`eskie.crosshair.ray.fantasy_01.white`),
+        lineFile = config.lineFile ?? closest(`eskie.crosshair.line.fantasy_01.white`),
+        borderColor = config.borderColor ?? "#ffffff",
         borderAlpha = config.borderAlpha ?? 0,
-        fillColor = config.fillColor || "#000000",
+        fillColor = config.fillColor ?? "#000000",
         fillAlpha = config.fillAlpha ?? 0,
         icon = config.icon,
         context = null
@@ -28,8 +28,8 @@ async function create(token, config = {}) {
 
     async function rayGraphic(crosshair) {
         const seq = new Sequence().wait(50);
-        const gridDist = canvas?.dimensions?.distance || 5;
-        const gridSize = canvas?.dimensions?.size || 100;
+        const gridDist = canvas?.dimensions?.distance ?? 5;
+        const gridSize = canvas?.dimensions?.size ?? 100;
         const lengthPixels = (distance / gridDist) * gridSize;
         const widthPixels = Math.max(gridSize, (width / gridDist) * gridSize);
         const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();

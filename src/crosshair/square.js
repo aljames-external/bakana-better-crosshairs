@@ -10,11 +10,11 @@ async function create(token, config = {}) {
         id = `Square Crosshair`,
         stickToToken = shouldStickToToken(config, false),
         showLine = config.showLine ?? true,
-        squareFile = config.squareFile || closest(`eskie.crosshair.square.fantasy_01.white`),
-        lineFile = config.lineFile || closest(`eskie.crosshair.line.fantasy_01.white`),
-        borderColor = config.borderColor || "#ffffff",
+        squareFile = config.squareFile ?? closest(`eskie.crosshair.square.fantasy_01.white`),
+        lineFile = config.lineFile ?? closest(`eskie.crosshair.line.fantasy_01.white`),
+        borderColor = config.borderColor ?? "#ffffff",
         borderAlpha = config.borderAlpha ?? 0,
-        fillColor = config.fillColor || "#000000",
+        fillColor = config.fillColor ?? "#000000",
         fillAlpha = config.fillAlpha ?? 0,
         icon = config.icon,
         context = null
@@ -28,10 +28,10 @@ async function create(token, config = {}) {
     async function squareGraphic(crosshair) {
         const seq = new Sequence().wait(50);
 
-        const gridDist = canvas?.dimensions?.distance || 5;
-        const gridSize = canvas?.dimensions?.size || 100;
+        const gridDist = canvas?.dimensions?.distance ?? 5;
+        const gridSize = canvas?.dimensions?.size ?? 100;
         const lengthPixels = (distance / gridDist) * gridSize;
-        const widthPixels = ((width || distance) / gridDist) * gridSize;
+        const widthPixels = ((width ?? distance) / gridDist) * gridSize;
         const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
 
         seq.effect()

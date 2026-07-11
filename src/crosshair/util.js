@@ -25,7 +25,7 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad) {
     }
     if (tmpl.ray && Ray && tmpl.ray.origin) {
         try {
-            tmpl.ray = Ray.fromAngle(tmpl.ray.origin.x, tmpl.ray.origin.y, rad, tmpl.ray.distance || 1000);
+            tmpl.ray = Ray.fromAngle(tmpl.ray.origin.x, tmpl.ray.origin.y, rad, tmpl.ray.distance ?? 1000);
         } catch (e) {}
     }
     if (tmpl.renderFlags) {
@@ -237,7 +237,7 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
         }
     }
 
-    const mousePos = canvas?.mousePosition || {};
+    const mousePos = canvas?.mousePosition ?? {};
     const clickX = mousePos.x ?? 0;
     const clickY = mousePos.y ?? 0;
 
@@ -286,13 +286,18 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
 
 /**
  * Calculate point on token boundary edge toward target position along with angle in degrees.
+ * @param {Token} tok - Normalized Token object
+ * @param {number} targetX
+ * @param {number} targetY
+ * @param {boolean} [sticky=false]
  */
-export function getTokenEdgePoint(tokenInput, targetX, targetY, sticky = false) {
-    const token = tokenInput instanceof Token ? tokenInput : (tokenInput?.object instanceof Token ? tokenInput.object : tokenInput);
-    const cx = token.center?.x ?? (token.x + (token.w || 0) / 2);
-    const cy = token.center?.y ?? (token.y + (token.h || 0) / 2);
-    const hw = (token.w || canvas?.grid?.size || 100) / 2;
-    const hh = (token.h || canvas?.grid?.size || 100) / 2;
+export function getTokenEdgePoint(tok, targetX, targetY, sticky = false) {
+    if (!tok) return { x: targetX, y: targetY, direction: 0 };
+    const size = canvas?.grid?.size ?? 100;
+    const cx = tok.center?.x ?? (tok.x + (tok.w ?? 0) / 2);
+    const cy = tok.center?.y ?? (tok.y + (tok.h ?? 0) / 2);
+    const hw = (tok.w ?? size) / 2;
+    const hh = (tok.h ?? size) / 2;
 
     const dx = targetX - cx;
     const dy = targetY - cy;
@@ -337,7 +342,7 @@ export function snapCoordinates(x, y, mode = "all") {
     if (!canvas?.grid) return { x, y };
 
     try {
-        const size = canvas.grid.size || 100;
+        const size = canvas.grid.size ?? 100;
 
         if (mode === "center") {
             if (typeof canvas.grid.getCenter === "function") {
@@ -376,12 +381,12 @@ const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
  * Wrapped in try/catch block with standard context variables.
  */
 export async function runConcurrentScript(token, config = {}, crosshairSequence = null) {
-    const code = config.concurrentCode || config.preAnimationCode || config.customCode;
+    const code = config.concurrentCode ?? config.preAnimationCode ?? config.customCode;
     if (!code || typeof code !== "string" || !code.trim()) return;
 
-    const actor = token?.actor || config.actor;
+    const actor = token?.actor ?? config.actor;
     const item = config.item;
-    const scope = config.scope || { token, actor, item, config };
+    const scope = config.scope ?? { token, actor, item, config };
 
     try {
         const fn = new AsyncFunction(

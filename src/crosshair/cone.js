@@ -11,7 +11,7 @@ async function create(token, config = {}) {
         coneSize = "thin",
         stickToToken = shouldStickToToken(config, true),
         file,
-        coneFile = file || config.animationFile || closest(`eskie.crosshair.cone.${coneSize}.fantasy_01.white.full`),
+        coneFile = file ?? config.animationFile ?? closest(`eskie.crosshair.cone.${coneSize}.fantasy_01.white.full`),
         icon = config.icon,
         borderColor = "#ffffff",
         borderAlpha = 0,
@@ -28,10 +28,10 @@ async function create(token, config = {}) {
     let targets;
 
     async function coneGraphic(crosshair) { 
-        const gridDist = canvas?.dimensions?.distance || 5;
-        const gridSize = canvas?.dimensions?.size || 100;
+        const gridDist = canvas?.dimensions?.distance ?? 5;
+        const gridSize = canvas?.dimensions?.size ?? 100;
         const lengthPixels = (distance / gridDist) * gridSize;
-        const angleRad = ((angle || 53.13) * Math.PI) / 180;
+        const angleRad = ((angle ?? 53.13) * Math.PI) / 180;
         const widthPixels = 2 * lengthPixels * Math.tan(angleRad / 2);
         const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
 

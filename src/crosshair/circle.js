@@ -16,7 +16,7 @@ function resolveCircleAsset(pathOrKey, effectSize) {
 async function create(token, config = {}) {
     const radius = config.radius ?? config.distance ?? 20;
     const effectSize = Math.round(config.effectSize ?? radius);
-    const fileArg = config.file || config.animationFile;
+    const fileArg = config.file ?? config.animationFile;
 
     const {
         id = `Circle Crosshair`,
@@ -51,8 +51,8 @@ async function create(token, config = {}) {
                 .persist();
         }
 
-        const gridDist = canvas?.dimensions?.distance || 5;
-        const gridSize = canvas?.dimensions?.size || 100;
+        const gridDist = canvas?.dimensions?.distance ?? 5;
+        const gridSize = canvas?.dimensions?.size ?? 100;
         const diameterPixels = ((radius * 2) / gridDist) * gridSize;
         const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
 
