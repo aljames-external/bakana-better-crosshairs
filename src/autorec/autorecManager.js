@@ -334,7 +334,16 @@ export class AutorecManager {
         const isLocal = Boolean(local || (typeof handlerOrConfig === "object" && handlerOrConfig !== null && handlerOrConfig.local));
 
         if (itemName === "DEFAULT" && typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
-            handlerOrConfig = { ...DEFAULT_AUTOREC_ENTRY, ...handlerOrConfig, id: "DEFAULT", itemName: "DEFAULT", isDefault: true };
+            handlerOrConfig = {
+                ...DEFAULT_AUTOREC_ENTRY,
+                ...handlerOrConfig,
+                id: "DEFAULT",
+                itemName: "DEFAULT",
+                isDefault: true,
+                activityId: "",
+                activityName: "",
+                hasActivity: false
+            };
         }
 
         if (this.registeredHandlers.has(itemName)) {
