@@ -402,8 +402,8 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                     const parsed = parseFloat(inputEl.value);
                     val = isNaN(parsed) ? undefined : parsed;
                 } else {
-                    val = inputEl.value;
-                    if (val === "" || val === "default") val = undefined;
+                    val = inputEl.value ?? "";
+                    if (inputEl.tagName === "SELECT" && val === "default") val = undefined;
                     else if (val === "true") val = true;
                     else if (val === "false") val = false;
                 }
