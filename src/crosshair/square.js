@@ -4,7 +4,7 @@ import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, ru
 
 async function create(token, config = {}) {
     const distance = config.distance ?? 30;
-    const width = config.width ?? distance;
+    const width = config.width ?? 30;
 
     const {
         id = `Square Crosshair`,
