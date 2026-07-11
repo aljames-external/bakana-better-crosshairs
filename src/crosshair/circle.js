@@ -1,6 +1,7 @@
 import { closest } from "../lib/filemanager.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
+import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken, resolveCrosshairIcon } from "./util.js";
+
 
 /**
  * Resolves the circle crosshair asset path based on the provided file path or key and the effect size.
@@ -117,8 +118,9 @@ async function create(token, config = {}) {
     }
 
     if (icon) {
-        circle.icon(icon);
+        circle.icon(resolveCrosshairIcon(icon));
     }
+
 
     circle
         .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {

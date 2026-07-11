@@ -1,7 +1,8 @@
 import { closest } from "../lib/filemanager.js";
 import { log } from "../lib/logger.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
+import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken, resolveCrosshairIcon } from "./util.js";
+
 
 /**
  * Creates and configures a ray crosshair sequence and associated graphics.
@@ -78,8 +79,9 @@ async function create(token, config = {}) {
     }
 
     if (icon) {
-        ray.icon(icon);
+        ray.icon(resolveCrosshairIcon(icon));
     }
+
 
     ray
         .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {

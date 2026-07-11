@@ -21,6 +21,35 @@ export function shouldStickToToken(config, defaultVal = false) {
 }
 
 /**
+ * Resolve an icon string into a direct asset path if it points to a Sequencer Database entry.
+ * @param {string} iconPath - Raw icon string (file path or Sequencer database dot path)
+ * @returns {string} Fully resolved icon file path
+ */
+export function resolveCrosshairIcon(iconPath) {
+    if (!iconPath || typeof iconPath !== "string") return "";
+    const trimmed = iconPath.trim();
+    if (!trimmed) return "";
+    try {
+        if (typeof Sequencer !== "undefined" && Sequencer.Database && typeof Sequencer.Database.entryExists === "function") {
+            if (Sequencer.Database.entryExists(trimmed)) {
+                const entry = Sequencer.Database.getEntry(trimmed);
+                const resolved = Array.isArray(entry) ? entry[0] : entry;
+                if (typeof resolved === "string") return resolved;
+                if (resolved && typeof resolved === "object") {
+                    const file = Array.isArray(resolved.file) ? resolved.file[0] : resolved.file;
+                    if (typeof file === "string") return file;
+                    if (file && typeof file === "object" && typeof file.file === "string") return file.file;
+                }
+            }
+        }
+    } catch (e) {
+        log.warn(`Could not resolve Sequencer Database entry for icon "${trimmed}":`, e);
+    }
+    return trimmed;
+}
+
+
+/**
  * Refresh the shape and grid highlights of a measured template overlay.
  * @param {object} tmpl - Template placeable or overlay object to refresh
  * @param {number} newDirDeg - New direction angle in degrees

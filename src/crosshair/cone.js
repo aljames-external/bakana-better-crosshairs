@@ -1,6 +1,7 @@
 import { closest } from "../lib/filemanager.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
+import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken, resolveCrosshairIcon } from "./util.js";
+
 
 /**
  * Creates a cone crosshair sequence and configures visual effects and placement callbacks.
@@ -93,8 +94,9 @@ async function create(token, config = {}) {
     }
 
     if (icon) {
-        cone.icon(icon);
+        cone.icon(resolveCrosshairIcon(icon));
     }
+
 
     cone
         .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {

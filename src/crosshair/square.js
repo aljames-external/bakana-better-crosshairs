@@ -1,6 +1,7 @@
 import { closest } from "../lib/filemanager.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken } from "./util.js";
+import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, runConcurrentScript, shouldStickToToken, resolveCrosshairIcon } from "./util.js";
+
 
 /**
  * Creates and configures a square crosshair sequence.
@@ -76,8 +77,9 @@ async function create(token, config = {}) {
     }
 
     if (icon) {
-        square.icon(icon);
+        square.icon(resolveCrosshairIcon(icon));
     }
+
 
     square
         .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {
