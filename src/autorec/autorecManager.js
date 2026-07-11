@@ -82,10 +82,10 @@ export class AutorecManager {
      */
     indexRegistration(registeredKey, handler) {
         const itemName = handler?.itemName ?? registeredKey.split(" | ")[0].trim();
-        const activityId = (handler?.activityId ?? "").trim();
-        const activityName = (handler?.activityName ?? "").trim();
-        const hasActivity = Boolean(activityId || activityName);
         const isDefault = Boolean(handler?.isDefault || registeredKey === "DEFAULT");
+        const activityId = isDefault ? "" : (handler?.activityId ?? "").trim();
+        const activityName = isDefault ? "" : (handler?.activityName ?? "").trim();
+        const hasActivity = Boolean(activityId || activityName);
         const enabled = handler?.enabled !== false;
         const baseConfig = typeof handler === "object" && handler !== null ? handler : { handler };
         const entry = {
@@ -363,8 +363,9 @@ export class AutorecManager {
      * @param {boolean} [options.local=false] - If true, only unregister locally
      */
     unregister(itemName, { persist = true, local = false } = {}) {
-        if (itemName === "DEFAULT") {
-            log.warn("AutorecManager | Cannot delete non-deletable DEFAULT entry. You may disable it by setting enabled: false.");
+        const existing = this.registeredHandlers.get(itemName);
+        if (existing?.isDefault) {
+            log.warn("AutorecManager | Cannot delete canonical default fallback entry (isDefault: true). You may disable it by setting enabled: false.");
             return false;
         }
         const deleted = this.registeredHandlers.delete(itemName);
