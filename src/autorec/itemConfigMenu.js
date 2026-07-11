@@ -124,6 +124,11 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             ? (autorecMatch ?? DEFAULT_AUTOREC_ENTRY)
             : { ...(autorecMatch ?? DEFAULT_AUTOREC_ENTRY), ...(itemCustomConfig ?? {}) };
 
+        const scopeHint = selectedScope === "item"
+            ? localize("BBC.itemConfigMenu.scopeHintItem", "Configuring default overrides for this entire item.")
+            : localize("BBC.itemConfigMenu.scopeHintActivity", "Configuring granular overrides specific to this activity (takes priority over item overrides).");
+
+
         const hasGranularFlags = Boolean(
             customConfig &&
             ("enableAnimation" in customConfig ||
