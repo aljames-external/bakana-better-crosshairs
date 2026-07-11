@@ -675,7 +675,8 @@
     gap: 6px;
 }
 
-.bbc-add-workflow-btn {
+.bbc-add-workflow-btn,
+.bbc-save-single-btn {
     background: rgba(34, 197, 94, 0.15);
     border: 1px solid rgba(34, 197, 94, 0.35);
     color: #86efac;
@@ -703,11 +704,13 @@
     border-color: #f87171;
 }
 
-.bbc-add-workflow-btn:hover {
+.bbc-add-workflow-btn:hover,
+.bbc-save-single-btn:hover {
     background: #22c55e;
     color: #ffffff;
     border-color: #4ade80;
 }
+
 
 .bbc-item-select-checkbox {
     margin-right: 8px;
