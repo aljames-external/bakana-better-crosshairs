@@ -10,13 +10,25 @@ export const DEFAULT_AUTOREC_ENTRY = {
     itemName: "DEFAULT",
     isDefault: true,
     enabled: true,
-    stickToToken: false,
+    stickToToken: "default",
     showLine: true,
     borderColor: "#ffffff",
     borderAlpha: 0,
     fillColor: "#000000",
-    fillAlpha: 0
+    fillAlpha: 0,
+    circleFile: "",
+    coneFile: "",
+    rayFile: "",
+    squareFile: "",
+    placedFillColor: "",
+    placedFillAlpha: 0,
+    placedBorderColor: "",
+    placedBorderAlpha: 0,
+    concurrentCode: "",
+    postPlacementCode: "",
+    icon: ""
 };
+
 
 /**
  * AutorecManager manages automatic recognition (autorec) registrations for template/region items.
@@ -54,6 +66,9 @@ export class AutorecManager {
         this.get = this.get.bind(this);
         this.list = this.list.bind(this);
         this.getAllEntries = this.getAllEntries.bind(this);
+        this.getDefaultConfig = this.getDefaultConfig.bind(this);
+        this.getDefault = this.getDefaultConfig;
+        this.customize = this.customize.bind(this);
         this.broadcastSync = this.broadcastSync.bind(this);
     }
 
@@ -67,6 +82,48 @@ export class AutorecManager {
             this._onRegisterCallback = callback;
         }
     }
+
+    /**
+     * Return a clean copy of the canonical default Better Crosshairs configuration entry schema.
+     * Serves as a reference template for systems without built-in support to inspect required and available options.
+     * @returns {Object} Clean copy of the canonical default crosshair configuration object
+     */
+    getDefaultConfig() {
+        return { ...DEFAULT_AUTOREC_ENTRY };
+    }
+
+
+    /**
+     * Customize item-specific crosshair override configuration stored on item flags.
+
+     * Invokable by any user with ownership of the passed Item.
+     * Passing config === undefined (or null) clears any existing custom item override.
+     * @param {Document} item - Target Item document
+     * @param {Object|undefined} [config] - Crosshair override configuration object or undefined to clear
+     * @returns {Promise<boolean>} True if the item configuration was successfully set or cleared, false otherwise
+     */
+    async customize(item, config) {
+        if (!item || typeof item.setFlag !== "function" || typeof item.unsetFlag !== "function") {
+            log.warn("AutorecManager.customize | Invalid item document passed to customize.");
+            return false;
+        }
+
+        if (!Boolean(item.isOwner)) {
+            log.warn(`AutorecManager.customize | Current user does not have ownership of item "${item.name}".`);
+            return false;
+        }
+
+        if (config === undefined || config === null) {
+            log.debug(`AutorecManager.customize | Clearing custom BBC crosshair configuration from item "${item.name}"`);
+            await item.unsetFlag(MODULE_ID, "customConfig");
+            return true;
+        }
+
+        log.debug(`AutorecManager.customize | Storing custom BBC crosshair configuration on item "${item.name}":`, config);
+        await item.setFlag(MODULE_ID, "customConfig", config);
+        return true;
+    }
+
 
     /**
      * Resolve the normalized calling Item and Activity context from a document and workflow payload.

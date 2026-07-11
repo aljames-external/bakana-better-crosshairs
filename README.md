@@ -13,10 +13,12 @@ A high-performance, modular targeting crosshair replacement and automated recogn
 * [Key Features](#key-features)
 * [Targeting Modes (`Attached` vs `Detached`)](#targeting-modes-attached-vs-detached)
 * [Automated Recognition (Autorec)](#automated-recognition-autorec)
+* [Per-Item Customization & Preference Hierarchy](#per-item-customization--preference-hierarchy)
 * [System & Module Support](#system--module-support)
 * [Developer Documentation](#developer-documentation)
 * [Installation](#installation)
 * [License](#license)
+
 
 ---
 
@@ -56,7 +58,31 @@ The **Autorec Configuration Hub** allows you to define custom crosshair rules th
 
 ---
 
+## Per-Item Customization & Preference Hierarchy
+
+Bakana's Better Crosshairs supports item-level overrides stored directly on item flags (`bakana-better-crosshairs.customConfig`):
+
+- **Item Sheet Header Button**: When an item owner (player or GM) opens an Item Sheet, a **BBC** button (`<i class="fa-solid fa-crosshairs"></i> BBC`) appears in the sheet header bar. Clicking it opens up an item-specific configuration menu (`ItemCrosshairConfigApplication`).
+- **Live Status Badges**: The Item Configuration Menu displays dynamic badges to indicate how the item resolves its crosshairs:
+  - **`CUSTOM`**: Custom overrides stored directly on the item's flags (`item.flags["bakana-better-crosshairs"].customConfig`).
+  - **`AUTOREC`**: Inheriting settings from a registered Autorec workflow.
+  - **`DEFAULT`**: Using the canonical fallback configuration.
+- **Delete CUSTOM Configuration**: If an item has custom flags stored, owners can click **Delete CUSTOM Configuration** to clear item-level overrides and immediately revert to AUTOREC or default without touching any global AUTOREC entries.
+- **Preference Resolution Hierarchy**: When any item or spell is used to spawn a crosshair (`matchAutorecEntry`), the engine resolves configuration in strict order:
+
+  $$\text{CUSTOM CONFIG} \rightarrow \text{AUTOREC MATCH} \rightarrow \text{AUTOREC DEFAULT} \rightarrow \text{FOUNDRY DEFAULT}$$
+
+### Programmatic Customization API
+
+For game systems without native integration or modules looking to programmatically configure items, `BBC` exposes two helper methods on `bbc.manager`:
+
+- **`bbc.manager.getDefaultConfig()`**: Returns a clean copy (`{ ...DEFAULT_AUTOREC_ENTRY }`) of the canonical default crosshair configuration schema outlining all required and available fields (`enabled`, `circleFile`, `coneFile`, `rayFile`, `squareFile`, `stickToToken`, `showLine`, `borderColor`, `borderAlpha`, `fillColor`, `fillAlpha`, `placedFillColor`, `concurrentCode`, `postPlacementCode`, etc.).
+- **`bbc.manager.customize(item, config)`**: Programmatically store or clear a custom crosshair configuration override on any Item document owned by the calling user (`item.setFlag("bakana-better-crosshairs", "customConfig", config)`). Passing `config === undefined` (or `null`) clears the override.
+
+---
+
 ## System & Module Support
+
 
 Bakana's Better Crosshairs uses a decoupled **System Adapter & Foundry Adapter** architecture:
 * **Foundry VTT V14+ (`Region` Workflows)**: Intercepts targeting via `drawMeasuredTemplate` → `preCreateRegion` → `createRegion`, automatically converting game feet (`30 ft`) into exact canvas pixel dimensions (`* pxPerFoot`) and grid units (`{ gridUnits: true }`) for Sequencer effects.

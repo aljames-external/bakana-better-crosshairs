@@ -27,8 +27,6 @@ export class BaseFoundryVTTAdapter {
             activity: activityObj,
             activityName: activityObj?.name ?? "",
             activityId: activityObj?.id ?? ""
-        };
-
         const result = systemAdapter.extractCallingContext(doc, baseContext);
 
         log.debug("BaseFoundryVTTAdapter.extractCallingContext | Result from systemAdapter:", {
@@ -43,10 +41,10 @@ export class BaseFoundryVTTAdapter {
 
     /**
      * Filter and match autorec candidates for a Foundry document (MeasuredTemplate / Region)
-     * by calling the system adapter to decide whether an entry should replace the default crosshair.
+     * following strict preference hierarchy: CUSTOM CONFIG > AUTOREC MATCH > AUTOREC DEFAULT > FOUNDRY DEFAULT.
      * @param {Document} doc - The template or region document
      * @param {Map<string, Object>} entries - Registered autorec entries map
-     * @returns {Object|null} The matching autorec entry or null
+     * @returns {Object|null} The matching crosshair configuration entry or null
      */
     matchAutorecEntry(doc, entries) {
         if (!doc || !entries) return null;
@@ -55,6 +53,26 @@ export class BaseFoundryVTTAdapter {
             log.debug("matchAutorecEntry | Could not extract calling item context (missing itemName and itemId) from document:", { doc, context });
             return null;
         }
+
+        // 1. CUSTOM CONFIG: Inspect calling item flags for explicit item custom configuration
+        if (context.item) {
+            const customConfig = context.item.getFlag?.(MODULE_ID, "customConfig") ?? context.item.flags?.[MODULE_ID]?.customConfig;
+            if (customConfig) {
+                if (customConfig.enabled !== false) {
+                    log.debug(`matchAutorecEntry | [CUSTOM CONFIG] Found custom item flag crosshair override on "${context.itemName}" (${context.itemId})`);
+                    return {
+                        ...DEFAULT_AUTOREC_ENTRY,
+                        ...customConfig,
+                        isCustom: true,
+                        item: context.item,
+                        activity: context.activity
+                    };
+                }
+                log.debug(`matchAutorecEntry | [CUSTOM CONFIG DISABLED] Custom override on "${context.itemName}" is disabled; returning null (FOUNDRY DEFAULT).`);
+                return null;
+            }
+        }
+
 
         log.debug("matchAutorecEntry | Comparing calling context against registered entries:", {
             callingItemName: context.itemName,

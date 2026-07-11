@@ -3,6 +3,8 @@ import { crosshair } from '../crosshair/_crosshairs.js';
 import { Token } from './compat.js';
 import { crosshairAdapter } from '../adapter/foundry/index.js';
 import { autorecManager } from '../autorec/autorecManager.js';
+import { registerItemSheetHooks } from '../autorec/itemConfigMenu.js';
+
 
 const pendingPlacements = new Map();
 let hooksInitialized = false;
@@ -321,6 +323,8 @@ function initializeHooks() {
     } else {
         Hooks.once("ready", () => autorecManager.initializeReadySync());
     }
+
+    registerItemSheetHooks();
 }
 
 // Connect autorec registration to hook initialization
