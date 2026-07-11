@@ -363,7 +363,7 @@ export class AutorecManager {
      * @param {boolean} [options.local=false] - If true, only unregister locally
      */
     unregister(itemName, { persist = true, local = false } = {}) {
-        if (itemName === "DEFAULT" || itemName === "default") {
+        if (itemName === "DEFAULT") {
             log.warn("AutorecManager | Cannot delete non-deletable DEFAULT entry. You may disable it by setting enabled: false.");
             return false;
         }
