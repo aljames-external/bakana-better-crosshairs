@@ -542,13 +542,14 @@ export class AutorecManager {
     }
 
     /**
-     * Get the registered handler entry for a target Document or item name.
+     * Get the registered handler entry for a target item name, Document, or PlaceableObject.
      * Normalizes caller entry boundary before dispatching to single-responsibility lookup helpers (Rule 5).
-     * @param {string|Document} targetOrName - Item name or candidate Document
+     * @param {string|Document|PlaceableObject} targetOrName - Item name, Document, or PlaceableObject (which exposes `.document`)
      * @returns {Object|null} Registered autorec entry configuration or null if not found
      */
     get(targetOrName) {
         if (typeof targetOrName === "string") {
+
             return this.getEntryByName(targetOrName);
         }
         const doc = targetOrName instanceof Document ? targetOrName : targetOrName?.document;
@@ -594,9 +595,11 @@ export class AutorecManager {
             const circleFile = config.circleFile ?? "eskie.crosshair.circle.fantasy_01.white.full";
             const coneFile = config.coneFile ?? "eskie.crosshair.cone.thin.fantasy_01.white.full";
             const rayFile = config.rayFile ?? "eskie.crosshair.ray.fantasy_01.white";
-            const squareFile = config.squareFile ?? "eskie.crosshair.square.fantasy_01.white";
+            const squareFile = config.squareFile ?? "eskie.crosshair.ray.fantasy_01.white";
 
             const unitFt = localize("BBC.Units.Feet", "ft");
+
+
             const distVal = config.distance ?? config.radius;
             const distanceDisplay = distVal !== undefined ? `${distVal} ${unitFt}` : null;
             const widthVal = config.width;
