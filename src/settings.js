@@ -17,7 +17,7 @@ Hooks.once('init', function() {
     });
 
     game.settings.register(MODULE_ID, 'registeredTemplates', {
-        name: 'Registered Templates',
+        name: 'BBC.settings.registeredTemplates.name',
         scope: 'world',
         config: false,
         type: Object,

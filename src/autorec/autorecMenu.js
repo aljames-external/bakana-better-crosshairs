@@ -47,6 +47,53 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             ? localize("BBC.autorecMenu.term.region", "region")
             : localize("BBC.autorecMenu.term.template", "template");
 
+        const labels = {
+            searchPlaceholder: localize("BBC.autorecMenu.labels.searchPlaceholder", "Filter registered workflows (e.g. Fireball)..."),
+            editMode: localize("BBC.autorecMenu.labels.editMode", "Edit Mode"),
+            registeredWorkflows: localize("BBC.autorecMenu.labels.registeredWorkflows", "Registered Workflows"),
+            addBtn: localize("BBC.autorecMenu.labels.addBtn", "Add"),
+            removeBtn: localize("BBC.autorecMenu.labels.removeBtn", "Remove"),
+            emptySidebar: localize("BBC.autorecMenu.labels.emptySidebar", "No crosshair animations registered yet."),
+            selectWorkflowTitle: localize("BBC.autorecMenu.labels.selectWorkflowTitle", "Select a Registered Workflow"),
+            selectWorkflowDesc: localize("BBC.autorecMenu.labels.selectWorkflowDesc", "Click on any item name in the sidebar to inspect its pre-animation, core animation, and post-animation configuration."),
+            preSectionDesc: localize("BBC.autorecMenu.labels.preSectionDesc", `Executes custom Javascript code concurrent with ${docTerm} placement selection.`),
+            noScript: localize("BBC.autorecMenu.labels.noScript", "No custom script configured"),
+            animationTitle: localize("BBC.autorecMenu.labels.animationTitle", "Animation Configuration"),
+            animationDesc: localize("BBC.autorecMenu.labels.animationDesc", "Sequencer crosshair graphic asset and interactive rendering properties."),
+            workflowEnabled: localize("BBC.autorecMenu.labels.workflowEnabled", "Workflow Enabled"),
+            callingItemName: localize("BBC.autorecMenu.labels.callingItemName", "Calling Item Name"),
+            callingActivity: localize("BBC.autorecMenu.labels.callingActivity", "Calling Activity ID / Name (DnD5e)"),
+            registrationScope: localize("BBC.autorecMenu.labels.registrationScope", "Registration Scope"),
+            circleFile: localize("BBC.autorecMenu.labels.circleFile", "Circle Sequencer Filepath"),
+            coneFile: localize("BBC.autorecMenu.labels.coneFile", "Cone Sequencer Filepath"),
+            rayFile: localize("BBC.autorecMenu.labels.rayFile", "Ray Sequencer Filepath"),
+            squareFile: localize("BBC.autorecMenu.labels.squareFile", "Square Sequencer Filepath"),
+            customHandler: localize("BBC.autorecMenu.labels.customHandler", "Custom Function Handler"),
+            lockToToken: localize("BBC.autorecMenu.labels.lockToToken", "Lock to Token (Stick)"),
+            originLine: localize("BBC.autorecMenu.labels.originLine", "Origin Stretch Line"),
+            borderStyling: localize("BBC.autorecMenu.labels.borderStyling", "Border Styling (Tile Highlight)"),
+            fillStyling: localize("BBC.autorecMenu.labels.fillStyling", "Fill Styling (Tile Highlight)"),
+            customIcon: localize("BBC.autorecMenu.labels.customIcon", "Custom Cursor Icon"),
+            placedSectionDesc: localize("BBC.autorecMenu.labels.placedSectionDesc", `Configures the fill color, border color, and alpha opacities of the final placed ${docTerm} document on the canvas.`),
+            placedFill: localize("BBC.autorecMenu.labels.placedFill", "Placed Fill Styling"),
+            placedBorder: localize("BBC.autorecMenu.labels.placedBorder", "Placed Border Styling"),
+            defaultPlacementNote: localize("BBC.autorecMenu.labels.defaultPlacementNote", "Using default Foundry / Game System placement colors (Enable Edit Mode to customize)."),
+            postSectionDesc: localize("BBC.autorecMenu.labels.postSectionDesc", `Executes custom Javascript code after final ${docTerm} document creation.`),
+            noPostScript: localize("BBC.autorecMenu.labels.noPostScript", "No custom post-placement script configured"),
+            enabledPill: localize("BBC.autorecMenu.pills.enabled", "Enabled"),
+            disabledPill: localize("BBC.autorecMenu.pills.disabled", "Disabled"),
+            allActivitiesPill: localize("BBC.autorecMenu.pills.allActivities", "All Activities"),
+            localOnlyPill: localize("BBC.autorecMenu.pills.localOnly", "Local Only (Session Scope)"),
+            worldSyncedPill: localize("BBC.autorecMenu.pills.worldSynced", "World Synced (Persisted)"),
+            yesCustomScript: localize("BBC.autorecMenu.pills.yesCustomScript", "Yes (Custom Script)"),
+            noDeclarative: localize("BBC.autorecMenu.pills.noDeclarative", "No (Declarative Config)"),
+            stickOn: localize("BBC.autorecMenu.pills.stickOn", "On (Locked to Origin Token)"),
+            stickOff: localize("BBC.autorecMenu.pills.stickOff", "Off (Free Cursor Placement)"),
+            stickDefault: localize("BBC.autorecMenu.pills.stickDefault", "Default (Cone: On, Others: Off)"),
+            showLineLabel: localize("BBC.autorecMenu.labels.showLine", "Show Line"),
+            alphaLabel: localize("BBC.autorecMenu.labels.alpha", "Alpha:")
+        };
+
         return {
             entries,
             count: entries.length,
@@ -60,6 +107,7 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             postPlacementTitle,
             placementSectionTag,
             docTerm,
+            labels,
             menuHint: localize("BBC.autorecMenu.menuHint")
         };
     }
