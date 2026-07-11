@@ -71,7 +71,7 @@ export const log = {
         }
     },
     groupEnd() {
-        if (groupStack.pop() === true) {
+        if (groupStack.pop()) {
             console.groupEnd();
         }
     },
