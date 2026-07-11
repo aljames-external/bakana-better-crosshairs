@@ -11,7 +11,7 @@ export const DEFAULT_AUTOREC_ENTRY = {
     itemName: "DEFAULT",
     isDefault: true,
     enabled: true,
-    stickToToken: false,
+    stickToToken: "default",
     showLine: true,
     borderColor: "#ffffff",
     borderAlpha: 0,
@@ -526,11 +526,11 @@ export class AutorecManager {
             const widthDisplay = widthVal !== undefined ? `${widthVal} ${unitFt}` : null;
             const angleVal = config.angle;
             const angleDisplay = angleVal !== undefined ? `${angleVal}°` : null;
-            const stickToToken = Boolean(config.stickToToken);
-            const stickToTokenMode = stickToToken ? "true" : "false";
-            const isStickOn = stickToToken;
-            const isStickOff = !stickToToken;
-            const isStickDefault = false;
+            const stickVal = String(config.stickToToken);
+            const isStickOn = stickVal === "true";
+            const isStickOff = stickVal === "false";
+            const isStickDefault = stickVal === "default";
+            const stickToToken = isStickOn ? "true" : (isStickOff ? "false" : "default");
             const showLine = config.showLine !== false;
             const lineFile = config.lineFile ?? "eskie.crosshair.line.generic_01.white";
             const borderColor = config.borderColor ?? "#ffffff";
@@ -591,7 +591,6 @@ export class AutorecManager {
                 widthDisplay,
                 angleDisplay,
                 stickToToken,
-                stickToTokenMode,
                 isStickDefault,
                 isStickOn,
                 isStickOff,

@@ -7,11 +7,10 @@ let activePointerHandler = null;
 
 export function shouldStickToToken(config, defaultVal = false) {
     if (!config || typeof config !== "object") return defaultVal;
-    const val = config.stickToToken ?? config.attachToToken ?? config.lockToToken;
-    if (val === undefined || val === null || val === "" || val === "default") return defaultVal;
-    if (val === false || val === "false" || val === "off" || val === "no" || val === 0 || val === "0") return false;
-    if (val === true || val === "true" || val === "on" || val === "yes" || val === 1 || val === "1") return true;
-    return Boolean(val);
+    const stickVal = String(config.stickToToken);
+    if (stickVal === "true") return true;
+    if (stickVal === "false") return false;
+    return defaultVal;
 }
 
 function refreshTemplateHighlights(tmpl, newDirDeg, rad) {
