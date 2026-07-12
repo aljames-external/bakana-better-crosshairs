@@ -220,15 +220,20 @@ export function attachWheelRotation(crosshair, config = {}) {
             }
         }
 
-        // 3. Rotate the active Sequencer visual effect graphics directly around the shape's origin
+        // 3. Rotate the active Sequencer visual effect graphics directly around the shape's container origin
         if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
             try {
                 const effects = Sequencer.EffectManager.getEffects({ name: config.id });
                 for (const eff of effects) {
-                    if (eff.sprite) enforceAnchorAndRotate(eff.sprite, rad);
-                    else if (eff.mesh) eff.mesh.rotation = rad;
-                    else if (eff.container) eff.container.rotation = rad;
-                    else if (typeof eff.rotation !== "undefined") eff.rotation = rad;
+                    if (eff.container && typeof eff.container.rotation !== "undefined") {
+                        eff.container.rotation = rad;
+                    } else if (eff.sprite && typeof eff.sprite.rotation !== "undefined") {
+                        eff.sprite.rotation = rad;
+                    } else if (eff.mesh && typeof eff.mesh.rotation !== "undefined") {
+                        eff.mesh.rotation = rad;
+                    } else if (typeof eff.rotation !== "undefined") {
+                        eff.rotation = rad;
+                    }
                 }
             } catch (e) {}
         }
