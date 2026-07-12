@@ -72,9 +72,9 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
             tmpl._onRotate(wheelEvent);
         } catch (e) {}
     }
-    if (crosshairAdapter?.updatePreviewShape) {
+    if (crosshairAdapter?.updatePreviewShape && tmpl.document) {
         try {
-            crosshairAdapter.updatePreviewShape(tmpl.document ?? tmpl, { direction: newDirDeg, rotation: newDirDeg });
+            crosshairAdapter.updatePreviewShape(tmpl.document, { direction: newDirDeg, rotation: newDirDeg });
         } catch (e) {}
     }
     tmpl.direction = newDirDeg;
