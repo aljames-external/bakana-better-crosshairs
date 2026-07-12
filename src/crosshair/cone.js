@@ -30,8 +30,8 @@ async function create(token, config = {}) {
 
     const id = config.id ?? "Cone Crosshair";
     const coneSize = config.coneSize ?? "thin";
-    const file = config.file;
-    const coneFile = config.coneFile ?? (file ?? closest(`eskie.crosshair.cone.${coneSize}.fantasy_01.white.full`));
+    const file = config.file ? closest(config.file) : undefined;
+    const coneFile = config.coneFile ? closest(config.coneFile) : (file ?? closest(`eskie.crosshair.cone.${coneSize}.fantasy_01.white.full`));
     const icon = config.icon;
     const borderColor = config.borderColor ?? "#ffffff";
     const borderAlpha = config.borderAlpha ?? 0;

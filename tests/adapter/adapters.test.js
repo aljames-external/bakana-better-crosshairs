@@ -1,6 +1,7 @@
 import '../setup.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { closest } from '../../src/lib/filemanager.js';
 import { initializeFoundryAdapter, crosshairAdapter } from '../../src/adapter/foundry/index.js';
 import { initializeSystemAdapter, systemAdapter } from '../../src/adapter/system/index.js';
 import { registerPlacementHooks } from '../../src/adapter/index.js';
@@ -389,4 +390,34 @@ test('FoundryVTTV14Adapter and Pf2eSystemAdapter handle Collection shapes via .c
     const ctx = pf2eAdapter.extractCallingContext(docWithBehavior, {});
     assert.equal(ctx.itemName, 'Aura of Protection');
     assert.equal(ctx.itemId, '999');
+});
+
+test('closest(path) invokes dependency validation, throwing Error and notifying UI when required module is unactivated', async () => {
+    let notifiedMessage = null;
+    const originalError = globalThis.ui?.notifications?.error;
+    try {
+        if (!globalThis.ui) globalThis.ui = { notifications: {} };
+        if (!globalThis.ui.notifications) globalThis.ui.notifications = {};
+        globalThis.ui.notifications.error = (msg) => { notifiedMessage = msg; };
+
+        // Ensure eskie modules return as unactivated in mock game objects
+        const origModulesGet = globalThis.game?.modules?.get;
+        if (globalThis.game?.modules) {
+            globalThis.game.modules.get = (id) => ({ active: false, version: '1.0.0' });
+        }
+
+        assert.throws(
+            () => closest('eskie.crosshair.cone.thin.fantasy_01.white.full'),
+            (err) => err instanceof Error && (err.message.includes('BBC.Dependency.RequiresOne') || err.message.includes('Requires at least one of the following'))
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, 65));
+        assert.ok(notifiedMessage !== null && (notifiedMessage.includes('BBC.Dependency.RequiresOne') || notifiedMessage.includes('Requires at least one of the following')), 'UI notification error was emitted');
+
+        if (globalThis.game?.modules && origModulesGet) {
+            globalThis.game.modules.get = origModulesGet;
+        }
+    } finally {
+        if (globalThis.ui?.notifications) globalThis.ui.notifications.error = originalError;
+    }
 });

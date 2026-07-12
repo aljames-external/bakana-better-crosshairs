@@ -29,8 +29,9 @@ async function create(token, config = {}) {
 
     const id = config.id ?? "Ray Crosshair";
     const showLine = config.showLine ?? true;
-    const rayFile = config.rayFile ?? closest("eskie.crosshair.ray.fantasy_01.white");
-    const lineFile = config.lineFile ?? closest("eskie.crosshair.line.generic_01.white");
+    const file = config.file ? closest(config.file) : undefined;
+    const rayFile = config.rayFile ? closest(config.rayFile) : (file ?? closest("eskie.crosshair.ray.fantasy_01.white"));
+    const lineFile = config.lineFile ? closest(config.lineFile) : closest("eskie.crosshair.line.generic_01.white");
     const borderColor = config.borderColor ?? "#ffffff";
     const borderAlpha = config.borderAlpha ?? 0;
     const fillColor = config.fillColor ?? "#000000";

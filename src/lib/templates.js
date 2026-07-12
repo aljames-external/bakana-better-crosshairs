@@ -1,4 +1,5 @@
 import { log } from './logger.js';
+import { notify } from './notifier.js';
 import { crosshair } from '../crosshair/_crosshairs.js';
 import { runConcurrentScript } from '../crosshair/util.js';
 import { Token } from './compat.js';
@@ -233,7 +234,9 @@ async function handleDrawPreview(placeable) {
 
         log.debug(`handleDrawPreview | Sequencer crosshair sequence completed for "${entry.itemName}".`);
     } catch (err) {
+        const msg = typeof err === "string" ? err : (err?.message ?? "Failed to play Sequencer crosshair effect");
         log.error(`handleDrawPreview | Error running sequencer sequence for "${entry.itemName}":`, err);
+        notify.error(msg);
         pending.cancelled = true;
         pending.resolved = true;
     }

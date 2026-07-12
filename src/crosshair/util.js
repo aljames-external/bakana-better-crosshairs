@@ -1,5 +1,6 @@
 import { log } from "../lib/logger.js";
 import { Ray } from "../lib/compat.js";
+import { closest } from "../lib/filemanager.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
 
 let activeWheelHandler = null;
@@ -29,10 +30,11 @@ export function resolveCrosshairIcon(iconPath) {
     if (!iconPath || typeof iconPath !== "string") return "";
     const trimmed = iconPath.trim();
     if (!trimmed) return "";
+    const resolvedPath = closest(trimmed) ?? trimmed;
     try {
         if (typeof Sequencer !== "undefined" && Sequencer.Database && typeof Sequencer.Database.entryExists === "function") {
-            if (Sequencer.Database.entryExists(trimmed)) {
-                const entry = Sequencer.Database.getEntry(trimmed);
+            if (Sequencer.Database.entryExists(resolvedPath)) {
+                const entry = Sequencer.Database.getEntry(resolvedPath);
                 const resolved = Array.isArray(entry) ? entry[0] : entry;
                 if (typeof resolved === "string") return resolved;
                 if (resolved && typeof resolved === "object") {
@@ -43,9 +45,9 @@ export function resolveCrosshairIcon(iconPath) {
             }
         }
     } catch (e) {
-        log.warn(`Could not resolve Sequencer Database entry for icon "${trimmed}":`, e);
+        log.warn(`Could not resolve Sequencer Database entry for icon "${resolvedPath}":`, e);
     }
-    return trimmed;
+    return resolvedPath;
 }
 
 /**
