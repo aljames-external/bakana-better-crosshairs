@@ -356,8 +356,11 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
                         el.style.display = isChecked ? "" : "none";
                     });
                     root.querySelectorAll(`[data-override-badge='${fieldName}']`).forEach(el => {
-                        el.textContent = isChecked ? this.labels.badgeCustomOverride : this.labels.badgeInherited;
+                        el.textContent = isChecked
+                            ? localize("BBC.itemConfigMenu.badgeCustomOverride", "CUSTOM OVERRIDE")
+                            : localize("BBC.itemConfigMenu.badgeInherited", "INHERITED");
                     });
+
                 });
             });
         }
