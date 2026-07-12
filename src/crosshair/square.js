@@ -23,21 +23,20 @@ import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, sh
  * @returns {Promise<Array<*>>} A promise resolving to an array containing the configured square sequence and targets
  */
 async function create(token, config = {}) {
-    const distance = config.distance ?? 30;
-    const width = config.width ?? 30;
+    const distance = Math.round(config.distance ?? 20);
+    const width = Math.round(config.width ?? distance);
     const stickToToken = shouldStickToToken(config, false);
 
-    const id = config.id ?? "Square Crosshair";
-    const showLine = config.showLine ?? true;
-    const file = config.file ? closest(config.file) : undefined;
-    const squareFile = config.squareFile ? closest(config.squareFile) : (file ?? closest("eskie.crosshair.square.fantasy_01.white"));
-    const lineFile = config.lineFile ? closest(config.lineFile) : closest("eskie.crosshair.line.generic_01.white");
-    const borderColor = config.borderColor ?? "#ffffff";
-    const borderAlpha = config.borderAlpha ?? 0;
-    const fillColor = config.fillColor ?? "#000000";
-    const fillAlpha = config.fillAlpha ?? 0;
-    const icon = config.icon;
-    const context = config.context ?? null;
+    const {
+        id = `Square Crosshair`,
+        squareFile = closest("eskie.crosshair.square.thin.white.full"),
+        icon = config.icon,
+        borderColor = "#ffffff",
+        borderAlpha = 0,
+        fillColor = "#000000",
+        fillAlpha = 0,
+        context = null
+    } = config;
 
     config.token = token;
     config.stickToToken = Boolean(stickToToken);
@@ -90,7 +89,8 @@ async function create(token, config = {}) {
     if (stickToToken && token) {
         square.location(token, { lockToEdge: true, lockToEdgeDirection: false });
     } else if (config.snapToGrid !== false && config.snapToGrid !== "none") {
-        square.snapPosition(globalThis.CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2);
+        const snapMode = getGridSnapMode(config);
+        if (snapMode !== 0) square.snapPosition(snapMode);
     }
 
     if (icon) {

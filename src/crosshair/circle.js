@@ -9,32 +9,12 @@ import { resolveCrosshairPlacement, shouldStickToToken, resolveCrosshairIcon, al
  * @param {number} effectSize - The target effect size in feet or grid distance.
  * @returns {string} The resolved file path or asset key for the circle crosshair.
  */
-function resolveCircleAsset(pathOrKey, effectSize) {
-    const cleanSize = Math.round(effectSize);
-
-    /**
-     * Checks whether the provided path or key belongs to the Eskie circle fantasy asset collection.
-     *
-     * @param {string} pathOrKey - The asset file path or Sequencer database key to check.
-     * @returns {boolean} True if the asset is an Eskie circle fantasy asset, false otherwise.
-     */
-    function isEskie(pathOrKey) {
-        return pathOrKey.startsWith("eskie.crosshair.circle.fantasy_01");
-    }
-
-    if (pathOrKey && !isEskie(pathOrKey)) return closest(pathOrKey);
-    if (!pathOrKey) pathOrKey = `eskie.crosshair.circle.fantasy_01.white.full`;
-
-    const radiusIndex = pathOrKey.lastIndexOf(".radius_");
-    if (radiusIndex !== -1) {
-        pathOrKey = pathOrKey.slice(0, radiusIndex);
-    }
-
-    const possibleSizes = [10, 20, 30, 60];
-    possibleSizes.sort((a, b) => Math.abs(a - cleanSize) - Math.abs(b - cleanSize));
-    const suggestedSize = possibleSizes[0];
-    pathOrKey = `eskie.crosshair.circle.fantasy_01.white.full.radius_${suggestedSize}ft`;
-    return closest(pathOrKey);
+export function resolveCircleAsset(pathOrKey, effectSize = 40) {
+    if (pathOrKey) return closest(pathOrKey);
+    if (effectSize <= 10) return closest("eskie.crosshair.circle.thin.01.2x2");
+    if (effectSize <= 20) return closest("eskie.crosshair.circle.thin.01.4x4");
+    if (effectSize <= 30) return closest("eskie.crosshair.circle.thin.01.6x6");
+    return closest("eskie.crosshair.circle.thin.01.8x8");
 }
 
 /**
@@ -129,7 +109,8 @@ async function create(token, config = {}) {
     if (stickToToken && token) {
         circle.location(token, { lockToEdge: true, lockToEdgeDirection: false });
     } else if (config.snapToGrid !== false && config.snapToGrid !== "none") {
-        circle.snapPosition(globalThis.CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2);
+        const snapMode = getGridSnapMode(config);
+        if (snapMode !== 0) circle.snapPosition(snapMode);
     }
 
     if (icon) {

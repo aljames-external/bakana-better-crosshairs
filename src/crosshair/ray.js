@@ -18,38 +18,33 @@ import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, sh
  * @param {number} [config.borderAlpha=0] - Border alpha transparency
  * @param {string} [config.fillColor="#000000"] - Fill color for the ray
  * @param {number} [config.fillAlpha=0] - Fill alpha transparency
- * @param {string} [config.icon] - Icon to display on the crosshair
- * @param {object|null} [config.context=null] - Context object for placement callbacks
- * @returns {Promise<Array>} A promise resolving to a tuple of [ray, targets]
+ * @returns {Promise<Array>} A promise resolving to `[Sequence, targets]` array
  */
 async function create(token, config = {}) {
-    const distance = config.distance ?? 30;
-    const width = config.width ?? 5;
+    const distance = Math.round(config.distance ?? 30);
+    const width = Math.round(config.width ?? 5);
     const stickToToken = shouldStickToToken(config, false);
 
-    const id = config.id ?? "Ray Crosshair";
-    const showLine = config.showLine ?? true;
-    const file = config.file ? closest(config.file) : undefined;
-    const rayFile = config.rayFile ? closest(config.rayFile) : (file ?? closest("eskie.crosshair.ray.fantasy_01.white"));
-    const lineFile = config.lineFile ? closest(config.lineFile) : closest("eskie.crosshair.line.generic_01.white");
-    const borderColor = config.borderColor ?? "#ffffff";
-    const borderAlpha = config.borderAlpha ?? 0;
-    const fillColor = config.fillColor ?? "#000000";
-    const fillAlpha = config.fillAlpha ?? 0;
-    const icon = config.icon;
-    const context = config.context ?? null;
+    const {
+        id = `Ray Crosshair`,
+        rayFile = closest("eskie.crosshair.ray.straight.thin.white.01"),
+        icon = config.icon,
+        borderColor = "#ffffff",
+        borderAlpha = 0,
+        fillColor = "#000000",
+        fillAlpha = 0,
+        context = null
+    } = config;
 
     config.token = token;
     config.stickToToken = Boolean(stickToToken);
-    config.distance = distance;
-    config.width = width;
 
     let targets;
 
     /**
-     * Creates and plays the visual Sequence effect for the ray graphic attached to the crosshair.
+     * Helper to render the ray graphic effect inside the Sequencer queue.
      *
-     * @param {object} crosshair - The Sequencer crosshair instance to attach the ray graphic to
+     * @param {object} crosshair - The Sequencer crosshair instance to attach the effect to
      * @returns {Promise<Sequence>} A promise resolving to the played sequence effect
      */
     async function rayGraphic(crosshair) {
@@ -89,7 +84,8 @@ async function create(token, config = {}) {
     if (stickToToken && token) {
         ray.location(token, { lockToEdge: true, lockToEdgeDirection: false });
     } else if (config.snapToGrid !== false && config.snapToGrid !== "none") {
-        ray.snapPosition(globalThis.CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2);
+        const snapMode = getGridSnapMode(config);
+        if (snapMode !== 0) ray.snapPosition(snapMode);
     }
 
     if (icon) {

@@ -90,7 +90,8 @@ async function create(token, config = {}) {
     if (stickToToken && token) {
         cone.location(token, { lockToEdge: true, lockToEdgeDirection: false });
     } else if (config.snapToGrid !== false && config.snapToGrid !== "none") {
-        cone.snapPosition(globalThis.CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2);
+        const snapMode = getGridSnapMode(config);
+        if (snapMode !== 0) cone.snapPosition(snapMode);
     }
 
     if (icon) {

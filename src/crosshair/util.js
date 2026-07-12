@@ -313,6 +313,23 @@ export function detachWheelRotation() {
 }
 
 /**
+ * Determine the canonical grid snapping mode integer for Sequencer and Foundry grid calculations.
+ * Defaults to 7 (CENTER | VERTEX | SIDE_MIDPOINT) matching core MeasuredTemplate behaviors.
+ * @param {object} [config={}] - Crosshair placement configuration
+ * @returns {number} Snapping mode bitmask integer
+ */
+export function getGridSnapMode(config = {}) {
+    if (config.snapToGrid === false || config.snapToGrid === "none" || config.snapToGrid === 0 || config.snapToGrid === "0") return 0;
+    if (typeof config.snapToGrid === "number") return config.snapToGrid;
+    if (config.snapToGrid === "center") return globalThis.CONST?.GRID_SNAPPING_MODES?.CENTER ?? 1;
+    if (config.snapToGrid === "corner" || config.snapToGrid === "vertex" || config.snapToGrid === "corners") return globalThis.CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2;
+    if (config.snapToGrid === "side" || config.snapToGrid === "edge" || config.snapToGrid === "edges") return globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE_MIDPOINT ?? globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE ?? 4;
+    return (globalThis.CONST?.GRID_SNAPPING_MODES?.CENTER ?? 1) |
+           (globalThis.CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2) |
+           (globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE_MIDPOINT ?? globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE ?? 4);
+}
+
+/**
  * Shared utility to resolve crosshair coordinates and direction upon placement.
  * Sequencer passes coordinates or the crosshair object to CALLBACKS.PLACED.
  * We inspect all arguments and fall back to canvas.mousePosition if needed.
@@ -364,8 +381,8 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
         // Detached / free cursor placement: Origin is where the user clicked (clickX, clickY)
         x = clickX;
         y = clickY;
-        const snapMode = config.snapToGrid ?? "corner";
-        if (snapMode && snapMode !== false && snapMode !== "none") {
+        const snapMode = getGridSnapMode(config);
+        if (snapMode !== 0) {
             const snapped = snapCoordinates(x, y, snapMode);
             x = snapped.x;
             y = snapped.y;
@@ -378,14 +395,71 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     if (typeof direction === "number") {
         while (direction < 0) direction += 360;
         direction = direction % 360;
+    } else {
+        direction = 0;
     }
 
-    const result = crosshairAdapter.formatPlacementCoordinates(x, y, typeof direction === "number" ? direction : 0, config);
+    x = Math.round(x);
+    y = Math.round(y);
 
-    log.debug("resolveCrosshairPlacement | Resolved and formatted placement coordinates:", result);
+    log.debug("resolveCrosshairPlacement | Resolved placement coordinates & direction ->", { x, y, direction });
 
-    config.context?.resolve?.(result);
+    const result = { x, y, direction };
+    if (typeof config._onPlaced === "function") {
+        try { config._onPlaced(result, crosshair, ...extraArgs); } catch (e) {}
+    }
     return result;
+}
+
+/**
+ * Snap raw coordinates according to the provided snapping mode.
+ * @param {number} x - Raw X coordinate to snap
+ * @param {number} y - Raw Y coordinate to snap
+ * @param {string|number|boolean} [mode="all"] - Snapping mode ("all", "center", "corner", "edges", bitmask integer)
+ * @returns {object} Snapped coordinates `{ x, y }`
+ */
+export function snapCoordinates(x, y, mode = "all") {
+    if (!canvas?.grid || mode === false || mode === "none" || mode === 0 || mode === "0") return { x, y };
+
+    try {
+        const size = canvas.grid.size ?? 100;
+
+        if (typeof canvas.grid.getSnappedPosition === "function" && mode !== "center" && mode !== "corner" && mode !== "corners") {
+            const numMode = typeof mode === "number" ? mode : getGridSnapMode({ snapToGrid: mode });
+            if (numMode !== 0) {
+                const snapped = canvas.grid.getSnappedPosition(x, y, numMode);
+                return { x: snapped.x, y: snapped.y };
+            }
+        }
+
+        if (mode === "center" || mode === 1) {
+            if (typeof canvas.grid.getCenter === "function") {
+                const [cx, cy] = canvas.grid.getCenter(x, y);
+                return { x: cx, y: cy };
+            }
+            if (typeof canvas.grid.getCenterPoint === "function") {
+                const pt = canvas.grid.getCenterPoint({ x, y });
+                return { x: pt.x, y: pt.y };
+            }
+        }
+
+        if (mode === "corner" || mode === "corners" || mode === 2) {
+            const sx = Math.round(x / size) * size;
+            const sy = Math.round(y / size) * size;
+            return { x: sx, y: sy };
+        }
+
+        if (mode === "all" || mode === true || mode === "default" || mode === "edges" || mode === "edge" || typeof mode === "number") {
+            // Snaps to nearest of: center, corners, or edges (half-grid interval size / 2)
+            const half = size / 2;
+            const sx = Math.round(x / half) * half;
+            const sy = Math.round(y / half) * half;
+            return { x: sx, y: sy };
+        }
+    } catch (e) {
+        log.warn("snapCoordinates | Error snapping coordinates:", e);
+    }
+    return { x, y };
 }
 
 /**
@@ -438,49 +512,6 @@ export function getTokenEdgePoint(tok, targetX, targetY, sticky = false) {
         y: cy + sinA * t,
         direction: angleDeg
     };
-}
-
-/**
- * Snap coordinates to grid center, corners, edges, or nearest of all.
- * @param {number} x - Raw X coordinate to snap
- * @param {number} y - Raw Y coordinate to snap
- * @param {string|boolean} [mode="all"] - Snapping mode ("all", "center", "corner", "edges")
- * @returns {object} Snapped coordinates `{ x, y }`
- */
-export function snapCoordinates(x, y, mode = "all") {
-    if (!canvas?.grid) return { x, y };
-
-    try {
-        const size = canvas.grid.size ?? 100;
-
-        if (mode === "center") {
-            if (typeof canvas.grid.getCenter === "function") {
-                const [cx, cy] = canvas.grid.getCenter(x, y);
-                return { x: cx, y: cy };
-            }
-            if (typeof canvas.grid.getCenterPoint === "function") {
-                const pt = canvas.grid.getCenterPoint({ x, y });
-                return { x: pt.x, y: pt.y };
-            }
-        }
-
-        if (mode === "corner" || mode === "corners") {
-            const sx = Math.round(x / size) * size;
-            const sy = Math.round(y / size) * size;
-            return { x: sx, y: sy };
-        }
-
-        if (mode === "all" || mode === true || mode === "default" || mode === "edges" || mode === "edge") {
-            // Snaps to nearest of: center, corners, or edges (half-grid interval size / 2)
-            const half = size / 2;
-            const sx = Math.round(x / half) * half;
-            const sy = Math.round(y / half) * half;
-            return { x: sx, y: sy };
-        }
-    } catch (e) {
-        log.warn("snapCoordinates | Error snapping coordinates:", e);
-    }
-    return { x, y };
 }
 
 const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;

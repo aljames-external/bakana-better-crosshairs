@@ -189,7 +189,13 @@ globalThis.canvas = {
             options: { dimensions: { distance: 5 } }
         },
         getCenter(x, y) { return [x, y]; },
-        getSnappedPosition(x, y) { return { x, y }; }
+        getSnappedPosition(x, y, mode = 7) {
+            const size = this.size ?? 100;
+            if (mode === 2) return { x: Math.round(x / size) * size, y: Math.round(y / size) * size };
+            if (mode === 1) return { x: Math.round(x / size) * size + size / 2, y: Math.round(y / size) * size + size / 2 };
+            const half = size / 2;
+            return { x: Math.round(x / half) * half, y: Math.round(y / half) * half };
+        }
     },
     interface: {
         grid: {
