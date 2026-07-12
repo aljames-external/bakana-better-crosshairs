@@ -54,6 +54,23 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
         Hooks.on("drawMeasuredTemplate", (template) => callbacks.onDrawPreview(template));
         Hooks.on("preCreateMeasuredTemplate", (doc, _data, _options, userId) => callbacks.onPreCreate(doc, _data, _options, userId));
         Hooks.on("createMeasuredTemplate", (doc, _options, userId) => callbacks.onCreate(doc, _options, userId));
+        Hooks.on("refreshMeasuredTemplate", (template) => {
+            const borderAlpha = template.document?.borderAlpha ?? template.document?.flags?.bbc?.placedBorderAlpha;
+            if (borderAlpha !== undefined && borderAlpha !== null && typeof borderAlpha === "number" && !isNaN(borderAlpha) && template.template) {
+                if (Array.isArray(template.template.geometry?.graphicsData)) {
+                    let dirty = false;
+                    for (const gd of template.template.geometry.graphicsData) {
+                        if (gd && gd.lineStyle && gd.lineStyle.width > 0 && gd.lineStyle.alpha !== borderAlpha) {
+                            gd.lineStyle.alpha = borderAlpha;
+                            dirty = true;
+                        }
+                    }
+                    if (dirty && typeof template.template.geometry.invalidate === "function") {
+                        template.template.geometry.invalidate();
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -137,6 +154,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
         if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
         if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
         if (styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
+        if (styling.placedBorderAlpha !== undefined) updateData.borderAlpha = styling.placedBorderAlpha;
         if (config.hidden || config.hideTemplate) updateData.hidden = true;
 
         doc.updateSource(updateData);
