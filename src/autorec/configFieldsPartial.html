@@ -59,8 +59,9 @@
                         <div class="bbc-edit-row edit-only">
                             <label class="bbc-edit-checkbox-label">
                                 <input type="checkbox" name="enablePrePlacement" data-field="enablePrePlacement" {{#if enablePrePlacement}}checked{{/if}} />
-                                <span>{{#if enablePrePlacement}}Enabled{{else}}Disabled{{/if}}</span>
+                                <span>{{labels.enabledPill}}</span>
                             </label>
+
                             {{#if enablePrePlacement}}
                             <span class="bbc-type-badge custom-badge">{{labels.badgeCustomOverride}}</span>
                             {{else}}
@@ -111,8 +112,9 @@
                         <div class="bbc-edit-row edit-only">
                             <label class="bbc-edit-checkbox-label">
                                 <input type="checkbox" name="enableAnimation" data-field="enableAnimation" {{#if enableAnimation}}checked{{/if}} />
-                                <span>{{#if enableAnimation}}Enabled{{else}}Disabled{{/if}}</span>
+                                <span>{{labels.enabledPill}}</span>
                             </label>
+
                             {{#if enableAnimation}}
                             <span class="bbc-type-badge custom-badge">{{labels.badgeCustomOverride}}</span>
                             {{else}}
@@ -243,8 +245,9 @@
                         <div class="bbc-edit-row edit-only">
                             <label class="bbc-edit-checkbox-label">
                                 <input type="checkbox" name="enablePlacedStyling" data-field="enablePlacedStyling" {{#if enablePlacedStyling}}checked{{/if}} />
-                                <span>{{#if enablePlacedStyling}}Enabled{{else}}Disabled{{/if}}</span>
+                                <span>{{labels.enabledPill}}</span>
                             </label>
+
                             {{#if enablePlacedStyling}}
                             <span class="bbc-type-badge custom-badge">{{labels.badgeCustomOverride}}</span>
                             {{else}}
@@ -328,8 +331,9 @@
                         <div class="bbc-edit-row edit-only">
                             <label class="bbc-edit-checkbox-label">
                                 <input type="checkbox" name="enablePostPlacement" data-field="enablePostPlacement" {{#if enablePostPlacement}}checked{{/if}} />
-                                <span>{{#if enablePostPlacement}}Enabled{{else}}Disabled{{/if}}</span>
+                                <span>{{labels.enabledPill}}</span>
                             </label>
+
                             {{#if enablePostPlacement}}
                             <span class="bbc-type-badge custom-badge">{{labels.badgeCustomOverride}}</span>
                             {{else}}
