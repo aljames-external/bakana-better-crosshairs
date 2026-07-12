@@ -5,7 +5,10 @@ import { crosshairAdapter } from '../adapter/foundry/index.js';
 import { socketlib } from '../integration/index.js';
 import { localize } from '../lib/utils.js';
 
-
+/**
+ * Canonical default configuration schema for an automatic recognition (autorec) registration entry.
+ * @type {Object}
+ */
 export const DEFAULT_AUTOREC_ENTRY = {
     id: "DEFAULT",
     itemName: "DEFAULT",
@@ -16,7 +19,25 @@ export const DEFAULT_AUTOREC_ENTRY = {
     borderColor: "#ffffff",
     borderAlpha: 0,
     fillColor: "#000000",
-    fillAlpha: 0
+    fillAlpha: 0,
+    circleFile: "eskie.crosshair.circle.fantasy_01.white.full",
+    coneFile: "eskie.crosshair.cone.thin.fantasy_01.white.full",
+    rayFile: "eskie.crosshair.ray.fantasy_01.white",
+    squareFile: "eskie.crosshair.square.fantasy_01.white",
+    lineFile: "eskie.crosshair.line.generic_01.white",
+    placedFillColor: "#000000",
+    placedFillAlpha: 0,
+    placedBorderColor: "#ffffff",
+    placedBorderAlpha: 0,
+
+    enablePrePlacement: false,
+    enableAnimation: false,
+    enablePlacedStyling: false,
+    enablePostPlacement: false,
+
+    concurrentCode: "",
+    postPlacementCode: "",
+    icon: "eskie.crosshair.reticle.generic_02.white"
 };
 
 /**
@@ -24,6 +45,10 @@ export const DEFAULT_AUTOREC_ENTRY = {
  * Encapsulated as a class instead of free-floating module-level functions.
  */
 export class AutorecManager {
+    /**
+     * Initialize the AutorecManager instance with default registrations and bind methods.
+     * @returns {void}
+     */
     constructor() {
         this.registeredHandlers = new Map([
             ["DEFAULT", { ...DEFAULT_AUTOREC_ENTRY }]
@@ -36,6 +61,7 @@ export class AutorecManager {
         this.resolveItemAndActivity = this.resolveItemAndActivity.bind(this);
         this.indexRegistration = this.indexRegistration.bind(this);
         this.rebuildFastLookupMap = this.rebuildFastLookupMap.bind(this);
+        this.getEntriesForItem = this.getEntriesForItem.bind(this);
         this.getEntryByName = this.getEntryByName.bind(this);
         this.getEntryForDocument = this.getEntryForDocument.bind(this);
         this.onRegister = this.onRegister.bind(this);
@@ -52,12 +78,16 @@ export class AutorecManager {
         this.get = this.get.bind(this);
         this.list = this.list.bind(this);
         this.getAllEntries = this.getAllEntries.bind(this);
+        this.getDefaultConfig = this.getDefaultConfig.bind(this);
+        this.getDefault = this.getDefaultConfig;
+        this.customize = this.customize.bind(this);
         this.broadcastSync = this.broadcastSync.bind(this);
     }
 
     /**
      * Set a callback to be invoked when registration occurs (e.g. to initialize placement hooks).
-     * @param {Function} callback
+     * @param {Function} callback - Callback function to execute on registration
+     * @returns {void}
      */
     onRegister(callback) {
         if (typeof callback === "function") {
@@ -66,11 +96,51 @@ export class AutorecManager {
     }
 
     /**
+     * Return a clean copy of the canonical default Better Crosshairs configuration entry schema.
+     * Serves as a reference template for systems without built-in support to inspect required and available options.
+     * @returns {Object} Clean copy of the canonical default crosshair configuration object
+     */
+    getDefaultConfig() {
+        return { ...DEFAULT_AUTOREC_ENTRY };
+    }
+
+    /**
+     * Customize item-specific crosshair override configuration stored on item flags.
+     * Invokable by any user with ownership of the passed Item.
+     * Passing config === undefined (or null) clears any existing custom item override.
+     * @param {Document} item - Target Item document
+     * @param {Object|undefined} [config] - Crosshair override configuration object or undefined to clear
+     * @returns {Promise<boolean>} True if the item configuration was successfully set or cleared, false otherwise
+     */
+    async customize(item, config) {
+        if (!item || typeof item.setFlag !== "function" || typeof item.unsetFlag !== "function") {
+            log.warn("AutorecManager.customize | Invalid item document passed to customize.");
+            return false;
+        }
+
+        const isOwner = Boolean(item.isOwner);
+        if (!isOwner) {
+            log.warn(`AutorecManager.customize | Current user does not have ownership of item "${item.name}".`);
+            return false;
+        }
+
+        if (config === undefined || config === null) {
+            log.debug(`AutorecManager.customize | Clearing custom BBC crosshair configuration from item "${item.name}"`);
+            await item.unsetFlag(MODULE_ID, "customConfig");
+            return true;
+        }
+
+        log.debug(`AutorecManager.customize | Storing custom BBC crosshair configuration on item "${item.name}":`, config);
+        await item.setFlag(MODULE_ID, "customConfig", config);
+        return true;
+    }
+
+    /**
      * Resolve the normalized calling Item and Activity context from a document and workflow payload.
      * Delegates directly to the active system adapter (`systemAdapter.extractCallingContext`).
      * @param {Document} document - Template or Region document
      * @param {Object} [baseContext={}] - Upstream workflow calling context
-     * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}}
+     * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}} Normalized calling context containing item and activity details
      */
     resolveItemAndActivity(document, baseContext = {}) {
         return systemAdapter.extractCallingContext(document, baseContext);
@@ -81,13 +151,14 @@ export class AutorecManager {
      * Normalizes partial configuration objects against canonical DEFAULT_AUTOREC_ENTRY schema.
      * @param {string} registeredKey - Unique registration key (e.g. "Fireball" or "Fireball | 123")
      * @param {Object|Function} handler - Autorec configuration or callback
+     * @returns {void}
      */
     indexRegistration(registeredKey, handler) {
         const itemName = handler?.itemName ?? registeredKey.split(" | ")[0].trim();
         const isDefault = Boolean(handler?.isDefault || registeredKey === "DEFAULT");
         const activityId = isDefault ? "" : (handler?.activityId ?? "").trim();
         const activityName = isDefault ? "" : (handler?.activityName ?? "").trim();
-        const hasActivity = Boolean(activityId || activityName);
+        const hasActivity = Boolean(activityId) || Boolean(activityName);
         const enabled = handler?.enabled !== false;
         const baseConfig = typeof handler === "function" ? { handler } : (handler ?? {});
         const entry = {
@@ -109,13 +180,14 @@ export class AutorecManager {
             this.fastLookupMap.set(itemName.toLowerCase(), entry);
         }
         if (activityId || activityName) {
-            const act = activityId || activityName;
+            const act = Boolean(activityId) ? activityId : activityName;
             this.fastLookupMap.set(`${itemName.toLowerCase()}|${act.toLowerCase()}`, entry);
         }
     }
 
     /**
      * Rebuild the fast O(1) lookup map from all currently registered handlers.
+     * @returns {void}
      */
     rebuildFastLookupMap() {
         this.fastLookupMap.clear();
@@ -171,36 +243,36 @@ export class AutorecManager {
         return crosshairAdapter.matchAutorecEntry(doc, this.registeredHandlers);
     }
 
-
     /**
      * Initialize world settings listener hooks and socket synchronization for autorec registrations.
+     * @returns {void}
      */
     initializeReadySync() {
         if (this.readySyncInitialized) return;
         this.readySyncInitialized = true;
 
         socketlib.on((data) => {
-                if (!data || typeof data !== "object") return;
-                if (data.type === "REGISTER_TEMPLATE") {
-                    if (game.user?.isGM) {
-                        this.register(data.itemName, data.config, { persist: true });
-                    }
-                } else if (data.type === "UNREGISTER_TEMPLATE") {
-                    if (game.user?.isGM) {
-                        this.unregister(data.itemName, { persist: true });
-                    }
-                } else if (data.type === "SYNC_AUTORECS") {
-                    try {
-                        const saved = game.settings?.get(MODULE_ID, "registeredTemplates");
-                        if (saved) this.loadSavedRegistrations(saved);
-                    } catch (e) {
-                        log.error("Failed to load saved registeredTemplates setting", e);
-                    }
-                    Object.values(ui.windows || {}).forEach(w => {
-                        if (w && w.id === "bbc-autorec-menu") w.render(false);
-                    });
+            if (!data || typeof data !== "object") return;
+            if (data.type === "REGISTER_TEMPLATE") {
+                if (game.user?.isGM) {
+                    this.register(data.itemName, data.config, { persist: true });
                 }
-            });
+            } else if (data.type === "UNREGISTER_TEMPLATE") {
+                if (game.user?.isGM) {
+                    this.unregister(data.itemName, { persist: true });
+                }
+            } else if (data.type === "SYNC_AUTORECS") {
+                try {
+                    const saved = game.settings?.get(MODULE_ID, "registeredTemplates");
+                    if (saved) this.loadSavedRegistrations(saved);
+                } catch (e) {
+                    log.error("Failed to load saved registeredTemplates setting", e);
+                }
+                Object.values(ui.windows ?? {}).forEach(w => {
+                    if (w && w.id === "bbc-autorec-menu") w.render(false);
+                });
+            }
+        });
 
         try {
             const saved = game.settings?.get(MODULE_ID, "registeredTemplates");
@@ -214,6 +286,7 @@ export class AutorecManager {
      * Persist an autorec configuration to world settings and broadcast socket sync to all connected clients.
      * @param {string} itemName - Registered item/spell name
      * @param {Object} config - Autorec entry configuration
+     * @returns {void}
      */
     persistRegistration(itemName, config) {
         if (!game.ready) {
@@ -239,6 +312,7 @@ export class AutorecManager {
     /**
      * Delete a persisted autorec registration from world settings and broadcast socket sync.
      * @param {string} itemName - Item/spell name to unpersist
+     * @returns {void}
      */
     persistUnregistration(itemName) {
         if (!game.ready) {
@@ -266,6 +340,7 @@ export class AutorecManager {
     /**
      * Load and synchronize saved registrations from world settings into the active runtime registry.
      * @param {Object<string, Object>} [savedRegistrations={}] - Dictionary of saved registrations keyed by item name
+     * @returns {void}
      */
     loadSavedRegistrations(savedRegistrations = {}) {
         if (!savedRegistrations || typeof savedRegistrations !== "object") {
@@ -304,15 +379,16 @@ export class AutorecManager {
      *
      * @param {string} itemName - Name of the item/spell (e.g., 'Fireball')
      * @param {Object|Function} [handlerOrConfig={}] - Config object (`{ file: '...', local: true }`) or custom async function (`(token, autoConfig) => ...`)
-     * @param {Object} [options={}]
+     * @param {Object} [options={}] - Registration options
      * @param {boolean} [options.persist=true] - Whether to persist registration to world settings across reboots/clients
      * @param {boolean} [options.local=false] - Whether this registration should only exist locally on this client and not persist or sync
+     * @returns {void}
      */
     register(itemName, handlerOrConfig = {}, { persist = true, local = false } = {}) {
         if (this._onRegisterCallback) {
             this._onRegisterCallback();
         }
-        const isLocal = Boolean(local || handlerOrConfig?.local);
+        const isLocal = Boolean(local) || Boolean(handlerOrConfig?.local);
 
         if (itemName === "DEFAULT" && typeof handlerOrConfig !== "function") {
             handlerOrConfig = {
@@ -328,9 +404,9 @@ export class AutorecManager {
         }
 
         if (this.registeredHandlers.has(itemName)) {
-            log.info(`Re-registering template sequence for item: ${itemName}${isLocal ? " (local only)" : ""}`);
+            log.debug(`Re-registering template sequence for item: ${itemName}${isLocal ? " (local only)" : ""}`);
         } else {
-            log.info(`Registering template sequence for item: ${itemName}${isLocal ? " (local only)" : ""}`);
+            log.debug(`Registering template sequence for item: ${itemName}${isLocal ? " (local only)" : ""}`);
         }
         this.registeredHandlers.set(itemName, handlerOrConfig);
         const registered = this.registeredHandlers.get(itemName);
@@ -349,9 +425,10 @@ export class AutorecManager {
      * Unregister a template placement handler for an item.
      *
      * @param {string} itemName - Name of the item/spell
-     * @param {Object} [options={}]
+     * @param {Object} [options={}] - Unregistration options
      * @param {boolean} [options.persist=true] - Whether to remove registration from world settings across reboots/clients
      * @param {boolean} [options.local=false] - If true, only unregister locally
+     * @returns {boolean} True if the item registration was successfully deleted, false otherwise
      */
     unregister(itemName, { persist = true, local = false } = {}) {
         const existing = this.registeredHandlers.get(itemName);
@@ -363,7 +440,7 @@ export class AutorecManager {
         const wasPersisted = this.persistedItemNames.has(itemName);
         if (deleted) {
             this.rebuildFastLookupMap();
-            log.info(`Unregistered template sequence for item: ${itemName}`);
+            log.debug(`Unregistered template sequence for item: ${itemName}`);
         }
         if (persist && !local && wasPersisted && typeof itemName === "string") {
             this.persistUnregistration(itemName);
@@ -375,6 +452,9 @@ export class AutorecManager {
      * Batch unregister multiple template placement handlers by item name.
      * @param {Array<string>} itemNames - List of item names to unregister
      * @param {Object} [options={}] - Options (`{ persist: boolean, local: boolean }`)
+     * @param {boolean} [options.persist=true] - Whether to persist unregistration to world settings
+     * @param {boolean} [options.local=false] - Whether to only unregister locally
+     * @returns {Promise<void>}
      */
     async unregisterMany(itemNames, { persist = true, local = false } = {}) {
         if (!Array.isArray(itemNames)) return;
@@ -383,7 +463,7 @@ export class AutorecManager {
             if (existing?.isDefault) continue;
             this.registeredHandlers.delete(itemName);
             this.persistedItemNames.delete(itemName);
-            log.info(`Unregistered template sequence for item: ${itemName}`);
+            log.debug(`Unregistered template sequence for item: ${itemName}`);
         }
         this.rebuildFastLookupMap();
 
@@ -403,7 +483,9 @@ export class AutorecManager {
     /**
      * Batch register multiple template placement handlers.
      * @param {Array<{itemName: string, config: Object, local?: boolean}>} entries - Array of registration entries
-     * @param {Object} [options={}] - Options (`{ persist: boolean }`)
+     * @param {Object} [options={}] - Registration options (`{ persist: boolean }`)
+     * @param {boolean} [options.persist=true] - Whether to persist registrations to world settings
+     * @returns {Promise<void>}
      */
     async registerMany(entries, { persist = true } = {}) {
         if (!Array.isArray(entries)) return;
@@ -438,6 +520,7 @@ export class AutorecManager {
     /**
      * Overwrite the entire persisted template registration dictionary in world settings.
      * @param {Object<string, Object>} [persistedDict={}] - Entire dictionary of configurations to save
+     * @returns {Promise<void>}
      */
     async overwrite(persistedDict = {}) {
         if (game.user?.isGM) {
@@ -459,17 +542,17 @@ export class AutorecManager {
     /**
      * Check if a registered template animation exists for a target Document or item name.
      * @param {string|Document} targetOrName - Item name or candidate Document
-     * @returns {boolean}
+     * @returns {boolean} True if a registered handler exists for the target or name
      */
     has(targetOrName) {
-        return this.get(targetOrName) !== null;
+        return Boolean(this.get(targetOrName));
     }
 
     /**
-     * Get the registered handler entry for a target Document or item name.
+     * Get the registered handler entry for a target item name or Document.
      * Normalizes caller entry boundary before dispatching to single-responsibility lookup helpers (Rule 5).
      * @param {string|Document} targetOrName - Item name or candidate Document
-     * @returns {Object|null}
+     * @returns {Object|null} Registered autorec entry configuration or null if not found
      */
     get(targetOrName) {
         if (typeof targetOrName === "string") {
@@ -511,13 +594,13 @@ export class AutorecManager {
                 file = config.file ?? "";
             }
 
-            const isLocal = Boolean(handlerOrConfig?.local) || !this.persistedItemNames.has(itemName);
+            const isLocal = Boolean(handlerOrConfig?.local || !this.persistedItemNames.has(itemName));
 
             const isDefault = Boolean(config.isDefault);
             const circleFile = config.circleFile ?? "eskie.crosshair.circle.fantasy_01.white.full";
             const coneFile = config.coneFile ?? "eskie.crosshair.cone.thin.fantasy_01.white.full";
             const rayFile = config.rayFile ?? "eskie.crosshair.ray.fantasy_01.white";
-            const squareFile = config.squareFile ?? "eskie.crosshair.ray.fantasy_01.white";
+            const squareFile = config.squareFile ?? "eskie.crosshair.square.fantasy_01.white";
 
             const unitFt = localize("BBC.Units.Feet", "ft");
             const distVal = config.distance ?? config.radius;
@@ -526,11 +609,11 @@ export class AutorecManager {
             const widthDisplay = widthVal !== undefined ? `${widthVal} ${unitFt}` : null;
             const angleVal = config.angle;
             const angleDisplay = angleVal !== undefined ? `${angleVal}°` : null;
-            const stickVal = String(config.stickToToken);
-            const isStickOn = stickVal === "true";
-            const isStickOff = stickVal === "false";
-            const isStickDefault = stickVal === "default";
-            const stickToToken = isStickOn ? "true" : (isStickOff ? "false" : "default");
+            const stickToToken = Boolean(config.stickToToken);
+            const stickToTokenMode = stickToToken ? "true" : "false";
+            const isStickOn = stickToToken;
+            const isStickOff = !stickToToken;
+            const isStickDefault = false;
             const showLine = config.showLine !== false;
             const lineFile = config.lineFile ?? "eskie.crosshair.line.generic_01.white";
             const borderColor = config.borderColor ?? "#ffffff";
@@ -556,8 +639,8 @@ export class AutorecManager {
                 (config.placedBorderAlpha !== undefined && config.placedBorderAlpha !== 1)
             );
 
-            const concurrentCode = config.concurrentCode ?? "";
-            const postPlacementCode = config.postPlacementCode ?? "";
+            const concurrentCode = (config.concurrentCode ?? "").trim();
+            const postPlacementCode = (config.postPlacementCode ?? "").trim();
             const cleanItemName = config.itemName ?? itemName;
             const activityId = isDefault ? "" : (config.activityId ?? "");
             const activityName = isDefault ? "" : (config.activityName ?? "");
@@ -576,7 +659,6 @@ export class AutorecManager {
                 activityDisplay,
                 supportsActivities: systemAdapter.supportsActivities,
                 type,
-
                 typeKey: rawType.toLowerCase(),
                 isAutoDetect: rawType === "Auto-Detect",
                 circleFile,
@@ -591,6 +673,7 @@ export class AutorecManager {
                 widthDisplay,
                 angleDisplay,
                 stickToToken,
+                stickToTokenMode,
                 isStickDefault,
                 isStickOn,
                 isStickOff,
@@ -620,11 +703,15 @@ export class AutorecManager {
 
     /**
      * Broadcast a socket synchronization event (`SYNC_AUTORECS`) to all connected clients.
+     * @returns {void}
      */
     broadcastSync() {
         socketlib.emit({ type: "SYNC_AUTORECS" });
     }
 }
 
+/**
+ * Singleton instance of AutorecManager for managing template and region autorec registrations.
+ * @type {AutorecManager}
+ */
 export const autorecManager = new AutorecManager();
-
