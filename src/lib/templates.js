@@ -1,8 +1,11 @@
 import { log } from './logger.js';
+import { notify } from './notifier.js';
 import { crosshair } from '../crosshair/_crosshairs.js';
+import { runConcurrentScript } from '../crosshair/util.js';
 import { Token } from './compat.js';
-import { crosshairAdapter } from '../adapter/foundry/index.js';
+import { crosshairAdapter, systemAdapter, registerPlacementHooks } from '../adapter/index.js';
 import { autorecManager } from '../autorec/autorecManager.js';
+import { registerItemSheetHooks } from '../autorec/itemConfigMenu.js';
 
 const pendingPlacements = new Map();
 let hooksInitialized = false;
@@ -14,26 +17,42 @@ let hooksInitialized = false;
  */
 function isOwner(doc) {
     if (!doc.id) return true; // Preview templates on canvas are always local to the drawing client
-    const userId = doc.author?.id ?? doc.author ?? doc.user?.id ?? doc.user ?? game.user.id;
+    const userId = doc.author?.id ?? doc.author ?? game.user.id;
     return userId === game.user.id;
 }
 
 /**
- * Detect shape type and dimensions from a template or region placeable on canvas.
- * @param {PlaceableObject} placeable - Canvas PlaceableObject (MeasuredTemplate or Region)
- * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}}
+ * Detect shape properties and dimensions from a template or region document through version adapter.
+ * Normalizes input document structure before delegating to single-responsibility adapter helper.
+ * @param {Document|PlaceableObject} target - Candidate Template or Region document
+ * @returns {{type: string, distance: number, radius: number, width: number, angle: number, x: number, y: number}} Detected properties dictionary
  */
-function detectTemplateProperties(placeable) {
-    return crosshairAdapter.detectProperties(placeable.document);
+function detectTemplateProperties(target) {
+    const doc = target instanceof Document ? target : target.document;
+    return crosshairAdapter.detectProperties(doc);
 }
 
+/**
+ * Normalize an item or placeable object into a canonical Token instance.
+ * Normalizes single concrete input type before passing down to placement helpers.
+ * @param {Token|Item|Actor|Object|null} target - Candidate object to normalize
+ * @returns {Token|null} Canonical Token object or null
+ */
+function toToken(target) {
+    if (!target) return null;
+    if (target instanceof Token) return target;
+    if (target.object instanceof Token) return target.object;
+    return target;
+}
 
 /**
  * Handle preview drawing (v13 drawMeasuredTemplate / v14 drawRegion).
+ * @param {PlaceableObject} placeable - Canvas PlaceableObject representing the preview template or region
+ * @returns {Promise<void>} Resolves when preview handling is complete
  */
 async function handleDrawPreview(placeable) {
     const doc = placeable.document;
-    const isPreview = Boolean(placeable.isPreview);
+    const isPreview = crosshairAdapter.isPreview(placeable);
 
     log.debug(`handleDrawPreview | Hook fired:`, {
         docId: doc.id,
@@ -53,7 +72,11 @@ async function handleDrawPreview(placeable) {
         return;
     }
 
-    log.debug(`handleDrawPreview | Intercepting template preview for "${entry.itemName}"`);
+    log.debug(`handleDrawPreview | Intercepting template preview for "${entry.itemName}"`, {
+        placeableClass: placeable?.constructor?.name,
+        docData: doc?.toObject?.(),
+        docFlags: doc?.flags
+    });
 
     // 1. Immediately hide the Foundry template/region preview graphic completely so custom Sequencer visuals take over
     crosshairAdapter.hidePreview(placeable);
@@ -61,8 +84,8 @@ async function handleDrawPreview(placeable) {
     // 2. Resolve token and item context deterministically through version adapter
     const callingContext = crosshairAdapter.extractCallingContext(doc);
     const item = entry.item ?? callingContext.item;
-    let rawToken = item?.parent?.getActiveTokens?.()[0] ?? canvas.tokens?.controlled?.[0];
-    const token = rawToken instanceof Token ? rawToken : (rawToken?.object instanceof Token ? rawToken.object : rawToken);
+    const rawToken = item?.parent?.getActiveTokens?.()[0] ?? canvas.tokens?.controlled?.[0];
+    const token = toToken(rawToken);
     const actor = token?.actor ?? item?.actor;
 
     log.debug(`handleDrawPreview | Using token context:`, token?.name);
@@ -74,7 +97,8 @@ async function handleDrawPreview(placeable) {
         resolved: false,
         cancelled: false,
         coords: null,
-        config: entryConfig
+        config: entryConfig,
+        placeable: placeable
     };
     pendingPlacements.set(placementKey, pending);
 
@@ -89,7 +113,11 @@ async function handleDrawPreview(placeable) {
         type: undefined,
         cancelled: false,
         resolved: false,
-        promise: null,
+        /**
+         * Resolve the pending sequencer crosshair placement with specified coordinates.
+         * @param {Object} [coords={}] - Placed coordinates and properties
+         * @returns {Promise<void>} Resolves when deferred document placement is processed
+         */
         async resolve(coords = {}) {
             log.debug(`context.resolve | Sequencer crosshair PLACED at (${coords.x}, ${coords.y}):`, coords);
             Object.assign(this, coords);
@@ -100,24 +128,46 @@ async function handleDrawPreview(placeable) {
                 pending.coords = coords;
                 pending.resolved = true;
 
-                const previewDoc = pending.originalTemplate?.document;
-                if (previewDoc) {
-                    crosshairAdapter.updatePreviewShape(previewDoc, coords);
-                }
-
                 if (pending.deferredCreateData && canvas.scene) {
                     log.debug(`context.resolve | Resuming deferred document creation on scene "${canvas.scene.name}"`);
                     const deferredData = foundry.utils.deepClone(pending.deferredCreateData);
                     delete deferredData._id;
-                    const docName = previewDoc?.documentName ?? (deferredData.shapes ? "Region" : "MeasuredTemplate");
+                    const docName = deferredData.shapes ? "Region" : "MeasuredTemplate";
+                    const shapesList = deferredData.shapes?.contents ?? (Array.isArray(deferredData.shapes) ? deferredData.shapes : []);
+                    if (shapesList.length > 0 && crosshairAdapter && typeof crosshairAdapter._formatRegionShapeUpdate === "function") {
+                        const origShape = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
+                        const newShape = crosshairAdapter._formatRegionShapeUpdate(origShape, coords);
+                        delete newShape._id;
+                        deferredData.shapes = [newShape];
+                    } else {
+                        if (coords.x !== undefined) deferredData.x = coords.x;
+                        if (coords.y !== undefined) deferredData.y = coords.y;
+                        if (coords.direction !== undefined) deferredData.direction = coords.direction;
+                        else if (coords.rotation !== undefined) deferredData.direction = coords.rotation;
+                        if (coords.distance !== undefined) deferredData.distance = coords.distance;
+                        else if (coords.radius !== undefined) deferredData.distance = coords.radius;
+                    }
                     try {
                         await canvas.scene.createEmbeddedDocuments(docName, [deferredData]);
                     } catch (err) {
                         log.error(`context.resolve | Failed to create deferred ${docName} document on placement:`, err);
                     }
+                    if (placeable && crosshairAdapter && typeof crosshairAdapter.dismissPreview === "function") {
+                        crosshairAdapter.dismissPreview(placeable);
+                    }
+                } else if (doc && canvas.scene) {
+                    systemAdapter.handleProgrammaticPlacement(canvas.scene, doc, placeable, coords, {
+                        crosshairAdapter,
+                        pendingPlacements,
+                        placementKey
+                    });
                 }
             }
         },
+        /**
+         * Cancel the pending sequencer crosshair placement.
+         * @returns {void}
+         */
         cancel() {
             log.debug(`context.cancel | Sequencer crosshair CANCELLED for "${entry.itemName}"`);
             this.cancelled = true;
@@ -128,6 +178,9 @@ async function handleDrawPreview(placeable) {
                 pending.resolved = true;
             }
             pendingPlacements.delete(placementKey);
+            if (placeable) {
+                crosshairAdapter.dismissPreview(placeable);
+            }
         }
     };
 
@@ -143,15 +196,21 @@ async function handleDrawPreview(placeable) {
             scope: { item, actor, token, doc }
         };
 
+        const mergedConfig = {
+            ...autoConfig,
+            ...entryConfig,
+            context: autoConfig.context,
+            scope: autoConfig.scope
+        };
+
+        if (mergedConfig.concurrentCode) {
+            log.debug(`handleDrawPreview | Executing pre-placement script before template placement selection for "${entry.itemName}"`);
+            await runConcurrentScript(token, mergedConfig, null);
+        }
+
         if (typeof entry.handler === "function") {
-            await entry.handler(token, autoConfig);
+            await entry.handler(token, mergedConfig);
         } else {
-            const mergedConfig = {
-                ...autoConfig,
-                ...entryConfig,
-                context: autoConfig.context,
-                scope: autoConfig.scope
-            };
             const explicitType = entryConfig.type;
             const isKnownType = ["circle", "cone", "ray", "square", "rect"].includes(String(explicitType ?? "").toLowerCase());
             const crosshairType = isKnownType
@@ -172,9 +231,12 @@ async function handleDrawPreview(placeable) {
             log.debug(`handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}" with config:`, finalConfig);
             await builder.play(token, finalConfig);
         }
+
         log.debug(`handleDrawPreview | Sequencer crosshair sequence completed for "${entry.itemName}".`);
     } catch (err) {
-        log.error(`handleDrawPreview | Error running sequencer sequence for "${entry.itemName}":`, err);
+        const msg = typeof err === "string" ? err : (err?.message ?? "Failed to play Sequencer crosshair effect");
+        log.debug(`handleDrawPreview | Error running sequencer sequence for "${entry.itemName}":`, err);
+        notify.error(msg);
         pending.cancelled = true;
         pending.resolved = true;
     }
@@ -182,6 +244,11 @@ async function handleDrawPreview(placeable) {
 
 /**
  * Handle document preCreate (v13 preCreateMeasuredTemplate / v14 preCreateRegion).
+ * @param {Document} doc - Template or Region document being created
+ * @param {Object} _data - Initial document creation data
+ * @param {Object} _options - Document creation options
+ * @param {string} userId - ID of the user creating the document
+ * @returns {boolean} True to proceed with normal creation, false to abort or defer
  */
 function handlePreCreate(doc, _data, _options, userId) {
     log.debug(`handlePreCreate | [ENTRY] preCreate hook triggered for docName=${doc.documentName}, id=${doc.id}, userId=${userId}, localUser=${game.user.id}`);
@@ -229,6 +296,9 @@ function handlePreCreate(doc, _data, _options, userId) {
     if (pending.resolved && pending.coords) {
         log.debug(`handlePreCreate | [APPLY] Sequencer placement resolved for "${entry.itemName}". Applying placement onto document:`, pending.coords);
         crosshairAdapter.applyDocumentPlacement(doc, pending.coords, pending.config);
+        if (pending.placeable && crosshairAdapter && typeof crosshairAdapter.dismissPreview === "function") {
+            crosshairAdapter.dismissPreview(pending.placeable);
+        }
         pendingPlacements.delete(placementKey);
         log.debug(`handlePreCreate | [APPLY COMPLETE] Document updated successfully.`);
         return true;
@@ -243,6 +313,10 @@ function handlePreCreate(doc, _data, _options, userId) {
 /**
  * Handle document post-creation hook (v13 createMeasuredTemplate / v14 createRegion).
  * Executes user-configured post-placement Javascript inside a try/catch block with standard context variables.
+ * @param {Document} doc - Template or Region document that was created
+ * @param {Object} _options - Document creation options
+ * @param {string} userId - ID of the user creating the document
+ * @returns {Promise<void>} Resolves when post-placement execution completes
  */
 async function handleCreateDocument(doc, _options, userId) {
     if (userId !== game.user?.id) return;
@@ -260,7 +334,8 @@ async function handleCreateDocument(doc, _options, userId) {
 
     const callingContext = crosshairAdapter.extractCallingContext(doc);
     const item = config.item ?? callingContext.item;
-    const token = item?.parent?.getActiveTokens?.()[0] ?? canvas.tokens?.controlled?.[0];
+    const rawToken = item?.parent?.getActiveTokens?.()[0] ?? canvas.tokens?.controlled?.[0];
+    const token = toToken(rawToken);
     const actor = token?.actor ?? item?.actor;
     const scope = { doc, token, actor, item, config };
 
@@ -279,15 +354,19 @@ async function handleCreateDocument(doc, _options, userId) {
         );
         await fn(doc, token, actor, item, scope, config, canvas, game);
     } catch (e) {
-        log.error(`Error executing post-placement script for ${doc.documentName}:`, e);
+        log.error(`handleCreateDocument | Error executing post-placement script for ${doc.documentName}:`, e);
     }
 }
 
+/**
+ * Initialize crosshair placement hooks and ready synchronization.
+ * @returns {void}
+ */
 function initializeHooks() {
     if (hooksInitialized) return;
     hooksInitialized = true;
 
-    crosshairAdapter.registerPlacementHooks({
+    registerPlacementHooks({
         onDrawPreview: (placeable) => handleDrawPreview(placeable),
         onPreCreate: (doc, _data, _options, userId) => handlePreCreate(doc, _data, _options, userId),
         onCreate: (doc, _options, userId) => handleCreateDocument(doc, _options, userId)
@@ -298,10 +377,11 @@ function initializeHooks() {
     } else {
         Hooks.once("ready", () => autorecManager.initializeReadySync());
     }
+
+    registerItemSheetHooks();
 }
 
 // Connect autorec registration to hook initialization
 autorecManager.onRegister(() => initializeHooks());
 
 export { initializeHooks };
-
