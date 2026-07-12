@@ -57,8 +57,21 @@ export function resolveCrosshairIcon(iconPath) {
  * @param {number} rad - New direction angle in radians
  * @returns {void}
  */
-function refreshTemplateHighlights(tmpl, newDirDeg, rad) {
+function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
     if (!tmpl) return;
+    log.debug("refreshTemplateHighlights | Before update:", {
+        className: tmpl.constructor?.name,
+        docClassName: tmpl.document?.constructor?.name,
+        directionBefore: tmpl.direction,
+        docDirectionBefore: tmpl.document?.direction,
+        newDirDeg,
+        hasOnRotate: typeof tmpl._onRotate === "function"
+    });
+    if (wheelEvent && typeof tmpl._onRotate === "function" && tmpl !== crosshair?.template && !tmpl.isCrosshair) {
+        try {
+            tmpl._onRotate(wheelEvent);
+        } catch (e) {}
+    }
     if (crosshairAdapter?.updatePreviewShape) {
         try {
             crosshairAdapter.updatePreviewShape(tmpl.document ?? tmpl, { direction: newDirDeg, rotation: newDirDeg });
@@ -110,6 +123,12 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad) {
     if (typeof tmpl.highlightGrid === "function") {
         try { tmpl.highlightGrid(); } catch (e) {}
     }
+    log.debug("refreshTemplateHighlights | After update:", {
+        directionAfter: tmpl.direction,
+        docDirectionAfter: tmpl.document?.direction,
+        hasShape: Boolean(tmpl.shape),
+        shapeBounds: tmpl.shape ? { x: tmpl.shape.x, y: tmpl.shape.y, pointsLen: tmpl.shape.points?.length } : null
+    });
 }
 
 /**
@@ -214,7 +233,7 @@ export function attachWheelRotation(crosshair, config = {}) {
             if (Array.isArray(list)) {
                 for (const p of list) {
                     if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children || p === crosshair?.template) {
-                        refreshTemplateHighlights(p, config.currentDirection, rad);
+                        refreshTemplateHighlights(p, config.currentDirection, rad, event);
                     }
                 }
             }
