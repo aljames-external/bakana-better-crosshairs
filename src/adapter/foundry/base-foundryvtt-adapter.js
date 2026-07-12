@@ -431,9 +431,7 @@ export class BaseFoundryVTTAdapter {
         const drawPlaceables = new Set([...basePlaceables, ...customPlaceables, ...dynamicPlaceables]);
         for (const placeableName of drawPlaceables) {
             Hooks.on(`draw${placeableName}`, (template) => callbacks.onDrawPreview(template));
-            if (placeableName.includes("MeasuredTemplate")) {
-                Hooks.on(`refresh${placeableName}`, (template) => this.handleMeasuredTemplateRefresh(template));
-            }
+            Hooks.on(`refresh${placeableName}`, (template) => this.handleMeasuredTemplateRefresh(template));
         }
 
         for (const docType of this.supportedDocumentTypes) {
@@ -443,25 +441,92 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
-     * Handle refresh hooks for MeasuredTemplate placeables (e.g. maintaining borderAlpha styling).
-     * @param {PlaceableObject} template - MeasuredTemplate placeable object on canvas
+     * Handle refresh hooks for placeables (`MeasuredTemplate` or `Region`), syncing colors/alpha from bbc flags onto PIXI graphics.
+     * @param {PlaceableObject} template - Placeable object on canvas
      * @returns {void}
      */
     handleMeasuredTemplateRefresh(template) {
-        const borderAlpha = template.document?.borderAlpha ?? template.document?.flags?.bbc?.placedBorderAlpha;
-        if (borderAlpha !== undefined && borderAlpha !== null && typeof borderAlpha === "number" && !isNaN(borderAlpha) && template.template) {
-            if (Array.isArray(template.template.geometry?.graphicsData)) {
-                let dirty = false;
-                for (const gd of template.template.geometry.graphicsData) {
-                    if (gd && gd.lineStyle && gd.lineStyle.width > 0 && gd.lineStyle.alpha !== borderAlpha) {
-                        gd.lineStyle.alpha = borderAlpha;
-                        dirty = true;
+        if (!template?.document) return;
+        const bbcFlags = template.document.flags?.bbc ?? {};
+        const placedBorderColor = bbcFlags.placedBorderColor ?? template.document.borderColor;
+        const placedBorderAlpha = bbcFlags.placedBorderAlpha ?? template.document.borderAlpha;
+        const placedFillColor = bbcFlags.placedFillColor ?? template.document.fillColor ?? template.document.color;
+        const placedFillAlpha = bbcFlags.placedFillAlpha ?? template.document.fillAlpha ?? template.document.alpha;
+
+        if (bbcFlags.placedBorderColor && template.document.borderColor !== bbcFlags.placedBorderColor) {
+            try { template.document.borderColor = bbcFlags.placedBorderColor; } catch (e) {}
+        }
+        if (bbcFlags.placedBorderAlpha !== undefined && template.document.borderAlpha !== bbcFlags.placedBorderAlpha) {
+            try { template.document.borderAlpha = bbcFlags.placedBorderAlpha; } catch (e) {}
+        }
+        if (bbcFlags.placedFillColor && template.document.fillColor !== bbcFlags.placedFillColor) {
+            try { template.document.fillColor = bbcFlags.placedFillColor; } catch (e) {}
+        }
+        if (bbcFlags.placedFillAlpha !== undefined && template.document.fillAlpha !== bbcFlags.placedFillAlpha) {
+            try { template.document.fillAlpha = bbcFlags.placedFillAlpha; } catch (e) {}
+        }
+        if (bbcFlags.placedFillColor && template.document.color !== bbcFlags.placedFillColor) {
+            try { template.document.color = bbcFlags.placedFillColor; } catch (e) {}
+        }
+        if (bbcFlags.placedFillAlpha !== undefined && template.document.alpha !== bbcFlags.placedFillAlpha) {
+            try { template.document.alpha = bbcFlags.placedFillAlpha; } catch (e) {}
+        }
+
+        const toColorNum = (col) => {
+            if (typeof col === "number" && !isNaN(col)) return col;
+            if (typeof col === "string" && col.length) {
+                if (typeof foundry?.utils?.Color?.from === "function") {
+                    try { return foundry.utils.Color.from(col).valueOf(); } catch(e){}
+                }
+                try { return parseInt(col.replace(/^#/, ""), 16); } catch(e){}
+            }
+            return undefined;
+        };
+
+        const borderNum = toColorNum(placedBorderColor);
+        const borderAlphaNum = typeof placedBorderAlpha === "number" && !isNaN(placedBorderAlpha) ? placedBorderAlpha : undefined;
+        const fillNum = toColorNum(placedFillColor);
+        const fillAlphaNum = typeof placedFillAlpha === "number" && !isNaN(placedFillAlpha) ? placedFillAlpha : undefined;
+
+        const applyGraphicsData = (gfx) => {
+            if (!gfx) return false;
+            let dirty = false;
+            if (Array.isArray(gfx.geometry?.graphicsData)) {
+                for (const gd of gfx.geometry.graphicsData) {
+                    if (!gd) continue;
+                    if (gd.lineStyle && gd.lineStyle.width > 0) {
+                        if (borderNum !== undefined && gd.lineStyle.color !== borderNum) { gd.lineStyle.color = borderNum; dirty = true; }
+                        if (borderAlphaNum !== undefined && gd.lineStyle.alpha !== borderAlphaNum) { gd.lineStyle.alpha = borderAlphaNum; dirty = true; }
+                    }
+                    if (gd.fillStyle && gd.fillStyle.alpha > 0) {
+                        if (fillNum !== undefined && gd.fillStyle.color !== fillNum) { gd.fillStyle.color = fillNum; dirty = true; }
+                        if (fillAlphaNum !== undefined && gd.fillStyle.alpha !== fillAlphaNum) { gd.fillStyle.alpha = fillAlphaNum; dirty = true; }
                     }
                 }
-                if (dirty && typeof template.template.geometry.invalidate === "function") {
-                    template.template.geometry.invalidate();
+                if (dirty && typeof gfx.geometry.invalidate === "function") gfx.geometry.invalidate();
+            }
+            const instructions = gfx.instructions ?? gfx.context?.instructions ?? gfx._instructions;
+            if (Array.isArray(instructions)) {
+                for (const inst of instructions) {
+                    if (!inst) continue;
+                    if (inst.action === "stroke" || (inst.data && inst.data.width > 0) || (inst.style && inst.style.width > 0)) {
+                        const target = inst.data ?? inst.style ?? inst;
+                        if (borderNum !== undefined && target.color !== borderNum) { target.color = borderNum; dirty = true; }
+                        if (borderAlphaNum !== undefined && target.alpha !== borderAlphaNum) { target.alpha = borderAlphaNum; dirty = true; }
+                    }
+                    if (inst.action === "fill" || (inst.data && inst.data.color !== undefined && !inst.data.width) || (inst.style && inst.style.color !== undefined && !inst.style.width)) {
+                        const target = inst.data ?? inst.style ?? inst;
+                        if (fillNum !== undefined && target.color !== fillNum) { target.color = fillNum; dirty = true; }
+                        if (fillAlphaNum !== undefined && target.alpha !== fillAlphaNum) { target.alpha = fillAlphaNum; dirty = true; }
+                    }
                 }
             }
+            return dirty;
+        };
+
+        const targets = [template.template, template.border, template.shape, template.mesh, ...(Array.isArray(template.children) ? template.children : [])];
+        for (const target of targets) {
+            applyGraphicsData(target);
         }
     }
 

@@ -169,18 +169,58 @@ test('extractPlacedStylingFlags and applyDocumentPlacement extract and set borde
     const adapterV13 = new FoundryVTTV13Adapter();
     const extracted = adapterV13.extractPlacedStylingFlags(config);
     assert.equal(extracted.placedBorderAlpha, 0.85);
-    assert.equal(extracted.flags.bbc.placedBorderAlpha, 0.85);
+    const styling = adapterV13.extractPlacedStylingFlags({
+        placedFillColor: '#ff0000',
+        placedFillAlpha: 0.5,
+        placedBorderColor: '#fc753b',
+        placedBorderAlpha: 0.6,
+        postPlacementCode: 'console.log("test");'
+    });
 
-    let updatedData = null;
-    const mockDoc = {
-        updateSource: (data) => { updatedData = data; }
+    assert.equal(styling.placedFillColor, '#ff0000');
+    assert.equal(styling.placedFillAlpha, 0.5);
+    assert.equal(styling.placedBorderColor, '#fc753b');
+    assert.equal(styling.placedBorderAlpha, 0.6);
+    assert.equal(styling.flags.bbc.placedBorderAlpha, 0.6);
+    assert.equal(styling.flags.bbc.placedBorderColor, '#fc753b');
+
+    // Test handleMeasuredTemplateRefresh syncing bbc flags across PIXI 7 graphicsData and PIXI 8 instructions
+    const mockTemplate = {
+        document: {
+            flags: {
+                bbc: {
+                    placedBorderColor: '#fc753b',
+                    placedBorderAlpha: 0.6,
+                    placedFillColor: '#ff0000',
+                    placedFillAlpha: 0.5
+                }
+            },
+            borderColor: '#000000',
+            borderAlpha: 1
+        },
+        template: {
+            geometry: {
+                graphicsData: [
+                    { lineStyle: { width: 2, color: 0x000000, alpha: 1 }, fillStyle: { color: 0xffffff, alpha: 1 } }
+                ],
+                invalidate: () => {}
+            },
+            instructions: [
+                { action: 'stroke', data: { width: 2, color: 0x000000, alpha: 1 } },
+                { action: 'fill', data: { color: 0xffffff, alpha: 1 } }
+            ]
+        }
     };
-    adapterV13.applyDocumentPlacement(mockDoc, { x: 50, y: 60 }, config);
-    assert.equal(updatedData.fillColor, '#123456');
-    assert.equal(updatedData.fillAlpha, 0.5);
-    assert.equal(updatedData.borderColor, '#abcdef');
-    assert.equal(updatedData.borderAlpha, 0.85);
-    assert.equal(updatedData.flags.bbc.placedBorderAlpha, 0.85);
+
+    adapterV13.handleMeasuredTemplateRefresh(mockTemplate);
+    assert.equal(mockTemplate.document.borderColor, '#fc753b');
+    assert.equal(mockTemplate.document.borderAlpha, 0.6);
+    assert.equal(mockTemplate.template.geometry.graphicsData[0].lineStyle.color, 0xfc753b);
+    assert.equal(mockTemplate.template.geometry.graphicsData[0].lineStyle.alpha, 0.6);
+    assert.equal(mockTemplate.template.instructions[0].data.color, 0xfc753b);
+    assert.equal(mockTemplate.template.instructions[0].data.alpha, 0.6);
+    assert.equal(mockTemplate.template.instructions[1].data.color, 0xff0000);
+    assert.equal(mockTemplate.template.instructions[1].data.alpha, 0.5);
 });
 
 test('abstracted registerPlacementHooks combines both Foundry version adapter and System adapter without coupling', () => {
