@@ -30,11 +30,9 @@
                 <input type="checkbox" id="bbc-item-edit-mode-toggle" class="bbc-edit-toggle-input" {{#if isEditMode}}checked{{/if}} />
                 <span class="bbc-edit-slider-track"></span>
             </label>
-            {{#if hasCustom}}
-            <button type="button" class="bbc-delete-single-btn edit-only" data-action="delete-custom" title="Delete custom item configuration">
-                <i class="fa-solid fa-trash-can"></i> {{labels.deleteCustomBtn}}
+            <button type="submit" class="bbc-save-single-btn edit-only" title="Save custom configuration">
+                <i class="fa-solid fa-floppy-disk"></i> {{labels.saveCustomBtn}}
             </button>
-            {{/if}}
         </div>
     </div>
 
@@ -60,11 +58,14 @@
     </div>
 
 
+    {{#if hasCustom}}
     <!-- Footer Action Bar -->
     <div class="bbc-sidebar-footer bbc-item-config-footer edit-only">
-        <button type="submit" class="bbc-add-workflow-btn" {{#unless isEditMode}}disabled{{/unless}}>
-            <i class="fa-solid fa-floppy-disk"></i> {{labels.saveCustomBtn}}
+        <button type="button" class="bbc-delete-single-btn" data-action="delete-custom" title="Delete custom item configuration">
+            <i class="fa-solid fa-trash-can"></i> {{labels.deleteCustomBtn}}
         </button>
     </div>
+    {{/if}}
 </div>
+
 
