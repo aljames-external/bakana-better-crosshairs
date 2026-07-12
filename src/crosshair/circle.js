@@ -109,6 +109,7 @@ async function create(token, config = {}) {
             .name(id)
             .file(circleFile)
             .attachTo(crosshair)
+            .anchor({ x: 0.5, y: 0.5 })
             .size({ width: diameterPixels * factor, height: diameterPixels * factor }, { gridUnits })
             .opacity(0.8)
             .belowTokens()

@@ -173,19 +173,39 @@ export function attachWheelRotation(crosshair, config = {}) {
         // 1. Store direction on crosshair object and force full internal redraw of shape overlay and grid highlights
         rotateCrosshairInstance(crosshair, config.currentDirection);
 
-        const isRay = config.type === "ray";
+        const getTargetAnchor = (cfg) => {
+            const t = String(cfg.type ?? cfg.t ?? "").toLowerCase();
+            if (t === "ray" || t === "cone") return { x: 0, y: 0.5 }; // Midpoint of left edge
+            if (t === "rect" || t === "square") return { x: 0, y: 0 }; // Top left corner
+            return { x: 0.5, y: 0.5 }; // Circles / center
+        };
+
+        const targetAnchor = getTargetAnchor(config);
+
+        const enforceAnchorAndRotate = (sprite, rad) => {
+            if (!sprite) return;
+            if (sprite.anchor && (sprite.anchor.x !== targetAnchor.x || sprite.anchor.y !== targetAnchor.y)) {
+                const curRad = sprite.rotation ?? 0;
+                const width = sprite.width ?? 0;
+                const height = sprite.height ?? 0;
+                const dx = (targetAnchor.x - sprite.anchor.x) * width;
+                const dy = (targetAnchor.y - sprite.anchor.y) * height;
+                sprite.x += Math.cos(curRad) * dx - Math.sin(curRad) * dy;
+                sprite.y += Math.sin(curRad) * dx + Math.cos(curRad) * dy;
+                if (typeof sprite.anchor.set === "function") {
+                    sprite.anchor.set(targetAnchor.x, targetAnchor.y);
+                } else {
+                    sprite.anchor.x = targetAnchor.x;
+                    sprite.anchor.y = targetAnchor.y;
+                }
+            }
+            sprite.rotation = rad;
+        };
 
         // 2. Rotate internal PIXI graphics inside crosshair container (rotates transparent grey shape)
         if (crosshair) {
             if (crosshair.sprite) {
-                if (isRay && crosshair.sprite.anchor && crosshair.sprite.anchor.x !== 0) {
-                    const curRad = crosshair.sprite.rotation ?? 0;
-                    const halfLen = (crosshair.sprite.width ?? 0) / 2;
-                    crosshair.sprite.x -= Math.cos(curRad) * halfLen;
-                    crosshair.sprite.y -= Math.sin(curRad) * halfLen;
-                    crosshair.sprite.anchor.set(0, 0.5);
-                }
-                crosshair.sprite.rotation = rad;
+                enforceAnchorAndRotate(crosshair.sprite, rad);
             }
             if (crosshair.mesh) crosshair.mesh.rotation = rad;
             if (crosshair.graphics) crosshair.graphics.rotation = rad;
@@ -193,26 +213,19 @@ export function attachWheelRotation(crosshair, config = {}) {
                 for (const child of crosshair.children) {
                     if (child.rotation !== undefined && (child.isGraphics || child.type === "Graphics" || child.constructor?.name === "Graphics")) {
                         child.rotation = rad;
+                    } else if (child.anchor && child !== crosshair.sprite) {
+                        enforceAnchorAndRotate(child, rad);
                     }
                 }
             }
         }
 
-        // 3. Rotate the active Sequencer visual effect graphics directly around the left edge midpoint
+        // 3. Rotate the active Sequencer visual effect graphics directly around the shape's origin
         if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
             try {
                 const effects = Sequencer.EffectManager.getEffects({ name: config.id });
                 for (const eff of effects) {
-                    if (eff.sprite) {
-                        if (isRay && eff.sprite.anchor && eff.sprite.anchor.x !== 0) {
-                            const curRad = eff.sprite.rotation ?? 0;
-                            const halfLen = (eff.sprite.width ?? 0) / 2;
-                            eff.sprite.x -= Math.cos(curRad) * halfLen;
-                            eff.sprite.y -= Math.sin(curRad) * halfLen;
-                            eff.sprite.anchor.set(0, 0.5);
-                        }
-                        eff.sprite.rotation = rad;
-                    }
+                    if (eff.sprite) enforceAnchorAndRotate(eff.sprite, rad);
                     else if (eff.mesh) eff.mesh.rotation = rad;
                     else if (eff.container) eff.container.rotation = rad;
                     else if (typeof eff.rotation !== "undefined") eff.rotation = rad;
