@@ -592,7 +592,7 @@ export class AutorecManager {
                 file = config.file ?? "";
             }
 
-            const isLocal = Boolean(handlerOrConfig?.local) || !this.persistedItemNames.has(itemName);
+            const isLocal = Boolean(handlerOrConfig?.local || !this.persistedItemNames.has(itemName));
 
             const isDefault = Boolean(config.isDefault);
             const circleFile = config.circleFile ?? "eskie.crosshair.circle.fantasy_01.white.full";
@@ -640,7 +640,6 @@ export class AutorecManager {
             const concurrentCode = (config.concurrentCode ?? "").trim();
             const postPlacementCode = (config.postPlacementCode ?? "").trim();
             const cleanItemName = config.itemName ?? itemName;
-
             const activityId = isDefault ? "" : (config.activityId ?? "");
             const activityName = isDefault ? "" : (config.activityName ?? "");
             const hasActivity = Boolean(activityId || activityName);
@@ -658,7 +657,6 @@ export class AutorecManager {
                 activityDisplay,
                 supportsActivities: systemAdapter.supportsActivities,
                 type,
-
                 typeKey: rawType.toLowerCase(),
                 isAutoDetect: rawType === "Auto-Detect",
                 circleFile,

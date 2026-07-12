@@ -125,9 +125,9 @@ export class BaseFoundryVTTAdapter {
             }
         }
 
-        const itemConfig = context.item?.getFlag?.(MODULE_ID, "customConfig") ?? context.item?.flags?.[MODULE_ID]?.customConfig ?? null;
+        const itemConfig = context.item?.getFlag(MODULE_ID, "customConfig") ?? null;
         const activityConfig = context.activityId
-            ? (context.item?.getFlag?.(MODULE_ID, "activityConfigs")?.[context.activityId] ?? context.item?.flags?.[MODULE_ID]?.activityConfigs?.[context.activityId] ?? null)
+            ? (context.item?.getFlag(MODULE_ID, "activityConfigs")?.[context.activityId] ?? null)
             : null;
 
         if (!itemConfig && !activityConfig) {
@@ -153,7 +153,6 @@ export class BaseFoundryVTTAdapter {
         log.debug(`matchAutorecEntry | [CUSTOM CONFIG] Merged custom overrides (item: ${Boolean(itemConfig)}, activity: ${Boolean(activityConfig)}) for "${context.itemName}"`);
         return baseConfig;
     }
-
 
     /**
      * Hide a live placeable preview graphic during interactive drawing.

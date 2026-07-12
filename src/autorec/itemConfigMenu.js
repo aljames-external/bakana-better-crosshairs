@@ -7,7 +7,6 @@ import { systemAdapter } from "../adapter/system/index.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-
 /**
  * Normalize a hex color string, returning a valid 6-digit hex string or the provided fallback.
  * @param {unknown} val - Input color value to validate
@@ -59,7 +58,6 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         await this._saveConfiguration(form);
     }
 
-
     /**
      * Application rendering template parts.
      * @type {object}
@@ -73,6 +71,7 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
     /**
      * Construct an ItemCrosshairConfigApplication for a specific item document.
      * @param {object} [options={}] - Application instantiation options containing target item
+     * @returns {ItemCrosshairConfigApplication} Form application instance
      */
     constructor(options = {}) {
         super({
@@ -95,7 +94,6 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         const itemName = item?.name ?? "Unknown Item";
         const itemImg = item?.img ?? null;
         const isEditMode = Boolean(this.isEditMode);
-
 
         const selectedScope = this.selectedScope ?? "item";
         const itemCustomConfig = item?.getFlag(MODULE_ID, "customConfig") ?? null;
@@ -147,7 +145,6 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         const scopeHint = selectedScope === "item"
             ? localize("BBC.itemConfigMenu.scopeHintItem", "Configuring default overrides for this entire item.")
             : localize("BBC.itemConfigMenu.scopeHintActivity", "Configuring granular overrides specific to this activity (takes priority over item overrides).");
-
 
         const hasGranularFlags = Boolean(
             customConfig &&
@@ -273,7 +270,6 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             stickOff: localize("BBC.autorecMenu.pills.stickOff", "Off (Free Cursor Placement)")
         };
 
-
         return {
             item,
             itemName,
@@ -296,9 +292,7 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             postPlacementTitle,
             labels
         };
-
     }
-
 
     /**
      * Attach interactive DOM event listeners after rendering completes.
@@ -352,11 +346,9 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
                     syncEditModeControls(turningOn);
                 }
             });
-
         }
 
         // Synchronize HTML color pickers with adjacent text inputs
-
         root.querySelectorAll("input[type='color'][data-color-target]").forEach(picker => {
             picker.addEventListener("input", (ev) => {
                 const targetId = ev.currentTarget.getAttribute("data-color-target");
@@ -391,7 +383,6 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             scopeSelect.addEventListener("change", onScopeChange);
             scopeSelect.addEventListener("input", onScopeChange);
         }
-
 
         // Handle Delete CUSTOM Configuration action button
         const deleteBtn = root.querySelector("button[data-action='delete-custom']");
@@ -458,7 +449,6 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             icon: String(formData.get("icon") ?? "").trim()
         };
 
-
         const scope = this.selectedScope ?? "item";
         if (scope === "item") {
             log.debug(`ItemCrosshairConfigApplication | Saving custom item-level configuration for "${this.item.name}":`, config);
@@ -476,7 +466,6 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
     }
 }
 
-
 /**
  * Open the Item Crosshair Configuration application for a target item.
  * Accessible to any user who owns the item.
@@ -489,9 +478,9 @@ export function openItemCrosshairConfig(item) {
 }
 
 /**
- * Register Foundry VTT ApplicationV2 Item sheet header controls (`getHeaderControlsItemSheet5e`,
- * `getHeaderControlsItemSheet5e2`, `dnd5e.getItemContextOptions`, and ApplicationV2 render hooks)
- * so item owners see a BBC top-bar / menu control to configure item crosshairs.
+ * Register Foundry VTT ApplicationV2 Item sheet header controls (`getHeaderControlsItemSheet5e`
+ * and `getHeaderControlsItemSheet5e2`) so item owners see a BBC top-bar / menu control
+ * to configure item crosshairs.
  * @returns {void}
  */
 export function registerItemSheetHooks() {
@@ -523,4 +512,3 @@ export function registerItemSheetHooks() {
     Hooks.on("getHeaderControlsItemSheet5e", addApplicationV2HeaderControl);
     Hooks.on("getHeaderControlsItemSheet5e2", addApplicationV2HeaderControl);
 }
-

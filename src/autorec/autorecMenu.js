@@ -64,7 +64,6 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             rayFile: e.rayFile ?? DEFAULT_AUTOREC_ENTRY.rayFile,
             squareFile: e.squareFile ?? DEFAULT_AUTOREC_ENTRY.squareFile,
             lineFile: e.lineFile ?? DEFAULT_AUTOREC_ENTRY.lineFile,
-
             borderColorPicker: normalizeHexColor(e.borderColor, "#ffffff"),
             fillColorPicker: normalizeHexColor(e.fillColor, "#000000"),
             placedFillColorPicker: normalizeHexColor(e.placedFillColor, "#000000"),
@@ -116,7 +115,6 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             noPreScript: localize("BBC.autorecMenu.labels.noPreScript", "No custom pre-placement script configured"),
             noPostScript: localize("BBC.autorecMenu.labels.noPostScript", "No custom post-placement script configured"),
             enabledPill: localize("BBC.autorecMenu.pills.enabled", "Enabled"),
-
             disabledPill: localize("BBC.autorecMenu.pills.disabled", "Disabled"),
             allActivitiesPill: localize("BBC.autorecMenu.pills.allActivities", "All Activities"),
             localOnlyPill: localize("BBC.autorecMenu.pills.localOnly", "Local Only (Session Scope)"),
@@ -148,7 +146,6 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             placementSectionTitle,
             postPlacementTitle,
             docTerm,
-
             labels,
             menuHint: localize("BBC.autorecMenu.menuHint")
         };
@@ -419,7 +416,6 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                     val = val.trim();
                 }
                 if (inputEl.tagName === "SELECT" && val === "default") val = undefined;
-
                 else if (val === "true") val = true;
                 else if (val === "false") val = false;
             }
@@ -484,7 +480,6 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                     else if (val === "true") val = true;
                     else if (val === "false") val = false;
                 }
-
 
                 if (config[field] !== val) {
                     if (val === undefined) delete config[field];

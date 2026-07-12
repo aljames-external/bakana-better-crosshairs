@@ -711,7 +711,6 @@
     border-color: #4ade80;
 }
 
-
 .bbc-item-select-checkbox {
     margin-right: 8px;
     cursor: pointer;
@@ -801,6 +800,10 @@
     background: rgba(15, 18, 28, 0.6);
 }
 
+.bbc-header-icon-custom {
+    color: #22c55e !important;
+}
+
 .bbc-item-header-titles h2 {
     font-size: 0.95rem;
     font-weight: 700;
@@ -870,7 +873,6 @@
 }
 
 .bbc-item-config-body {
-
     flex: 1;
     min-height: 0;
     overflow-y: auto;
@@ -885,11 +887,3 @@
     border-top: 1px solid rgba(99, 102, 241, 0.25);
     flex-shrink: 0;
 }
-
-.bbc-header-icon-custom {
-    color: #22c55e !important;
-}
-
-
-
-

@@ -63,7 +63,6 @@
                 </div>
                 {{/each}}
             </div>
-
             {{/if}}
         </aside>
 
@@ -96,9 +95,7 @@
                             <i class="fa-solid fa-floppy-disk"></i> {{../labels.saveBtn}}
                         </button>
                     </div>
-
                 </header>
-
 
                 <div class="bbc-sections-scroll">
                     <!-- Top Section: Workflow Status -->
@@ -123,7 +120,6 @@
                                                 <input type="checkbox" class="bbc-edit-input" data-field="enabled" {{#if enabled}}checked{{/if}} />
                                                 <span>{{../labels.enabledPill}}</span>
                                             </label>
-
                                         </td>
                                     </tr>
                                 </tbody>
@@ -132,11 +128,8 @@
                     </section>
 
                     {{> "modules/bakana-better-crosshairs/src/autorec/configFieldsPartial.html" labels=../labels prePlacementTitle=../prePlacementTitle placementSectionTitle=../placementSectionTitle postPlacementTitle=../postPlacementTitle showOverrides=false showActivityIdentification=true isEditMode=../isEditMode supportsActivities=../supportsActivities}}
-
                 </div>
             </div>
-
-
             {{/each}}
         </main>
     </div>
