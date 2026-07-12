@@ -346,7 +346,22 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
                     syncEditModeControls(turningOn);
                 }
             });
+
+            // Live-toggle child configuration options and badge text when an override checkbox changes in edit mode
+            root.querySelectorAll("input[type='checkbox'][name^='enable']").forEach(chk => {
+                chk.addEventListener("change", (ev) => {
+                    const fieldName = ev.currentTarget.name;
+                    const isChecked = Boolean(ev.currentTarget.checked);
+                    root.querySelectorAll(`[data-override-child='${fieldName}']`).forEach(el => {
+                        el.style.display = isChecked ? "" : "none";
+                    });
+                    root.querySelectorAll(`[data-override-badge='${fieldName}']`).forEach(el => {
+                        el.textContent = isChecked ? this.labels.badgeCustomOverride : this.labels.badgeInherited;
+                    });
+                });
+            });
         }
+
 
         // Synchronize HTML color pickers with adjacent text inputs
         root.querySelectorAll("input[type='color'][data-color-target]").forEach(picker => {

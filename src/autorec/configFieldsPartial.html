@@ -52,11 +52,11 @@
                 <tr>
                     <th>{{labels.overridePrePlacement}}</th>
                     <td>
-                        <span class="view-only"><span class="bbc-type-badge">{{#if enablePrePlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span></span>
+                        <span class="view-only"><span class="bbc-type-badge" data-override-badge="enablePrePlacement">{{#if enablePrePlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span></span>
                         <div class="bbc-edit-row edit-only">
                             <label class="bbc-edit-checkbox-label">
                                 <input type="checkbox" name="enablePrePlacement" data-field="enablePrePlacement" {{#if enablePrePlacement}}checked{{/if}} />
-                                <span class="bbc-type-badge">{{#if enablePrePlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
+                                <span class="bbc-type-badge" data-override-badge="enablePrePlacement">{{#if enablePrePlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
                             </label>
                         </div>
 
@@ -65,7 +65,7 @@
                 {{/if}}
             </tbody>
         </table>
-        <div class="bbc-code-container {{#if (and showOverrides (not enablePrePlacement))}}edit-only{{/if}}">
+        <div class="bbc-code-container" data-override-child="enablePrePlacement" {{#if (and showOverrides (not enablePrePlacement))}}style="display: none;"{{/if}}>
             <div class="view-only">
                 {{#if concurrentCode}}
                 <pre class="bbc-code-preview"><code>{{concurrentCode}}</code></pre>
@@ -98,46 +98,46 @@
                 <tr>
                     <th>{{labels.overrideAnimation}}</th>
                     <td>
-                        <span class="view-only"><span class="bbc-type-badge">{{#if enableAnimation}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span></span>
+                        <span class="view-only"><span class="bbc-type-badge" data-override-badge="enableAnimation">{{#if enableAnimation}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span></span>
                         <div class="bbc-edit-row edit-only">
                             <label class="bbc-edit-checkbox-label">
                                 <input type="checkbox" name="enableAnimation" data-field="enableAnimation" {{#if enableAnimation}}checked{{/if}} />
-                                <span class="bbc-type-badge">{{#if enableAnimation}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
+                                <span class="bbc-type-badge" data-override-badge="enableAnimation">{{#if enableAnimation}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
                             </label>
                         </div>
                     </td>
                 </tr>
                 {{/if}}
 
-                <tr class="{{#if (and showOverrides (not enableAnimation))}}edit-only{{/if}}">
+                <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
                     <th>{{labels.circleFile}}</th>
                     <td>
                         <code class="bbc-code-pill view-only">{{circleFile}}</code>
                         <input type="text" class="bbc-edit-input edit-only" name="circleFile" data-field="circleFile" value="{{circleFile}}" placeholder="eskie.crosshair.circle.fantasy_01.white.full" />
                     </td>
                 </tr>
-                <tr class="{{#if (and showOverrides (not enableAnimation))}}edit-only{{/if}}">
+                <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
                     <th>{{labels.coneFile}}</th>
                     <td>
                         <code class="bbc-code-pill view-only">{{coneFile}}</code>
                         <input type="text" class="bbc-edit-input edit-only" name="coneFile" data-field="coneFile" value="{{coneFile}}" placeholder="eskie.crosshair.cone.thin.fantasy_01.white.full" />
                     </td>
                 </tr>
-                <tr class="{{#if (and showOverrides (not enableAnimation))}}edit-only{{/if}}">
+                <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
                     <th>{{labels.rayFile}}</th>
                     <td>
                         <code class="bbc-code-pill view-only">{{rayFile}}</code>
                         <input type="text" class="bbc-edit-input edit-only" name="rayFile" data-field="rayFile" value="{{rayFile}}" placeholder="eskie.crosshair.ray.fantasy_01.white" />
                     </td>
                 </tr>
-                <tr class="{{#if (and showOverrides (not enableAnimation))}}edit-only{{/if}}">
+                <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
                     <th>{{labels.squareFile}}</th>
                     <td>
                         <code class="bbc-code-pill view-only">{{squareFile}}</code>
                         <input type="text" class="bbc-edit-input edit-only" name="squareFile" data-field="squareFile" value="{{squareFile}}" placeholder="eskie.crosshair.square.fantasy_01.white" />
                     </td>
                 </tr>
-                <tr class="{{#if (and showOverrides (not enableAnimation))}}edit-only{{/if}}">
+                <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
                     <th>{{labels.lockToToken}}</th>
                     <td>
                         <span class="view-only">
@@ -152,7 +152,7 @@
                         </select>
                     </td>
                 </tr>
-                <tr class="{{#if (and showOverrides (not enableAnimation))}}edit-only{{/if}}">
+                <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
                     <th>{{labels.originLine}}</th>
                     <td>
                         <span class="view-only bbc-inline-flex-row">{{#if showLine}}<span class="bbc-pill">{{labels.enabledPill}}</span><code class="bbc-code-pill">{{lineFile}}</code>{{else}}<span class="bbc-pill">{{labels.disabledPill}}</span>{{/if}}</span>
@@ -166,7 +166,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="{{#if (or (and showOverrides (not enableAnimation)) (not hasCustomStyling))}}edit-only{{/if}}">
+                <tr class="{{#unless hasCustomStyling}}edit-only{{/unless}}" data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
                     <th>{{labels.borderStyling}}</th>
                     <td>
                         <span class="view-only">
@@ -180,7 +180,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="{{#if (or (and showOverrides (not enableAnimation)) (not hasCustomStyling))}}edit-only{{/if}}">
+                <tr class="{{#unless hasCustomStyling}}edit-only{{/unless}}" data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
                     <th>{{labels.fillStyling}}</th>
                     <td>
                         <span class="view-only">
@@ -194,13 +194,14 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="{{#if (or (and showOverrides (not enableAnimation)) (not icon))}}edit-only{{/if}}">
+                <tr class="{{#unless icon}}edit-only{{/unless}}" data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
                     <th>{{labels.customIcon}}</th>
                     <td>
                         <span class="view-only"><code class="bbc-code-pill">{{icon}}</code></span>
                         <input type="text" class="bbc-edit-input edit-only" name="icon" data-field="icon" value="{{icon}}" placeholder="eskie.crosshair.reticle.generic_02.white" />
                     </td>
                 </tr>
+
 
             </tbody>
         </table>
@@ -224,11 +225,11 @@
                 <tr>
                     <th>{{labels.overridePlacedStyling}}</th>
                     <td>
-                        <span class="view-only"><span class="bbc-type-badge">{{#if enablePlacedStyling}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span></span>
+                        <span class="view-only"><span class="bbc-type-badge" data-override-badge="enablePlacedStyling">{{#if enablePlacedStyling}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span></span>
                         <div class="bbc-edit-row edit-only">
                             <label class="bbc-edit-checkbox-label">
                                 <input type="checkbox" name="enablePlacedStyling" data-field="enablePlacedStyling" {{#if enablePlacedStyling}}checked{{/if}} />
-                                <span class="bbc-type-badge">{{#if enablePlacedStyling}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
+                                <span class="bbc-type-badge" data-override-badge="enablePlacedStyling">{{#if enablePlacedStyling}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
                             </label>
                         </div>
                     </td>
@@ -242,7 +243,7 @@
                 {{/if}}
                 {{/if}}
 
-                <tr class="{{#if (or (and showOverrides (not enablePlacedStyling)) (not hasPlacedStyling))}}edit-only{{/if}}">
+                <tr class="{{#unless hasPlacedStyling}}edit-only{{/unless}}" data-override-child="enablePlacedStyling" {{#if (and showOverrides (not enablePlacedStyling))}}style="display: none;"{{/if}}>
                     <th>{{labels.placedFill}}</th>
                     <td>
                         <span class="view-only">
@@ -256,7 +257,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="{{#if (or (and showOverrides (not enablePlacedStyling)) (not hasPlacedStyling))}}edit-only{{/if}}">
+                <tr class="{{#unless hasPlacedStyling}}edit-only{{/unless}}" data-override-child="enablePlacedStyling" {{#if (and showOverrides (not enablePlacedStyling))}}style="display: none;"{{/if}}>
                     <th>{{labels.placedBorder}}</th>
                     <td>
                         <span class="view-only">
@@ -301,11 +302,11 @@
                 <tr>
                     <th>{{labels.overridePostPlacement}}</th>
                     <td>
-                        <span class="view-only"><span class="bbc-type-badge">{{#if enablePostPlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span></span>
+                        <span class="view-only"><span class="bbc-type-badge" data-override-badge="enablePostPlacement">{{#if enablePostPlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span></span>
                         <div class="bbc-edit-row edit-only">
                             <label class="bbc-edit-checkbox-label">
                                 <input type="checkbox" name="enablePostPlacement" data-field="enablePostPlacement" {{#if enablePostPlacement}}checked{{/if}} />
-                                <span class="bbc-type-badge">{{#if enablePostPlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
+                                <span class="bbc-type-badge" data-override-badge="enablePostPlacement">{{#if enablePostPlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
                             </label>
                         </div>
 
@@ -314,7 +315,8 @@
             </tbody>
         </table>
         {{/if}}
-        <div class="bbc-code-container {{#if (and showOverrides (not enablePostPlacement))}}edit-only{{/if}}">
+        <div class="bbc-code-container" data-override-child="enablePostPlacement" {{#if (and showOverrides (not enablePostPlacement))}}style="display: none;"{{/if}}>
+
 
             <div class="view-only">
                 {{#if postPlacementCode}}
