@@ -637,9 +637,10 @@ export class AutorecManager {
                 (config.placedBorderAlpha !== undefined && config.placedBorderAlpha !== 1)
             );
 
-            const concurrentCode = config.concurrentCode ?? "";
-            const postPlacementCode = config.postPlacementCode ?? "";
+            const concurrentCode = (config.concurrentCode ?? "").trim();
+            const postPlacementCode = (config.postPlacementCode ?? "").trim();
             const cleanItemName = config.itemName ?? itemName;
+
             const activityId = isDefault ? "" : (config.activityId ?? "");
             const activityName = isDefault ? "" : (config.activityName ?? "");
             const hasActivity = Boolean(activityId || activityName);

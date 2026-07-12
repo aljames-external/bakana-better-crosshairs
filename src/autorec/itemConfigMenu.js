@@ -170,10 +170,9 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             ...source,
             enablePrePlacement,
             enableAnimation,
-            enablePlacedStyling,
             enablePostPlacement,
 
-            concurrentCode: source.concurrentCode ?? "",
+            concurrentCode: (source.concurrentCode ?? "").trim(),
 
             enabled: Boolean(source.enabled !== false),
             circleFile: Boolean(source.circleFile) ? source.circleFile : DEFAULT_AUTOREC_ENTRY.circleFile,
@@ -194,7 +193,7 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             placedBorderColor: source.placedBorderColor ?? "#ffffff",
             placedBorderAlpha: source.placedBorderAlpha ?? 0,
 
-            postPlacementCode: source.postPlacementCode ?? "",
+            postPlacementCode: (source.postPlacementCode ?? "").trim(),
 
             borderColorPicker: normalizeHexColor(source.borderColor, "#ffffff"),
             fillColorPicker: normalizeHexColor(source.fillColor, "#000000"),
@@ -244,6 +243,8 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             animationDesc: localize("BBC.itemConfigMenu.animationDesc", "Sequencer crosshair graphic asset and interactive rendering properties."),
             placedSectionDesc: localize("BBC.itemConfigMenu.placedSectionDesc", `Configure fill and border highlight colors applied to the created ${docTerm}.`),
             postSectionDesc: localize("BBC.itemConfigMenu.postSectionDesc", `Executes custom Javascript code immediately after the ${docTerm} document is created on the canvas.`),
+            noPreScript: localize("BBC.itemConfigMenu.noPreScript", "No custom pre-placement script configured"),
+            noPostScript: localize("BBC.itemConfigMenu.noPostScript", "No custom post-placement script configured"),
 
             animationTitle: localize("BBC.autorecMenu.labels.animationTitle", "Animation Configuration"),
             workflowEnabled: localize("BBC.autorecMenu.labels.workflowEnabled", "Workflow Enabled"),
@@ -264,6 +265,7 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             stickOn: localize("BBC.autorecMenu.pills.stickOn", "On (Locked to Origin Token)"),
             stickOff: localize("BBC.autorecMenu.pills.stickOff", "Off (Free Cursor Placement)")
         };
+
 
         return {
             item,
@@ -436,10 +438,11 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             placedFillAlpha: parseFloat(formData.get("placedFillAlpha") ?? "0"),
             placedBorderColor: String(formData.get("placedBorderColor") ?? "").trim(),
             placedBorderAlpha: parseFloat(formData.get("placedBorderAlpha") ?? "0"),
-            concurrentCode: String(formData.get("concurrentCode") ?? ""),
-            postPlacementCode: String(formData.get("postPlacementCode") ?? ""),
+            concurrentCode: String(formData.get("concurrentCode") ?? "").trim(),
+            postPlacementCode: String(formData.get("postPlacementCode") ?? "").trim(),
             icon: String(formData.get("icon") ?? "").trim()
         };
+
 
         const scope = this.selectedScope ?? "item";
         if (scope === "item") {

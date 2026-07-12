@@ -113,8 +113,10 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             placedBorder: localize("BBC.autorecMenu.labels.placedBorder", "Placed Border Styling"),
             defaultPlacementNote: localize("BBC.autorecMenu.labels.defaultPlacementNote", "Using default Foundry / Game System placement colors (Enable Edit Mode to customize)."),
             postSectionDesc: localize("BBC.autorecMenu.labels.postSectionDesc", `Executes custom Javascript code after final ${docTerm} document creation.`),
+            noPreScript: localize("BBC.autorecMenu.labels.noPreScript", "No custom pre-placement script configured"),
             noPostScript: localize("BBC.autorecMenu.labels.noPostScript", "No custom post-placement script configured"),
             enabledPill: localize("BBC.autorecMenu.pills.enabled", "Enabled"),
+
             disabledPill: localize("BBC.autorecMenu.pills.disabled", "Disabled"),
             allActivitiesPill: localize("BBC.autorecMenu.pills.allActivities", "All Activities"),
             localOnlyPill: localize("BBC.autorecMenu.pills.localOnly", "Local Only (Session Scope)"),
@@ -413,7 +415,11 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                 val = isNaN(parsed) ? undefined : parsed;
             } else {
                 val = inputEl.value ?? "";
+                if (typeof val === "string" && (field === "concurrentCode" || field === "postPlacementCode")) {
+                    val = val.trim();
+                }
                 if (inputEl.tagName === "SELECT" && val === "default") val = undefined;
+
                 else if (val === "true") val = true;
                 else if (val === "false") val = false;
             }
@@ -471,10 +477,14 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                     val = isNaN(parsed) ? undefined : parsed;
                 } else {
                     val = inputEl.value ?? "";
+                    if (typeof val === "string" && (field === "concurrentCode" || field === "postPlacementCode")) {
+                        val = val.trim();
+                    }
                     if (inputEl.tagName === "SELECT" && val === "default") val = undefined;
                     else if (val === "true") val = true;
                     else if (val === "false") val = false;
                 }
+
 
                 if (config[field] !== val) {
                     if (val === undefined) delete config[field];
