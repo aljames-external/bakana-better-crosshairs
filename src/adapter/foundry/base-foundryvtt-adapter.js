@@ -213,6 +213,32 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
+     * Safely dismiss a canvas preview placeable by detaching stage interaction listeners and invoking prototype destruction.
+     * Common across Foundry v12..v14+ placement previews and system-overridden canvas previews (e.g. Pathfinder 2e).
+     * @param {PlaceableObject} placeable - The placeable graphic object to dismiss and destroy
+     * @returns {void} No return value
+     */
+    dismissPreview(placeable) {
+        if (!placeable) return;
+        if (typeof placeable._onConfirm === "function") {
+            try { placeable._onConfirm({ preventDefault: () => {}, stopPropagation: () => {} }); } catch (e) {}
+        } else if (typeof placeable._finishPreview === "function") {
+            try { placeable._finishPreview(); } catch (e) {}
+        } else if (typeof placeable._onCancel === "function") {
+            try { placeable._onCancel({ preventDefault: () => {}, stopPropagation: () => {} }); } catch (e) {}
+        } else if (typeof canvas?.templates?._onCancel === "function") {
+            try { canvas.templates._onCancel(); } catch (e) {}
+        }
+
+        if (canvas?.templates?.preview?.children?.includes(placeable)) {
+            try { canvas.templates.preview.removeChild(placeable); } catch (e) {}
+        }
+        if (typeof placeable.destroy === "function") {
+            try { placeable.destroy({ children: true }); } catch (e) {}
+        }
+    }
+
+    /**
      * Extract normalized placed fill/border styling values and flags from workflow configuration.
      * Shared across V13 and V14 document updates.
      * @param {Object} [config={}] - Workflow placement configuration options

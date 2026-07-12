@@ -3,6 +3,7 @@ import { crosshair } from '../crosshair/_crosshairs.js';
 import { runConcurrentScript } from '../crosshair/util.js';
 import { Token } from './compat.js';
 import { crosshairAdapter } from '../adapter/foundry/index.js';
+import { systemAdapter } from '../adapter/system/index.js';
 import { autorecManager } from '../autorec/autorecManager.js';
 import { registerItemSheetHooks } from '../autorec/itemConfigMenu.js';
 
@@ -21,18 +22,21 @@ function isOwner(doc) {
 }
 
 /**
- * Detect shape type and dimensions from a template or region placeable on canvas.
- * @param {PlaceableObject} placeable - Canvas PlaceableObject (MeasuredTemplate or Region)
- * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}} Detected shape properties and dimensions
+ * Detect shape properties and dimensions from a template or region document through version adapter.
+ * Normalizes input document structure before delegating to single-responsibility adapter helper.
+ * @param {Document|PlaceableObject} target - Candidate Template or Region document
+ * @returns {{type: string, distance: number, radius: number, width: number, angle: number, x: number, y: number}} Detected properties dictionary
  */
-function detectTemplateProperties(placeable) {
-    return crosshairAdapter.detectProperties(placeable.document);
+function detectTemplateProperties(target) {
+    const doc = target instanceof Document ? target : target.document;
+    return crosshairAdapter.detectProperties(doc);
 }
 
 /**
- * Normalize a Token or TokenDocument reference into a canvas Token placeable object.
- * @param {Token|TokenDocument|Object|null} target - Potential Token placeable or TokenDocument
- * @returns {Token|Object|null} The normalized Token placeable or original target
+ * Normalize an item or placeable object into a canonical Token instance.
+ * Normalizes single concrete input type before passing down to placement helpers.
+ * @param {Token|Item|Actor|Object|null} target - Candidate object to normalize
+ * @returns {Token|null} Canonical Token object or null
  */
 function toToken(target) {
     if (!target) return null;
@@ -68,7 +72,11 @@ async function handleDrawPreview(placeable) {
         return;
     }
 
-    log.debug(`handleDrawPreview | Intercepting template preview for "${entry.itemName}"`);
+    log.debug(`handleDrawPreview | Intercepting template preview for "${entry.itemName}"`, {
+        placeableClass: placeable?.constructor?.name,
+        docData: doc?.toObject?.(),
+        docFlags: doc?.flags
+    });
 
     // 1. Immediately hide the Foundry template/region preview graphic completely so custom Sequencer visuals take over
     crosshairAdapter.hidePreview(placeable);
@@ -130,26 +138,11 @@ async function handleDrawPreview(placeable) {
                         log.error(`context.resolve | Failed to create deferred ${docName} document on placement:`, err);
                     }
                 } else if (doc && canvas.scene) {
-                    const docName = doc.documentName ?? "MeasuredTemplate";
-                    setTimeout(async () => {
-                        const stillPending = pendingPlacements.get(placementKey);
-                        if (stillPending && stillPending.resolved && !stillPending.cancelled && stillPending.coords) {
-                            log.debug(`context.resolve | Native placement hook did not fire after 50ms (e.g. pf2e). Programmatically creating ${docName} from preview document.`);
-                            const createData = foundry.utils.deepClone(doc.toObject());
-                            delete createData._id;
-                            try {
-                                await canvas.scene.createEmbeddedDocuments(docName, [createData]);
-                                if (canvas.templates?.preview?.children?.includes(placeable)) {
-                                    canvas.templates.preview.removeChild(placeable);
-                                }
-                                if (typeof placeable.destroy === "function") {
-                                    try { placeable.destroy({ children: true }); } catch (e) {}
-                                }
-                            } catch (err) {
-                                log.error(`context.resolve | Failed to programmatically create ${docName}:`, err);
-                            }
-                        }
-                    }, 50);
+                    systemAdapter.handleProgrammaticPlacement(canvas.scene, doc, placeable, coords, {
+                        crosshairAdapter,
+                        pendingPlacements,
+                        placementKey
+                    });
                 }
             }
         },
@@ -167,6 +160,9 @@ async function handleDrawPreview(placeable) {
                 pending.resolved = true;
             }
             pendingPlacements.delete(placementKey);
+            if (placeable) {
+                crosshairAdapter.dismissPreview(placeable);
+            }
         }
     };
 
