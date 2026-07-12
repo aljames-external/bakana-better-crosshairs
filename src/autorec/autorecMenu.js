@@ -350,6 +350,37 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
                 el.style.backgroundColor = el.dataset.color;
             }
         });
+
+        // 6. Synchronize HTML color pickers with adjacent text inputs across both input and change events
+        root.querySelectorAll("input[type='color'].bbc-edit-color, input[type='color'][data-color-target]").forEach(picker => {
+            const syncToText = (ev) => {
+                const row = ev.currentTarget.closest(".bbc-edit-color-row");
+                const targetInput = row?.querySelector("input[type='text']")
+                    ?? root.querySelector(`#${CSS.escape(ev.currentTarget.getAttribute("data-color-target") || "")}`);
+                if (targetInput && targetInput.value !== ev.currentTarget.value) {
+                    targetInput.value = ev.currentTarget.value;
+                    targetInput.dispatchEvent(new Event("input", { bubbles: true }));
+                    targetInput.dispatchEvent(new Event("change", { bubbles: true }));
+                }
+            };
+            picker.addEventListener("input", syncToText);
+            picker.addEventListener("change", syncToText);
+        });
+
+        // 7. Synchronize text inputs back to adjacent HTML color pickers when valid hex entered
+        root.querySelectorAll(".bbc-edit-color-row input[type='text'], input[type='text'][id^='bbc-item-']").forEach(textInput => {
+            const syncToPicker = (ev) => {
+                const val = ev.currentTarget.value?.trim();
+                const row = ev.currentTarget.closest(".bbc-edit-color-row");
+                const targetPicker = row?.querySelector("input[type='color']")
+                    ?? root.querySelector(`input[type='color'][data-color-target='${CSS.escape(ev.currentTarget.id || "")}']`);
+                if (targetPicker && /^#[0-9A-Fa-f]{6}$/.test(val) && targetPicker.value !== val) {
+                    targetPicker.value = val;
+                }
+            };
+            textInput.addEventListener("input", syncToPicker);
+            textInput.addEventListener("change", syncToPicker);
+        });
     }
 
     /**
