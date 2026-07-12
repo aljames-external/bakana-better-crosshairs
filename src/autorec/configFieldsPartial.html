@@ -166,7 +166,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="{{#unless hasCustomStyling}}edit-only{{/unless}}" data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
+                <tr class="{{#if (and (not showOverrides) (not hasCustomStyling))}}edit-only{{/if}}" data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
                     <th>{{labels.borderStyling}}</th>
                     <td>
                         <span class="view-only">
@@ -180,7 +180,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="{{#unless hasCustomStyling}}edit-only{{/unless}}" data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
+                <tr class="{{#if (and (not showOverrides) (not hasCustomStyling))}}edit-only{{/if}}" data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
                     <th>{{labels.fillStyling}}</th>
                     <td>
                         <span class="view-only">
@@ -194,13 +194,14 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="{{#unless icon}}edit-only{{/unless}}" data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
+                <tr class="{{#if (and (not showOverrides) (not icon))}}edit-only{{/if}}" data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
                     <th>{{labels.customIcon}}</th>
                     <td>
                         <span class="view-only"><code class="bbc-code-pill">{{icon}}</code></span>
                         <input type="text" class="bbc-edit-input edit-only" name="icon" data-field="icon" value="{{icon}}" placeholder="eskie.crosshair.reticle.generic_02.white" />
                     </td>
                 </tr>
+
 
 
             </tbody>
@@ -243,7 +244,7 @@
                 {{/if}}
                 {{/if}}
 
-                <tr class="{{#unless hasPlacedStyling}}edit-only{{/unless}}" data-override-child="enablePlacedStyling" {{#if (and showOverrides (not enablePlacedStyling))}}style="display: none;"{{/if}}>
+                <tr class="{{#if (and (not showOverrides) (not hasPlacedStyling))}}edit-only{{/if}}" data-override-child="enablePlacedStyling" {{#if (and showOverrides (not enablePlacedStyling))}}style="display: none;"{{/if}}>
                     <th>{{labels.placedFill}}</th>
                     <td>
                         <span class="view-only">
@@ -257,7 +258,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="{{#unless hasPlacedStyling}}edit-only{{/unless}}" data-override-child="enablePlacedStyling" {{#if (and showOverrides (not enablePlacedStyling))}}style="display: none;"{{/if}}>
+                <tr class="{{#if (and (not showOverrides) (not hasPlacedStyling))}}edit-only{{/if}}" data-override-child="enablePlacedStyling" {{#if (and showOverrides (not enablePlacedStyling))}}style="display: none;"{{/if}}>
                     <th>{{labels.placedBorder}}</th>
                     <td>
                         <span class="view-only">
@@ -271,6 +272,7 @@
                         </div>
                     </td>
                 </tr>
+
                 {{#unless showOverrides}}
                 {{#unless hasPlacedStyling}}
                 <tr class="view-only">
