@@ -166,6 +166,7 @@ export class BaseFoundryVTTAdapter {
     hidePreview(placeable) {
         if (!placeable) return;
         const hideContainers = (obj) => {
+            if (!obj) return;
             try { obj.visible = false; } catch (e) {}
             try { obj.renderable = false; } catch (e) {}
             try { obj.alpha = 0; } catch (e) {}
@@ -197,27 +198,71 @@ export class BaseFoundryVTTAdapter {
                 try { obj.border.renderable = false; } catch (e) {}
                 try { obj.border.alpha = 0; } catch (e) {}
             }
-            if (obj.highlightId && canvas.grid?.clearHighlightLayer) {
-                try { clearHighlightLayer(obj.highlightId); } catch (e) { }
+            if (Array.isArray(obj.children)) {
+                for (const child of obj.children) {
+                    if (!child) continue;
+                    try { child.visible = false; } catch (e) {}
+                    try { child.renderable = false; } catch (e) {}
+                    try { child.alpha = 0; } catch (e) {}
+                }
+            }
+            if (Array.isArray(obj._measurementLines)) {
+                for (const line of obj._measurementLines) {
+                    if (!line) continue;
+                    try { line.visible = false; } catch (e) {}
+                    try { line.alpha = 0; } catch (e) {}
+                }
+            }
+            if (Array.isArray(obj._measurementLabels)) {
+                for (const label of obj._measurementLabels) {
+                    if (!label) continue;
+                    try { label.visible = false; } catch (e) {}
+                    try { label.alpha = 0; } catch (e) {}
+                }
+            }
+
+            const hId = obj.highlightId || obj.id || "preview";
+            if (typeof canvas !== "undefined") {
+                if (canvas.grid?.clearHighlightLayer && typeof canvas.grid.clearHighlightLayer === "function") {
+                    try { canvas.grid.clearHighlightLayer(hId); } catch (e) {}
+                }
+                if (canvas.interface?.grid?.clearHighlightLayer && typeof canvas.interface.grid.clearHighlightLayer === "function") {
+                    try { canvas.interface.grid.clearHighlightLayer(hId); } catch (e) {}
+                }
+                if (canvas.regions?.clearHighlightLayer && typeof canvas.regions.clearHighlightLayer === "function") {
+                    try { canvas.regions.clearHighlightLayer(hId); } catch (e) {}
+                }
+                if (canvas.regions?.highlight?.clear && typeof canvas.regions.highlight.clear === "function") {
+                    try { canvas.regions.highlight.clear(); } catch (e) {}
+                }
             }
         };
 
+        try { Object.defineProperty(placeable, "visible", { get: () => false, set: () => {}, configurable: true }); } catch (e) {}
+        try { Object.defineProperty(placeable, "renderable", { get: () => false, set: () => {}, configurable: true }); } catch (e) {}
         hideContainers(placeable);
-        if (typeof placeable.highlightGrid === "function") {
-            try { placeable.highlightGrid = function () { }; } catch (e) {}
+
+        const methodsToIntercept = [
+            "refresh", "_refresh",
+            "applyRenderFlags", "_applyRenderFlags",
+            "_refreshState", "_refreshShape", "_refreshBorder", "_refreshMeasurements", "_updateMeasurements",
+            "highlightGrid", "_highlightGrid", "highlight", "_highlight"
+        ];
+
+        for (const methodName of methodsToIntercept) {
+            if (methodName === "refresh" || methodName === "_refresh" || typeof placeable[methodName] === "function") {
+                try {
+                    const orig = placeable[methodName];
+                    placeable[methodName] = function (...args) {
+                        if (typeof orig === "function") {
+                            try { orig.apply(this, args); } catch (e) {}
+                        }
+                        hideContainers(this);
+                        return this;
+                    };
+                } catch (e) {}
+            }
         }
-        try {
-            placeable.refresh = function () {
-                hideContainers(this);
-                return this;
-            };
-        } catch (e) {}
-        try {
-            placeable._refresh = function () {
-                hideContainers(this);
-                return this;
-            };
-        } catch (e) {}
     }
 
     /**
