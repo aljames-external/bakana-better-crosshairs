@@ -336,6 +336,25 @@
     border-color: rgba(16, 185, 129, 0.4);
 }
 
+.bbc-type-badge.custom-badge {
+    background: rgba(34, 197, 94, 0.18);
+    color: #4ade80;
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+.bbc-type-badge.autorec-badge {
+    background: rgba(168, 85, 247, 0.18);
+    color: #c084fc;
+    border-color: rgba(168, 85, 247, 0.4);
+}
+
+.bbc-type-badge.default-badge {
+    background: rgba(100, 116, 139, 0.18);
+    color: #94a3b8;
+    border-color: rgba(100, 116, 139, 0.35);
+}
+
+
 .bbc-status-badge.active {
     font-size: 0.72rem;
     font-weight: 600;

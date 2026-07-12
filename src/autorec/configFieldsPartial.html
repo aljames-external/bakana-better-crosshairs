@@ -73,7 +73,7 @@
                 {{/if}}
             </tbody>
         </table>
-        <div class="bbc-code-container">
+        <div class="bbc-code-container {{#if (and showOverrides (not enablePrePlacement))}}edit-only{{/if}}">
             <div class="view-only">
                 {{#if concurrentCode}}
                 <pre class="bbc-code-preview"><code>{{concurrentCode}}</code></pre>
@@ -125,35 +125,35 @@
                 </tr>
                 {{/if}}
 
-                <tr>
+                <tr class="{{#if (and showOverrides (not enableAnimation))}}edit-only{{/if}}">
                     <th>{{labels.circleFile}}</th>
                     <td>
                         <code class="bbc-code-pill view-only">{{circleFile}}</code>
                         <input type="text" class="bbc-edit-input edit-only" name="circleFile" data-field="circleFile" value="{{circleFile}}" placeholder="eskie.crosshair.circle.fantasy_01.white.full" />
                     </td>
                 </tr>
-                <tr>
+                <tr class="{{#if (and showOverrides (not enableAnimation))}}edit-only{{/if}}">
                     <th>{{labels.coneFile}}</th>
                     <td>
                         <code class="bbc-code-pill view-only">{{coneFile}}</code>
                         <input type="text" class="bbc-edit-input edit-only" name="coneFile" data-field="coneFile" value="{{coneFile}}" placeholder="eskie.crosshair.cone.thin.fantasy_01.white.full" />
                     </td>
                 </tr>
-                <tr>
+                <tr class="{{#if (and showOverrides (not enableAnimation))}}edit-only{{/if}}">
                     <th>{{labels.rayFile}}</th>
                     <td>
                         <code class="bbc-code-pill view-only">{{rayFile}}</code>
                         <input type="text" class="bbc-edit-input edit-only" name="rayFile" data-field="rayFile" value="{{rayFile}}" placeholder="eskie.crosshair.ray.fantasy_01.white" />
                     </td>
                 </tr>
-                <tr>
+                <tr class="{{#if (and showOverrides (not enableAnimation))}}edit-only{{/if}}">
                     <th>{{labels.squareFile}}</th>
                     <td>
                         <code class="bbc-code-pill view-only">{{squareFile}}</code>
                         <input type="text" class="bbc-edit-input edit-only" name="squareFile" data-field="squareFile" value="{{squareFile}}" placeholder="eskie.crosshair.square.fantasy_01.white" />
                     </td>
                 </tr>
-                <tr>
+                <tr class="{{#if (and showOverrides (not enableAnimation))}}edit-only{{/if}}">
                     <th>{{labels.lockToToken}}</th>
                     <td>
                         <span class="view-only">
@@ -168,7 +168,7 @@
                         </select>
                     </td>
                 </tr>
-                <tr>
+                <tr class="{{#if (and showOverrides (not enableAnimation))}}edit-only{{/if}}">
                     <th>{{labels.originLine}}</th>
                     <td>
                         <span class="view-only bbc-inline-flex-row">{{#if showLine}}<span class="bbc-pill yes">{{labels.enabledPill}}</span><code class="bbc-code-pill">{{lineFile}}</code>{{else}}<span class="bbc-pill no">{{labels.disabledPill}}</span>{{/if}}</span>
@@ -181,7 +181,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="{{#unless hasCustomStyling}}edit-only{{/unless}}">
+                <tr class="{{#if (or (and showOverrides (not enableAnimation)) (not hasCustomStyling))}}edit-only{{/if}}">
                     <th>{{labels.borderStyling}}</th>
                     <td>
                         <span class="view-only">
@@ -195,7 +195,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="{{#unless hasCustomStyling}}edit-only{{/unless}}">
+                <tr class="{{#if (or (and showOverrides (not enableAnimation)) (not hasCustomStyling))}}edit-only{{/if}}">
                     <th>{{labels.fillStyling}}</th>
                     <td>
                         <span class="view-only">
@@ -209,13 +209,14 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="{{#unless icon}}edit-only{{/unless}}">
+                <tr class="{{#if (or (and showOverrides (not enableAnimation)) (not icon))}}edit-only{{/if}}">
                     <th>{{labels.customIcon}}</th>
                     <td>
                         <span class="view-only"><code class="bbc-code-pill">{{icon}}</code></span>
                         <input type="text" class="bbc-edit-input edit-only" name="icon" data-field="icon" value="{{icon}}" placeholder="eskie.crosshair.reticle.generic_02.white" />
                     </td>
                 </tr>
+
             </tbody>
         </table>
     </div>
@@ -265,7 +266,7 @@
                 {{/if}}
                 {{/if}}
 
-                <tr class="{{#unless hasPlacedStyling}}edit-only{{/unless}}">
+                <tr class="{{#if (or (and showOverrides (not enablePlacedStyling)) (not hasPlacedStyling))}}edit-only{{/if}}">
                     <th>{{labels.placedFill}}</th>
                     <td>
                         <span class="view-only">
@@ -279,7 +280,7 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="{{#unless hasPlacedStyling}}edit-only{{/unless}}">
+                <tr class="{{#if (or (and showOverrides (not enablePlacedStyling)) (not hasPlacedStyling))}}edit-only{{/if}}">
                     <th>{{labels.placedBorder}}</th>
                     <td>
                         <span class="view-only">
@@ -345,7 +346,8 @@
             </tbody>
         </table>
         {{/if}}
-        <div class="bbc-code-container">
+        <div class="bbc-code-container {{#if (and showOverrides (not enablePostPlacement))}}edit-only{{/if}}">
+
             <div class="view-only">
                 {{#if postPlacementCode}}
                 <pre class="bbc-code-preview"><code>{{postPlacementCode}}</code></pre>
