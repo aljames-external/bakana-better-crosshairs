@@ -98,4 +98,19 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
         log.debug(`Dnd5eSystemAdapter.isMatch | Activity comparison (${match ? 'MATCHED' : 'FAILED'}): calling activity ("${callingActivityName}" / "${callingActivityId}") vs entry activity filters ("${entryFilterName}" / "${entryFilterId}")`);
         return match;
     }
+
+    /**
+     * Handle delayed single-click programmatic document creation when native placement listeners are blocked or deferred.
+     * In DnD5e, native template placement pointer events fire cleanly on Click #1 without being blocked.
+     * Strictly NOP this method to isolate DnD5e from PF2e race workarounds and preserve exact native placement behavior.
+     * @param {Scene} scene - Target Canvas Scene
+     * @param {Document} doc - Preview Template or Region document
+     * @param {PlaceableObject} placeable - Live canvas preview placeable
+     * @param {Object} [coords={}] - Resolved placement coordinates (`{ x, y, direction, distance }`)
+     * @param {Object} [options={}] - Execution dependencies (`{ crosshairAdapter, pendingPlacements, placementKey }`)
+     * @returns {void} No return value
+     */
+    handleProgrammaticPlacement(scene, doc, placeable, coords = {}, options = {}) {
+        log.debug("Dnd5eSystemAdapter.handleProgrammaticPlacement | DnD5e uses native single-click placement (NOP isolation).");
+    }
 }

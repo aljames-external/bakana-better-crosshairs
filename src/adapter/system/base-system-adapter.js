@@ -53,7 +53,8 @@ export class BaseSystemAdapter {
 
     /**
      * Handle delayed single-click programmatic document creation when native placement listeners are blocked or deferred.
-     * Base implementation executes 50ms fallback creation check and delegates preview teardown to crosshairAdapter.
+     * Base implementation defaults to NOP to preserve native placement behavior across standard game systems.
+     * System subclasses that block pointer events on Click #1 (e.g. Pathfinder 2e) override this method.
      * @param {Scene} scene - Target Canvas Scene
      * @param {Document} doc - Preview Template or Region document
      * @param {PlaceableObject} placeable - Live canvas preview placeable
@@ -62,31 +63,7 @@ export class BaseSystemAdapter {
      * @returns {void} No return value
      */
     handleProgrammaticPlacement(scene, doc, placeable, coords = {}, options = {}) {
-        if (!doc || !scene) return;
-        const docName = doc.documentName ?? "MeasuredTemplate";
-        const { crosshairAdapter, pendingPlacements, placementKey } = options;
-
-        setTimeout(async () => {
-            const stillPending = pendingPlacements?.get(placementKey);
-            if (stillPending && stillPending.resolved && !stillPending.cancelled && stillPending.coords) {
-                log.debug(`BaseSystemAdapter.handleProgrammaticPlacement | Native placement hook did not fire after 50ms. Programmatically creating ${docName} from preview document.`);
-                const createData = foundry.utils.deepClone(doc.toObject());
-                delete createData._id;
-                if (stillPending.coords.x !== undefined) createData.x = stillPending.coords.x;
-                if (stillPending.coords.y !== undefined) createData.y = stillPending.coords.y;
-                if (stillPending.coords.direction !== undefined) createData.direction = stillPending.coords.direction;
-                if (stillPending.coords.distance !== undefined) createData.distance = stillPending.coords.distance;
-
-                try {
-                    await scene.createEmbeddedDocuments(docName, [createData]);
-                } catch (err) {
-                    log.error(`BaseSystemAdapter.handleProgrammaticPlacement | Failed to programmatically create ${docName}:`, err);
-                }
-            }
-            if (placeable && crosshairAdapter && typeof crosshairAdapter.dismissPreview === "function") {
-                crosshairAdapter.dismissPreview(placeable);
-            }
-        }, 50);
+        return;
     }
 }
 
