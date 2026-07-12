@@ -99,6 +99,7 @@ async function create(token, config = {}) {
             if (crosshair?.pivot?.set) crosshair.pivot.set(0, 0);
             attachWheelRotation(crosshair, config);
             await rayGraphic(crosshair);
+            alignCrosshairAndEffects(crosshair, config, (config.currentDirection ?? config.direction ?? 0) * (Math.PI / 180));
         })
         .callback(Sequencer.Crosshair.CALLBACKS.PLACED, async (...args) => {
             Sequencer.EffectManager.endEffects({ name: id });

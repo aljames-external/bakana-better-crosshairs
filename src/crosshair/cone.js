@@ -101,6 +101,7 @@ async function create(token, config = {}) {
         .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {
             attachWheelRotation(crosshair, config);
             await coneGraphic(crosshair);
+            alignCrosshairAndEffects(crosshair, config, (config.currentDirection ?? config.direction ?? 0) * (Math.PI / 180));
         })
         .callback(Sequencer.Crosshair.CALLBACKS.PLACED, async (...args) => {
             Sequencer.EffectManager.endEffects({ name: id });

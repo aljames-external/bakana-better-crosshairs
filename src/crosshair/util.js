@@ -169,74 +169,7 @@ export function attachWheelRotation(crosshair, config = {}) {
             step: delta,
             newDirection: config.currentDirection
         });
-
-        // 1. Store direction on crosshair object and force full internal redraw of shape overlay and grid highlights
-        rotateCrosshairInstance(crosshair, config.currentDirection);
-
-        const getTargetAnchor = (cfg) => {
-            const t = String(cfg.type ?? cfg.t ?? "").toLowerCase();
-            if (t === "ray" || t === "cone") return { x: 0, y: 0.5 }; // Midpoint of left edge
-            if (t === "rect" || t === "square") return { x: 0, y: 0 }; // Top left corner
-            return { x: 0.5, y: 0.5 }; // Circles / center
-        };
-
-        const targetAnchor = getTargetAnchor(config);
-
-        const enforceAnchorAndRotate = (sprite, rad) => {
-            if (!sprite) return;
-            if (sprite.anchor && (sprite.anchor.x !== targetAnchor.x || sprite.anchor.y !== targetAnchor.y)) {
-                const curRad = sprite.rotation ?? 0;
-                const width = sprite.width ?? 0;
-                const height = sprite.height ?? 0;
-                const dx = (targetAnchor.x - sprite.anchor.x) * width;
-                const dy = (targetAnchor.y - sprite.anchor.y) * height;
-                sprite.x += Math.cos(curRad) * dx - Math.sin(curRad) * dy;
-                sprite.y += Math.sin(curRad) * dx + Math.cos(curRad) * dy;
-                if (typeof sprite.anchor.set === "function") {
-                    sprite.anchor.set(targetAnchor.x, targetAnchor.y);
-                } else {
-                    sprite.anchor.x = targetAnchor.x;
-                    sprite.anchor.y = targetAnchor.y;
-                }
-            }
-            sprite.rotation = rad;
-        };
-
-        // 2. Rotate internal PIXI graphics inside crosshair container (rotates transparent grey shape)
-        if (crosshair) {
-            if (crosshair.sprite) {
-                enforceAnchorAndRotate(crosshair.sprite, rad);
-            }
-            if (crosshair.mesh) crosshair.mesh.rotation = rad;
-            if (crosshair.graphics) crosshair.graphics.rotation = rad;
-            if (Array.isArray(crosshair.children)) {
-                for (const child of crosshair.children) {
-                    if (child.rotation !== undefined && (child.isGraphics || child.type === "Graphics" || child.constructor?.name === "Graphics")) {
-                        child.rotation = rad;
-                    } else if (child.anchor && child !== crosshair.sprite) {
-                        enforceAnchorAndRotate(child, rad);
-                    }
-                }
-            }
-        }
-
-        // 3. Rotate the active Sequencer visual effect graphics directly around the shape's container origin
-        if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
-            try {
-                const effects = Sequencer.EffectManager.getEffects({ name: config.id });
-                for (const eff of effects) {
-                    if (eff.container && typeof eff.container.rotation !== "undefined") {
-                        eff.container.rotation = rad;
-                    } else if (eff.sprite && typeof eff.sprite.rotation !== "undefined") {
-                        eff.sprite.rotation = rad;
-                    } else if (eff.mesh && typeof eff.mesh.rotation !== "undefined") {
-                        eff.mesh.rotation = rad;
-                    } else if (typeof eff.rotation !== "undefined") {
-                        eff.rotation = rad;
-                    }
-                }
-            } catch (e) {}
-        }
+        alignCrosshairAndEffects(crosshair, config, rad);
 
         // 4. Update any active Core Foundry preview MeasuredTemplate shape & grid highlight overlay
         if (canvas?.templates?.preview?.children) {
@@ -265,6 +198,76 @@ export function attachWheelRotation(crosshair, config = {}) {
     window.addEventListener("wheel", activeWheelHandler, { capture: true, passive: false });
     window.addEventListener("pointermove", activePointerHandler, { capture: true, passive: true });
     log.debug("attachWheelRotation | Mousewheel & pointermove listeners attached for crosshair rotation (capture phase).");
+}
+
+/**
+ * Align crosshair container and all active Sequencer effects so their origin (0, 0.5 for cones/rays, 0, 0 for squares, 0.5, 0.5 for circles)
+ * sits precisely at the container's origin (0, 0) and rotates around the cursor point.
+ * @param {object} crosshair - Active Sequencer crosshair container
+ * @param {object} config - Crosshair placement config
+ * @param {number} rad - Current rotation angle in radians
+ * @returns {void}
+ */
+export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
+    rotateCrosshairInstance(crosshair, config.currentDirection ?? config.direction ?? 0);
+
+    const getTargetAnchor = (cfg) => {
+        const t = String(cfg.type ?? cfg.t ?? "").toLowerCase();
+        if (t === "ray" || t === "cone") return { x: 0, y: 0.5 }; // Midpoint of left edge
+        if (t === "rect" || t === "square") return { x: 0, y: 0 }; // Top left corner
+        return { x: 0.5, y: 0.5 }; // Circles / center
+    };
+
+    const targetAnchor = getTargetAnchor(config);
+
+    const alignSpriteInsideContainer = (sprite) => {
+        if (!sprite || !sprite.anchor) return;
+        if (typeof sprite.anchor.set === "function") {
+            sprite.anchor.set(targetAnchor.x, targetAnchor.y);
+        } else {
+            sprite.anchor.x = targetAnchor.x;
+            sprite.anchor.y = targetAnchor.y;
+        }
+        if (sprite.position && typeof sprite.position.set === "function") {
+            sprite.position.set(0, 0);
+        } else if (sprite.x !== undefined) {
+            sprite.x = 0;
+            sprite.y = 0;
+        }
+        if (sprite.rotation !== undefined) sprite.rotation = 0;
+    };
+
+    // 1. Align internal PIXI sprites inside crosshair container (rotates transparent grey shape)
+    if (crosshair) {
+        if (crosshair.sprite) alignSpriteInsideContainer(crosshair.sprite);
+        if (crosshair.mesh && crosshair !== crosshair.mesh) alignSpriteInsideContainer(crosshair.mesh);
+        if (Array.isArray(crosshair.children)) {
+            for (const child of crosshair.children) {
+                if (child !== crosshair.sprite && child !== crosshair.mesh && child.anchor) {
+                    alignSpriteInsideContainer(child);
+                }
+            }
+        }
+    }
+
+    // 2. Align and rotate all active Sequencer visual effect graphics
+    if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
+        try {
+            const effects = Sequencer.EffectManager.getEffects({ name: config.id });
+            for (const eff of effects) {
+                if (eff.sprite) alignSpriteInsideContainer(eff.sprite);
+                if (eff.mesh) alignSpriteInsideContainer(eff.mesh);
+
+                if (eff.container && typeof eff.container.rotation !== "undefined") {
+                    eff.container.rotation = rad;
+                }
+                if (typeof eff.rotation !== "undefined") eff.rotation = rad;
+                if (typeof eff.update === "function") {
+                    try { eff.update({ rotation: rad }); } catch (e) {}
+                }
+            }
+        } catch (e) {}
+    }
 }
 
 /**
