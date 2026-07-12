@@ -530,19 +530,13 @@ export function registerItemSheetHooks() {
         if (!item || !Boolean(item.isOwner)) return;
         if (options.some(o => o.name?.startsWith("BBC Crosshair"))) return;
 
-        const customConfig = item.getFlag(MODULE_ID, "customConfig") ?? null;
-        const activityConfigs = item.getFlag(MODULE_ID, "activityConfigs") ?? null;
-        const hasAnyCustom = Boolean(
-            customConfig ||
-            (activityConfigs && typeof activityConfigs === "object" && Object.keys(activityConfigs).length > 0)
-        );
-
         options.push({
             name: "BBC Crosshair Configuration",
-            icon: hasAnyCustom ? "<i class='fa-solid fa-crosshairs bbc-header-icon-custom' style='color: #22c55e;'></i>" : "<i class='fa-solid fa-crosshairs'></i>",
+            icon: "<i class='fa-solid fa-crosshairs'></i>",
             callback: () => openItemCrosshairConfig(item)
         });
     }
+
 
 
     Hooks.on("getHeaderControlsItemSheet5e", addApplicationV2HeaderControl);
