@@ -26,8 +26,12 @@ Hooks.once('init', () => {
         initializeSystemAdapter();
         initializeFoundryAdapter();
         initializeHooks();
+        loadTemplates([
+            `modules/${MODULE_ID}/src/autorec/configFieldsPartial.html`
+        ]);
 
         /**
+
          * Merges exported module functions and utilities into the global `bbc` namespace object.
          *
          * @param {Record<string, unknown>} exportedFunctions - Object containing functions or utilities to export globally.

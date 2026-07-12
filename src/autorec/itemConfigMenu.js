@@ -199,7 +199,23 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             borderColorPicker: normalizeHexColor(source.borderColor, "#ffffff"),
             fillColorPicker: normalizeHexColor(source.fillColor, "#000000"),
             placedFillColorPicker: normalizeHexColor(source.placedFillColor, "#000000"),
-            placedBorderColorPicker: normalizeHexColor(source.placedBorderColor, "#000000")
+            placedBorderColorPicker: normalizeHexColor(source.placedBorderColor, "#000000"),
+
+            isStickDefault: Boolean((source.stickToToken ?? "default") === "default" || !source.stickToToken),
+            isStickOn: Boolean((source.stickToToken ?? "default") === "true"),
+            isStickOff: Boolean((source.stickToToken ?? "default") === "false"),
+            hasCustomStyling: Boolean(
+                (source.borderColor && source.borderColor !== "#ffffff") ||
+                (source.borderAlpha !== undefined && source.borderAlpha !== 0) ||
+                (source.fillColor && source.fillColor !== "#000000") ||
+                (source.fillAlpha !== undefined && source.fillAlpha !== 0)
+            ),
+            hasPlacedStyling: Boolean(
+                (source.placedFillColor && source.placedFillColor !== "#000000") ||
+                (source.placedFillAlpha !== undefined && source.placedFillAlpha !== 0) ||
+                (source.placedBorderColor && source.placedBorderColor !== "#ffffff") ||
+                (source.placedBorderAlpha !== undefined && source.placedBorderAlpha !== 0)
+            )
         };
 
         const docTerm = crosshairAdapter.documentTerm;
@@ -263,12 +279,15 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             overrideScopes,
             scopeHint,
             selectedScope,
+            showOverrides: true,
+            showActivityIdentification: false,
 
             prePlacementTitle,
             placementSectionTitle,
             postPlacementTitle,
             labels
         };
+
     }
 
 
