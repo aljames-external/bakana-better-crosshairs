@@ -129,6 +129,27 @@ async function handleDrawPreview(placeable) {
                     } catch (err) {
                         log.error(`context.resolve | Failed to create deferred ${docName} document on placement:`, err);
                     }
+                } else if (doc && canvas.scene) {
+                    const docName = doc.documentName ?? "MeasuredTemplate";
+                    setTimeout(async () => {
+                        const stillPending = pendingPlacements.get(placementKey);
+                        if (stillPending && stillPending.resolved && !stillPending.cancelled && stillPending.coords) {
+                            log.debug(`context.resolve | Native placement hook did not fire after 50ms (e.g. pf2e). Programmatically creating ${docName} from preview document.`);
+                            const createData = foundry.utils.deepClone(doc.toObject());
+                            delete createData._id;
+                            try {
+                                await canvas.scene.createEmbeddedDocuments(docName, [createData]);
+                                if (canvas.templates?.preview?.children?.includes(placeable)) {
+                                    canvas.templates.preview.removeChild(placeable);
+                                }
+                                if (typeof placeable.destroy === "function") {
+                                    try { placeable.destroy({ children: true }); } catch (e) {}
+                                }
+                            } catch (err) {
+                                log.error(`context.resolve | Failed to programmatically create ${docName}:`, err);
+                            }
+                        }
+                    }, 50);
                 }
             }
         },
