@@ -49,13 +49,26 @@
     </div>
     {{/if}}
 
-    <!-- Scrollable Configuration Body -->
-
     <div class="bbc-sections-scroll bbc-item-config-body">
+        {{#if hasCustom}}
         {{#with config}}
         {{> "modules/bakana-better-crosshairs/src/autorec/configFieldsPartial.html" labels=../labels prePlacementTitle=../prePlacementTitle placementSectionTitle=../placementSectionTitle postPlacementTitle=../postPlacementTitle showOverrides=../showOverrides showActivityIdentification=../showActivityIdentification isEditMode=../isEditMode}}
         {{/with}}
+        {{else if isEditMode}}
+        {{#with config}}
+        {{> "modules/bakana-better-crosshairs/src/autorec/configFieldsPartial.html" labels=../labels prePlacementTitle=../prePlacementTitle placementSectionTitle=../placementSectionTitle postPlacementTitle=../postPlacementTitle showOverrides=../showOverrides showActivityIdentification=../showActivityIdentification isEditMode=../isEditMode}}
+        {{/with}}
+        {{else}}
+        <div class="bbc-inspector-empty">
+            <div class="bbc-empty-card">
+                <i class="fa-solid fa-wand-magic-sparkles bbc-empty-icon"></i>
+                <h3>{{#if isAutorec}}{{labels.inheritingAutorecTitle}}{{else}}{{labels.noCustomOverridesTitle}}{{/if}}</h3>
+                <p>{{#if isAutorec}}{{labels.inheritingAutorecDesc}}{{else}}{{labels.noCustomOverridesDesc}}{{/if}}</p>
+            </div>
+        </div>
+        {{/if}}
     </div>
+
 
 
     {{#if hasCustom}}

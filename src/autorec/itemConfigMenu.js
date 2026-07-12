@@ -134,6 +134,7 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             ? itemCustomConfig
             : (activityConfigs[selectedScope] ?? null);
         const hasCustom = Boolean(customConfig);
+        this.hasCustom = Boolean(hasCustom);
         const isCustom = Boolean(customConfig && customConfig.enabled !== false);
 
         const autorecMatch = autorecManager.getEntryByName(itemName);
@@ -170,6 +171,7 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             ...source,
             enablePrePlacement,
             enableAnimation,
+            enablePlacedStyling,
             enablePostPlacement,
 
             concurrentCode: (source.concurrentCode ?? "").trim(),
@@ -245,6 +247,11 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             postSectionDesc: localize("BBC.itemConfigMenu.postSectionDesc", `Executes custom Javascript code immediately after the ${docTerm} document is created on the canvas.`),
             noPreScript: localize("BBC.itemConfigMenu.noPreScript", "No custom pre-placement script configured"),
             noPostScript: localize("BBC.itemConfigMenu.noPostScript", "No custom post-placement script configured"),
+
+            inheritingAutorecTitle: localize("BBC.itemConfigMenu.inheritingAutorecTitle", "Inheriting Global Autorec"),
+            inheritingAutorecDesc: localize("BBC.itemConfigMenu.inheritingAutorecDesc", `This ${selectedScope === "item" ? "item" : "activity"} is currently inheriting configuration from the registered Global Autorec workflow "${autorecMatch?.itemName ?? "Unknown"}". Toggle Edit Mode above to customize overrides.`),
+            noCustomOverridesTitle: localize("BBC.itemConfigMenu.noCustomOverridesTitle", "No Custom Overrides Set"),
+            noCustomOverridesDesc: localize("BBC.itemConfigMenu.noCustomOverridesDesc", `This ${selectedScope === "item" ? "item" : "activity"} is currently using default crosshair placement settings. Toggle Edit Mode above to configure custom overrides.`),
 
             animationTitle: localize("BBC.autorecMenu.labels.animationTitle", "Animation Configuration"),
             workflowEnabled: localize("BBC.autorecMenu.labels.workflowEnabled", "Workflow Enabled"),
