@@ -59,6 +59,11 @@ export function resolveCrosshairIcon(iconPath) {
  */
 function refreshTemplateHighlights(tmpl, newDirDeg, rad) {
     if (!tmpl) return;
+    if (crosshairAdapter?.updatePreviewShape) {
+        try {
+            crosshairAdapter.updatePreviewShape(tmpl.document ?? tmpl, { direction: newDirDeg, rotation: newDirDeg });
+        } catch (e) {}
+    }
     tmpl.direction = newDirDeg;
     if (tmpl.document) {
         tmpl.document.direction = newDirDeg;
@@ -171,25 +176,41 @@ export function attachWheelRotation(crosshair, config = {}) {
         });
         alignCrosshairAndEffects(crosshair, config, rad);
 
-        // 4. Update any active Core Foundry preview MeasuredTemplate shape & grid highlight overlay
-        if (canvas?.templates?.preview?.children) {
-            for (const child of canvas.templates.preview.children) {
-                refreshTemplateHighlights(child, config.currentDirection, rad);
-            }
-        }
-        if (canvas?.templates?.placeables) {
-            for (const p of canvas.templates.placeables) {
-                if (p.isPreview) refreshTemplateHighlights(p, config.currentDirection, rad);
+        // 4. Update any active Core Foundry preview MeasuredTemplate or Region shape & grid highlight overlay
+        const previewLists = [
+            canvas?.templates?.preview?.children,
+            canvas?.templates?.placeables,
+            canvas?.regions?.preview?.children,
+            canvas?.regions?.placeables
+        ];
+        for (const list of previewLists) {
+            if (Array.isArray(list)) {
+                for (const p of list) {
+                    if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children) {
+                        refreshTemplateHighlights(p, config.currentDirection, rad);
+                    }
+                }
             }
         }
     };
 
     activePointerHandler = () => {
         const rad = config.currentDirection * (Math.PI / 180);
-        if (canvas?.templates?.preview?.children) {
-            for (const child of canvas.templates.preview.children) {
-                if (child.document && child.document.direction !== config.currentDirection) {
-                    refreshTemplateHighlights(child, config.currentDirection, rad);
+        const previewLists = [
+            canvas?.templates?.preview?.children,
+            canvas?.templates?.placeables,
+            canvas?.regions?.preview?.children,
+            canvas?.regions?.placeables
+        ];
+        for (const list of previewLists) {
+            if (Array.isArray(list)) {
+                for (const p of list) {
+                    if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children) {
+                        const docDir = p.document?.direction ?? p.document?.shapes?.[0]?.rotation ?? p.direction;
+                        if (docDir !== config.currentDirection) {
+                            refreshTemplateHighlights(p, config.currentDirection, rad);
+                        }
+                    }
                 }
             }
         }
