@@ -31,6 +31,11 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
     static DEFAULT_OPTIONS = {
         id: "bbc-item-crosshair-config",
         tag: "form",
+        form: {
+            handler: ItemCrosshairConfigApplication.#onSubmitForm,
+            submitOnChange: false,
+            closeOnSubmit: false
+        },
         window: {
             title: "BBC.itemConfigMenu.title",
             icon: "fa-solid fa-crosshairs",
@@ -42,6 +47,18 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         },
         classes: ["bbc-app", "bbc-autorec-form", "bbc-item-config-form"]
     };
+
+    /**
+     * Handle declarative form submission via ApplicationV2 lifecycle.
+     * @param {Event} event - Form submit event
+     * @param {HTMLFormElement} form - Rendered form element
+     * @param {FormData} formData - Form submission payload
+     * @returns {Promise<void>}
+     */
+    static async #onSubmitForm(event, form, formData) {
+        await this._saveConfiguration(form);
+    }
+
 
     /**
      * Application rendering template parts.
@@ -335,17 +352,6 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
                 this.render(false);
             });
         }
-
-
-        // Handle Form Submission / Save CUSTOM Configuration
-        const form = root.tagName === "FORM" ? root : root.querySelector("form");
-        if (form) {
-            form.addEventListener("submit", async (ev) => {
-                ev.preventDefault();
-                ev.stopPropagation();
-                await this._saveConfiguration(form);
-            });
-        }
     }
 
     /**
@@ -396,12 +402,9 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             notify.info(localize("BBC.itemConfigMenu.savedActivityCustom", `Saved custom Activity-level crosshair configuration for "${this.item.name}".`));
         }
 
-        await this.render({ force: true });
         this.element?.querySelectorAll?.("input, select, button, textarea").forEach(el => {
             el.disabled = false;
         });
-
-
     }
 }
 
