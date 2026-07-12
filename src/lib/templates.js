@@ -235,7 +235,7 @@ async function handleDrawPreview(placeable) {
         log.debug(`handleDrawPreview | Sequencer crosshair sequence completed for "${entry.itemName}".`);
     } catch (err) {
         const msg = typeof err === "string" ? err : (err?.message ?? "Failed to play Sequencer crosshair effect");
-        log.error(`handleDrawPreview | Error running sequencer sequence for "${entry.itemName}":`, err);
+        log.debug(`handleDrawPreview | Error running sequencer sequence for "${entry.itemName}":`, err);
         notify.error(msg);
         pending.cancelled = true;
         pending.resolved = true;
