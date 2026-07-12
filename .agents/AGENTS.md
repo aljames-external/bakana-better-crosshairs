@@ -15,3 +15,8 @@
 ## 12. Boolean Primitive Conversion (`Boolean(x)`) Over Verbose Equality (`=== true`)
 - **Crisp Boolean Primitive Conversion**: When normalizing or converting an object property or flag into a strict boolean primitive value (`e.g. const isPreview = Boolean(placeable.isPreview)`), strictly prefer explicit `Boolean(foo)` conversion over verbose strict equality checks (`foo === true` / `foo === false`).
 - **Complement to Rule 7**: While direct conditional evaluation (`if (foo)`) is preferred inside branching statements (Rule 7), variable assignments that demand a guaranteed boolean primitive (`true` / `false`) must use `Boolean(foo)`.
+
+## 13. Library File Immunity to Dead Code Pruning (`src/lib/*`)
+- **Strict Immunity for Reusable Library Modules**: All functions, helpers, classes, and exported symbols defined within library files (`e.g. src/lib/*.js` such as `dependency.js`, `filemanager.js`, `logger.js`, `notifier.js`, `utils.js`, `compat.js`, `constants.js`, `templates.js`) are strictly immune to dead code pruning and removal.
+- **Cross-Repository Reusability**: These modules are structured as reusable library components shared across multiple repositories, macro ecosystems, and future modules. They MUST NEVER be modified or pruned on the basis of lacking active internal callers within the local project repository.
+
