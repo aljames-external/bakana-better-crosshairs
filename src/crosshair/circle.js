@@ -1,6 +1,6 @@
 import { closest } from "../lib/filemanager.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
-import { resolveCrosshairPlacement, shouldStickToToken, resolveCrosshairIcon } from "./util.js";
+import { resolveCrosshairPlacement, shouldStickToToken, resolveCrosshairIcon, alignCrosshairAndEffects } from "./util.js";
 
 /**
  * Resolves the circle crosshair asset path based on the provided file path or key and the effect size.
