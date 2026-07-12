@@ -340,12 +340,13 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
                 const turningOn = Boolean(ev.currentTarget.checked);
                 this.isEditMode = turningOn;
                 const hasEmptyCard = Boolean(root.querySelector(".bbc-inspector-empty"));
-                if (hasEmptyCard || !this.hasCustom) {
+                if (!turningOn || hasEmptyCard || !this.hasCustom) {
                     this.render(false);
                 } else {
-                    syncEditModeControls(turningOn);
+                    syncEditModeControls(true);
                 }
             });
+
 
             // Live-toggle child configuration options and badge text when an override checkbox changes in edit mode
             root.querySelectorAll("input[type='checkbox'][name^='enable']").forEach(chk => {
