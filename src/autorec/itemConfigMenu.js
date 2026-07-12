@@ -457,11 +457,10 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             notify.info(localize("BBC.itemConfigMenu.savedActivityCustom", `Saved custom Activity-level crosshair configuration for "${this.item.name}".`));
         }
 
-        this.element?.querySelectorAll?.("input, select, button, textarea").forEach(el => {
-            el.disabled = false;
-        });
+        this.render(false);
     }
 }
+
 
 /**
  * Open the Item Crosshair Configuration application for a target item.
