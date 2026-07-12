@@ -165,51 +165,53 @@ export class BaseFoundryVTTAdapter {
      */
     hidePreview(placeable) {
         if (!placeable) return;
-        placeable.visible = false;
-        placeable.renderable = false;
-        placeable.alpha = 0;
+        try { placeable.visible = false; } catch (e) {}
+        try { placeable.renderable = false; } catch (e) {}
+        try { placeable.alpha = 0; } catch (e) {}
         if (placeable.template) {
-            placeable.template.visible = false;
-            placeable.template.renderable = false;
-            placeable.template.alpha = 0;
+            try { placeable.template.visible = false; } catch (e) {}
+            try { placeable.template.renderable = false; } catch (e) {}
+            try { placeable.template.alpha = 0; } catch (e) {}
         }
         if (placeable.ruler) {
-            placeable.ruler.visible = false;
-            placeable.ruler.renderable = false;
-            placeable.ruler.text = "";
+            try { placeable.ruler.visible = false; } catch (e) {}
+            try { placeable.ruler.renderable = false; } catch (e) {}
+            try { placeable.ruler.text = ""; } catch (e) {}
         }
         if (placeable.controlIcon) {
-            placeable.controlIcon.visible = false;
+            try { placeable.controlIcon.visible = false; } catch (e) {}
         }
         if (typeof placeable.highlightGrid === "function") {
-            placeable.highlightGrid = function () { };
+            try { placeable.highlightGrid = function () { }; } catch (e) {}
         }
         if (placeable.highlightId && canvas.grid?.clearHighlightLayer) {
             try { clearHighlightLayer(placeable.highlightId); } catch (e) { }
         }
 
-        placeable.refresh = function () {
-            this.visible = false;
-            this.renderable = false;
-            this.alpha = 0;
-            if (this.template) {
-                this.template.visible = false;
-                this.template.renderable = false;
-                this.template.alpha = 0;
-            }
-            if (this.ruler) {
-                this.ruler.visible = false;
-                this.ruler.renderable = false;
-                this.ruler.text = "";
-            }
-            if (this.controlIcon) {
-                this.controlIcon.visible = false;
-            }
-            if (this.highlightId && canvas.grid?.clearHighlightLayer) {
-                try { clearHighlightLayer(this.highlightId); } catch (e) { }
-            }
-            return this;
-        };
+        try {
+            placeable.refresh = function () {
+                try { this.visible = false; } catch (e) {}
+                try { this.renderable = false; } catch (e) {}
+                try { this.alpha = 0; } catch (e) {}
+                if (this.template) {
+                    try { this.template.visible = false; } catch (e) {}
+                    try { this.template.renderable = false; } catch (e) {}
+                    try { this.template.alpha = 0; } catch (e) {}
+                }
+                if (this.ruler) {
+                    try { this.ruler.visible = false; } catch (e) {}
+                    try { this.ruler.renderable = false; } catch (e) {}
+                    try { this.ruler.text = ""; } catch (e) {}
+                }
+                if (this.controlIcon) {
+                    try { this.controlIcon.visible = false; } catch (e) {}
+                }
+                if (this.highlightId && canvas.grid?.clearHighlightLayer) {
+                    try { clearHighlightLayer(this.highlightId); } catch (e) { }
+                }
+                return this;
+            };
+        } catch (e) {}
     }
 
     /**
@@ -221,9 +223,9 @@ export class BaseFoundryVTTAdapter {
     dismissPreview(placeable) {
         if (!placeable) return;
 
-        placeable.isPreview = false;
-        placeable.visible = false;
-        placeable.renderable = false;
+        try { placeable.isPreview = false; } catch (e) {}
+        try { placeable.visible = false; } catch (e) {}
+        try { placeable.renderable = false; } catch (e) {}
 
         if (placeable.renderFlags && typeof placeable.renderFlags.clear === "function") {
             try { placeable.renderFlags.clear(); } catch (e) {}
