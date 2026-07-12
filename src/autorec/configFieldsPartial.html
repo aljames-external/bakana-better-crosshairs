@@ -59,7 +59,6 @@
                                 <span class="bbc-type-badge" data-override-badge="enablePrePlacement">{{#if enablePrePlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
                             </label>
                         </div>
-
                     </td>
                 </tr>
                 {{/if}}
@@ -156,7 +155,6 @@
                     <th>{{labels.originLine}}</th>
                     <td>
                         <span class="view-only bbc-inline-flex-row">{{#if showLine}}<span class="bbc-pill">{{labels.enabledPill}}</span><code class="bbc-code-pill">{{lineFile}}</code>{{else}}<span class="bbc-pill">{{labels.disabledPill}}</span>{{/if}}</span>
-
                         <div class="bbc-edit-row edit-only">
                             <label class="bbc-edit-checkbox-label">
                                 <input type="checkbox" class="bbc-edit-checkbox" name="showLine" data-field="showLine" {{#if showLine}}checked{{/if}} />
@@ -201,9 +199,6 @@
                         <input type="text" class="bbc-edit-input edit-only" name="icon" data-field="icon" value="{{icon}}" placeholder="eskie.crosshair.reticle.generic_02.white" />
                     </td>
                 </tr>
-
-
-
             </tbody>
         </table>
     </div>
@@ -311,15 +306,12 @@
                                 <span class="bbc-type-badge" data-override-badge="enablePostPlacement">{{#if enablePostPlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
                             </label>
                         </div>
-
                     </td>
                 </tr>
             </tbody>
         </table>
         {{/if}}
         <div class="bbc-code-container" data-override-child="enablePostPlacement" {{#if (and showOverrides (not enablePostPlacement))}}style="display: none;"{{/if}}>
-
-
             <div class="view-only">
                 {{#if postPlacementCode}}
                 <pre class="bbc-code-preview"><code>{{postPlacementCode}}</code></pre>

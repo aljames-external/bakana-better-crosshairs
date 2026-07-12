@@ -336,9 +336,6 @@
     border-color: rgba(16, 185, 129, 0.4);
 }
 
-
-
-
 .bbc-status-badge.active {
     font-size: 0.72rem;
     font-weight: 600;
@@ -526,8 +523,6 @@
     padding: 3px 8px;
     border-radius: 6px;
 }
-
-
 
 .bbc-inline-flex-row {
     display: inline-flex !important;

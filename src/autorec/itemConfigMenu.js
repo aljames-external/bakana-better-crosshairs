@@ -360,11 +360,9 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
                             ? localize("BBC.itemConfigMenu.badgeCustomOverride", "CUSTOM OVERRIDE")
                             : localize("BBC.itemConfigMenu.badgeInherited", "INHERITED");
                     });
-
                 });
             });
         }
-
 
         // Synchronize HTML color pickers with adjacent text inputs
         root.querySelectorAll("input[type='color'][data-color-target]").forEach(picker => {
