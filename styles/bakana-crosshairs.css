@@ -821,6 +821,12 @@
     gap: 8px;
 }
 
+.bbc-item-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
 .bbc-scope-selector-banner {
     display: flex;
     align-items: center;
