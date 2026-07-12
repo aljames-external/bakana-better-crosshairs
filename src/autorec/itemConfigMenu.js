@@ -520,26 +520,7 @@ export function registerItemSheetHooks() {
         });
     }
 
-    /**
-     * Add a Better Crosshairs context menu option for items owned by the user.
-     * @param {Document} item - Target Item document
-     * @param {Array<object>} options - Context menu options array
-     * @returns {void}
-     */
-    function addItemContextOption(item, options) {
-        if (!item || !Boolean(item.isOwner)) return;
-        if (options.some(o => o.name?.startsWith("BBC Crosshair"))) return;
-
-        options.push({
-            name: "BBC Crosshair Configuration",
-            icon: "<i class='fa-solid fa-crosshairs'></i>",
-            callback: () => openItemCrosshairConfig(item)
-        });
-    }
-
-
-
     Hooks.on("getHeaderControlsItemSheet5e", addApplicationV2HeaderControl);
     Hooks.on("getHeaderControlsItemSheet5e2", addApplicationV2HeaderControl);
-    Hooks.on("dnd5e.getItemContextOptions", addItemContextOption);
 }
+
