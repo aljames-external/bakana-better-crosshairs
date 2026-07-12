@@ -89,10 +89,12 @@ export class Pf2eSystemAdapter extends BaseSystemAdapter {
 
                 try {
                     await scene.createEmbeddedDocuments(docName, [createData]);
-                    crosshairAdapter?.dismissPreview(placeable);
                 } catch (err) {
                     log.error(`Pf2eSystemAdapter.handleProgrammaticPlacement | Failed to programmatically create ${docName}:`, err);
                 }
+            }
+            if (placeable && crosshairAdapter && typeof crosshairAdapter.dismissPreview === "function") {
+                crosshairAdapter.dismissPreview(placeable);
             }
         }, 50);
     }

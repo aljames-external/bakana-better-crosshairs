@@ -79,10 +79,12 @@ export class BaseSystemAdapter {
 
                 try {
                     await scene.createEmbeddedDocuments(docName, [createData]);
-                    crosshairAdapter?.dismissPreview(placeable);
                 } catch (err) {
                     log.error(`BaseSystemAdapter.handleProgrammaticPlacement | Failed to programmatically create ${docName}:`, err);
                 }
+            }
+            if (placeable && crosshairAdapter && typeof crosshairAdapter.dismissPreview === "function") {
+                crosshairAdapter.dismissPreview(placeable);
             }
         }, 50);
     }

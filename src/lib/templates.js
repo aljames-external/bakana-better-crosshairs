@@ -97,7 +97,8 @@ async function handleDrawPreview(placeable) {
         resolved: false,
         cancelled: false,
         coords: null,
-        config: entryConfig
+        config: entryConfig,
+        placeable: placeable
     };
     pendingPlacements.set(placementKey, pending);
 
@@ -136,6 +137,9 @@ async function handleDrawPreview(placeable) {
                         await canvas.scene.createEmbeddedDocuments(docName, [deferredData]);
                     } catch (err) {
                         log.error(`context.resolve | Failed to create deferred ${docName} document on placement:`, err);
+                    }
+                    if (placeable && crosshairAdapter && typeof crosshairAdapter.dismissPreview === "function") {
+                        crosshairAdapter.dismissPreview(placeable);
                     }
                 } else if (doc && canvas.scene) {
                     systemAdapter.handleProgrammaticPlacement(canvas.scene, doc, placeable, coords, {
@@ -276,6 +280,9 @@ function handlePreCreate(doc, _data, _options, userId) {
     if (pending.resolved && pending.coords) {
         log.debug(`handlePreCreate | [APPLY] Sequencer placement resolved for "${entry.itemName}". Applying placement onto document:`, pending.coords);
         crosshairAdapter.applyDocumentPlacement(doc, pending.coords, pending.config);
+        if (pending.placeable && crosshairAdapter && typeof crosshairAdapter.dismissPreview === "function") {
+            crosshairAdapter.dismissPreview(pending.placeable);
+        }
         pendingPlacements.delete(placementKey);
         log.debug(`handlePreCreate | [APPLY COMPLETE] Document updated successfully.`);
         return true;
