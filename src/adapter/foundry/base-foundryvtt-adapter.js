@@ -213,21 +213,56 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
-     * Safely dismiss a canvas preview placeable by detaching stage interaction listeners and invoking prototype destruction.
+     * Safely dismiss a canvas preview placeable by detaching stage interaction listeners, clearing ticker queues, and destroying.
      * Common across Foundry v12..v14+ placement previews and system-overridden canvas previews (e.g. Pathfinder 2e).
      * @param {PlaceableObject} placeable - The placeable graphic object to dismiss and destroy
      * @returns {void} No return value
      */
     dismissPreview(placeable) {
         if (!placeable) return;
+
+        placeable.isPreview = false;
+        placeable.visible = false;
+        placeable.renderable = false;
+
+        if (placeable.renderFlags && typeof placeable.renderFlags.clear === "function") {
+            try { placeable.renderFlags.clear(); } catch (e) {}
+        }
+        if (typeof canvas?.app?.ticker?.remove === "function") {
+            try { canvas.app.ticker.remove(placeable.applyRenderFlags, placeable); } catch (e) {}
+            try { canvas.app.ticker.remove(placeable._tick, placeable); } catch (e) {}
+        }
+
         if (typeof placeable._onConfirm === "function") {
             try { placeable._onConfirm({ preventDefault: () => {}, stopPropagation: () => {} }); } catch (e) {}
-        } else if (typeof placeable._finishPreview === "function") {
+        }
+        if (typeof placeable._finishPreview === "function") {
             try { placeable._finishPreview(); } catch (e) {}
-        } else if (typeof placeable._onCancel === "function") {
+        }
+        if (typeof placeable._onCancel === "function") {
             try { placeable._onCancel({ preventDefault: () => {}, stopPropagation: () => {} }); } catch (e) {}
-        } else if (typeof canvas?.templates?._onCancel === "function") {
-            try { canvas.templates._onCancel(); } catch (e) {}
+        }
+        if (typeof canvas?.templates?._onCancel === "function") {
+            try { canvas.templates._onCancel({ preventDefault: () => {}, stopPropagation: () => {} }); } catch (e) {}
+        }
+
+        const stages = [canvas?.stage, canvas?.app?.stage, canvas?.templates, canvas?.templates?.preview].filter(Boolean);
+        const eventNames = ["pointermove", "mousemove", "pointerdown", "mousedown", "pointerup", "mouseup", "click"];
+        for (const stg of stages) {
+            if (typeof stg.listeners === "function" && typeof stg.off === "function") {
+                for (const evName of eventNames) {
+                    try {
+                        const lns = stg.listeners(evName);
+                        if (Array.isArray(lns)) {
+                            for (const fn of lns) {
+                                if (fn && (fn.context === placeable || fn._context === placeable || (fn.name && fn.name.includes("mousemove")))) {
+                                    stg.off(evName, fn);
+                                }
+                            }
+                        }
+                    } catch (e) {}
+                }
+            }
         }
 
         if (canvas?.templates?.preview?.children?.includes(placeable)) {
