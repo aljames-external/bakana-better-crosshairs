@@ -70,6 +70,14 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad) {
         if (typeof tmpl.document.updateSource === "function") {
             try { tmpl.document.updateSource({ direction: newDirDeg }); } catch (e) {}
         }
+        if (tmpl.document._shape !== undefined) tmpl.document._shape = null;
+        if (tmpl.document.shape !== undefined && typeof tmpl.document.shape.clear === "function") {
+            try { tmpl.document.shape.clear(); } catch (e) {}
+        }
+    }
+    if (tmpl._shape !== undefined) tmpl._shape = null;
+    if (tmpl.shape !== undefined && typeof tmpl.shape.clear === "function") {
+        try { tmpl.shape.clear(); } catch (e) {}
     }
     if (tmpl.ray && Ray && tmpl.ray.origin) {
         try {
@@ -87,14 +95,17 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad) {
             tmpl.renderFlags.set(flagsToSet);
         }
     }
+    if (typeof tmpl.applyRenderFlags === "function") {
+        try { tmpl.applyRenderFlags(); } catch (e) {}
+    }
     if (typeof tmpl._refreshShape === "function") {
         try { tmpl._refreshShape(); } catch (e) {}
     }
     if (typeof tmpl._refresh === "function") {
-        try { tmpl._refresh(); } catch (e) {}
+        try { tmpl._refresh({ refreshShape: true, refreshTemplate: true, refreshGrid: true }); } catch (e) {}
     }
     if (typeof tmpl.refresh === "function") {
-        try { tmpl.refresh(); } catch (e) {}
+        try { tmpl.refresh({ refreshShape: true, refreshTemplate: true, refreshGrid: true }); } catch (e) {}
     }
     if (typeof tmpl.highlightGrid === "function") {
         try { tmpl.highlightGrid(); } catch (e) {}
