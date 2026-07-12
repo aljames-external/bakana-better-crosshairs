@@ -1,0 +1,75 @@
+<div class="bbc-autorec-container bbc-item-config-container {{#if isEditMode}}edit-mode{{/if}}">
+    <!-- Header Banner -->
+    <div class="bbc-item-header-banner">
+        <div class="bbc-item-header-left">
+            {{#if itemImg}}
+            <img src="{{itemImg}}" alt="{{itemName}}" class="bbc-item-header-icon" />
+            {{/if}}
+            <div class="bbc-item-header-titles">
+                <h2>{{itemName}}</h2>
+            </div>
+            <div class="bbc-item-badges">
+                {{#if isCustom}}
+                <span class="bbc-type-badge custom-badge" title="Custom configuration stored on item flags">
+                    <i class="fa-solid fa-star"></i> {{labels.badgeCustom}}
+                </span>
+                {{else if isAutorec}}
+                <span class="bbc-type-badge autorec-badge" title="Inheriting from registered AUTOREC workflow">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> {{labels.badgeAutorec}}
+                </span>
+                {{else}}
+                <span class="bbc-type-badge default-badge" title="Using fallback default settings">
+                    <i class="fa-solid fa-circle-dot"></i> {{labels.badgeDefault}}
+                </span>
+                {{/if}}
+            </div>
+        </div>
+        <div class="bbc-item-header-actions">
+            <label class="bbc-edit-slider-label" title="{{labels.editMode}}">
+                <span>{{labels.editMode}}</span>
+                <input type="checkbox" id="bbc-item-edit-mode-toggle" class="bbc-edit-toggle-input" {{#if isEditMode}}checked{{/if}} />
+                <span class="bbc-edit-slider-track"></span>
+            </label>
+            <button type="submit" class="bbc-save-single-btn edit-only" title="Save custom configuration">
+                <i class="fa-solid fa-floppy-disk"></i> {{labels.saveCustomBtn}}
+            </button>
+        </div>
+    </div>
+
+    {{#if showActivityDropdown}}
+    <div class="bbc-scope-selector-banner">
+        <label for="bbc-override-scope"><i class="fa-solid fa-layer-group"></i> Configure Target Scope:</label>
+        <select name="overrideScope" id="bbc-override-scope" class="bbc-scope-select">
+            {{#each overrideScopes}}
+            <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
+            {{/each}}
+        </select>
+        <span class="bbc-scope-hint">{{scopeHint}}</span>
+    </div>
+    {{/if}}
+
+    <div class="bbc-sections-scroll bbc-item-config-body">
+        {{#if (or hasCustom isEditMode)}}
+        {{#with config}}
+        {{> "modules/bakana-better-crosshairs/src/autorec/configFieldsPartial.html" labels=../labels prePlacementTitle=../prePlacementTitle placementSectionTitle=../placementSectionTitle postPlacementTitle=../postPlacementTitle showOverrides=../showOverrides showActivityIdentification=../showActivityIdentification isEditMode=../isEditMode}}
+        {{/with}}
+        {{else}}
+        <div class="bbc-inspector-empty">
+            <div class="bbc-empty-card">
+                <i class="fa-solid fa-wand-magic-sparkles bbc-empty-icon"></i>
+                <h3>{{#if isAutorec}}{{labels.inheritingAutorecTitle}}{{else}}{{labels.noCustomOverridesTitle}}{{/if}}</h3>
+                <p>{{#if isAutorec}}{{labels.inheritingAutorecDesc}}{{else}}{{labels.noCustomOverridesDesc}}{{/if}}</p>
+            </div>
+        </div>
+        {{/if}}
+    </div>
+
+    {{#if hasCustom}}
+    <!-- Footer Action Bar -->
+    <div class="bbc-sidebar-footer bbc-item-config-footer edit-only">
+        <button type="button" class="bbc-delete-single-btn" data-action="delete-custom" title="Delete custom item configuration">
+            <i class="fa-solid fa-trash-can"></i> {{labels.deleteCustomBtn}}
+        </button>
+    </div>
+    {{/if}}
+</div>
