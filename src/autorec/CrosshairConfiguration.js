@@ -13,8 +13,9 @@ export class CrosshairConfiguration {
         const defaults = DEFAULT_AUTOREC_ENTRY;
 
         this.itemName = String(source.itemName ?? defaults.itemName).trim();
-        this.id = String(source.id ?? this.itemName);
+        this.id = String(source.id ?? defaults.id);
         this.isDefault = Boolean(source.isDefault);
+
         this.isCustom = Boolean(source.isCustom);
         this.enabled = source.enabled !== undefined ? Boolean(source.enabled) : defaults.enabled;
 
