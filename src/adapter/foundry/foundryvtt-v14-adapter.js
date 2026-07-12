@@ -186,7 +186,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             delete newShape._id;
             updateData.shapes = [newShape];
 
-            const targetColor = styling.placedBorderColor ? styling.placedBorderColor : (styling.placedFillColor ? styling.placedFillColor : undefined);
+            const targetColor = styling.placedFillColor ? styling.placedFillColor : (styling.placedBorderColor ? styling.placedBorderColor : undefined);
             if (targetColor) updateData.color = targetColor;
             if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
             if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;

@@ -235,7 +235,7 @@ test('FoundryVTTV14Adapter applyDocumentPlacement and updatePreviewShape handle 
     assert.equal(regionUpdate.shapes[0].x, 100);
     assert.equal(regionUpdate.shapes[0].y, 200);
     assert.equal(regionUpdate.shapes[0].radius, 20);
-    assert.equal(regionUpdate.color, '#00ff00');
+    assert.equal(regionUpdate.color, '#ffffff');
     assert.equal(regionUpdate.borderColor, '#00ff00');
     assert.equal(regionUpdate.fillColor, '#ffffff');
     assert.equal(regionUpdate.alpha, 0.4);
