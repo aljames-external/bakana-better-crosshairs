@@ -37,11 +37,6 @@
                 "id": "sequencer",
                 "type": "module",
                 "compatibility": {}
-            },
-            {
-                "id": "socketlib",
-                "type": "module",
-                "compatibility": {}
             }
         ]
     }

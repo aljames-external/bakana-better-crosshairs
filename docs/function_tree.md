@@ -132,7 +132,19 @@ Binds a global canvas mousewheel listener (`Shift+Scroll` / `Ctrl+Scroll`) to ro
 
 ---
 
-### Adapter Core Methods (`src/adapter/`)
+### Programmatic Manager API (`bbc.manager` / `src/autorec/autorecManager.js`)
+
+#### `bbc.manager.getDefaultConfig()`
+Returns a fresh reference copy (`{ ...DEFAULT_AUTOREC_ENTRY }`) of the canonical default Better Crosshairs configuration entry schema.
+- **Returns**: (*Object*) Complete crosshair configuration template dictionary (`id`, `enabled`, `stickToToken`, `showLine`, `circleFile`, `coneFile`, `rayFile`, `squareFile`, `borderColor`, `borderAlpha`, `fillColor`, `fillAlpha`, `placedFillColor`, `concurrentCode`, `postPlacementCode`, `icon`).
+
+#### `bbc.manager.customize(item, config)`
+Programmatically stores or clears (`config === undefined`) an item-specific crosshair override configuration on an Item document's flags (`bakana-better-crosshairs.customConfig`).
+- **Arguments**:
+  - `item` (*Document*): The target Item document.
+  - `config` (*Object|undefined*): The custom crosshair configuration dictionary, or `undefined`/`null` to remove item overrides.
+- **Returns**: (*Promise<boolean>*) `true` if item flags were successfully modified or cleared.
+
 
 #### `Dnd5eSystemAdapter.prototype.shouldReplace(context, entry)`
 Evaluates whether an item/activity matches an Autorec configuration entry.

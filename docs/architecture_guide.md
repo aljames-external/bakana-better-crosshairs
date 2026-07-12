@@ -67,12 +67,23 @@ Located in [`src/adapter/foundry/`](../src/adapter/foundry/), Foundry adapters i
 - **`FoundryVTTV14Adapter`**: Handles V14+ `Region` placement hooks (`drawMeasuredTemplate` → `preCreateRegion` → `createRegion`). Converts game feet (`distance`, `width`) to canvas pixels (`* pxPerFoot`) inside `_formatRegionShapeUpdate` and returns `{ factor: 1 / gridSize, gridUnits: true }` so Sequencer effects render accurate grid unit dimensions.
 
 ### Multi-Activity Priority Matching (`matchAutorecEntry` & `getEntriesForItem`)
-When a template or region for an item (`e.g. Longbow`) is drawn, `matchAutorecEntry` queries `autorecManager.getEntriesForItem(itemName)` to evaluate candidate workflows in strict priority order:
-1. **Activity-Specific Workflows (`Longbow > Rapid Fire`, `Longbow > Line Fire`)**: Grouped and sorted to the front (`aHasAct && !bHasAct`).
-2. **General Item Fallback Workflows (`Longbow > <no activity named>`)**: Sorted to the back.
-3. **Stable Front-to-Back Tiebreaking**: Evaluated iteratively (`for (const entry of candidateEntries)`); the first entry where `shouldReplace` matches wins (`first registered matching rule wins`).
+When a template or region for an item (`e.g. Longbow`) is drawn, `matchAutorecEntry` evaluates crosshair overrides according to a strict 4-tier preference hierarchy:
+
+1. **`CUSTOM CONFIG` (Item Flags Override)**: If `item.flags["bakana-better-crosshairs"].customConfig` exists and is active (`enabled !== false`), it immediately takes precedence over all Autorec rules.
+2. **`AUTOREC MATCH` (Candidate Workflows)**: If no custom item override is active, `autorecManager.getEntriesForItem(itemName)` is queried:
+   - **Activity-Specific Workflows (`Longbow > Rapid Fire`, `Longbow > Line Fire`)**: Sorted to the front (`aHasAct && !bHasAct`).
+   - **General Item Fallback Workflows (`Longbow > <no activity named>`)**: Sorted to the back.
+   - **Stable Tiebreaking**: Evaluated front-to-back (`first registered matching rule wins`).
+3. **`AUTOREC DEFAULT` (Global Fallback)**: If no matching workflow exists, the `DEFAULT` entry in `autorecManager` applies if enabled.
+4. **`FOUNDRY DEFAULT`**: Otherwise `matchAutorecEntry` returns `null` and standard tabletop placement applies.
+
+### Programmatic Customization (`bbc.manager.customize` & `bbc.manager.getDefaultConfig`)
+Modules and systems without native support can programmatically interact with item crosshairs:
+- `bbc.manager.getDefaultConfig()`: Returns a fresh reference copy (`{ ...DEFAULT_AUTOREC_ENTRY }`) of the default crosshair schema.
+- `bbc.manager.customize(item, config)`: Programmatically sets or clears (`config === undefined`) the `customConfig` flag on an item owned by the calling user.
 
 ### System Adapters (`BaseSystemAdapter` & Subclasses)
+
 Located in [`src/adapter/system/`](../src/adapter/system/), system adapters determine whether a candidate Autorec entry matches the calling context:
 - **`BaseSystemAdapter`**: Checks generic `itemName` / `itemId` equality against registered rules.
 - **`Dnd5eSystemAdapter`**: Resolves D&D 5e origin UUIDs (`flags.dnd5e.origin`), extracts v4 Activity objects (`item.system.activities`), and matches both `activityId` and `activityName` case-insensitively.
