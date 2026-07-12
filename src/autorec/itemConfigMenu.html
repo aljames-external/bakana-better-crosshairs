@@ -1,4 +1,4 @@
-<div class="bbc-autorec-container bbc-item-config-container">
+<div class="bbc-autorec-container bbc-item-config-container {{#if isEditMode}}edit-mode{{/if}}">
     <!-- Header Banner -->
     <div class="bbc-item-header-banner">
         <div class="bbc-item-header-left">
@@ -25,13 +25,19 @@
             </div>
         </div>
         <div class="bbc-item-header-actions">
+            <label class="bbc-edit-slider-label" title="{{labels.editMode}}">
+                <span>{{labels.editMode}}</span>
+                <input type="checkbox" id="bbc-item-edit-mode-toggle" class="bbc-edit-toggle-input" {{#if isEditMode}}checked{{/if}} />
+                <span class="bbc-edit-slider-track"></span>
+            </label>
             {{#if hasCustom}}
-            <button type="button" class="bbc-delete-single-btn" data-action="delete-custom" title="Delete custom item configuration">
+            <button type="button" class="bbc-delete-single-btn edit-only" data-action="delete-custom" title="Delete custom item configuration">
                 <i class="fa-solid fa-trash-can"></i> {{labels.deleteCustomBtn}}
             </button>
             {{/if}}
         </div>
     </div>
+
 
     {{#if showActivityDropdown}}
     <div class="bbc-scope-selector-banner">
@@ -66,7 +72,7 @@
                             <td>
                                 <div class="bbc-edit-row">
                                     <label class="bbc-edit-checkbox-label">
-                                        <input type="checkbox" name="enablePrePlacement" {{#if config.enablePrePlacement}}checked{{/if}} />
+                                        <input type="checkbox" name="enablePrePlacement" {{#if config.enablePrePlacement}}checked{{/if}} {{#unless isEditMode}}disabled{{/unless}} />
                                         <span>{{#if config.enablePrePlacement}}Enabled{{else}}Disabled{{/if}}</span>
                                     </label>
 
@@ -82,7 +88,7 @@
                     </tbody>
                 </table>
                 <div class="bbc-code-container">
-                    <textarea class="bbc-edit-textarea bbc-code-editor" name="concurrentCode" rows="4" spellcheck="false" placeholder="// Enter Javascript code executed before template placement selection...">{{config.concurrentCode}}</textarea>
+                    <textarea class="bbc-edit-textarea bbc-code-editor" name="concurrentCode" rows="4" spellcheck="false" placeholder="// Enter Javascript code executed before template placement selection..." {{#unless isEditMode}}disabled{{/unless}}>{{config.concurrentCode}}</textarea>
                 </div>
             </div>
         </section>
@@ -105,7 +111,7 @@
                             <td>
                                 <div class="bbc-edit-row">
                                     <label class="bbc-edit-checkbox-label">
-                                        <input type="checkbox" name="enableAnimation" {{#if config.enableAnimation}}checked{{/if}} />
+                                        <input type="checkbox" name="enableAnimation" {{#if config.enableAnimation}}checked{{/if}} {{#unless isEditMode}}disabled{{/unless}} />
                                         <span>{{#if config.enableAnimation}}Enabled{{else}}Disabled{{/if}}</span>
                                     </label>
 
@@ -122,31 +128,31 @@
                             <th>{{labels.circleFile}}</th>
 
                             <td>
-                                <input type="text" class="bbc-edit-input" name="circleFile" value="{{config.circleFile}}" placeholder="eskie.crosshair.circle.fantasy_01.white.full" />
+                                <input type="text" class="bbc-edit-input" name="circleFile" value="{{config.circleFile}}" placeholder="eskie.crosshair.circle.fantasy_01.white.full" {{#unless isEditMode}}disabled{{/unless}} />
                             </td>
                         </tr>
                         <tr>
                             <th>{{labels.coneFile}}</th>
                             <td>
-                                <input type="text" class="bbc-edit-input" name="coneFile" value="{{config.coneFile}}" placeholder="eskie.crosshair.cone.thin.fantasy_01.white.full" />
+                                <input type="text" class="bbc-edit-input" name="coneFile" value="{{config.coneFile}}" placeholder="eskie.crosshair.cone.thin.fantasy_01.white.full" {{#unless isEditMode}}disabled{{/unless}} />
                             </td>
                         </tr>
                         <tr>
                             <th>{{labels.rayFile}}</th>
                             <td>
-                                <input type="text" class="bbc-edit-input" name="rayFile" value="{{config.rayFile}}" placeholder="eskie.crosshair.ray.fantasy_01.white" />
+                                <input type="text" class="bbc-edit-input" name="rayFile" value="{{config.rayFile}}" placeholder="eskie.crosshair.ray.fantasy_01.white" {{#unless isEditMode}}disabled{{/unless}} />
                             </td>
                         </tr>
                         <tr>
                             <th>{{labels.squareFile}}</th>
                             <td>
-                                <input type="text" class="bbc-edit-input" name="squareFile" value="{{config.squareFile}}" placeholder="eskie.crosshair.square.fantasy_01.white" />
+                                <input type="text" class="bbc-edit-input" name="squareFile" value="{{config.squareFile}}" placeholder="eskie.crosshair.square.fantasy_01.white" {{#unless isEditMode}}disabled{{/unless}} />
                             </td>
                         </tr>
                         <tr>
                             <th>{{labels.lockToToken}}</th>
                             <td>
-                                <select class="bbc-edit-select" name="stickToToken">
+                                <select class="bbc-edit-select" name="stickToToken" {{#unless isEditMode}}disabled{{/unless}}>
                                     <option value="default" {{#if (eq config.stickToToken "default")}}selected{{/if}}>{{labels.stickDefault}}</option>
                                     <option value="true" {{#if (eq config.stickToToken "true")}}selected{{/if}}>{{labels.stickOn}}</option>
                                     <option value="false" {{#if (eq config.stickToToken "false")}}selected{{/if}}>{{labels.stickOff}}</option>
@@ -158,10 +164,10 @@
                             <td>
                                 <div class="bbc-edit-row">
                                     <label class="bbc-edit-checkbox-label">
-                                        <input type="checkbox" name="showLine" {{#if config.showLine}}checked{{/if}} />
+                                        <input type="checkbox" name="showLine" {{#if config.showLine}}checked{{/if}} {{#unless isEditMode}}disabled{{/unless}} />
                                         <span>{{labels.showLineLabel}}</span>
                                     </label>
-                                    <input type="text" class="bbc-edit-input" name="lineFile" value="{{config.lineFile}}" placeholder="eskie.crosshair.line.generic_01.white" />
+                                    <input type="text" class="bbc-edit-input" name="lineFile" value="{{config.lineFile}}" placeholder="eskie.crosshair.line.generic_01.white" {{#unless isEditMode}}disabled{{/unless}} />
                                 </div>
                             </td>
                         </tr>
@@ -169,9 +175,9 @@
                             <th>{{labels.borderStyling}}</th>
                             <td>
                                 <div class="bbc-edit-color-row">
-                                    <input type="color" class="bbc-edit-color" data-color-target="bbc-item-bordercolor" value="{{config.borderColorPicker}}" />
-                                    <input type="text" id="bbc-item-bordercolor" class="bbc-edit-input" name="borderColor" value="{{config.borderColor}}" placeholder="#ffffff" />
-                                    <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="borderAlpha" value="{{config.borderAlpha}}" /></label>
+                                    <input type="color" class="bbc-edit-color" data-color-target="bbc-item-bordercolor" value="{{config.borderColorPicker}}" {{#unless isEditMode}}disabled{{/unless}} />
+                                    <input type="text" id="bbc-item-bordercolor" class="bbc-edit-input" name="borderColor" value="{{config.borderColor}}" placeholder="#ffffff" {{#unless isEditMode}}disabled{{/unless}} />
+                                    <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="borderAlpha" value="{{config.borderAlpha}}" {{#unless isEditMode}}disabled{{/unless}} /></label>
                                 </div>
                             </td>
                         </tr>
@@ -179,19 +185,20 @@
                             <th>{{labels.fillStyling}}</th>
                             <td>
                                 <div class="bbc-edit-color-row">
-                                    <input type="color" class="bbc-edit-color" data-color-target="bbc-item-fillcolor" value="{{config.fillColorPicker}}" />
-                                    <input type="text" id="bbc-item-fillcolor" class="bbc-edit-input" name="fillColor" value="{{config.fillColor}}" placeholder="#000000" />
-                                    <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="fillAlpha" value="{{config.fillAlpha}}" /></label>
+                                    <input type="color" class="bbc-edit-color" data-color-target="bbc-item-fillcolor" value="{{config.fillColorPicker}}" {{#unless isEditMode}}disabled{{/unless}} />
+                                    <input type="text" id="bbc-item-fillcolor" class="bbc-edit-input" name="fillColor" value="{{config.fillColor}}" placeholder="#000000" {{#unless isEditMode}}disabled{{/unless}} />
+                                    <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="fillAlpha" value="{{config.fillAlpha}}" {{#unless isEditMode}}disabled{{/unless}} /></label>
                                 </div>
                             </td>
                         </tr>
                         <tr>
                             <th>{{labels.customIcon}}</th>
                             <td>
-                                <input type="text" class="bbc-edit-input" name="icon" value="{{config.icon}}" placeholder="eskie.crosshair.reticle.generic_02.white" />
+                                <input type="text" class="bbc-edit-input" name="icon" value="{{config.icon}}" placeholder="eskie.crosshair.reticle.generic_02.white" {{#unless isEditMode}}disabled{{/unless}} />
 
                             </td>
                         </tr>
+
                     </tbody>
                 </table>
             </div>
@@ -215,7 +222,7 @@
                             <td>
                                 <div class="bbc-edit-row">
                                     <label class="bbc-edit-checkbox-label">
-                                        <input type="checkbox" name="enablePlacedStyling" {{#if config.enablePlacedStyling}}checked{{/if}} />
+                                        <input type="checkbox" name="enablePlacedStyling" {{#if config.enablePlacedStyling}}checked{{/if}} {{#unless isEditMode}}disabled{{/unless}} />
                                         <span>{{#if config.enablePlacedStyling}}Enabled{{else}}Disabled{{/if}}</span>
                                     </label>
 
@@ -232,9 +239,9 @@
                             <th>{{labels.placedFill}}</th>
                             <td>
                                 <div class="bbc-edit-color-row">
-                                    <input type="color" class="bbc-edit-color" data-color-target="bbc-item-placedfill" value="{{config.placedFillColorPicker}}" />
-                                    <input type="text" id="bbc-item-placedfill" class="bbc-edit-input" name="placedFillColor" value="{{config.placedFillColor}}" placeholder="#000000" />
-                                    <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="placedFillAlpha" value="{{config.placedFillAlpha}}" /></label>
+                                    <input type="color" class="bbc-edit-color" data-color-target="bbc-item-placedfill" value="{{config.placedFillColorPicker}}" {{#unless isEditMode}}disabled{{/unless}} />
+                                    <input type="text" id="bbc-item-placedfill" class="bbc-edit-input" name="placedFillColor" value="{{config.placedFillColor}}" placeholder="#000000" {{#unless isEditMode}}disabled{{/unless}} />
+                                    <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="placedFillAlpha" value="{{config.placedFillAlpha}}" {{#unless isEditMode}}disabled{{/unless}} /></label>
                                 </div>
                             </td>
                         </tr>
@@ -242,9 +249,9 @@
                             <th>{{labels.placedBorder}}</th>
                             <td>
                                 <div class="bbc-edit-color-row">
-                                    <input type="color" class="bbc-edit-color" data-color-target="bbc-item-placedborder" value="{{config.placedBorderColorPicker}}" />
-                                    <input type="text" id="bbc-item-placedborder" class="bbc-edit-input" name="placedBorderColor" value="{{config.placedBorderColor}}" placeholder="#ffffff" />
-                                    <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="placedBorderAlpha" value="{{config.placedBorderAlpha}}" /></label>
+                                    <input type="color" class="bbc-edit-color" data-color-target="bbc-item-placedborder" value="{{config.placedBorderColorPicker}}" {{#unless isEditMode}}disabled{{/unless}} />
+                                    <input type="text" id="bbc-item-placedborder" class="bbc-edit-input" name="placedBorderColor" value="{{config.placedBorderColor}}" placeholder="#ffffff" {{#unless isEditMode}}disabled{{/unless}} />
+                                    <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="placedBorderAlpha" value="{{config.placedBorderAlpha}}" {{#unless isEditMode}}disabled{{/unless}} /></label>
                                 </div>
                             </td>
                         </tr>
@@ -271,7 +278,7 @@
                             <td>
                                 <div class="bbc-edit-row">
                                     <label class="bbc-edit-checkbox-label">
-                                        <input type="checkbox" name="enablePostPlacement" {{#if config.enablePostPlacement}}checked{{/if}} />
+                                        <input type="checkbox" name="enablePostPlacement" {{#if config.enablePostPlacement}}checked{{/if}} {{#unless isEditMode}}disabled{{/unless}} />
                                         <span>{{#if config.enablePostPlacement}}Enabled{{else}}Disabled{{/if}}</span>
                                     </label>
 
@@ -287,16 +294,17 @@
                     </tbody>
                 </table>
                 <div class="bbc-code-container">
-                    <textarea class="bbc-edit-textarea bbc-code-editor" name="postPlacementCode" rows="4" spellcheck="false" placeholder="// Enter Javascript code executed after document creation...">{{config.postPlacementCode}}</textarea>
+                    <textarea class="bbc-edit-textarea bbc-code-editor" name="postPlacementCode" rows="4" spellcheck="false" placeholder="// Enter Javascript code executed after document creation..." {{#unless isEditMode}}disabled{{/unless}}>{{config.postPlacementCode}}</textarea>
                 </div>
             </div>
         </section>
     </div>
 
     <!-- Footer Action Bar -->
-    <div class="bbc-sidebar-footer bbc-item-config-footer">
-        <button type="submit" class="bbc-add-workflow-btn">
+    <div class="bbc-sidebar-footer bbc-item-config-footer edit-only">
+        <button type="submit" class="bbc-add-workflow-btn" {{#unless isEditMode}}disabled{{/unless}}>
             <i class="fa-solid fa-floppy-disk"></i> {{labels.saveCustomBtn}}
         </button>
     </div>
 </div>
+

@@ -81,8 +81,8 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         });
         this.item = options.item ?? null;
         this.selectedScope = options.selectedScope ?? "item";
+        this.isEditMode = Boolean(options.isEditMode ?? false);
     }
-
 
     /**
      * Prepare the rendering context for the item crosshair configuration form template.
@@ -94,6 +94,8 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         const item = this.item;
         const itemName = item?.name ?? "Unknown Item";
         const itemImg = item?.img ?? null;
+        const isEditMode = Boolean(this.isEditMode);
+
 
         const selectedScope = this.selectedScope ?? "item";
         const itemCustomConfig = item?.getFlag(MODULE_ID, "customConfig") ?? null;
@@ -211,6 +213,7 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             badgeDefault: localize("BBC.itemConfigMenu.badges.default", "DEFAULT"),
             deleteCustomBtn: localize("BBC.itemConfigMenu.deleteCustomBtn", "Delete"),
             saveCustomBtn: localize("BBC.itemConfigMenu.saveCustomBtn", "Save"),
+            editMode: localize("BBC.autorecMenu.labels.editMode", "Edit Mode"),
 
             overridePrePlacement: localize("BBC.itemConfigMenu.overridePrePlacement", "Override Pre-Placement Script"),
             overrideAnimation: localize("BBC.itemConfigMenu.overrideAnimation", "Override Animation Configuration"),
@@ -253,12 +256,14 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             hasCustom,
             isCustom,
             isAutorec,
+            isEditMode,
             autorecMatchName: autorecMatch?.itemName ?? "",
             config: mergedConfig,
             showActivityDropdown,
             overrideScopes,
             scopeHint,
             selectedScope,
+
             prePlacementTitle,
             placementSectionTitle,
             postPlacementTitle,
@@ -287,7 +292,35 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
     _attachEventListeners(root) {
         if (!root) return;
 
+        // Restore and handle Edit Mode state across re-renders and toggles
+        const editToggle = root.querySelector("#bbc-item-edit-mode-toggle");
+        const container = root.querySelector(".bbc-autorec-container");
+        if (editToggle && container) {
+            if (this.isEditMode) {
+                editToggle.checked = true;
+                container.classList.add("edit-mode");
+            } else {
+                editToggle.checked = false;
+                container.classList.remove("edit-mode");
+            }
+
+            const syncEditModeControls = (turningOn) => {
+                this.isEditMode = turningOn;
+                container.classList.toggle("edit-mode", turningOn);
+                root.querySelectorAll("input:not(#bbc-item-edit-mode-toggle), select:not([name='overrideScope']), textarea, button[type='submit']").forEach(el => {
+                    el.disabled = !turningOn;
+                });
+            };
+
+            syncEditModeControls(this.isEditMode);
+
+            editToggle.addEventListener("change", (ev) => {
+                syncEditModeControls(Boolean(ev.currentTarget.checked));
+            });
+        }
+
         // Synchronize HTML color pickers with adjacent text inputs
+
         root.querySelectorAll("input[type='color'][data-color-target]").forEach(picker => {
             picker.addEventListener("input", (ev) => {
                 const targetId = ev.currentTarget.getAttribute("data-color-target");
