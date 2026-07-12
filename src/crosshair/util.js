@@ -211,53 +211,11 @@ export function attachWheelRotation(crosshair, config = {}) {
 export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
     rotateCrosshairInstance(crosshair, config.currentDirection ?? config.direction ?? 0);
 
-    const getTargetAnchor = (cfg) => {
-        const t = String(cfg.type ?? cfg.t ?? "").toLowerCase();
-        if (t === "ray" || t === "cone") return { x: 0, y: 0.5 }; // Midpoint of left edge
-        if (t === "rect" || t === "square") return { x: 0, y: 0 }; // Top left corner
-        return { x: 0.5, y: 0.5 }; // Circles / center
-    };
-
-    const targetAnchor = getTargetAnchor(config);
-
-    const alignSpriteInsideContainer = (sprite) => {
-        if (!sprite || !sprite.anchor) return;
-        if (typeof sprite.anchor.set === "function") {
-            sprite.anchor.set(targetAnchor.x, targetAnchor.y);
-        } else {
-            sprite.anchor.x = targetAnchor.x;
-            sprite.anchor.y = targetAnchor.y;
-        }
-        if (sprite.position && typeof sprite.position.set === "function") {
-            sprite.position.set(0, 0);
-        } else if (sprite.x !== undefined) {
-            sprite.x = 0;
-            sprite.y = 0;
-        }
-        if (sprite.rotation !== undefined) sprite.rotation = 0;
-    };
-
-    // 1. Align internal PIXI sprites inside crosshair container (rotates transparent grey shape)
-    if (crosshair) {
-        if (crosshair.sprite) alignSpriteInsideContainer(crosshair.sprite);
-        if (crosshair.mesh && crosshair !== crosshair.mesh) alignSpriteInsideContainer(crosshair.mesh);
-        if (Array.isArray(crosshair.children)) {
-            for (const child of crosshair.children) {
-                if (child !== crosshair.sprite && child !== crosshair.mesh && child.anchor) {
-                    alignSpriteInsideContainer(child);
-                }
-            }
-        }
-    }
-
-    // 2. Align and rotate all active Sequencer visual effect graphics
+    // Synchronize rotation across all active Sequencer visual effect graphics without fighting Sequencer's internal pivot/anchor layout
     if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
         try {
             const effects = Sequencer.EffectManager.getEffects({ name: config.id });
             for (const eff of effects) {
-                if (eff.sprite) alignSpriteInsideContainer(eff.sprite);
-                if (eff.mesh) alignSpriteInsideContainer(eff.mesh);
-
                 if (eff.container && typeof eff.container.rotation !== "undefined") {
                     eff.container.rotation = rad;
                 }

@@ -512,7 +512,7 @@ test('crosshair.util.attachWheelRotation delegates Control key requirement to sy
     }
 });
 
-test('crosshair.util.attachWheelRotation enforces shape origin anchors (ray/cone: {0, 0.5}, square: {0, 0}, circle: {0.5, 0.5}) when rotating', () => {
+test('crosshair.util.attachWheelRotation synchronizes container and effect rotation across cones, squares, and circles without fighting internal anchors', () => {
     let wheelHandler = null;
     const origAddEvent = globalThis.window?.addEventListener;
     const origRemoveEvent = globalThis.window?.removeEventListener;
@@ -523,29 +523,29 @@ test('crosshair.util.attachWheelRotation enforces shape origin anchors (ray/cone
         };
         globalThis.window.removeEventListener = () => {};
 
-        // 1. Verify Cone ({0, 0.5})
+        // 1. Verify Cone rotation sync
         const coneConfig = { type: 'cone', direction: 0 };
-        const mockConeCrosshair = { sprite: { anchor: { x: 0.5, y: 0.5, set(x, y) { this.x = x; this.y = y; } }, width: 100, height: 100, x: 50, y: 50, rotation: 0 } };
+        const mockConeCrosshair = { rotation: 0, direction: 0 };
         attachWheelRotation(mockConeCrosshair, coneConfig);
         wheelHandler({ ctrlKey: true, deltaY: 100 });
-        assert.equal(mockConeCrosshair.sprite.anchor.x, 0);
-        assert.equal(mockConeCrosshair.sprite.anchor.y, 0.5);
+        assert.equal(mockConeCrosshair.rotation, 5 * (Math.PI / 180));
+        assert.equal(mockConeCrosshair.direction, 5);
 
-        // 2. Verify Square ({0, 0})
+        // 2. Verify Square rotation sync
         const squareConfig = { type: 'rect', direction: 0 };
-        const mockSquareCrosshair = { sprite: { anchor: { x: 0.5, y: 0.5, set(x, y) { this.x = x; this.y = y; } }, width: 100, height: 100, x: 50, y: 50, rotation: 0 } };
+        const mockSquareCrosshair = { rotation: 0, direction: 0 };
         attachWheelRotation(mockSquareCrosshair, squareConfig);
         wheelHandler({ ctrlKey: true, deltaY: 100 });
-        assert.equal(mockSquareCrosshair.sprite.anchor.x, 0);
-        assert.equal(mockSquareCrosshair.sprite.anchor.y, 0);
+        assert.equal(mockSquareCrosshair.rotation, 5 * (Math.PI / 180));
+        assert.equal(mockSquareCrosshair.direction, 5);
 
-        // 3. Verify Circle ({0.5, 0.5})
+        // 3. Verify Circle rotation sync
         const circleConfig = { type: 'circle', direction: 0 };
-        const mockCircleCrosshair = { sprite: { anchor: { x: 0, y: 0, set(x, y) { this.x = x; this.y = y; } }, width: 100, height: 100, x: 50, y: 50, rotation: 0 } };
+        const mockCircleCrosshair = { rotation: 0, direction: 0 };
         attachWheelRotation(mockCircleCrosshair, circleConfig);
         wheelHandler({ ctrlKey: true, deltaY: 100 });
-        assert.equal(mockCircleCrosshair.sprite.anchor.x, 0.5);
-        assert.equal(mockCircleCrosshair.sprite.anchor.y, 0.5);
+        assert.equal(mockCircleCrosshair.rotation, 5 * (Math.PI / 180));
+        assert.equal(mockCircleCrosshair.direction, 5);
 
         detachWheelRotation();
     } finally {
