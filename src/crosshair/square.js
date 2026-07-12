@@ -1,7 +1,7 @@
 import { closest } from "../lib/filemanager.js";
 import { log } from "../lib/logger.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, resolveCrosshairIcon, alignCrosshairAndEffects } from "./util.js";
+import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, resolveCrosshairIcon, alignCrosshairAndEffects, getGridSnapMode } from "./util.js";
 
 /**
  * Creates and configures a square crosshair sequence.
