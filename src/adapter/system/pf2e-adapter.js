@@ -23,6 +23,15 @@ export class Pf2eSystemAdapter extends BaseSystemAdapter {
     }
 
     /**
+     * Return whether mouse wheel rotation of a crosshair requires holding the Control / Command modifier key.
+     * In Pathfinder 2e, rotating a region/template requires holding Ctrl + mousewheel, so normal mousewheel zooms the canvas.
+     * @returns {boolean} True (Pathfinder 2e requires Control key for crosshair wheel rotation)
+     */
+    requiresWheelModifier() {
+        return true;
+    }
+
+    /**
      * Extract calling item context from Pathfinder 2e template document flags or base context.
      * @param {Document} document - Template or Region document placed on canvas
      * @param {Object} [baseContext={}] - Initial calling context (`{ item, itemName, itemId }`)

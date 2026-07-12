@@ -5,6 +5,7 @@ import { closest } from '../../src/lib/filemanager.js';
 import { initializeFoundryAdapter, crosshairAdapter } from '../../src/adapter/foundry/index.js';
 import { initializeSystemAdapter, systemAdapter } from '../../src/adapter/system/index.js';
 import { registerPlacementHooks } from '../../src/adapter/index.js';
+import { snapCoordinates, attachWheelRotation, detachWheelRotation } from '../../src/crosshair/util.js';
 import { FoundryVTTV13Adapter } from '../../src/adapter/foundry/foundryvtt-v13-adapter.js';
 import { FoundryVTTV14Adapter } from '../../src/adapter/foundry/foundryvtt-v14-adapter.js';
 import { Dnd5eSystemAdapter } from '../../src/adapter/system/dnd5e-adapter.js';
@@ -451,6 +452,62 @@ test('closest(path) invokes dependency validation, throwing Error with trailing 
     } finally {
         if (globalThis.game?.modules && origModulesGet) {
             globalThis.game.modules.get = origModulesGet;
+        }
+    }
+});
+
+test('crosshair.util.attachWheelRotation delegates Control key requirement to systemAdapter.requiresWheelModifier()', () => {
+    let addedEvent = null;
+    let addedOptions = null;
+    let addedHandler = null;
+    const origAddEvent = globalThis.window?.addEventListener;
+    const origRemoveEvent = globalThis.window?.removeEventListener;
+    try {
+        if (!globalThis.window) globalThis.window = {};
+        globalThis.window.addEventListener = (event, handler, options) => {
+            if (event === 'wheel') {
+                addedEvent = event;
+                addedHandler = handler;
+                addedOptions = options;
+            }
+        };
+        globalThis.window.removeEventListener = () => {};
+
+        // 1. Verify PF2e system adapter requires Ctrl key
+        const origRequiresWheel = systemAdapter.requiresWheelModifier;
+        systemAdapter.requiresWheelModifier = () => true;
+
+        const config = { direction: 0 };
+        attachWheelRotation(null, config);
+
+        assert.equal(addedEvent, 'wheel');
+        assert.equal(addedOptions.passive, false);
+        assert.equal(typeof addedHandler, 'function');
+
+        // Simulate wheel scroll WITHOUT ctrlKey -> should NOT rotate when required by system
+        let preventDefaultCalled = false;
+        addedHandler({ ctrlKey: false, deltaY: 100, preventDefault: () => { preventDefaultCalled = true; } });
+        assert.equal(config.currentDirection, 0);
+        assert.equal(preventDefaultCalled, false);
+
+        // Simulate wheel scroll WITH ctrlKey -> should rotate
+        addedHandler({ ctrlKey: true, deltaY: 100, preventDefault: () => { preventDefaultCalled = true; } });
+        assert.equal(config.currentDirection, 5);
+        assert.equal(preventDefaultCalled, true);
+
+        // 2. Verify base/dnd5e system adapter does NOT require Ctrl key
+        systemAdapter.requiresWheelModifier = () => false;
+        preventDefaultCalled = false;
+        addedHandler({ ctrlKey: false, deltaY: 100, preventDefault: () => { preventDefaultCalled = true; } });
+        assert.equal(config.currentDirection, 10); // Rotated 5 more degrees without Ctrl key
+        assert.equal(preventDefaultCalled, true);
+
+        systemAdapter.requiresWheelModifier = origRequiresWheel;
+        detachWheelRotation();
+    } finally {
+        if (globalThis.window) {
+            globalThis.window.addEventListener = origAddEvent;
+            globalThis.window.removeEventListener = origRemoveEvent;
         }
     }
 });

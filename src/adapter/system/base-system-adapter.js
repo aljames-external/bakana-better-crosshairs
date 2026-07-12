@@ -22,6 +22,15 @@ export class BaseSystemAdapter {
     }
 
     /**
+     * Return whether mouse wheel rotation of a crosshair requires holding the Control / Command modifier key.
+     * Base implementation returns false (normal mouse wheel scrolling rotates crosshair unless overridden by system).
+     * @returns {boolean} True if the Control / Command key must be held to rotate the crosshair via mouse wheel.
+     */
+    requiresWheelModifier() {
+        return false;
+    }
+
+    /**
      * Extract or refine calling context for the specific game system.
      * Base implementation returns the standard calling context passed by upstream workflow.
      * @param {Document} document - Template or Region document placed on canvas

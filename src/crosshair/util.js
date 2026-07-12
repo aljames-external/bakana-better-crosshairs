@@ -1,7 +1,7 @@
 import { log } from "../lib/logger.js";
 import { Ray } from "../lib/compat.js";
 import { closest } from "../lib/filemanager.js";
-import { crosshairAdapter } from "../adapter/foundry/index.js";
+import { crosshairAdapter, systemAdapter } from "../adapter/index.js";
 
 let activeWheelHandler = null;
 let activePointerHandler = null;
@@ -153,6 +153,11 @@ export function attachWheelRotation(crosshair, config = {}) {
     config.currentDirection = config.currentDirection ?? config.direction ?? 0;
 
     activeWheelHandler = (event) => {
+        const requiresCtrl = systemAdapter?.requiresWheelModifier?.() ?? false;
+        if (requiresCtrl && !event.ctrlKey) return;
+        if (typeof event.preventDefault === "function") event.preventDefault();
+        if (typeof event.stopPropagation === "function") event.stopPropagation();
+
         const step = event.shiftKey ? 1 : 5; // 5 degrees normally (72 mousewheel steps per 360° turn)
         const delta = event.deltaY < 0 ? -step : step;
         config.currentDirection = (config.currentDirection + delta + 360) % 360;
@@ -239,7 +244,7 @@ export function attachWheelRotation(crosshair, config = {}) {
         }
     };
 
-    window.addEventListener("wheel", activeWheelHandler, { capture: true, passive: true });
+    window.addEventListener("wheel", activeWheelHandler, { capture: true, passive: false });
     window.addEventListener("pointermove", activePointerHandler, { capture: true, passive: true });
     log.debug("attachWheelRotation | Mousewheel & pointermove listeners attached for crosshair rotation (capture phase).");
 }
