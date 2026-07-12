@@ -223,6 +223,9 @@ export class BaseFoundryVTTAdapter {
     dismissPreview(placeable) {
         if (!placeable) return;
 
+        try { Object.defineProperty(placeable, 'isPreview', { get: () => false, configurable: true }); } catch (e) {}
+        try { Object.defineProperty(placeable, 'visible', { get: () => false, configurable: true }); } catch (e) {}
+        try { Object.defineProperty(placeable, 'renderable', { get: () => false, configurable: true }); } catch (e) {}
         try { placeable.isPreview = false; } catch (e) {}
         try { placeable.visible = false; } catch (e) {}
         try { placeable.renderable = false; } catch (e) {}
@@ -249,7 +252,7 @@ export class BaseFoundryVTTAdapter {
         }
 
         const stages = [canvas?.stage, canvas?.app?.stage, canvas?.templates, canvas?.templates?.preview].filter(Boolean);
-        const eventNames = ["pointermove", "mousemove", "pointerdown", "mousedown", "pointerup", "mouseup", "click"];
+        const eventNames = ["pointermove", "mousemove", "pointerdown", "mousedown", "pointerup", "mouseup", "click", "rightclick"];
         for (const stg of stages) {
             if (typeof stg.listeners === "function" && typeof stg.off === "function") {
                 for (const evName of eventNames) {
@@ -257,7 +260,7 @@ export class BaseFoundryVTTAdapter {
                         const lns = stg.listeners(evName);
                         if (Array.isArray(lns)) {
                             for (const fn of lns) {
-                                if (fn && (fn.context === placeable || fn._context === placeable || (fn.name && fn.name.includes("mousemove")))) {
+                                if (fn && (fn.context === placeable || fn._context === placeable || (fn.name && (fn.name.includes("mousemove") || fn.name.includes("pointermove") || fn.name.includes("pointerdown") || fn.name.includes("mousedown") || fn.name.includes("click") || fn.name.includes("preview") || fn.name.includes("template"))))) {
                                     stg.off(evName, fn);
                                 }
                             }
@@ -273,6 +276,19 @@ export class BaseFoundryVTTAdapter {
         if (typeof placeable.destroy === "function") {
             try { placeable.destroy({ children: true }); } catch (e) {}
         }
+
+        const dummyContainer = {
+            position: { x: 0, y: 0, set: () => {} },
+            visible: false,
+            renderable: false,
+            alpha: 0,
+            text: "",
+            destroy: () => {}
+        };
+        try { placeable.controlIcon = dummyContainer; } catch (e) {}
+        try { placeable.ruler = dummyContainer; } catch (e) {}
+        try { placeable.template = dummyContainer; } catch (e) {}
+        try { if (!placeable.position) placeable.position = dummyContainer.position; } catch (e) {}
     }
 
     /**
