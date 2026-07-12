@@ -343,8 +343,16 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             syncEditModeControls(this.isEditMode);
 
             editToggle.addEventListener("change", (ev) => {
-                syncEditModeControls(Boolean(ev.currentTarget.checked));
+                const turningOn = Boolean(ev.currentTarget.checked);
+                this.isEditMode = turningOn;
+                const hasEmptyCard = Boolean(root.querySelector(".bbc-inspector-empty"));
+                if (hasEmptyCard || !this.hasCustom) {
+                    this.render(false);
+                } else {
+                    syncEditModeControls(turningOn);
+                }
             });
+
         }
 
         // Synchronize HTML color pickers with adjacent text inputs
