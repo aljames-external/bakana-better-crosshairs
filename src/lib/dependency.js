@@ -1,5 +1,4 @@
 import { log } from "./logger.js";
-import { notify } from "./notifier.js";
 import { localize } from "./utils.js";
 
 /**
@@ -177,8 +176,7 @@ function required(dependencyList) {
     }
 
     if (!dependencyMet) {
-        notify.error(errorMsg);
-        throw new Error(errorMsg);
+        throw new Error(errorMsg + "\n");
     }
 }
 
@@ -197,8 +195,7 @@ function someRequired(dependencyList) {
         errorMsg += `${localize("BBC.Dependency.ModuleLabel", "Module: ")}${depRef}`;
         errorMsg += _versionMessageAppend(dependency, _getEntity(dependency)?.version);
     }
-    notify.error(errorMsg);
-    throw new Error(errorMsg);
+    throw new Error(errorMsg + "\n");
 }
 
 /**

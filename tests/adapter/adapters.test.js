@@ -392,32 +392,21 @@ test('FoundryVTTV14Adapter and Pf2eSystemAdapter handle Collection shapes via .c
     assert.equal(ctx.itemId, '999');
 });
 
-test('closest(path) invokes dependency validation, throwing Error and notifying UI when required module is unactivated', async () => {
-    let notifiedMessage = null;
-    const originalError = globalThis.ui?.notifications?.error;
+test('closest(path) invokes dependency validation, throwing Error with trailing newline when required module is unactivated', () => {
+    // Ensure eskie modules return as unactivated in mock game objects
+    const origModulesGet = globalThis.game?.modules?.get;
+    if (globalThis.game?.modules) {
+        globalThis.game.modules.get = (id) => ({ active: false, version: '1.0.0' });
+    }
+
     try {
-        if (!globalThis.ui) globalThis.ui = { notifications: {} };
-        if (!globalThis.ui.notifications) globalThis.ui.notifications = {};
-        globalThis.ui.notifications.error = (msg) => { notifiedMessage = msg; };
-
-        // Ensure eskie modules return as unactivated in mock game objects
-        const origModulesGet = globalThis.game?.modules?.get;
-        if (globalThis.game?.modules) {
-            globalThis.game.modules.get = (id) => ({ active: false, version: '1.0.0' });
-        }
-
         assert.throws(
             () => closest('eskie.crosshair.cone.thin.fantasy_01.white.full'),
-            (err) => err instanceof Error && (err.message.includes('BBC.Dependency.RequiresOne') || err.message.includes('Requires at least one of the following'))
+            (err) => err instanceof Error && err.message.endsWith('\n') && (err.message.includes('BBC.Dependency.RequiresOne') || err.message.includes('Requires at least one of the following'))
         );
-
-        await new Promise((resolve) => setTimeout(resolve, 65));
-        assert.ok(notifiedMessage !== null && (notifiedMessage.includes('BBC.Dependency.RequiresOne') || notifiedMessage.includes('Requires at least one of the following')), 'UI notification error was emitted');
-
+    } finally {
         if (globalThis.game?.modules && origModulesGet) {
             globalThis.game.modules.get = origModulesGet;
         }
-    } finally {
-        if (globalThis.ui?.notifications) globalThis.ui.notifications.error = originalError;
     }
 });
