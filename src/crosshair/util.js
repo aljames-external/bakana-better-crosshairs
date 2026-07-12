@@ -399,12 +399,11 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
         direction = 0;
     }
 
-    x = Math.round(x);
-    y = Math.round(y);
+    const result = crosshairAdapter.formatPlacementCoordinates(x, y, typeof direction === "number" ? direction : 0, config);
 
-    log.debug("resolveCrosshairPlacement | Resolved placement coordinates & direction ->", { x, y, direction });
+    log.debug("resolveCrosshairPlacement | Resolved and formatted placement coordinates:", result);
 
-    const result = { x, y, direction };
+    config.context?.resolve?.(result);
     if (typeof config._onPlaced === "function") {
         try { config._onPlaced(result, crosshair, ...extraArgs); } catch (e) {}
     }
