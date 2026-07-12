@@ -6,6 +6,9 @@ import { log } from "../../lib/logger.js";
  * Determines whether an autorec entry should replace the default crosshair based on the calling item AND calling activity.
  */
 export class Dnd5eSystemAdapter extends BaseSystemAdapter {
+    /**
+     * Initialize the DnD5e system adapter and declare activity support.
+     */
     constructor() {
         super();
         this.systemId = "dnd5e";
@@ -16,7 +19,7 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * Extract normalized calling item and activity context from a DnD5e Document and flags.
      * @param {Document} document - Template or Region document placed on canvas
      * @param {Object} [baseContext={}] - Initial calling context (`{ item, itemName, itemId, activity, activityName, activityId }`)
-     * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}}
+     * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}} Normalized calling context containing item and activity references and identifiers
      */
     extractCallingContext(document, baseContext = {}) {
         let itemObj = baseContext.item ?? null;
@@ -96,4 +99,3 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
         return match;
     }
 }
-

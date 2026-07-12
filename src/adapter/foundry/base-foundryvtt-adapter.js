@@ -1,16 +1,60 @@
 import { systemAdapter } from "../system/index.js";
 import { log } from "../../lib/logger.js";
 import { clearHighlightLayer } from "../../lib/compat.js";
-
+import { MODULE_ID } from "../../lib/constants.js";
+import { DEFAULT_AUTOREC_ENTRY } from "../../autorec/autorecManager.js";
+import { CrosshairConfiguration } from "../../autorec/CrosshairConfiguration.js";
+/**
+ * Base abstract class for Foundry VTT version-specific adapters.
+ */
 export class BaseFoundryVTTAdapter {
+    /**
+     * Initialize the base Foundry VTT adapter.
+     */
     constructor() {
         this.version = 0;
     }
 
     /**
+     * Return canonical document terminology string ("template" or "region").
+     * @abstract
+     * @returns {string} The localized or canonical document type term
+     */
+    get documentTerm() {
+        throw new Error("Subclass must implement documentTerm getter");
+    }
+
+    /**
+     * Return section title header for pre-placement configuration.
+     * @abstract
+     * @returns {string} Section header text
+     */
+    get prePlacementTitle() {
+        throw new Error("Subclass must implement prePlacementTitle getter");
+    }
+
+    /**
+     * Return section title header for placement configuration.
+     * @abstract
+     * @returns {string} Section header text
+     */
+    get placementSectionTitle() {
+        throw new Error("Subclass must implement placementSectionTitle getter");
+    }
+
+    /**
+     * Return section title header for post-placement configuration.
+     * @abstract
+     * @returns {string} Section header text
+     */
+    get postPlacementTitle() {
+        throw new Error("Subclass must implement postPlacementTitle getter");
+    }
+
+    /**
      * Extract normalized calling item and activity context from a Foundry document.
      * @param {Document} doc - The template or region document
-     * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}}
+     * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}} Normalized calling context object containing item and activity details
      */
     extractCallingContext(doc) {
         if (!doc) return { item: null, itemName: "", itemId: "", activity: null, activityName: "", activityId: "" };
@@ -40,10 +84,10 @@ export class BaseFoundryVTTAdapter {
 
     /**
      * Filter and match autorec candidates for a Foundry document (MeasuredTemplate / Region)
-     * by calling the system adapter to decide whether an entry should replace the default crosshair.
+     * following strict preference hierarchy: CUSTOM CONFIG > AUTOREC MATCH > AUTOREC DEFAULT > FOUNDRY DEFAULT.
      * @param {Document} doc - The template or region document
      * @param {Map<string, Object>} entries - Registered autorec entries map
-     * @returns {Object|null} The matching autorec entry or null
+     * @returns {Object|null} The matching crosshair configuration entry or null
      */
     matchAutorecEntry(doc, entries) {
         if (!doc || !entries) return null;
@@ -53,13 +97,6 @@ export class BaseFoundryVTTAdapter {
             return null;
         }
 
-        log.debug("matchAutorecEntry | Comparing calling context against registered entries:", {
-            callingItemName: context.itemName,
-            callingActivityName: context.activityName,
-            entriesCount: entries.size
-        });
-
-        // 1. Group candidate entries for this item and order: activity-specific rules first, item fallbacks last
         const callingItemName = context.itemName.trim().toLowerCase();
         const candidateEntries = [];
         for (const entry of entries.values()) {
@@ -75,32 +112,56 @@ export class BaseFoundryVTTAdapter {
             return 0;
         });
 
+        let baseEntry = null;
         for (const entry of candidateEntries) {
             if (systemAdapter.isMatch(context, entry)) {
-                log.debug(`matchAutorecEntry | [MATCH FOUND] Specific entry "${entry.itemName}" (activity: "${entry.activityName ?? 'ANY'}") matched calling item "${context.itemName}" (activity: "${context.activityName}")`);
-                return { ...entry, item: context.item, activity: context.activity };
+                log.debug(`matchAutorecEntry | [MATCH FOUND] Specific global entry "${entry.itemName}" matched calling item "${context.itemName}"`);
+                baseEntry = { ...entry, item: context.item, activity: context.activity };
+                break;
             }
         }
 
-        // 2. If no specific match was found, fall back to the DEFAULT entry if enabled
-        const defaultEntry = entries.get("DEFAULT");
-        if (defaultEntry && defaultEntry.enabled) {
-            log.debug(`matchAutorecEntry | [DEFAULT FALLBACK] No specific item match found for "${context.itemName}"; applying DEFAULT crosshair entry.`);
-            return { ...defaultEntry, item: context.item, activity: context.activity };
+        if (!baseEntry) {
+            const defaultEntry = entries.get("DEFAULT");
+            if (defaultEntry && defaultEntry.enabled) {
+                baseEntry = { ...defaultEntry, item: context.item, activity: context.activity };
+            }
         }
 
-        log.debug(`matchAutorecEntry | [NO MATCH] No matching autorec entry or enabled DEFAULT entry for calling item "${context.itemName}" (activity: "${context.activityName}")`);
-        return null;
+        const itemConfig = context.item?.getFlag(MODULE_ID, "customConfig") ?? null;
+        const activityConfig = context.activityId
+            ? (context.item?.getFlag(MODULE_ID, "activityConfigs")?.[context.activityId] ?? null)
+            : null;
+
+        if (!itemConfig && !activityConfig) {
+            return baseEntry ? CrosshairConfiguration.fromSource(baseEntry) : null;
+        }
+
+        let baseConfig = CrosshairConfiguration.fromSource({
+            ...(baseEntry ?? DEFAULT_AUTOREC_ENTRY),
+            item: context.item,
+            activity: context.activity
+        });
+
+        if (itemConfig) {
+            baseConfig = baseConfig.overrideWith(itemConfig);
+        }
+        if (activityConfig) {
+            baseConfig = baseConfig.overrideWith(activityConfig);
+        }
+
+        baseConfig.item = context.item;
+        baseConfig.activity = context.activity;
+
+        log.debug(`matchAutorecEntry | [CUSTOM CONFIG] Merged custom overrides (item: ${Boolean(itemConfig)}, activity: ${Boolean(activityConfig)}) for "${context.itemName}"`);
+        return baseConfig;
     }
-
-
-
 
     /**
      * Hide a live placeable preview graphic during interactive drawing.
-
      * Common across Foundry v12..v14+ placement previews.
-     * @param {PlaceableObject} placeable
+     * @param {PlaceableObject} placeable - The placeable graphic object to hide
+     * @returns {void} No return value
      */
     hidePreview(placeable) {
         if (!placeable) return;
@@ -121,13 +182,13 @@ export class BaseFoundryVTTAdapter {
             placeable.controlIcon.visible = false;
         }
         if (typeof placeable.highlightGrid === "function") {
-            placeable.highlightGrid = function() {};
+            placeable.highlightGrid = function () { };
         }
         if (placeable.highlightId && canvas.grid?.clearHighlightLayer) {
             try { clearHighlightLayer(placeable.highlightId); } catch (e) { }
         }
 
-        placeable.refresh = function() {
+        placeable.refresh = function () {
             this.visible = false;
             this.renderable = false;
             this.alpha = 0;
@@ -154,8 +215,8 @@ export class BaseFoundryVTTAdapter {
     /**
      * Extract normalized placed fill/border styling values and flags from workflow configuration.
      * Shared across V13 and V14 document updates.
-     * @param {Object} [config={}]
-     * @returns {{placedFillColor?: string, placedFillAlpha?: number, placedBorderColor?: string, placedBorderAlpha?: number, flags: Object}}
+     * @param {Object} [config={}] - Workflow placement configuration options
+     * @returns {{placedFillColor?: string, placedFillAlpha?: number, placedBorderColor?: string, placedBorderAlpha?: number, flags: Object}} Extracted placement styling properties and flags
      */
     extractPlacedStylingFlags(config = {}) {
         const placedFillColor = config.placedFillColor;
@@ -183,15 +244,16 @@ export class BaseFoundryVTTAdapter {
     /**
      * Register Foundry VTT canvas placement hooks for live previewing and document creation.
      * @param {Object} callbacks - Placement hook callbacks (`{ onDrawPreview, onPreCreate, onCreate }`)
+     * @returns {void} No return value
      */
     registerPlacementHooks(callbacks) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement registerPlacementHooks(callbacks).");
     }
 
     /**
-     * Detect geometric properties and dimensions from a canvas PlaceableObject or Document.
-     * @param {Document} doc - Template or Region document
-     * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}}
+     * Detect geometric properties and dimensions from a MeasuredTemplate or Region Document.
+     * @param {Document} doc - MeasuredTemplate or Region document
+     * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}} Detected geometric properties including type, distance, width, angle, and coordinates
      */
     detectProperties(doc) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement detectProperties(doc).");
@@ -199,11 +261,11 @@ export class BaseFoundryVTTAdapter {
 
     /**
      * Format placement coordinates into a version-specific schema data structure.
-     * @param {number} x
-     * @param {number} y
-     * @param {number} direction
-     * @param {Object} [config={}]
-     * @returns {Object}
+     * @param {number} x - Target x-coordinate
+     * @param {number} y - Target y-coordinate
+     * @param {number} direction - Target direction angle in degrees
+     * @param {Object} [config={}] - Optional placement configuration
+     * @returns {{x: number, y: number, direction: number}} Formatted placement coordinates object
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
         return { x, y, direction };
@@ -213,6 +275,7 @@ export class BaseFoundryVTTAdapter {
      * Mutate a live preview placeable document's shape coordinates during mouse drag.
      * @param {Document} previewDoc - Preview MeasuredTemplate or Region document
      * @param {Object} coords - Destination coordinates payload
+     * @returns {void} No return value
      */
     updatePreviewShape(previewDoc, coords) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement updatePreviewShape(previewDoc, coords).");
@@ -223,6 +286,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Document} doc - MeasuredTemplate or Region document
      * @param {Object} coords - Resolved placement coordinates
      * @param {Object} [config={}] - Workflow placement configuration
+     * @returns {void} No return value
      */
     applyDocumentPlacement(doc, coords, config) {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement applyDocumentPlacement(doc, coords, config).");
@@ -232,8 +296,9 @@ export class BaseFoundryVTTAdapter {
      * Resolve placement anchor coordinates {x, y, direction} on a token's edge toward a click coordinate.
      * Takes only a normalized Token object and {x, y} click coordinates.
      * Implements 1-to-1 the exact algorithm from Sequencer 4.2.2 (#handleLockedEdge in CrosshairsPlaceable.js).
-     * @param {Token} tok
-     * @param {{x?: number, y?: number}} [clickCoords={}]
+     * @param {Token} tok - The source token object to anchor placement against
+     * @param {{x?: number, y?: number}} [clickCoords={}] - Optional mouse click coordinates
+     * @returns {{x: number, y: number, direction: number}} Resolved anchor placement coordinates and facing direction
      */
     resolveAnchorPlacement(tok, clickCoords = {}) {
         const rawClickX = clickCoords.x ?? 0;
@@ -244,9 +309,15 @@ export class BaseFoundryVTTAdapter {
         const edgeMidpointMode = typeof CONST !== "undefined" && CONST.GRID_SNAPPING_MODES ? CONST.GRID_SNAPPING_MODES.EDGE_MIDPOINT : 16;
         const size = canvas?.grid?.size ?? 100;
 
+        /**
+         * Helper to snap a point using the canvas grid if available.
+         * @param {{x: number, y: number}} pt - Point coordinates to snap
+         * @param {number} mode - Snapping mode constant
+         * @returns {{x: number, y: number}} The snapped or original point coordinates
+         */
         const snapPt = (pt, mode) => {
             if (canvas?.grid?.getSnappedPoint) {
-                try { return canvas.grid.getSnappedPoint(pt, { mode, resolution: size }); } catch (e) {}
+                try { return canvas.grid.getSnappedPoint(pt, { mode, resolution: size }); } catch (e) { }
             }
             return pt;
         };
@@ -323,9 +394,9 @@ export class BaseFoundryVTTAdapter {
 
     /**
      * Return template pixel multiplier factor and gridUnits mode for Sequencer effects.
+     * @returns {{factor: number, gridUnits: boolean}} Template pixel scaling factor and grid units flag
      */
     getTemplatePixelFactor() {
         return { factor: 1, gridUnits: false };
     }
 }
-
