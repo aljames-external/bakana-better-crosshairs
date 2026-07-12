@@ -29,7 +29,7 @@
                     <th>{{labels.callingActivity}}</th>
                     <td>
                         <span class="view-only">
-                            {{#if activityDisplay}}<code>{{activityDisplay}}</code>{{else}}<span class="bbc-pill no">{{labels.allActivitiesPill}}</span>{{/if}}
+                            {{#if activityDisplay}}<code>{{activityDisplay}}</code>{{else}}<span class="bbc-pill">{{labels.allActivitiesPill}}</span>{{/if}}
                         </span>
                         <input type="text" class="bbc-edit-input edit-only" name="activityId" data-field="activityId" value="{{activityId}}" placeholder="e.g. Attack or Activity ID" />
                     </td>
@@ -39,7 +39,7 @@
                 <tr>
                     <th>{{labels.registrationScope}}</th>
                     <td>
-                        <span class="view-only">{{#if isLocal}}<span class="bbc-pill no">{{labels.localOnlyPill}}</span>{{else}}<span class="bbc-pill yes">{{labels.worldSyncedPill}}</span>{{/if}}</span>
+                        <span class="view-only">{{#if isLocal}}<span class="bbc-pill">{{labels.localOnlyPill}}</span>{{else}}<span class="bbc-pill">{{labels.worldSyncedPill}}</span>{{/if}}</span>
                         <label class="bbc-edit-checkbox-label edit-only">
                             <input type="checkbox" class="bbc-edit-checkbox" name="local" data-field="local" {{#if isLocal}}checked{{/if}} />
                             <span>{{labels.localOnlyPill}}</span>
@@ -52,21 +52,12 @@
                 <tr>
                     <th>{{labels.overridePrePlacement}}</th>
                     <td>
-                        <span class="view-only">
-                            {{#if enablePrePlacement}}<span class="bbc-pill yes">{{labels.enabledPill}}</span>{{else}}<span class="bbc-pill no">{{labels.disabledPill}}</span>{{/if}}
-                            {{#if enablePrePlacement}}<span class="bbc-type-badge custom-badge" style="margin-left:6px;">{{labels.badgeCustomOverride}}</span>{{else}}<span class="bbc-type-badge default-badge" style="margin-left:6px;">{{labels.badgeInherited}}</span>{{/if}}
-                        </span>
+                        <span class="view-only">{{#if enablePrePlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
                         <div class="bbc-edit-row edit-only">
                             <label class="bbc-edit-checkbox-label">
                                 <input type="checkbox" name="enablePrePlacement" data-field="enablePrePlacement" {{#if enablePrePlacement}}checked{{/if}} />
-                                <span>{{labels.enabledPill}}</span>
+                                <span>{{#if enablePrePlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
                             </label>
-
-                            {{#if enablePrePlacement}}
-                            <span class="bbc-type-badge custom-badge">{{labels.badgeCustomOverride}}</span>
-                            {{else}}
-                            <span class="bbc-type-badge default-badge">{{labels.badgeInherited}}</span>
-                            {{/if}}
                         </div>
                     </td>
                 </tr>
@@ -78,9 +69,10 @@
                 {{#if concurrentCode}}
                 <pre class="bbc-code-preview"><code>{{concurrentCode}}</code></pre>
                 {{else}}
-                <span class="bbc-pill no">{{labels.noPreScript}}</span>
+                <span class="bbc-pill">{{labels.noPreScript}}</span>
                 {{/if}}
             </div>
+
             <div class="edit-only">
                 <textarea class="bbc-edit-textarea bbc-code-editor" name="concurrentCode" data-field="concurrentCode" rows="4" spellcheck="false" placeholder="// Enter Javascript code executed before template placement selection...">{{concurrentCode}}</textarea>
             </div>
@@ -105,21 +97,12 @@
                 <tr>
                     <th>{{labels.overrideAnimation}}</th>
                     <td>
-                        <span class="view-only">
-                            {{#if enableAnimation}}<span class="bbc-pill yes">{{labels.enabledPill}}</span>{{else}}<span class="bbc-pill no">{{labels.disabledPill}}</span>{{/if}}
-                            {{#if enableAnimation}}<span class="bbc-type-badge custom-badge" style="margin-left:6px;">{{labels.badgeCustomOverride}}</span>{{else}}<span class="bbc-type-badge default-badge" style="margin-left:6px;">{{labels.badgeInherited}}</span>{{/if}}
-                        </span>
+                        <span class="view-only">{{#if enableAnimation}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
                         <div class="bbc-edit-row edit-only">
                             <label class="bbc-edit-checkbox-label">
                                 <input type="checkbox" name="enableAnimation" data-field="enableAnimation" {{#if enableAnimation}}checked{{/if}} />
-                                <span>{{labels.enabledPill}}</span>
+                                <span>{{#if enableAnimation}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
                             </label>
-
-                            {{#if enableAnimation}}
-                            <span class="bbc-type-badge custom-badge">{{labels.badgeCustomOverride}}</span>
-                            {{else}}
-                            <span class="bbc-type-badge default-badge">{{labels.badgeInherited}}</span>
-                            {{/if}}
                         </div>
                     </td>
                 </tr>
@@ -157,9 +140,9 @@
                     <th>{{labels.lockToToken}}</th>
                     <td>
                         <span class="view-only">
-                            {{#if isStickOn}}<span class="bbc-pill yes">{{labels.stickOn}}</span>{{/if}}
-                            {{#if isStickOff}}<span class="bbc-pill no">{{labels.stickOff}}</span>{{/if}}
-                            {{#if isStickDefault}}<span class="bbc-pill neutral">{{labels.stickDefault}}</span>{{/if}}
+                            {{#if isStickOn}}<span class="bbc-pill">{{labels.stickOn}}</span>{{/if}}
+                            {{#if isStickOff}}<span class="bbc-pill">{{labels.stickOff}}</span>{{/if}}
+                            {{#if isStickDefault}}<span class="bbc-pill">{{labels.stickDefault}}</span>{{/if}}
                         </span>
                         <select class="bbc-edit-select edit-only" name="stickToToken" data-field="stickToToken">
                             <option value="default" {{#if isStickDefault}}selected{{/if}}>{{labels.stickDefault}}</option>
@@ -171,7 +154,8 @@
                 <tr class="{{#if (and showOverrides (not enableAnimation))}}edit-only{{/if}}">
                     <th>{{labels.originLine}}</th>
                     <td>
-                        <span class="view-only bbc-inline-flex-row">{{#if showLine}}<span class="bbc-pill yes">{{labels.enabledPill}}</span><code class="bbc-code-pill">{{lineFile}}</code>{{else}}<span class="bbc-pill no">{{labels.disabledPill}}</span>{{/if}}</span>
+                        <span class="view-only bbc-inline-flex-row">{{#if showLine}}<span class="bbc-pill">{{labels.enabledPill}}</span><code class="bbc-code-pill">{{lineFile}}</code>{{else}}<span class="bbc-pill">{{labels.disabledPill}}</span>{{/if}}</span>
+
                         <div class="bbc-edit-row edit-only">
                             <label class="bbc-edit-checkbox-label">
                                 <input type="checkbox" class="bbc-edit-checkbox" name="showLine" data-field="showLine" {{#if showLine}}checked{{/if}} />
@@ -239,21 +223,12 @@
                 <tr>
                     <th>{{labels.overridePlacedStyling}}</th>
                     <td>
-                        <span class="view-only">
-                            {{#if enablePlacedStyling}}<span class="bbc-pill yes">{{labels.enabledPill}}</span>{{else}}<span class="bbc-pill no">{{labels.disabledPill}}</span>{{/if}}
-                            {{#if enablePlacedStyling}}<span class="bbc-type-badge custom-badge" style="margin-left:6px;">{{labels.badgeCustomOverride}}</span>{{else}}<span class="bbc-type-badge default-badge" style="margin-left:6px;">{{labels.badgeInherited}}</span>{{/if}}
-                        </span>
+                        <span class="view-only">{{#if enablePlacedStyling}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
                         <div class="bbc-edit-row edit-only">
                             <label class="bbc-edit-checkbox-label">
                                 <input type="checkbox" name="enablePlacedStyling" data-field="enablePlacedStyling" {{#if enablePlacedStyling}}checked{{/if}} />
-                                <span>{{labels.enabledPill}}</span>
+                                <span>{{#if enablePlacedStyling}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
                             </label>
-
-                            {{#if enablePlacedStyling}}
-                            <span class="bbc-type-badge custom-badge">{{labels.badgeCustomOverride}}</span>
-                            {{else}}
-                            <span class="bbc-type-badge default-badge">{{labels.badgeInherited}}</span>
-                            {{/if}}
                         </div>
                     </td>
                 </tr>
@@ -325,21 +300,12 @@
                 <tr>
                     <th>{{labels.overridePostPlacement}}</th>
                     <td>
-                        <span class="view-only">
-                            {{#if enablePostPlacement}}<span class="bbc-pill yes">{{labels.enabledPill}}</span>{{else}}<span class="bbc-pill no">{{labels.disabledPill}}</span>{{/if}}
-                            {{#if enablePostPlacement}}<span class="bbc-type-badge custom-badge" style="margin-left:6px;">{{labels.badgeCustomOverride}}</span>{{else}}<span class="bbc-type-badge default-badge" style="margin-left:6px;">{{labels.badgeInherited}}</span>{{/if}}
-                        </span>
+                        <span class="view-only">{{#if enablePostPlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
                         <div class="bbc-edit-row edit-only">
                             <label class="bbc-edit-checkbox-label">
                                 <input type="checkbox" name="enablePostPlacement" data-field="enablePostPlacement" {{#if enablePostPlacement}}checked{{/if}} />
-                                <span>{{labels.enabledPill}}</span>
+                                <span>{{#if enablePostPlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
                             </label>
-
-                            {{#if enablePostPlacement}}
-                            <span class="bbc-type-badge custom-badge">{{labels.badgeCustomOverride}}</span>
-                            {{else}}
-                            <span class="bbc-type-badge default-badge">{{labels.badgeInherited}}</span>
-                            {{/if}}
                         </div>
                     </td>
                 </tr>
@@ -352,9 +318,10 @@
                 {{#if postPlacementCode}}
                 <pre class="bbc-code-preview"><code>{{postPlacementCode}}</code></pre>
                 {{else}}
-                <span class="bbc-pill no">{{labels.noPostScript}}</span>
+                <span class="bbc-pill">{{labels.noPostScript}}</span>
                 {{/if}}
             </div>
+
             <div class="edit-only">
                 <textarea class="bbc-edit-textarea bbc-code-editor" name="postPlacementCode" data-field="postPlacementCode" rows="4" spellcheck="false" placeholder="// Enter Javascript code executed after document creation...">{{postPlacementCode}}</textarea>
             </div>

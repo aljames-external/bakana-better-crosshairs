@@ -114,8 +114,9 @@
                                         <th>{{../labels.workflowEnabled}}</th>
                                         <td>
                                             <span class="view-only">
-                                                {{#if enabled}}<span class="bbc-pill yes">{{../labels.enabledPill}}</span>{{else}}<span class="bbc-pill no">{{../labels.disabledPill}}</span>{{/if}}
+                                                <span class="bbc-pill">{{#if enabled}}{{../labels.enabledPill}}{{else}}{{../labels.disabledPill}}{{/if}}</span>
                                             </span>
+
                                             <label class="bbc-toggle-label edit-only">
                                                 <input type="checkbox" class="bbc-edit-input" data-field="enabled" {{#if enabled}}checked{{/if}} />
                                                 <span>{{../labels.enabledPill}}</span>
