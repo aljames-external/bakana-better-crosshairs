@@ -47,14 +47,19 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Register Foundry VTT v14+ placement hooks for Regions.
-     * @param {Object} callbacks - Placement callback handlers ({ onDrawPreview, onPreCreate, onCreate })
-     * @returns {void}
+     * Return supported base canvas PlaceableObject type names for Foundry VTT v14+.
+     * @returns {string[]} Base placeable type names
      */
-    registerPlacementHooks(callbacks) {
-        Hooks.on("drawMeasuredTemplate", (template) => callbacks.onDrawPreview(template));
-        Hooks.on("preCreateRegion", (doc, _data, _options, userId) => callbacks.onPreCreate(doc, _data, _options, userId));
-        Hooks.on("createRegion", (doc, _options, userId) => callbacks.onCreate(doc, _options, userId));
+    get supportedBasePlaceables() {
+        return ["MeasuredTemplate", "Region"];
+    }
+
+    /**
+     * Return supported document creation type names (`preCreate`/`create` hook suffixes) for Foundry VTT v14+.
+     * @returns {string[]} Document type names
+     */
+    get supportedDocumentTypes() {
+        return ["MeasuredTemplate", "Region"];
     }
 
     /**
@@ -93,7 +98,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             return result;
         }
 
-        const shape = doc.shapes?.[0] ?? {};
+        const shapesList = this._getShapesArray(doc);
+        const shape = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : (shapesList[0] ?? {});
         let shapeType = "circle";
         if (shape.type === "circle") shapeType = "circle";
         else if (shape.type === "cone") shapeType = "cone";
@@ -116,6 +122,16 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
+     * Helper to safely extract a Region shapes array from either an Array or Collection property.
+     * @param {Document} doc - Region document
+     * @returns {Array} Array of shape objects or models
+     */
+    _getShapesArray(doc) {
+        if (!doc) return [];
+        return doc.shapes?.contents ?? (Array.isArray(doc.shapes) ? doc.shapes : []);
+    }
+
+    /**
      * Return template pixel multiplier factor for V14 (converts pixels to exact grid units).
      * @returns {{factor: number, gridUnits: boolean}} The template scaling factor and grid units flag
      */
@@ -126,59 +142,91 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
     /**
      * Update live canvas preview shape coordinates during mouse drag.
-     * @param {Document} previewDoc - The Region preview document being updated
-     * @param {{x?: number, y?: number, rotation?: number, radius?: number, width?: number, gridUnits?: boolean}} coords - The target canvas placement coordinates
+     * @param {Document} previewDoc - The Region or MeasuredTemplate preview document being updated
+     * @param {{x?: number, y?: number, rotation?: number, direction?: number, radius?: number, distance?: number, width?: number, gridUnits?: boolean}} coords - The target canvas placement coordinates
      * @returns {void}
      */
     updatePreviewShape(previewDoc, coords) {
-        if (Array.isArray(previewDoc.shapes) && previewDoc.shapes.length > 0) {
-            const orig = previewDoc.shapes[0].toObject();
+        if (!previewDoc || !coords) return;
+        const shapesList = this._getShapesArray(previewDoc);
+        if (shapesList.length > 0) {
+            const orig = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
             const updatedShape = this._formatRegionShapeUpdate(orig, coords);
             previewDoc.shapes = [updatedShape];
+        } else {
+            if (coords.x !== undefined) previewDoc.x = coords.x;
+            if (coords.y !== undefined) previewDoc.y = coords.y;
+            if (coords.direction !== undefined) previewDoc.direction = coords.direction;
+            else if (coords.rotation !== undefined) previewDoc.direction = coords.rotation;
+            if (coords.distance !== undefined) previewDoc.distance = coords.distance;
+            else if (coords.radius !== undefined) previewDoc.distance = coords.radius;
         }
     }
 
     /**
-     * Apply resolved placement coordinates and workflow flags onto a Region document.
-     * @param {Document} doc - The target Region document to update
+     * Apply resolved placement coordinates and workflow flags onto a Region or MeasuredTemplate document.
+     * @param {Document} doc - The target document to update
      * @param {Object} [coords={}] - The resolved placement coordinates
      * @param {Object} [config={}] - Optional placement styling and behavior configuration
      * @returns {void}
      */
     applyDocumentPlacement(doc, coords = {}, config = {}) {
         const styling = this.extractPlacedStylingFlags(config);
-        const updateData = {
-            flags: styling.flags
-        };
+        const shapesList = this._getShapesArray(doc);
+        const isRegion = shapesList.length > 0;
 
-        if (Array.isArray(doc.shapes) && doc.shapes.length > 0) {
-            const shapeObj = doc.shapes[0].toObject();
+        if (isRegion) {
+            const updateData = {
+                flags: styling.flags
+            };
+            const shapeObj = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
             const originalShape = foundry.utils.deepClone(shapeObj);
             const newShape = this._formatRegionShapeUpdate(originalShape, coords);
             delete newShape._id;
             updateData.shapes = [newShape];
+
+            if (styling.placedFillColor) updateData.color = styling.placedFillColor;
+            if (config.hidden || config.hideTemplate) updateData.hidden = true;
+
+            doc.updateSource(updateData);
+        } else {
+            const updateData = {
+                flags: styling.flags
+            };
+            if (coords.x !== undefined) updateData.x = coords.x;
+            if (coords.y !== undefined) updateData.y = coords.y;
+            if (coords.direction !== undefined) updateData.direction = coords.direction;
+            else if (coords.rotation !== undefined) updateData.direction = coords.rotation;
+            if (coords.distance !== undefined) updateData.distance = coords.distance;
+            else if (coords.radius !== undefined) updateData.distance = coords.radius;
+            if (coords.width !== undefined) updateData.width = coords.width;
+
+            if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
+            if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
+            if (styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
+            if (styling.placedBorderAlpha !== undefined) updateData.borderAlpha = styling.placedBorderAlpha;
+            if (config.hidden || config.hideTemplate) updateData.hidden = true;
+
+            doc.updateSource(updateData);
         }
-
-        if (styling.placedFillColor) updateData.color = styling.placedFillColor;
-        if (config.hidden || config.hideTemplate) updateData.hidden = true;
-
-        doc.updateSource(updateData);
     }
 
     /**
-     * Format drag destination coordinates into a V14 Region placement coordinates payload.
+     * Format drag destination coordinates into a V14 placement coordinates payload.
      * @param {number} x - Destination x-coordinate
      * @param {number} y - Destination y-coordinate
      * @param {number} direction - Rotation angle in degrees
      * @param {Object} [config={}] - Optional sequence placement configuration
-     * @returns {{x: number, y: number, rotation: number, radius: number|undefined, width: number|undefined, gridUnits: boolean}} Formatted Region placement coordinates payload
+     * @returns {{x: number, y: number, direction: number, rotation: number, distance: number|undefined, radius: number|undefined, width: number|undefined, gridUnits: boolean}} Formatted placement coordinates payload
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
         return {
             x,
             y,
+            direction,
             rotation: direction,
-            radius: config.radius,
+            distance: config.distance ?? config.radius,
+            radius: config.radius ?? config.distance,
             width: config.width,
             gridUnits: Boolean(config.gridUnits ?? true)
         };

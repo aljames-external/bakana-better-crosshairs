@@ -16,6 +16,14 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
     }
 
     /**
+     * Return list of custom PlaceableObject subclass names introduced by DnD5e.
+     * @returns {string[]} Array of custom placeable class names
+     */
+    getCustomPlaceableClassNames() {
+        return ["MeasuredTemplate5e"];
+    }
+
+    /**
      * Extract normalized calling item and activity context from a DnD5e Document and flags.
      * @param {Document} document - Template or Region document placed on canvas
      * @param {Object} [baseContext={}] - Initial calling context (`{ item, itemName, itemId, activity, activityName, activityId }`)

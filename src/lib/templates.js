@@ -2,8 +2,7 @@ import { log } from './logger.js';
 import { crosshair } from '../crosshair/_crosshairs.js';
 import { runConcurrentScript } from '../crosshair/util.js';
 import { Token } from './compat.js';
-import { crosshairAdapter } from '../adapter/foundry/index.js';
-import { systemAdapter } from '../adapter/system/index.js';
+import { crosshairAdapter, systemAdapter, registerPlacementHooks } from '../adapter/index.js';
 import { autorecManager } from '../autorec/autorecManager.js';
 import { registerItemSheetHooks } from '../autorec/itemConfigMenu.js';
 
@@ -52,7 +51,7 @@ function toToken(target) {
  */
 async function handleDrawPreview(placeable) {
     const doc = placeable.document;
-    const isPreview = Boolean(placeable.isPreview);
+    const isPreview = crosshairAdapter.isPreview(placeable);
 
     log.debug(`handleDrawPreview | Hook fired:`, {
         docId: doc.id,
@@ -133,6 +132,20 @@ async function handleDrawPreview(placeable) {
                     const deferredData = foundry.utils.deepClone(pending.deferredCreateData);
                     delete deferredData._id;
                     const docName = deferredData.shapes ? "Region" : "MeasuredTemplate";
+                    const shapesList = deferredData.shapes?.contents ?? (Array.isArray(deferredData.shapes) ? deferredData.shapes : []);
+                    if (shapesList.length > 0 && crosshairAdapter && typeof crosshairAdapter._formatRegionShapeUpdate === "function") {
+                        const origShape = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
+                        const newShape = crosshairAdapter._formatRegionShapeUpdate(origShape, coords);
+                        delete newShape._id;
+                        deferredData.shapes = [newShape];
+                    } else {
+                        if (coords.x !== undefined) deferredData.x = coords.x;
+                        if (coords.y !== undefined) deferredData.y = coords.y;
+                        if (coords.direction !== undefined) deferredData.direction = coords.direction;
+                        else if (coords.rotation !== undefined) deferredData.direction = coords.rotation;
+                        if (coords.distance !== undefined) deferredData.distance = coords.distance;
+                        else if (coords.radius !== undefined) deferredData.distance = coords.radius;
+                    }
                     try {
                         await canvas.scene.createEmbeddedDocuments(docName, [deferredData]);
                     } catch (err) {
@@ -350,7 +363,7 @@ function initializeHooks() {
     if (hooksInitialized) return;
     hooksInitialized = true;
 
-    crosshairAdapter.registerPlacementHooks({
+    registerPlacementHooks({
         onDrawPreview: (placeable) => handleDrawPreview(placeable),
         onPreCreate: (doc, _data, _options, userId) => handlePreCreate(doc, _data, _options, userId),
         onCreate: (doc, _options, userId) => handleCreateDocument(doc, _options, userId)

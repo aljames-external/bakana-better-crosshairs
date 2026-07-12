@@ -14,6 +14,14 @@ export class BaseSystemAdapter {
     }
 
     /**
+     * Return list of custom PlaceableObject subclass names introduced by this game system.
+     * @returns {string[]} Array of custom placeable class names
+     */
+    getCustomPlaceableClassNames() {
+        return [];
+    }
+
+    /**
      * Extract or refine calling context for the specific game system.
      * Base implementation returns the standard calling context passed by upstream workflow.
      * @param {Document} document - Template or Region document placed on canvas

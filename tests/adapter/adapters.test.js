@@ -3,6 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { initializeFoundryAdapter, crosshairAdapter } from '../../src/adapter/foundry/index.js';
 import { initializeSystemAdapter, systemAdapter } from '../../src/adapter/system/index.js';
+import { registerPlacementHooks } from '../../src/adapter/index.js';
 import { FoundryVTTV13Adapter } from '../../src/adapter/foundry/foundryvtt-v13-adapter.js';
 import { FoundryVTTV14Adapter } from '../../src/adapter/foundry/foundryvtt-v14-adapter.js';
 import { Dnd5eSystemAdapter } from '../../src/adapter/system/dnd5e-adapter.js';
@@ -179,4 +180,213 @@ test('extractPlacedStylingFlags and applyDocumentPlacement extract and set borde
     assert.equal(updatedData.borderColor, '#abcdef');
     assert.equal(updatedData.borderAlpha, 0.85);
     assert.equal(updatedData.flags.bbc.placedBorderAlpha, 0.85);
+});
+
+test('abstracted registerPlacementHooks combines both Foundry version adapter and System adapter without coupling', () => {
+    const registered = [];
+    const originalOn = globalThis.Hooks.on;
+    try {
+        globalThis.Hooks.on = (event, fn) => { registered.push(event); };
+        const adapterV14 = new FoundryVTTV14Adapter();
+        const pf2eSys = new Pf2eSystemAdapter();
+
+        registerPlacementHooks({ onDrawPreview: () => {}, onPreCreate: () => {}, onCreate: () => {} }, {
+            foundryAdapter: adapterV14,
+            sysAdapter: pf2eSys
+        });
+        assert.ok(registered.includes('drawMeasuredTemplate'));
+        assert.ok(registered.includes('drawMeasuredTemplatePF2e'));
+        assert.ok(registered.includes('drawRegion'));
+        assert.ok(registered.includes('drawRegionPF2e'));
+        assert.ok(registered.includes('preCreateRegion'));
+        assert.ok(registered.includes('preCreateMeasuredTemplate'));
+        assert.ok(registered.includes('createRegion'));
+        assert.ok(registered.includes('createMeasuredTemplate'));
+
+        registered.length = 0;
+        const adapterV13 = new FoundryVTTV13Adapter();
+        const dndSys = new Dnd5eSystemAdapter();
+        registerPlacementHooks({ onDrawPreview: () => {}, onPreCreate: () => {}, onCreate: () => {} }, {
+            foundryAdapter: adapterV13,
+            sysAdapter: dndSys
+        });
+        assert.ok(registered.includes('drawMeasuredTemplate'));
+        assert.ok(registered.includes('drawMeasuredTemplate5e'));
+        assert.equal(registered.includes('drawRegion'), false, 'V13 adapter does not register Region draw hooks');
+        assert.ok(registered.includes('refreshMeasuredTemplate'));
+        assert.ok(registered.includes('refreshMeasuredTemplate5e'));
+    } finally {
+        globalThis.Hooks.on = originalOn;
+    }
+});
+
+test('FoundryVTTV14Adapter applyDocumentPlacement and updatePreviewShape handle both Region and MeasuredTemplate in V14', () => {
+    const adapterV14 = new FoundryVTTV14Adapter();
+
+    // 1. Test Region placement
+    let regionUpdate = null;
+    const regionDoc = {
+        shapes: [{ toObject: () => ({ type: 'circle', x: 0, y: 0, radius: 15 }) }],
+        updateSource: (data) => { regionUpdate = data; }
+    };
+    adapterV14.applyDocumentPlacement(regionDoc, { x: 100, y: 200, radius: 20, gridUnits: false }, { itemName: 'Test Region', placedFillColor: '#ffffff' });
+    assert.ok(regionUpdate.shapes);
+    assert.equal(regionUpdate.shapes[0].x, 100);
+    assert.equal(regionUpdate.shapes[0].y, 200);
+    assert.equal(regionUpdate.shapes[0].radius, 20);
+    assert.equal(regionUpdate.color, '#ffffff');
+
+    // 2. Test MeasuredTemplate placement in V14
+    let mtUpdate = null;
+    const mtDoc = {
+        t: 'circle',
+        updateSource: (data) => { mtUpdate = data; }
+    };
+    adapterV14.applyDocumentPlacement(mtDoc, { x: 150, y: 250, direction: 90, distance: 30 }, { itemName: 'Test MT', placedFillColor: '#ff0000', placedBorderColor: '#00ff00', placedFillAlpha: 0.4, placedBorderAlpha: 0.9 });
+    assert.equal(mtUpdate.x, 150);
+    assert.equal(mtUpdate.y, 250);
+    assert.equal(mtUpdate.direction, 90);
+    assert.equal(mtUpdate.distance, 30);
+    assert.equal(mtUpdate.fillColor, '#ff0000');
+    assert.equal(mtUpdate.borderColor, '#00ff00');
+    assert.equal(mtUpdate.fillAlpha, 0.4);
+    assert.equal(mtUpdate.borderAlpha, 0.9);
+
+    // 3. Test updatePreviewShape on both Region and MeasuredTemplate
+    const regionPreview = { shapes: [{ toObject: () => ({ x: 0, y: 0, radius: 5 }) }] };
+    adapterV14.updatePreviewShape(regionPreview, { x: 300, y: 400, radius: 10, gridUnits: false });
+    assert.equal(regionPreview.shapes[0].x, 300);
+    assert.equal(regionPreview.shapes[0].y, 400);
+
+    const mtPreview = { t: 'cone', x: 0, y: 0, direction: 0, distance: 0 };
+    adapterV14.updatePreviewShape(mtPreview, { x: 500, y: 600, direction: 45, distance: 40 });
+    assert.equal(mtPreview.x, 500);
+    assert.equal(mtPreview.y, 600);
+    assert.equal(mtPreview.direction, 45);
+    assert.equal(mtPreview.distance, 40);
+});
+
+test('Pf2eSystemAdapter handleProgrammaticPlacement branches between Region shapes and MeasuredTemplate coordinates', async () => {
+    const pf2eAdapter = new Pf2eSystemAdapter();
+    let createdDocData = null;
+    const mockScene = {
+        createEmbeddedDocuments: async (docName, data) => { createdDocData = data[0]; return data; }
+    };
+
+    // Test Region programmatic placement
+    const regionPendingMap = new Map([
+        ['reg_key', { resolved: true, cancelled: false, coords: { x: 120, y: 220, radius: 25, gridUnits: false } }]
+    ]);
+    const mockRegionDoc = {
+        documentName: 'Region',
+        toObject: () => ({ shapes: [{ type: 'circle', x: 0, y: 0, radius: 5, toObject: () => ({ type: 'circle', x: 0, y: 0, radius: 5 }) }], _id: 'temp_reg' }),
+        flags: {}
+    };
+
+    const mockCrosshairAdapter = new FoundryVTTV14Adapter();
+    pf2eAdapter.handleProgrammaticPlacement(mockScene, mockRegionDoc, {}, {}, {
+        crosshairAdapter: mockCrosshairAdapter,
+        pendingPlacements: regionPendingMap,
+        placementKey: 'reg_key'
+    });
+
+    await new Promise(r => setTimeout(r, 70));
+    assert.ok(createdDocData);
+    assert.ok(createdDocData.shapes);
+    assert.equal(createdDocData.shapes[0].x, 120);
+    assert.equal(createdDocData.shapes[0].y, 220);
+    assert.equal(createdDocData.shapes[0].radius, 25);
+    assert.equal(createdDocData._id, undefined);
+});
+
+test('hidePreview safely hides PIXI containers immediately and overrides refresh and _refresh methods', () => {
+    const mockPlaceable = {
+        visible: true,
+        renderable: true,
+        alpha: 1,
+        template: { visible: true, renderable: true, alpha: 1 },
+        mesh: { visible: true, renderable: true, alpha: 1 },
+        shape: { visible: true, renderable: true, alpha: 1 },
+        border: { visible: true, renderable: true, alpha: 1 },
+        ruler: { visible: true, renderable: true, text: '20 ft' },
+        controlIcon: { visible: true }
+    };
+
+    crosshairAdapter.hidePreview(mockPlaceable);
+
+    assert.equal(mockPlaceable.visible, false);
+    assert.equal(mockPlaceable.renderable, false);
+    assert.equal(mockPlaceable.alpha, 0);
+    assert.equal(mockPlaceable.template.visible, false);
+    assert.equal(mockPlaceable.mesh.visible, false);
+    assert.equal(mockPlaceable.shape.visible, false);
+    assert.equal(mockPlaceable.border.visible, false);
+    assert.equal(mockPlaceable.ruler.visible, false);
+    assert.equal(mockPlaceable.controlIcon.visible, false);
+
+    // Simulate mouse move triggering refresh and _refresh
+    mockPlaceable.visible = true;
+    mockPlaceable.mesh.visible = true;
+    mockPlaceable.refresh();
+    assert.equal(mockPlaceable.visible, false);
+    assert.equal(mockPlaceable.mesh.visible, false);
+
+    mockPlaceable.visible = true;
+    mockPlaceable.shape.visible = true;
+    if (typeof mockPlaceable._refresh === 'function') {
+        mockPlaceable._refresh();
+    }
+    assert.equal(mockPlaceable.visible, false);
+    assert.equal(mockPlaceable.shape.visible, false);
+});
+
+test('crosshairAdapter.isPreview reliably recognizes both Region and MeasuredTemplate unpersisted previews', () => {
+    const adapter = new FoundryVTTV14Adapter();
+    const mtPreview = { isPreview: true, document: { id: null } };
+    assert.equal(adapter.isPreview(mtPreview), true);
+
+    const regionPreview = { document: { id: undefined } };
+    assert.equal(adapter.isPreview(regionPreview), true);
+
+    const persistedRegion = { isPreview: false, document: { id: 'reg_abc123' } };
+    assert.equal(adapter.isPreview(persistedRegion), false);
+});
+
+test('FoundryVTTV14Adapter and Pf2eSystemAdapter handle Collection shapes via .contents and Region behaviors', () => {
+    const adapterV14 = new FoundryVTTV14Adapter();
+    const pf2eAdapter = new Pf2eSystemAdapter();
+
+    // Collection .contents shape checking
+    const mockRegionDoc = {
+        shapes: {
+            contents: [{
+                type: 'circle',
+                radius: 30,
+                x: 0,
+                y: 0,
+                toObject: () => ({ type: 'circle', radius: 30, x: 0, y: 0 })
+            }]
+        }
+    };
+    const props = adapterV14.detectProperties(mockRegionDoc);
+    assert.equal(props.type, 'circle');
+    assert.ok(props.radius > 0);
+
+    // Region behaviors item origin check in PF2e
+    globalThis.foundry.utils.fromUuidSync = (uuid) => {
+        if (uuid === 'Item.RegionBehaviorOrigin') return { id: '999', name: 'Aura of Protection' };
+        return null;
+    };
+
+    const docWithBehavior = {
+        flags: {},
+        behaviors: {
+            contents: [{
+                flags: { pf2e: { origin: 'Item.RegionBehaviorOrigin' } }
+            }]
+        }
+    };
+    const ctx = pf2eAdapter.extractCallingContext(docWithBehavior, {});
+    assert.equal(ctx.itemName, 'Aura of Protection');
+    assert.equal(ctx.itemId, '999');
 });

@@ -94,6 +94,15 @@ globalThis.foundry = {
     }
 };
 
+globalThis.CONFIG = {
+    MeasuredTemplate: {
+        objectClass: class MeasuredTemplate {}
+    },
+    Region: {
+        objectClass: class Region {}
+    }
+};
+
 const settingsStore = new Map([
     ['bakana-better-crosshairs.logVerbosity', 3],
     ['bakana-better-crosshairs.registeredTemplates', {}]

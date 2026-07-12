@@ -165,50 +165,56 @@ export class BaseFoundryVTTAdapter {
      */
     hidePreview(placeable) {
         if (!placeable) return;
-        try { placeable.visible = false; } catch (e) {}
-        try { placeable.renderable = false; } catch (e) {}
-        try { placeable.alpha = 0; } catch (e) {}
-        if (placeable.template) {
-            try { placeable.template.visible = false; } catch (e) {}
-            try { placeable.template.renderable = false; } catch (e) {}
-            try { placeable.template.alpha = 0; } catch (e) {}
-        }
-        if (placeable.ruler) {
-            try { placeable.ruler.visible = false; } catch (e) {}
-            try { placeable.ruler.renderable = false; } catch (e) {}
-            try { placeable.ruler.text = ""; } catch (e) {}
-        }
-        if (placeable.controlIcon) {
-            try { placeable.controlIcon.visible = false; } catch (e) {}
-        }
+        const hideContainers = (obj) => {
+            try { obj.visible = false; } catch (e) {}
+            try { obj.renderable = false; } catch (e) {}
+            try { obj.alpha = 0; } catch (e) {}
+            if (obj.template) {
+                try { obj.template.visible = false; } catch (e) {}
+                try { obj.template.renderable = false; } catch (e) {}
+                try { obj.template.alpha = 0; } catch (e) {}
+            }
+            if (obj.ruler) {
+                try { obj.ruler.visible = false; } catch (e) {}
+                try { obj.ruler.renderable = false; } catch (e) {}
+                try { obj.ruler.text = ""; } catch (e) {}
+            }
+            if (obj.controlIcon) {
+                try { obj.controlIcon.visible = false; } catch (e) {}
+            }
+            if (obj.mesh) {
+                try { obj.mesh.visible = false; } catch (e) {}
+                try { obj.mesh.renderable = false; } catch (e) {}
+                try { obj.mesh.alpha = 0; } catch (e) {}
+            }
+            if (obj.shape) {
+                try { obj.shape.visible = false; } catch (e) {}
+                try { obj.shape.renderable = false; } catch (e) {}
+                try { obj.shape.alpha = 0; } catch (e) {}
+            }
+            if (obj.border) {
+                try { obj.border.visible = false; } catch (e) {}
+                try { obj.border.renderable = false; } catch (e) {}
+                try { obj.border.alpha = 0; } catch (e) {}
+            }
+            if (obj.highlightId && canvas.grid?.clearHighlightLayer) {
+                try { clearHighlightLayer(obj.highlightId); } catch (e) { }
+            }
+        };
+
+        hideContainers(placeable);
         if (typeof placeable.highlightGrid === "function") {
             try { placeable.highlightGrid = function () { }; } catch (e) {}
         }
-        if (placeable.highlightId && canvas.grid?.clearHighlightLayer) {
-            try { clearHighlightLayer(placeable.highlightId); } catch (e) { }
-        }
-
         try {
             placeable.refresh = function () {
-                try { this.visible = false; } catch (e) {}
-                try { this.renderable = false; } catch (e) {}
-                try { this.alpha = 0; } catch (e) {}
-                if (this.template) {
-                    try { this.template.visible = false; } catch (e) {}
-                    try { this.template.renderable = false; } catch (e) {}
-                    try { this.template.alpha = 0; } catch (e) {}
-                }
-                if (this.ruler) {
-                    try { this.ruler.visible = false; } catch (e) {}
-                    try { this.ruler.renderable = false; } catch (e) {}
-                    try { this.ruler.text = ""; } catch (e) {}
-                }
-                if (this.controlIcon) {
-                    try { this.controlIcon.visible = false; } catch (e) {}
-                }
-                if (this.highlightId && canvas.grid?.clearHighlightLayer) {
-                    try { clearHighlightLayer(this.highlightId); } catch (e) { }
-                }
+                hideContainers(this);
+                return this;
+            };
+        } catch (e) {}
+        try {
+            placeable._refresh = function () {
+                hideContainers(this);
                 return this;
             };
         } catch (e) {}
@@ -250,8 +256,11 @@ export class BaseFoundryVTTAdapter {
         if (typeof canvas?.templates?._onCancel === "function") {
             try { canvas.templates._onCancel({ preventDefault: () => {}, stopPropagation: () => {} }); } catch (e) {}
         }
+        if (typeof canvas?.regions?._onCancel === "function") {
+            try { canvas.regions._onCancel({ preventDefault: () => {}, stopPropagation: () => {} }); } catch (e) {}
+        }
 
-        const stages = [canvas?.stage, canvas?.app?.stage, canvas?.templates, canvas?.templates?.preview].filter(Boolean);
+        const stages = [canvas?.stage, canvas?.app?.stage, canvas?.templates, canvas?.templates?.preview, canvas?.regions, canvas?.regions?.preview].filter(Boolean);
         const eventNames = ["pointermove", "mousemove", "pointerdown", "mousedown", "pointerup", "mouseup", "click", "rightclick"];
         for (const stg of stages) {
             if (typeof stg.listeners === "function" && typeof stg.off === "function") {
@@ -260,7 +269,7 @@ export class BaseFoundryVTTAdapter {
                         const lns = stg.listeners(evName);
                         if (Array.isArray(lns)) {
                             for (const fn of lns) {
-                                if (fn && (fn.context === placeable || fn._context === placeable || (fn.name && (fn.name.includes("mousemove") || fn.name.includes("pointermove") || fn.name.includes("pointerdown") || fn.name.includes("mousedown") || fn.name.includes("click") || fn.name.includes("preview") || fn.name.includes("template"))))) {
+                                if (fn && (fn.context === placeable || fn._context === placeable || (fn.name && (fn.name.includes("mousemove") || fn.name.includes("pointermove") || fn.name.includes("pointerdown") || fn.name.includes("mousedown") || fn.name.includes("click") || fn.name.includes("preview") || fn.name.includes("template") || fn.name.includes("region"))))) {
                                     stg.off(evName, fn);
                                 }
                             }
@@ -272,6 +281,9 @@ export class BaseFoundryVTTAdapter {
 
         if (canvas?.templates?.preview?.children?.includes(placeable)) {
             try { canvas.templates.preview.removeChild(placeable); } catch (e) {}
+        }
+        if (canvas?.regions?.preview?.children?.includes(placeable)) {
+            try { canvas.regions.preview.removeChild(placeable); } catch (e) {}
         }
         if (typeof placeable.destroy === "function") {
             try { placeable.destroy({ children: true }); } catch (e) {}
@@ -288,7 +300,20 @@ export class BaseFoundryVTTAdapter {
         try { placeable.controlIcon = dummyContainer; } catch (e) {}
         try { placeable.ruler = dummyContainer; } catch (e) {}
         try { placeable.template = dummyContainer; } catch (e) {}
+        try { placeable.mesh = dummyContainer; } catch (e) {}
+        try { placeable.shape = dummyContainer; } catch (e) {}
+        try { placeable.border = dummyContainer; } catch (e) {}
         try { if (!placeable.position) placeable.position = dummyContainer.position; } catch (e) {}
+    }
+
+    /**
+     * Determine if a placeable object on the canvas represents an unpersisted interactive preview (`MeasuredTemplate` or `Region`).
+     * @param {PlaceableObject} placeable - Canvas placeable object
+     * @returns {boolean} True if the placeable is a live preview graphic
+     */
+    isPreview(placeable) {
+        if (!placeable) return false;
+        return Boolean(placeable.isPreview ?? !placeable.document?.id);
     }
 
     /**
@@ -321,12 +346,78 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
-     * Register Foundry VTT canvas placement hooks for live previewing and document creation.
+     * Return supported base canvas PlaceableObject type names for this Foundry VTT generation.
+     * @returns {string[]} Base placeable type names (`e.g. ["MeasuredTemplate"]`)
+     */
+    get supportedBasePlaceables() {
+        return ["MeasuredTemplate"];
+    }
+
+    /**
+     * Return supported document creation type names (`preCreate`/`create` hook suffixes) for this Foundry VTT generation.
+     * @returns {string[]} Document type names (`e.g. ["MeasuredTemplate"]`)
+     */
+    get supportedDocumentTypes() {
+        return ["MeasuredTemplate"];
+    }
+
+    /**
+     * Register placement hooks (`onDrawPreview`, `onPreCreate`, `onCreate`, and `refresh`) across all placeable and document types.
+     * Abstracted to depend cleanly on both the Foundry VTT generation adapter (`supportedBasePlaceables`, `supportedDocumentTypes`)
+     * AND the System adapter (`getCustomPlaceableClassNames`).
      * @param {Object} callbacks - Placement hook callbacks (`{ onDrawPreview, onPreCreate, onCreate }`)
+     * @param {Object} [sysAdapter=systemAdapter] - Active System Adapter instance
      * @returns {void} No return value
      */
-    registerPlacementHooks(callbacks) {
-        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement registerPlacementHooks(callbacks).");
+    registerPlacementHooks(callbacks, sysAdapter = systemAdapter) {
+        const basePlaceables = this.supportedBasePlaceables;
+        const customPlaceables = sysAdapter?.getCustomPlaceableClassNames?.() ?? [];
+        const dynamicPlaceables = [];
+
+        if (typeof CONFIG !== "undefined") {
+            for (const base of basePlaceables) {
+                const customClass = CONFIG[base]?.objectClass?.name;
+                if (customClass && typeof customClass === "string" && !basePlaceables.includes(customClass) && !customPlaceables.includes(customClass)) {
+                    dynamicPlaceables.push(customClass);
+                }
+            }
+        }
+
+        const drawPlaceables = new Set([...basePlaceables, ...customPlaceables, ...dynamicPlaceables]);
+        for (const placeableName of drawPlaceables) {
+            Hooks.on(`draw${placeableName}`, (template) => callbacks.onDrawPreview(template));
+            if (placeableName.includes("MeasuredTemplate")) {
+                Hooks.on(`refresh${placeableName}`, (template) => this.handleMeasuredTemplateRefresh(template));
+            }
+        }
+
+        for (const docType of this.supportedDocumentTypes) {
+            Hooks.on(`preCreate${docType}`, (doc, _data, _options, userId) => callbacks.onPreCreate(doc, _data, _options, userId));
+            Hooks.on(`create${docType}`, (doc, _options, userId) => callbacks.onCreate(doc, _options, userId));
+        }
+    }
+
+    /**
+     * Handle refresh hooks for MeasuredTemplate placeables (e.g. maintaining borderAlpha styling).
+     * @param {PlaceableObject} template - MeasuredTemplate placeable object on canvas
+     * @returns {void}
+     */
+    handleMeasuredTemplateRefresh(template) {
+        const borderAlpha = template.document?.borderAlpha ?? template.document?.flags?.bbc?.placedBorderAlpha;
+        if (borderAlpha !== undefined && borderAlpha !== null && typeof borderAlpha === "number" && !isNaN(borderAlpha) && template.template) {
+            if (Array.isArray(template.template.geometry?.graphicsData)) {
+                let dirty = false;
+                for (const gd of template.template.geometry.graphicsData) {
+                    if (gd && gd.lineStyle && gd.lineStyle.width > 0 && gd.lineStyle.alpha !== borderAlpha) {
+                        gd.lineStyle.alpha = borderAlpha;
+                        dirty = true;
+                    }
+                }
+                if (dirty && typeof template.template.geometry.invalidate === "function") {
+                    template.template.geometry.invalidate();
+                }
+            }
+        }
     }
 
     /**
