@@ -89,6 +89,8 @@ async function create(token, config = {}) {
 
     if (stickToToken && token) {
         square.location(token, { lockToEdge: true, lockToEdgeDirection: false });
+    } else if (config.snapToGrid !== false && config.snapToGrid !== "none") {
+        square.snapPosition(globalThis.CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2);
     }
 
     if (icon) {
