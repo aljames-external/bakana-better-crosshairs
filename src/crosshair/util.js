@@ -330,9 +330,7 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
 
     log.debug("resolveCrosshairPlacement | Resolved and formatted placement coordinates:", result);
 
-    if (config.context) {
-        config.context.resolve(result);
-    }
+    config.context?.resolve?.(result);
     return result;
 }
 

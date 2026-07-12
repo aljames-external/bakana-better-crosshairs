@@ -12,8 +12,8 @@ export class CrosshairConfiguration {
     constructor(source = {}) {
         const defaults = DEFAULT_AUTOREC_ENTRY;
 
-        this.itemName = String(source.itemName ?? defaults.itemName ?? "").trim();
-        this.id = String(source.id ?? source.itemName ?? defaults.id ?? "DEFAULT");
+        this.itemName = String(source.itemName ?? defaults.itemName).trim();
+        this.id = String(source.id ?? source.itemName ?? defaults.id);
         this.isDefault = Boolean(source.isDefault);
         this.isCustom = Boolean(source.isCustom);
         this.enabled = source.enabled !== undefined ? Boolean(source.enabled) : defaults.enabled;
@@ -33,7 +33,7 @@ export class CrosshairConfiguration {
         this.borderColor = String(source.borderColor ?? defaults.borderColor).trim();
         this.borderAlpha = Number.isFinite(Number(source.borderAlpha)) ? Number(source.borderAlpha) : defaults.borderAlpha;
         this.fillColor = String(source.fillColor ?? defaults.fillColor).trim();
-        this.fillAlpha = Number.isFinite(Number(source.fillAlpha)) ? Number(source.fillAlpha) : (defaults.fillAlpha ?? 0);
+        this.fillAlpha = Number.isFinite(Number(source.fillAlpha)) ? Number(source.fillAlpha) : defaults.fillAlpha;
         this.icon = String(source.icon ?? defaults.icon).trim();
 
         // Placed document styling options
@@ -85,7 +85,7 @@ export class CrosshairConfiguration {
 
         const isPreOverride = hasGranularFlags ? Boolean(customSource.enablePrePlacement) : Boolean(customSource.concurrentCode);
         const isAnimOverride = hasGranularFlags ? Boolean(customSource.enableAnimation) : Boolean(customSource.enabled !== false);
-        const isPlacedOverride = hasGranularFlags ? Boolean(customSource.enablePlacedStyling) : Boolean(customSource.placedFillColor || customSource.placedBorderColor);
+        const isPlacedOverride = hasGranularFlags ? Boolean(customSource.enablePlacedStyling) : (Boolean(customSource.placedFillColor) || Boolean(customSource.placedBorderColor));
         const isPostOverride = hasGranularFlags ? Boolean(customSource.enablePostPlacement) : Boolean(customSource.postPlacementCode);
 
         if (!isPreOverride && !isAnimOverride && !isPlacedOverride && !isPostOverride) {
@@ -113,18 +113,18 @@ export class CrosshairConfiguration {
 
             merged.showLine = Boolean(customSource.showLine);
             merged.lineFile = Boolean(customSource.lineFile) ? customSource.lineFile : DEFAULT_AUTOREC_ENTRY.lineFile;
-            merged.borderColor = customSource.borderColor ?? "#ffffff";
-            merged.borderAlpha = customSource.borderAlpha ?? 0;
-            merged.fillColor = customSource.fillColor ?? "#000000";
+            merged.borderColor = customSource.borderColor ?? DEFAULT_AUTOREC_ENTRY.borderColor;
+            merged.borderAlpha = customSource.borderAlpha ?? DEFAULT_AUTOREC_ENTRY.borderAlpha;
+            merged.fillColor = customSource.fillColor ?? DEFAULT_AUTOREC_ENTRY.fillColor;
             merged.icon = Boolean(customSource.icon) ? customSource.icon : DEFAULT_AUTOREC_ENTRY.icon;
         }
 
         if (isPlacedOverride) {
             merged.enablePlacedStyling = true;
-            merged.placedFillColor = customSource.placedFillColor ?? "#000000";
-            merged.placedFillAlpha = customSource.placedFillAlpha ?? 0;
-            merged.placedBorderColor = customSource.placedBorderColor ?? "#ffffff";
-            merged.placedBorderAlpha = customSource.placedBorderAlpha ?? 0;
+            merged.placedFillColor = customSource.placedFillColor ?? DEFAULT_AUTOREC_ENTRY.placedFillColor;
+            merged.placedFillAlpha = customSource.placedFillAlpha ?? DEFAULT_AUTOREC_ENTRY.placedFillAlpha;
+            merged.placedBorderColor = customSource.placedBorderColor ?? DEFAULT_AUTOREC_ENTRY.placedBorderColor;
+            merged.placedBorderAlpha = customSource.placedBorderAlpha ?? DEFAULT_AUTOREC_ENTRY.placedBorderAlpha;
         }
 
         if (isPostOverride) {

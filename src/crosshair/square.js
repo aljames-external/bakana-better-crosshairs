@@ -1,4 +1,5 @@
 import { closest } from "../lib/filemanager.js";
+import { log } from "../lib/logger.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, resolveCrosshairIcon } from "./util.js";
 
@@ -7,6 +8,18 @@ import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, sh
  *
  * @param {object|null} token - The token or object to associate with the crosshair
  * @param {object} [config={}] - Configuration options for the square crosshair
+ * @param {number} [config.distance=30] - The distance/length of the square
+ * @param {number} [config.width=30] - The width of the square
+ * @param {string} [config.id="Square Crosshair"] - Identifier for the square crosshair effect
+ * @param {boolean} [config.showLine=true] - Whether to show the center line
+ * @param {string} [config.squareFile] - Explicit file path or key for the square graphic
+ * @param {string} [config.lineFile] - Explicit file path or key for the line graphic
+ * @param {string} [config.borderColor="#ffffff"] - Border color for the square
+ * @param {number} [config.borderAlpha=0] - Border alpha transparency
+ * @param {string} [config.fillColor="#000000"] - Fill color for the square
+ * @param {number} [config.fillAlpha=0] - Fill alpha transparency
+ * @param {string} [config.icon] - Icon to display on the crosshair
+ * @param {object|null} [config.context=null] - Context object for placement callbacks
  * @returns {Promise<Array<*>>} A promise resolving to an array containing the configured square sequence and targets
  */
 async function create(token, config = {}) {
@@ -26,7 +39,9 @@ async function create(token, config = {}) {
     const context = config.context ?? null;
 
     config.token = token;
-    config.stickToToken = stickToToken;
+    config.stickToToken = Boolean(stickToToken);
+    config.distance = distance;
+    config.width = width;
 
     let targets;
 
@@ -44,6 +59,8 @@ async function create(token, config = {}) {
         const lengthPixels = (distance / gridDist) * gridSize;
         const widthPixels = ((width ?? distance) / gridDist) * gridSize;
         const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
+
+        log.debug("squareGraphic | Sizing square graphic:", { distance, width, lengthPixels, widthPixels, factor, gridUnits });
 
         seq.effect()
             .name(id)
@@ -90,7 +107,7 @@ async function create(token, config = {}) {
         .callback(Sequencer.Crosshair.CALLBACKS.CANCEL, () => {
             detachWheelRotation();
             Sequencer.EffectManager.endEffects({ name: id });
-            if (context) context.cancel();
+            context?.cancel?.();
         });
 
     return [square, targets];

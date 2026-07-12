@@ -163,7 +163,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     /**
      * Update live canvas preview shape coordinates during mouse drag.
      * @param {Document} previewDoc - The Region preview document being updated
-     * @param {{x: number, y: number}} coords - The target canvas coordinates
+     * @param {{x?: number, y?: number, rotation?: number, radius?: number, width?: number, gridUnits?: boolean}} coords - The target canvas placement coordinates
      * @returns {void}
      */
     updatePreviewShape(previewDoc, coords) {

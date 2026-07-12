@@ -6,6 +6,10 @@ import { MODULE_NAME } from "../../lib/constants.js";
 
 export { BaseFoundryVTTAdapter, FoundryVTTV13Adapter, FoundryVTTV14Adapter, version };
 
+/**
+ * Active crosshair adapter instance, defaulting to base adapter before initialization.
+ * @type {BaseFoundryVTTAdapter|FoundryVTTV13Adapter|FoundryVTTV14Adapter}
+ */
 export let crosshairAdapter = new BaseFoundryVTTAdapter();
 
 /**

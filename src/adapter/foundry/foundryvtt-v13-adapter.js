@@ -1,6 +1,9 @@
 import { BaseFoundryVTTAdapter } from "./base-foundryvtt-adapter.js";
 import { localize } from "../../lib/utils.js";
 
+/**
+ * Adapter subclass encapsulating Foundry VTT v13 MeasuredTemplate placement behavior.
+ */
 export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
     /**
      * Construct a Foundry VTT V13 adapter instance.

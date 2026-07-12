@@ -27,21 +27,19 @@ async function create(token, config = {}) {
     const width = config.width ?? 5;
     const stickToToken = shouldStickToToken(config, false);
 
-    const {
-        id = `Ray Crosshair`,
-        showLine = true,
-        rayFile = closest(`eskie.crosshair.ray.fantasy_01.white`),
-        lineFile = closest(`eskie.crosshair.line.generic_01.white`),
-        borderColor = "#ffffff",
-        borderAlpha = 0,
-        fillColor = "#000000",
-        fillAlpha = 0,
-        icon = config.icon,
-        context = null
-    } = config;
+    const id = config.id ?? "Ray Crosshair";
+    const showLine = config.showLine ?? true;
+    const rayFile = config.rayFile ?? closest("eskie.crosshair.ray.fantasy_01.white");
+    const lineFile = config.lineFile ?? closest("eskie.crosshair.line.generic_01.white");
+    const borderColor = config.borderColor ?? "#ffffff";
+    const borderAlpha = config.borderAlpha ?? 0;
+    const fillColor = config.fillColor ?? "#000000";
+    const fillAlpha = config.fillAlpha ?? 0;
+    const icon = config.icon;
+    const context = config.context ?? null;
 
     config.token = token;
-    config.stickToToken = stickToToken;
+    config.stickToToken = Boolean(stickToToken);
     config.distance = distance;
     config.width = width;
 
@@ -68,7 +66,7 @@ async function create(token, config = {}) {
             .file(rayFile)
             .attachTo(crosshair)
             .anchor({ x: 0, y: 0.5 })
-            .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits })
+            .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
             .belowTokens()
             .locally()
@@ -108,7 +106,7 @@ async function create(token, config = {}) {
         .callback(Sequencer.Crosshair.CALLBACKS.CANCEL, () => {
             detachWheelRotation();
             Sequencer.EffectManager.endEffects({ name: id });
-            if (context) context.cancel();
+            context?.cancel?.();
         });
 
     return [ray, targets];

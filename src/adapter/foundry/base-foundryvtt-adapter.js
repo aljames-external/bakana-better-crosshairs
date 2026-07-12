@@ -4,6 +4,9 @@ import { clearHighlightLayer } from "../../lib/compat.js";
 import { MODULE_ID } from "../../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY } from "../../autorec/autorecManager.js";
 import { CrosshairConfiguration } from "../../autorec/CrosshairConfiguration.js";
+/**
+ * Base abstract class for Foundry VTT version-specific adapters.
+ */
 export class BaseFoundryVTTAdapter {
     /**
      * Initialize the base Foundry VTT adapter.
@@ -248,8 +251,8 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
-     * Detect geometric properties and dimensions from a canvas PlaceableObject or Document.
-     * @param {Document} doc - Template or Region document
+     * Detect geometric properties and dimensions from a MeasuredTemplate or Region Document.
+     * @param {Document} doc - MeasuredTemplate or Region document
      * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}} Detected geometric properties including type, distance, width, angle, and coordinates
      */
     detectProperties(doc) {

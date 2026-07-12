@@ -48,7 +48,7 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
     async _prepareContext(options) {
         /**
          * Normalizes a candidate color string to a valid 6-digit hex color or returns a fallback.
-         * @param {*} val - Candidate color value.
+         * @param {unknown} val - Candidate color value.
          * @param {string} [fallback="#000000"] - Fallback hex string.
          * @returns {string} Valid 6-digit hex color string.
          */

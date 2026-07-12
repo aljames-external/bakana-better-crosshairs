@@ -49,10 +49,8 @@
                         {{#if isDefault}}
                         <span class="bbc-type-badge default" title="{{../labels.globalFallbackHint}}">{{../labels.defaultBadge}}</span>
                         {{/if}}
-                        {{#if ../supportsActivities}}
-                        {{#if hasActivity}}
+                        {{#if (and ../supportsActivities hasActivity)}}
                         <span class="bbc-activity-pill" title="{{../labels.activityHintPrefix}}{{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
-                        {{/if}}
                         {{/if}}
                     </div>
                     {{#if isLocal}}
@@ -84,10 +82,8 @@
                     <div class="bbc-title-left">
                         <i class="fa-solid fa-crosshairs bbc-detail-icon"></i>
                         <h2>{{itemName}}</h2>
-                        {{#if ../supportsActivities}}
-                        {{#if hasActivity}}
+                        {{#if (and ../supportsActivities hasActivity)}}
                         <span class="bbc-activity-pill" title="{{../labels.activityHintPrefix}}{{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
-                        {{/if}}
                         {{/if}}
                     </div>
                     <div class="bbc-detail-actions edit-only">

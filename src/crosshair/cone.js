@@ -69,7 +69,7 @@ async function create(token, config = {}) {
             .file(coneFile)
             .attachTo(crosshair)
             .anchor({ x: 0, y: 0.5 })
-            .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits })
+            .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
             .belowTokens()
             .locally()

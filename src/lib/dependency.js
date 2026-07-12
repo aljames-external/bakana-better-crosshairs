@@ -198,6 +198,13 @@ function someRequired(dependencyList) {
 
 /**
  * Dependency verification utility export.
+ * @type {object}
+ * @property {typeof isActivated} isActivated - Checks if a dependency is activated and optionally logs a warning.
+ * @property {typeof isInstalled} isInstalled - Checks if a dependency is installed and optionally logs a warning.
+ * @property {typeof hasRecommended} hasRecommended - Checks if a recommended dependency is activated.
+ * @property {typeof hasSomeRecommended} hasSomeRecommended - Checks if at least one of a list of recommended dependencies is activated.
+ * @property {typeof required} required - Checks if a required dependency or list of dependencies is activated and throws if not.
+ * @property {typeof someRequired} someRequired - Checks if at least one of a list of required dependencies is activated and throws if not.
  */
 export const dependency = {
     isActivated,

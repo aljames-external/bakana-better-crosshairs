@@ -268,15 +268,13 @@
                     </td>
                 </tr>
 
-                {{#unless showOverrides}}
-                {{#unless hasPlacedStyling}}
+                {{#if (and (not showOverrides) (not hasPlacedStyling))}}
                 <tr class="view-only">
                     <td colspan="2" style="text-align: center; color: #64748b; font-style: italic;">
                         {{labels.defaultPlacementNote}}
                     </td>
                 </tr>
-                {{/unless}}
-                {{/unless}}
+                {{/if}}
             </tbody>
         </table>
     </div>

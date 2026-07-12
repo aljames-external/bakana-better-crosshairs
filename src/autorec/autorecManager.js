@@ -19,6 +19,7 @@ export const DEFAULT_AUTOREC_ENTRY = {
     borderColor: "#ffffff",
     borderAlpha: 0,
     fillColor: "#000000",
+    fillAlpha: 0,
     circleFile: "eskie.crosshair.circle.fantasy_01.white.full",
     coneFile: "eskie.crosshair.cone.thin.fantasy_01.white.full",
     rayFile: "eskie.crosshair.ray.fantasy_01.white",
@@ -117,7 +118,8 @@ export class AutorecManager {
             return false;
         }
 
-        if (!Boolean(item.isOwner)) {
+        const isOwner = Boolean(item.isOwner);
+        if (!isOwner) {
             log.warn(`AutorecManager.customize | Current user does not have ownership of item "${item.name}".`);
             return false;
         }
@@ -156,7 +158,7 @@ export class AutorecManager {
         const isDefault = Boolean(handler?.isDefault || registeredKey === "DEFAULT");
         const activityId = isDefault ? "" : (handler?.activityId ?? "").trim();
         const activityName = isDefault ? "" : (handler?.activityName ?? "").trim();
-        const hasActivity = Boolean(activityId || activityName);
+        const hasActivity = Boolean(activityId) || Boolean(activityName);
         const enabled = handler?.enabled !== false;
         const baseConfig = typeof handler === "function" ? { handler } : (handler ?? {});
         const entry = {
@@ -358,7 +360,7 @@ export class AutorecManager {
         }
 
         for (const [itemName, rawConfig] of Object.entries(savedRegistrations)) {
-            const config = rawConfig?.handler ?? rawConfig?.config ?? rawConfig;
+            const config = rawConfig?.handler ?? rawConfig;
             const current = this.registeredHandlers.get(itemName);
             const isCurrentLocal = Boolean(current?.local);
             if (!isCurrentLocal) {
@@ -386,7 +388,7 @@ export class AutorecManager {
         if (this._onRegisterCallback) {
             this._onRegisterCallback();
         }
-        const isLocal = Boolean(local || handlerOrConfig?.local);
+        const isLocal = Boolean(local) || Boolean(handlerOrConfig?.local);
 
         if (itemName === "DEFAULT" && typeof handlerOrConfig !== "function") {
             handlerOrConfig = {

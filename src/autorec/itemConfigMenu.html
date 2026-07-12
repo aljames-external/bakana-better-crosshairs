@@ -49,11 +49,7 @@
     {{/if}}
 
     <div class="bbc-sections-scroll bbc-item-config-body">
-        {{#if hasCustom}}
-        {{#with config}}
-        {{> "modules/bakana-better-crosshairs/src/autorec/configFieldsPartial.html" labels=../labels prePlacementTitle=../prePlacementTitle placementSectionTitle=../placementSectionTitle postPlacementTitle=../postPlacementTitle showOverrides=../showOverrides showActivityIdentification=../showActivityIdentification isEditMode=../isEditMode}}
-        {{/with}}
-        {{else if isEditMode}}
+        {{#if (or hasCustom isEditMode)}}
         {{#with config}}
         {{> "modules/bakana-better-crosshairs/src/autorec/configFieldsPartial.html" labels=../labels prePlacementTitle=../prePlacementTitle placementSectionTitle=../placementSectionTitle postPlacementTitle=../postPlacementTitle showOverrides=../showOverrides showActivityIdentification=../showActivityIdentification isEditMode=../isEditMode}}
         {{/with}}
