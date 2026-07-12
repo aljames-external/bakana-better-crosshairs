@@ -507,12 +507,15 @@ export function registerItemSheetHooks() {
         if (controls.some(c => c.label?.startsWith("BBC") || c.icon === "fa-solid fa-crosshairs")) return;
 
         const customConfig = item.getFlag(MODULE_ID, "customConfig") ?? null;
-        const autorecMatch = autorecManager.getEntryByName(item.name);
-        const statusLabel = Boolean(customConfig) ? " [CUSTOM]" : (autorecMatch ? " [AUTOREC]" : "");
+        const activityConfigs = item.getFlag(MODULE_ID, "activityConfigs") ?? null;
+        const hasAnyCustom = Boolean(
+            customConfig ||
+            (activityConfigs && typeof activityConfigs === "object" && Object.keys(activityConfigs).length > 0)
+        );
 
         controls.push({
-            label: `BBC${statusLabel}`,
-            icon: "fa-solid fa-crosshairs",
+            label: "BBC",
+            icon: hasAnyCustom ? "fa-solid fa-crosshairs bbc-header-icon-custom" : "fa-solid fa-crosshairs",
             onClick: () => openItemCrosshairConfig(item)
         });
     }
@@ -528,15 +531,19 @@ export function registerItemSheetHooks() {
         if (options.some(o => o.name?.startsWith("BBC Crosshair"))) return;
 
         const customConfig = item.getFlag(MODULE_ID, "customConfig") ?? null;
-        const autorecMatch = autorecManager.getEntryByName(item.name);
-        const statusLabel = Boolean(customConfig) ? " [CUSTOM]" : (autorecMatch ? " [AUTOREC]" : "");
+        const activityConfigs = item.getFlag(MODULE_ID, "activityConfigs") ?? null;
+        const hasAnyCustom = Boolean(
+            customConfig ||
+            (activityConfigs && typeof activityConfigs === "object" && Object.keys(activityConfigs).length > 0)
+        );
 
         options.push({
-            name: `BBC Crosshair Configuration${statusLabel}`,
-            icon: "<i class='fa-solid fa-crosshairs'></i>",
+            name: "BBC Crosshair Configuration",
+            icon: hasAnyCustom ? "<i class='fa-solid fa-crosshairs bbc-header-icon-custom' style='color: #22c55e;'></i>" : "<i class='fa-solid fa-crosshairs'></i>",
             callback: () => openItemCrosshairConfig(item)
         });
     }
+
 
     Hooks.on("getHeaderControlsItemSheet5e", addApplicationV2HeaderControl);
     Hooks.on("getHeaderControlsItemSheet5e2", addApplicationV2HeaderControl);
