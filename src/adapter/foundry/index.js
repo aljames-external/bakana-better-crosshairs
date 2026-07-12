@@ -6,13 +6,17 @@ import { MODULE_NAME } from "../../lib/constants.js";
 
 export { BaseFoundryVTTAdapter, FoundryVTTV13Adapter, FoundryVTTV14Adapter, version };
 
+/**
+ * Active crosshair adapter instance, defaulting to base adapter before initialization.
+ * @type {BaseFoundryVTTAdapter|FoundryVTTV13Adapter|FoundryVTTV14Adapter}
+ */
 export let crosshairAdapter = new BaseFoundryVTTAdapter();
 
 /**
  * Initialize the active Foundry VTT version adapter (v13 or v14).
  * Evaluates supported generation boundaries using boolean version.clamp.
  * Should be called during the 'init' hook.
- * @returns {FoundryVTTV13Adapter|FoundryVTTV14Adapter}
+ * @returns {FoundryVTTV13Adapter|FoundryVTTV14Adapter} The initialized Foundry VTT adapter instance.
  */
 export function initializeFoundryAdapter() {
     const ver = game.version;

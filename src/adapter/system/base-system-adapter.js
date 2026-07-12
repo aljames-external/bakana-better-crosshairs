@@ -5,9 +5,29 @@ import { log } from "../../lib/logger.js";
  * Makes no assumptions about placeable document types (template vs region).
  */
 export class BaseSystemAdapter {
+    /**
+     * Initialize base system adapter properties (`systemId` and `supportsActivities`).
+     */
     constructor() {
         this.systemId = "base";
         this.supportsActivities = false;
+    }
+
+    /**
+     * Return list of custom PlaceableObject subclass names introduced by this game system.
+     * @returns {string[]} Array of custom placeable class names
+     */
+    getCustomPlaceableClassNames() {
+        return [];
+    }
+
+    /**
+     * Return whether mouse wheel rotation of a crosshair requires holding the Control / Command modifier key.
+     * Base implementation returns false (normal mouse wheel scrolling rotates crosshair unless overridden by system).
+     * @returns {boolean} True if the Control / Command key must be held to rotate the crosshair via mouse wheel.
+     */
+    requiresWheelModifier() {
+        return false;
     }
 
     /**
@@ -15,7 +35,7 @@ export class BaseSystemAdapter {
      * Base implementation returns the standard calling context passed by upstream workflow.
      * @param {Document} document - Template or Region document placed on canvas
      * @param {Object} [baseContext={}] - Initial calling context (`{ item, itemName, itemId, activity, activityName, activityId }`)
-     * @returns {{item?: Item|null, itemName?: string, itemId?: string, activity?: Object|null, activityName?: string, activityId?: string}}
+     * @returns {{item?: Item|null, itemName?: string, itemId?: string, activity?: Object|null, activityName?: string, activityId?: string}} Refined calling context object
      */
     extractCallingContext(document, baseContext = {}) {
         return baseContext;
@@ -48,4 +68,19 @@ export class BaseSystemAdapter {
         return match;
     }
 
+    /**
+     * Handle delayed single-click programmatic document creation when native placement listeners are blocked or deferred.
+     * Base implementation defaults to NOP to preserve native placement behavior across standard game systems.
+     * System subclasses that block pointer events on Click #1 (e.g. Pathfinder 2e) override this method.
+     * @param {Scene} scene - Target Canvas Scene
+     * @param {Document} doc - Preview Template or Region document
+     * @param {PlaceableObject} placeable - Live canvas preview placeable
+     * @param {Object} [coords={}] - Resolved placement coordinates (`{ x, y, direction, distance }`)
+     * @param {Object} [options={}] - Execution dependencies (`{ crosshairAdapter, pendingPlacements, placementKey }`)
+     * @returns {void} No return value
+     */
+    handleProgrammaticPlacement(scene, doc, placeable, coords = {}, options = {}) {
+        return;
+    }
 }
+

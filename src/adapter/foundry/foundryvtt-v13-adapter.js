@@ -1,26 +1,70 @@
 import { BaseFoundryVTTAdapter } from "./base-foundryvtt-adapter.js";
+import { localize } from "../../lib/utils.js";
 
+/**
+ * Adapter subclass encapsulating Foundry VTT v13 MeasuredTemplate placement behavior.
+ */
 export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
+    /**
+     * Construct a Foundry VTT V13 adapter instance.
+     */
     constructor() {
         super();
         this.version = 13;
     }
 
     /**
-     * Register Foundry VTT v13 placement hooks for MeasuredTemplates.
-     * @param {Object} callbacks - { onDrawPreview, onPreCreate, onCreate }
+     * Return canonical document terminology string ("template").
+     * @returns {string} The localized or canonical document type term
      */
-    registerPlacementHooks(callbacks) {
-        Hooks.on("drawMeasuredTemplate", (template) => callbacks.onDrawPreview(template));
-        Hooks.on("preCreateMeasuredTemplate", (doc, _data, _options, userId) => callbacks.onPreCreate(doc, _data, _options, userId));
-        Hooks.on("createMeasuredTemplate", (doc, _options, userId) => callbacks.onCreate(doc, _options, userId));
+    get documentTerm() {
+        return "template";
+    }
 
+    /**
+     * Return section title header for pre-placement configuration.
+     * @returns {string} Section header text
+     */
+    get prePlacementTitle() {
+        return localize("BBC.autorecMenu.preTemplatePlacement", "Pre-Template Placement");
+    }
+
+    /**
+     * Return section title header for placement configuration.
+     * @returns {string} Section header text
+     */
+    get placementSectionTitle() {
+        return localize("BBC.autorecMenu.templatePlacementConfig", "Template Placement Configuration");
+    }
+
+    /**
+     * Return section title header for post-placement configuration.
+     * @returns {string} Section header text
+     */
+    get postPlacementTitle() {
+        return localize("BBC.autorecMenu.postTemplatePlacement", "Post-Template Placement");
+    }
+
+    /**
+     * Return supported base canvas PlaceableObject type names for Foundry VTT v13.
+     * @returns {string[]} Base placeable type names
+     */
+    get supportedBasePlaceables() {
+        return ["MeasuredTemplate"];
+    }
+
+    /**
+     * Return supported document creation type names (`preCreate`/`create` hook suffixes) for Foundry VTT v13.
+     * @returns {string[]} Document type names
+     */
+    get supportedDocumentTypes() {
+        return ["MeasuredTemplate"];
     }
 
     /**
      * Detect shape type and geometric dimensions from a MeasuredTemplate document.
-     * @param {Document} doc
-     * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}}
+     * @param {Document} doc - MeasuredTemplate document
+     * @returns {{type: string, distance: number, radius: number, width: number, angle: number, x: number, y: number}} Detected shape properties and dimensions
      */
     detectProperties(doc) {
         const shapeMap = {
@@ -42,12 +86,12 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Format drag destination coordinates into a V12 MeasuredTemplate placement coordinates payload.
+     * Format drag destination coordinates into a V13 MeasuredTemplate placement coordinates payload.
      * @param {number} x - Destination x-coordinate
      * @param {number} y - Destination y-coordinate
      * @param {number} direction - Direction angle in degrees
      * @param {Object} [config={}] - Optional sequence placement configuration
-     * @returns {{x: number, y: number, direction: number, distance: number|undefined, width: number|undefined}}
+     * @returns {{x: number, y: number, direction: number, distance: number|undefined, width: number|undefined}} Formatted placement coordinates payload
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
         return {
@@ -60,54 +104,18 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Compute canvas graphic dimensions in pixel units for a V12 MeasuredTemplate shape.
-     * @param {number} [distance=30] - Shape distance/length
-     * @param {number} [widthOrAngle=5] - Shape width (ray/square) or angle in degrees (cone)
-     * @param {string} [shapeType="ray"] - Canonical shape type ('circle', 'cone', 'ray', 'square')
-     * @returns {{size: {width: number, height: number}, gridUnits: boolean}}
-     */
-    formatGraphicSize(distance = 30, widthOrAngle = 5, shapeType = "ray") {
-        const gridDist = canvas?.dimensions?.distance ?? 5;
-        const gridSize = canvas?.dimensions?.size ?? 100;
-        const lengthPixels = (distance / gridDist) * gridSize;
-
-        if (shapeType === "circle") {
-            const diameterPixels = ((distance * 2) / gridDist) * gridSize;
-            return {
-                size: { width: diameterPixels, height: diameterPixels },
-                gridUnits: false
-            };
-        }
-
-        if (shapeType === "cone") {
-            const angleRad = ((widthOrAngle ?? 53.13) * Math.PI) / 180;
-            const widthPixels = 2 * lengthPixels * Math.tan(angleRad / 2);
-            return {
-                size: { width: lengthPixels, height: widthPixels },
-                gridUnits: false
-            };
-        }
-
-        const widthPixels = ((widthOrAngle ?? distance) / gridDist) * gridSize;
-        return {
-            size: { width: lengthPixels, height: Math.max(gridSize, widthPixels) },
-            gridUnits: false
-        };
-    }
-
-    /**
      * Return template pixel multiplier factor for V13 (legacy pixel sizing).
-     * @returns {{factor: number, gridUnits: boolean}}
+     * @returns {{factor: number, gridUnits: boolean}} Template pixel multiplier factor and gridUnits mode
      */
     getTemplatePixelFactor() {
         return { factor: 1, gridUnits: false };
     }
 
-
     /**
      * Update live canvas preview shape coordinates during mouse drag.
-     * @param {Document} previewDoc
-     * @param {{x: number, y: number}} coords
+     * @param {Document} previewDoc - Preview MeasuredTemplate document
+     * @param {{x?: number, y?: number, direction?: number, distance?: number}} coords - Destination preview coordinates
+     * @returns {void}
      */
     updatePreviewShape(previewDoc, coords) {
         if (!previewDoc || !coords) return;
@@ -119,9 +127,10 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
 
     /**
      * Apply resolved placement coordinates and workflow flags onto a MeasuredTemplate document.
-     * @param {Document} doc
-     * @param {Object} coords
-     * @param {Object} [config={}]
+     * @param {Document} doc - MeasuredTemplate document
+     * @param {Object} [coords={}] - Resolved placement coordinates
+     * @param {Object} [config={}] - Workflow placement configuration
+     * @returns {void}
      */
     applyDocumentPlacement(doc, coords = {}, config = {}) {
         const styling = this.extractPlacedStylingFlags(config);
@@ -133,9 +142,9 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
         if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
         if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
         if (styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
+        if (styling.placedBorderAlpha !== undefined) updateData.borderAlpha = styling.placedBorderAlpha;
         if (config.hidden || config.hideTemplate) updateData.hidden = true;
 
         doc.updateSource(updateData);
     }
 }
-
