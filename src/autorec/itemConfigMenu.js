@@ -149,9 +149,9 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         const hasGranularFlags = Boolean(
             customConfig &&
             ("enableAnimation" in customConfig ||
-             "enablePrePlacement" in customConfig ||
-             "enablePlacedStyling" in customConfig ||
-             "enablePostPlacement" in customConfig)
+                "enablePrePlacement" in customConfig ||
+                "enablePlacedStyling" in customConfig ||
+                "enablePostPlacement" in customConfig)
         );
         const enablePrePlacement = hasGranularFlags ? Boolean(customConfig.enablePrePlacement) : Boolean(customConfig?.concurrentCode);
         const enableAnimation = hasGranularFlags ? Boolean(customConfig.enableAnimation) : Boolean(customConfig && customConfig.enabled !== false);
@@ -346,7 +346,6 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
                     syncEditModeControls(true);
                 }
             });
-
 
             // Live-toggle child configuration options and badge text when an override checkbox changes in edit mode
             root.querySelectorAll("input[type='checkbox'][name^='enable']").forEach(chk => {
