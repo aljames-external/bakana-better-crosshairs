@@ -152,6 +152,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         if (shapesList.length > 0) {
             const orig = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
             const updatedShape = this._formatRegionShapeUpdate(orig, coords);
+            delete updatedShape._id;
             previewDoc.shapes = [updatedShape];
         } else {
             if (coords.x !== undefined) previewDoc.x = coords.x;
@@ -185,7 +186,16 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             delete newShape._id;
             updateData.shapes = [newShape];
 
-            if (styling.placedFillColor) updateData.color = styling.placedFillColor;
+            const targetColor = styling.placedBorderColor ? styling.placedBorderColor : (styling.placedFillColor ? styling.placedFillColor : undefined);
+            if (targetColor) updateData.color = targetColor;
+            if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
+            if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
+
+            const targetAlpha = styling.placedFillAlpha !== undefined ? styling.placedFillAlpha : (styling.placedBorderAlpha !== undefined ? styling.placedBorderAlpha : undefined);
+            if (targetAlpha !== undefined) updateData.alpha = targetAlpha;
+            if (styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
+            if (styling.placedBorderAlpha !== undefined) updateData.borderAlpha = styling.placedBorderAlpha;
+
             if (config.hidden || config.hideTemplate) updateData.hidden = true;
 
             doc.updateSource(updateData);

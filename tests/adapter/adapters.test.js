@@ -230,41 +230,45 @@ test('FoundryVTTV14Adapter applyDocumentPlacement and updatePreviewShape handle 
         shapes: [{ toObject: () => ({ type: 'circle', x: 0, y: 0, radius: 15 }) }],
         updateSource: (data) => { regionUpdate = data; }
     };
-    adapterV14.applyDocumentPlacement(regionDoc, { x: 100, y: 200, radius: 20, gridUnits: false }, { itemName: 'Test Region', placedFillColor: '#ffffff' });
+    adapterV14.applyDocumentPlacement(regionDoc, { x: 100, y: 200, radius: 20, gridUnits: false }, { itemName: 'Test Region', placedFillColor: '#ffffff', placedBorderColor: '#00ff00', placedFillAlpha: 0.4, placedBorderAlpha: 0.8 });
     assert.ok(regionUpdate.shapes);
     assert.equal(regionUpdate.shapes[0].x, 100);
     assert.equal(regionUpdate.shapes[0].y, 200);
     assert.equal(regionUpdate.shapes[0].radius, 20);
-    assert.equal(regionUpdate.color, '#ffffff');
+    assert.equal(regionUpdate.color, '#00ff00');
+    assert.equal(regionUpdate.borderColor, '#00ff00');
+    assert.equal(regionUpdate.fillColor, '#ffffff');
+    assert.equal(regionUpdate.alpha, 0.4);
+    assert.equal(regionUpdate.fillAlpha, 0.4);
+    assert.equal(regionUpdate.borderAlpha, 0.8);
 
-    // 2. Test MeasuredTemplate placement in V14
-    let mtUpdate = null;
-    const mtDoc = {
+    // 2. Test MeasuredTemplate placement
+    let templateUpdate = null;
+    const templateDoc = {
         t: 'circle',
-        updateSource: (data) => { mtUpdate = data; }
+        updateSource: (data) => { templateUpdate = data; }
     };
-    adapterV14.applyDocumentPlacement(mtDoc, { x: 150, y: 250, direction: 90, distance: 30 }, { itemName: 'Test MT', placedFillColor: '#ff0000', placedBorderColor: '#00ff00', placedFillAlpha: 0.4, placedBorderAlpha: 0.9 });
-    assert.equal(mtUpdate.x, 150);
-    assert.equal(mtUpdate.y, 250);
-    assert.equal(mtUpdate.direction, 90);
-    assert.equal(mtUpdate.distance, 30);
-    assert.equal(mtUpdate.fillColor, '#ff0000');
-    assert.equal(mtUpdate.borderColor, '#00ff00');
-    assert.equal(mtUpdate.fillAlpha, 0.4);
-    assert.equal(mtUpdate.borderAlpha, 0.9);
+    adapterV14.applyDocumentPlacement(templateDoc, { x: 300, y: 400, distance: 30 }, { itemName: 'Test Template', placedFillColor: '#ff0000', placedBorderColor: '#0000ff' });
+    assert.equal(templateUpdate.x, 300);
+    assert.equal(templateUpdate.y, 400);
+    assert.equal(templateUpdate.distance, 30);
+    assert.equal(templateUpdate.fillColor, '#ff0000');
+    assert.equal(templateUpdate.borderColor, '#0000ff');
 
-    // 3. Test updatePreviewShape on both Region and MeasuredTemplate
-    const regionPreview = { shapes: [{ toObject: () => ({ x: 0, y: 0, radius: 5 }) }] };
-    adapterV14.updatePreviewShape(regionPreview, { x: 300, y: 400, radius: 10, gridUnits: false });
-    assert.equal(regionPreview.shapes[0].x, 300);
-    assert.equal(regionPreview.shapes[0].y, 400);
+    // 3. Test updatePreviewShape
+    const shapePreviewDoc = { shapes: [{ toObject: () => ({ _id: 'old_id', type: 'circle', x: 0, y: 0, radius: 10 }) }] };
+    adapterV14.updatePreviewShape(shapePreviewDoc, { x: 150, y: 250, radius: 35, gridUnits: false });
+    assert.equal(shapePreviewDoc.shapes[0].x, 150);
+    assert.equal(shapePreviewDoc.shapes[0].y, 250);
+    assert.equal(shapePreviewDoc.shapes[0].radius, 35);
+    assert.equal(shapePreviewDoc.shapes[0]._id, undefined); // Rule 9: no _id property on updated shape
 
-    const mtPreview = { t: 'cone', x: 0, y: 0, direction: 0, distance: 0 };
-    adapterV14.updatePreviewShape(mtPreview, { x: 500, y: 600, direction: 45, distance: 40 });
-    assert.equal(mtPreview.x, 500);
-    assert.equal(mtPreview.y, 600);
-    assert.equal(mtPreview.direction, 45);
-    assert.equal(mtPreview.distance, 40);
+    const templatePreviewDoc = { t: 'cone' };
+    adapterV14.updatePreviewShape(templatePreviewDoc, { x: 50, y: 60, direction: 45, distance: 20 });
+    assert.equal(templatePreviewDoc.x, 50);
+    assert.equal(templatePreviewDoc.y, 60);
+    assert.equal(templatePreviewDoc.direction, 45);
+    assert.equal(templatePreviewDoc.distance, 20);
 });
 
 test('Pf2eSystemAdapter handleProgrammaticPlacement branches between Region shapes and MeasuredTemplate coordinates', async () => {
