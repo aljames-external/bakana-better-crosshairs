@@ -440,73 +440,7 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
         }
         await manager.overwrite(persistedDict);
         notify.info(localize("BBC.autorecMenu.notify.savedOne", `Saved workflow "${regKey}".`));
-
         this.render(false);
-    }
-
-    /**
-     * Saves all modified workflow configurations from the inspector form fields and syncs across connected clients.
-     * @param {HTMLElement} root - Root HTML element of the rendered application form.
-     * @returns {Promise<void>}
-     */
-    async saveAllEditedConfigurations(root) {
-        let modifiedAny = false;
-        root.querySelectorAll(".bbc-inspector-detail").forEach(detailEl => {
-            const regKey = detailEl.dataset.itemName;
-            if (!regKey) return;
-
-            const existingEntry = manager.registeredHandlers.get(regKey) ?? manager.get(regKey) ?? {};
-            const existingHandler = existingEntry.handler ?? existingEntry.config ?? existingEntry;
-            const config = foundry.utils.deepClone(typeof existingHandler === "object" ? existingHandler : {});
-            let modified = false;
-
-            // Fixed schema properties [data-field]
-            detailEl.querySelectorAll("[data-field]").forEach(inputEl => {
-                const field = inputEl.dataset.field;
-                if (!field) return;
-
-                let val;
-                if (inputEl.type === "checkbox") {
-                    val = Boolean(inputEl.checked);
-                } else if (inputEl.type === "number") {
-                    const parsed = parseFloat(inputEl.value);
-                    val = isNaN(parsed) ? undefined : parsed;
-                } else {
-                    val = inputEl.value ?? "";
-                    if (typeof val === "string" && (field === "concurrentCode" || field === "postPlacementCode")) {
-                        val = val.trim();
-                    }
-                    if (inputEl.tagName === "SELECT" && val === "default") val = undefined;
-                    else if (val === "true") val = true;
-                    else if (val === "false") val = false;
-                }
-
-                if (config[field] !== val) {
-                    if (val === undefined) delete config[field];
-                    else config[field] = val;
-                    modified = true;
-                }
-            });
-
-            if (modified) {
-                manager.register(regKey, config, { persist: false, local: Boolean(config.local) });
-                modifiedAny = true;
-            }
-        });
-
-        if (modifiedAny) {
-            const persistedDict = {};
-            for (const regKey of manager.list()) {
-                const entry = manager.registeredHandlers.get(regKey) ?? manager.get(regKey);
-                const handler = entry?.handler ?? entry?.config ?? entry;
-                if (handler && typeof handler === "object" && !handler.local && typeof handler !== "function") {
-                    persistedDict[regKey] = handler;
-                }
-            }
-            await manager.overwrite(persistedDict);
-            notify.info(localize("BBC.autorecMenu.notify.saved", "Saved workflow configurations and synced across all clients."));
-            this.render(false);
-        }
     }
 
     /**

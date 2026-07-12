@@ -112,43 +112,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             x: shape.x ?? 0,
             y: shape.y ?? 0
         };
-        log.debug("FoundryVTTV14Adapter.detectProperties | Detected from doc.shapes (Region):", result);
         return result;
-    }
-
-    /**
-     * Compute canvas graphic dimensions in grid units for a V14 Region shape.
-     * @param {number} [distance=30] - Shape distance/length
-     * @param {number} [widthOrAngle=5] - Shape width (ray/square) or angle in degrees (cone)
-     * @param {string} [shapeType="ray"] - Canonical shape type ('circle', 'cone', 'ray', 'square')
-     * @returns {{size: {width: number, height: number}, gridUnits: boolean}} Computed graphic dimensions and gridUnits flag
-     */
-    formatGraphicSize(distance = 30, widthOrAngle = 5, shapeType = "ray") {
-        const gridDist = canvas?.dimensions?.distance ?? 5;
-        const lengthGridUnits = distance / gridDist;
-
-        if (shapeType === "circle") {
-            const diameterGridUnits = (distance * 2) / gridDist;
-            return {
-                size: { width: diameterGridUnits, height: diameterGridUnits },
-                gridUnits: true
-            };
-        }
-
-        if (shapeType === "cone") {
-            const angleRad = ((widthOrAngle ?? 53.13) * Math.PI) / 180;
-            const widthGridUnits = 2 * lengthGridUnits * Math.tan(angleRad / 2);
-            return {
-                size: { width: lengthGridUnits, height: widthGridUnits },
-                gridUnits: true
-            };
-        }
-
-        const widthGridUnits = (widthOrAngle ?? distance) / gridDist;
-        return {
-            size: { width: lengthGridUnits, height: Math.max(1, widthGridUnits) },
-            gridUnits: true
-        };
     }
 
     /**

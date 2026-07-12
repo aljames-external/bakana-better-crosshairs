@@ -1,5 +1,5 @@
 import { log } from "../lib/logger.js";
-import { Token, Ray } from "../lib/compat.js";
+import { Ray } from "../lib/compat.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
 
 let activeWheelHandler = null;

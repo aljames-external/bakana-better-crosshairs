@@ -1,8 +1,6 @@
 import { BaseSystemAdapter } from "./base-system-adapter.js";
 import { Dnd5eSystemAdapter } from "./dnd5e-adapter.js";
 
-export { BaseSystemAdapter, Dnd5eSystemAdapter };
-
 export let systemAdapter = new BaseSystemAdapter();
 
 /**

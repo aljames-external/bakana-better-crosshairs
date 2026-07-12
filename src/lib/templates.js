@@ -104,7 +104,6 @@ async function handleDrawPreview(placeable) {
         type: undefined,
         cancelled: false,
         resolved: false,
-        promise: null,
         /**
          * Resolve the pending sequencer crosshair placement with specified coordinates.
          * @param {Object} [coords={}] - Placed coordinates and properties
@@ -120,16 +119,11 @@ async function handleDrawPreview(placeable) {
                 pending.coords = coords;
                 pending.resolved = true;
 
-                const previewDoc = pending.originalTemplate?.document;
-                if (previewDoc) {
-                    crosshairAdapter.updatePreviewShape(previewDoc, coords);
-                }
-
                 if (pending.deferredCreateData && canvas.scene) {
                     log.debug(`context.resolve | Resuming deferred document creation on scene "${canvas.scene.name}"`);
                     const deferredData = foundry.utils.deepClone(pending.deferredCreateData);
                     delete deferredData._id;
-                    const docName = previewDoc?.documentName ?? (deferredData.shapes ? "Region" : "MeasuredTemplate");
+                    const docName = deferredData.shapes ? "Region" : "MeasuredTemplate";
                     try {
                         await canvas.scene.createEmbeddedDocuments(docName, [deferredData]);
                     } catch (err) {

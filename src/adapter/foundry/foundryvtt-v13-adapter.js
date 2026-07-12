@@ -99,42 +99,6 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Compute canvas graphic dimensions in pixel units for a V13 MeasuredTemplate shape.
-     * @param {number} [distance=30] - Shape distance/length
-     * @param {number} [widthOrAngle=5] - Shape width (ray/square) or angle in degrees (cone)
-     * @param {string} [shapeType="ray"] - Canonical shape type ('circle', 'cone', 'ray', 'square')
-     * @returns {{size: {width: number, height: number}, gridUnits: boolean}} Graphic dimensions in pixel units and gridUnits flag
-     */
-    formatGraphicSize(distance = 30, widthOrAngle = 5, shapeType = "ray") {
-        const gridDist = canvas?.dimensions?.distance ?? 5;
-        const gridSize = canvas?.dimensions?.size ?? 100;
-        const lengthPixels = (distance / gridDist) * gridSize;
-
-        if (shapeType === "circle") {
-            const diameterPixels = ((distance * 2) / gridDist) * gridSize;
-            return {
-                size: { width: diameterPixels, height: diameterPixels },
-                gridUnits: false
-            };
-        }
-
-        if (shapeType === "cone") {
-            const angleRad = ((widthOrAngle ?? 53.13) * Math.PI) / 180;
-            const widthPixels = 2 * lengthPixels * Math.tan(angleRad / 2);
-            return {
-                size: { width: lengthPixels, height: widthPixels },
-                gridUnits: false
-            };
-        }
-
-        const widthPixels = ((widthOrAngle ?? distance) / gridDist) * gridSize;
-        return {
-            size: { width: lengthPixels, height: Math.max(gridSize, widthPixels) },
-            gridUnits: false
-        };
-    }
-
-    /**
      * Return template pixel multiplier factor for V13 (legacy pixel sizing).
      * @returns {{factor: number, gridUnits: boolean}} Template pixel multiplier factor and gridUnits mode
      */
