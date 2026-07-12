@@ -117,13 +117,6 @@ function rotateCrosshairInstance(crosshair, newDirDeg) {
     const isRay = crosshair.type === "ray" || crosshair.config?.type === "ray" || crosshair.data?.type === "ray";
 
     if (!isRay) {
-        if (typeof crosshair.update === "function") {
-            try { crosshair.update({ direction: newDirDeg }); } catch (e) {}
-            try { crosshair.update(); } catch (e) {}
-        }
-        if (typeof crosshair.draw === "function") {
-            try { crosshair.draw(); } catch (e) {}
-        }
         if (typeof crosshair.refresh === "function") {
             try { crosshair.refresh(); } catch (e) {}
         }
