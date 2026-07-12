@@ -76,22 +76,19 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad) {
             tmpl.ray = Ray.fromAngle(tmpl.ray.origin.x, tmpl.ray.origin.y, rad, tmpl.ray.distance ?? 1000);
         } catch (e) {}
     }
-    if (tmpl.renderFlags) {
-        tmpl.renderFlags.set({
-            refreshShape: true,
-            refreshTemplate: true,
-            refreshGrid: true,
-            refreshGeometry: true,
-            refreshRegion: true,
-            refreshState: true,
-            redraw: true
-        });
+    if (tmpl.renderFlags && tmpl.renderFlags.flags) {
+        const flagsToSet = {};
+        for (const flagName of ["refreshShape", "refreshTemplate", "refreshGrid", "refreshState", "refresh"]) {
+            if (flagName in tmpl.renderFlags.flags) {
+                flagsToSet[flagName] = true;
+            }
+        }
+        if (Object.keys(flagsToSet).length > 0) {
+            tmpl.renderFlags.set(flagsToSet);
+        }
     }
     if (typeof tmpl._refreshShape === "function") {
         try { tmpl._refreshShape(); } catch (e) {}
-    }
-    if (typeof tmpl._refreshGeometry === "function") {
-        try { tmpl._refreshGeometry(); } catch (e) {}
     }
     if (typeof tmpl._refresh === "function") {
         try { tmpl._refresh(); } catch (e) {}
@@ -183,6 +180,14 @@ export function attachWheelRotation(crosshair, config = {}) {
             deltaY: event.deltaY,
             step: delta,
             newDirection: config.currentDirection
+        });
+        log.debug("Crosshair mousewheel rotation | Preview inspection:", {
+            crosshairType: crosshair?.constructor?.name,
+            hasCrosshairTemplate: Boolean(crosshair?.template),
+            crosshairTemplateType: crosshair?.template?.constructor?.name,
+            crosshairTemplateDocType: crosshair?.template?.document?.constructor?.name,
+            templatesPreviewChildren: canvas?.templates?.preview?.children?.map?.(c => ({ className: c.constructor.name, isPreview: Boolean(c.isPreview) })),
+            regionsPreviewChildren: canvas?.regions?.preview?.children?.map?.(c => ({ className: c.constructor.name, isPreview: Boolean(c.isPreview) }))
         });
         alignCrosshairAndEffects(crosshair, config, rad);
 
