@@ -77,7 +77,24 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad) {
         } catch (e) {}
     }
     if (tmpl.renderFlags) {
-        tmpl.renderFlags.set({ refreshShape: true, refreshTemplate: true, refreshGrid: true });
+        tmpl.renderFlags.set({
+            refreshShape: true,
+            refreshTemplate: true,
+            refreshGrid: true,
+            refreshGeometry: true,
+            refreshRegion: true,
+            refreshState: true,
+            redraw: true
+        });
+    }
+    if (typeof tmpl._refreshShape === "function") {
+        try { tmpl._refreshShape(); } catch (e) {}
+    }
+    if (typeof tmpl._refreshGeometry === "function") {
+        try { tmpl._refreshGeometry(); } catch (e) {}
+    }
+    if (typeof tmpl._refresh === "function") {
+        try { tmpl._refresh(); } catch (e) {}
     }
     if (typeof tmpl.refresh === "function") {
         try { tmpl.refresh(); } catch (e) {}
@@ -174,12 +191,13 @@ export function attachWheelRotation(crosshair, config = {}) {
             canvas?.templates?.preview?.children,
             canvas?.templates?.placeables,
             canvas?.regions?.preview?.children,
-            canvas?.regions?.placeables
+            canvas?.regions?.placeables,
+            crosshair?.template ? [crosshair.template] : null
         ];
         for (const list of previewLists) {
             if (Array.isArray(list)) {
                 for (const p of list) {
-                    if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children) {
+                    if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children || p === crosshair?.template) {
                         refreshTemplateHighlights(p, config.currentDirection, rad);
                     }
                 }
@@ -193,12 +211,13 @@ export function attachWheelRotation(crosshair, config = {}) {
             canvas?.templates?.preview?.children,
             canvas?.templates?.placeables,
             canvas?.regions?.preview?.children,
-            canvas?.regions?.placeables
+            canvas?.regions?.placeables,
+            crosshair?.template ? [crosshair.template] : null
         ];
         for (const list of previewLists) {
             if (Array.isArray(list)) {
                 for (const p of list) {
-                    if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children) {
+                    if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children || p === crosshair?.template) {
                         const docDir = p.document?.direction ?? p.document?.shapes?.[0]?.rotation ?? p.direction;
                         if (docDir !== config.currentDirection) {
                             refreshTemplateHighlights(p, config.currentDirection, rad);

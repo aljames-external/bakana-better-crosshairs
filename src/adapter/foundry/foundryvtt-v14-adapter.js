@@ -153,14 +153,33 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             const orig = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
             const updatedShape = this._formatRegionShapeUpdate(orig, coords);
             delete updatedShape._id;
-            previewDoc.shapes = [updatedShape];
+            if (typeof previewDoc.updateSource === "function") {
+                try {
+                    previewDoc.updateSource({ shapes: [updatedShape] });
+                } catch (e) {
+                    previewDoc.shapes = [updatedShape];
+                }
+            } else {
+                previewDoc.shapes = [updatedShape];
+            }
         } else {
-            if (coords.x !== undefined) previewDoc.x = coords.x;
-            if (coords.y !== undefined) previewDoc.y = coords.y;
-            if (coords.direction !== undefined) previewDoc.direction = coords.direction;
-            else if (coords.rotation !== undefined) previewDoc.direction = coords.rotation;
-            if (coords.distance !== undefined) previewDoc.distance = coords.distance;
-            else if (coords.radius !== undefined) previewDoc.distance = coords.radius;
+            const updateObj = {};
+            if (coords.x !== undefined) updateObj.x = coords.x;
+            if (coords.y !== undefined) updateObj.y = coords.y;
+            if (coords.direction !== undefined) updateObj.direction = coords.direction;
+            else if (coords.rotation !== undefined) updateObj.direction = coords.rotation;
+            if (coords.distance !== undefined) updateObj.distance = coords.distance;
+            else if (coords.radius !== undefined) updateObj.distance = coords.radius;
+
+            if (typeof previewDoc.updateSource === "function") {
+                try {
+                    previewDoc.updateSource(updateObj);
+                } catch (e) {
+                    Object.assign(previewDoc, updateObj);
+                }
+            } else {
+                Object.assign(previewDoc, updateObj);
+            }
         }
     }
 
