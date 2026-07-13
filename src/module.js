@@ -1,6 +1,7 @@
 import { crosshair } from './crosshair/_crosshairs.js';
 import { file, closest, absolutePath } from './lib/filemanager.js';
 import { log } from './lib/logger.js';
+import { dependency } from './lib/dependency.js';
 import { autorecManager } from './autorec/autorecManager.js';
 import { systemAdapter, initializeSystemAdapter, crosshairAdapter, initializeFoundryAdapter } from './adapter/index.js';
 import { attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement, getTokenEdgePoint, snapCoordinates } from './crosshair/util.js';
@@ -21,6 +22,7 @@ Hooks.once('init', () => {
      * @returns {void}
      */
     function setupModule() {
+        dependency.required([{ id: 'sequencer', ref: 'Sequencer' }, { id: 'socketlib', ref: 'socketlib' }]);
         registerModuleSettings();
         initializeSystemAdapter();
         initializeFoundryAdapter();

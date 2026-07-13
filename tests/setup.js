@@ -134,7 +134,7 @@ globalThis.game = {
             if (id === "bakana-better-crosshairs") {
                 return { id, active: true, version: "2.0.0", api: {} };
             }
-            if (id === "sequencer") {
+            if (id === "sequencer" || id === "socketlib") {
                 return { id, active: true, version: "3.2.0" };
             }
             if (id === "jb2a_patreon" || id === "eskie" || id === "psfx" || id === "boss-loot-assets-premium") {
