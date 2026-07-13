@@ -536,7 +536,5 @@ export function registerItemSheetHooks() {
         });
     }
 
-    Hooks.on("getHeaderControlsApplicationV2", addApplicationV2HeaderControl);
-    Hooks.on("getHeaderControlsItemSheetV2", addApplicationV2HeaderControl);
     systemAdapter.registerItemSheetHooks(addApplicationV2HeaderControl);
 }

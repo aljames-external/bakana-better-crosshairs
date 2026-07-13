@@ -84,10 +84,14 @@ export class BaseSystemAdapter {
     }
 
     /**
-     * Register any system-specific ApplicationV2 item sheet header hooks.
-     * Base implementation is a NOP for systems using standard universal ApplicationV2 sheet hooks.
+     * Register standard universal ApplicationV2 item sheet header hooks (`ApplicationV2` / `ItemSheetV2`).
      * @param {Function} handler - Universal header control registration handler
      * @returns {void} No return value
      */
-    registerItemSheetHooks(handler) {}
+    registerItemSheetHooks(handler) {
+        if (typeof Hooks?.on === "function" && typeof handler === "function") {
+            Hooks.on("getHeaderControlsApplicationV2", handler);
+            Hooks.on("getHeaderControlsItemSheetV2", handler);
+        }
+    }
 }
