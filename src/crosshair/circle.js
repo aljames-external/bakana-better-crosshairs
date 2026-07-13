@@ -1,6 +1,6 @@
 import { closest } from "../lib/filemanager.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
-import { resolveCrosshairPlacement, shouldStickToToken, resolveCrosshairIcon, alignCrosshairAndEffects, getGridSnapMode } from "./util.js";
+import { BaseCrosshairShape } from "./base.js";
 
 /**
  * Resolves the circle crosshair asset path based on the provided file path or key and the effect size.
@@ -18,120 +18,86 @@ export function resolveCircleAsset(pathOrKey, effectSize = 40) {
 }
 
 /**
- * Creates and configures a circle crosshair Sequence instance along with any associated target data.
- *
- * @param {object|null} token - The token object or document to attach or center the circle crosshair on.
- * @param {object} [config={}] - Configuration options for the circle crosshair.
- * @param {number} [config.radius=20] - The radius of the circle crosshair.
- * @param {string} [config.file] - Explicit file path or Sequencer key for the circle graphic.
- * @param {boolean} [config.stickToToken] - Whether the crosshair should stick to the target token.
- * @param {string} [config.id="Circle Crosshair"] - Identifier for the circle crosshair effect.
- * @param {boolean} [config.showLine=true] - Whether to show a line stretching from the token to the crosshair.
- * @param {string} [config.lineFile="eskie.crosshair.line.generic_01.white"] - File path or key for the line graphic.
- * @param {string} [config.circleFile] - Resolved file path or key for the circle graphic.
- * @param {string} [config.icon] - Icon to display on the crosshair.
- * @param {string} [config.borderColor="#ffffff"] - Border color for the circle.
- * @param {number} [config.borderAlpha=0] - Border alpha transparency.
- * @param {string} [config.fillColor="#000000"] - Fill color for the circle.
- * @param {number} [config.fillAlpha=0] - Fill alpha transparency.
- * @param {object|null} [config.context=null] - Context object for placement callbacks.
- * @returns {Promise<Array>} A promise resolving to an array containing the configured circle Sequence and targets.
+ * Circle crosshair shape class encapsulating circle animation, dimensions, and center anchor point logic.
  */
-async function create(token, config = {}) {
-    const radius = Math.round(config.radius ?? 20);
-    const file = config.file ? closest(config.file) : undefined;
-    const stickToToken = shouldStickToToken(config, "circle");
-
-    const {
-        id = `Circle Crosshair`,
-        showLine = true,
-        lineFile = closest("eskie.crosshair.line.generic_01.white"),
-        circleFile = config.circleFile ? closest(config.circleFile) : resolveCircleAsset(file, radius * 2),
-        icon = config.icon,
-        borderColor = "#ffffff",
-        borderAlpha = 0,
-        fillColor = "#000000",
-        fillAlpha = 0,
-        context = null
-    } = config;
-
-    config.token = token;
-    config.stickToToken = stickToToken;
-
-    let targets;
+export class CircleCrosshairShape extends BaseCrosshairShape {
+    /**
+     * Get the default shape type string for this crosshair.
+     * @returns {string} The circle type (`"circle"`)
+     */
+    get defaultShapeType() {
+        return "circle";
+    }
 
     /**
-     * Plays the visual graphic effects for the circle crosshair and optional line from the token.
-     *
-     * @param {object} crosshair - The placed crosshair object or position coordinates.
-     * @returns {Promise<any>} A promise resolving when the graphic sequence finishes playing.
+     * Get the default identifier string for this circle sequence effect.
+     * @returns {string} Default circle effect identifier (`"Circle Crosshair"`)
      */
-    async function circleGraphic(crosshair) {
-        const seq = new Sequence().wait(50);
+    getDefaultId() {
+        return "Circle Crosshair";
+    }
 
-        if (token && showLine && !stickToToken) {
-            seq.effect()
-                .name(id)
-                .file(lineFile)
-                .attachTo(token)
-                .stretchTo(crosshair, { attachTo: true })
-                .opacity(0.8)
-                .locally()
-                .persist();
-        }
+    /**
+     * Get the default normalized animation anchor coordinates (`{ x: 0.5, y: 0.5 }`).
+     * @returns {{x: number, y: number}} Center anchor
+     */
+    get defaultAnimationAnchor() {
+        return { x: 0.5, y: 0.5 };
+    }
 
+    /**
+     * Get the default normalized Foundry shape anchor coordinates (`{ x: 0.5, y: 0.5 }`).
+     * @returns {{x: number, y: number}} Center anchor
+     */
+    get defaultShapeAnchor() {
+        return { x: 0.5, y: 0.5 };
+    }
+
+    /**
+     * Configure circle distance on the Sequencer crosshair chain.
+     * @param {Sequence} crosshairSeq - The Sequencer crosshair builder instance
+     * @returns {void}
+     */
+    configureCrosshairShape(crosshairSeq) {
+        const radius = Math.round(this.config.radius ?? 20);
+        crosshairSeq.distance(radius);
+    }
+
+    /**
+     * Calculate pixel diameter and scale factor for the circle graphic.
+     * @returns {{widthPx: number, heightPx: number, factor: number, gridUnits: boolean}} Calculated pixel and scale dimensions
+     */
+    getGraphicDimensions() {
+        const radius = Math.round(this.config.radius ?? 20);
         const gridDist = canvas?.dimensions?.distance ?? 5;
         const gridSize = canvas?.dimensions?.size ?? 100;
         const diameterPixels = ((radius * 2) / gridDist) * gridSize;
         const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
-
-        seq.effect()
-            .name(id)
-            .file(circleFile)
-            .attachTo(crosshair)
-            .anchor({ x: 0.5, y: 0.5 })
-            .size({ width: diameterPixels * factor, height: diameterPixels * factor }, { gridUnits })
-            .opacity(0.8)
-            .belowTokens()
-            .locally()
-            .persist();
-
-        return seq.play();
+        return { widthPx: diameterPixels, heightPx: diameterPixels, factor, gridUnits };
     }
 
-    const circle = new Sequence()
-        .crosshair("position")
-            .type("circle")
-            .distance(radius)
-            .borderColor(borderColor, { alpha: borderAlpha })
-            .fillColor(fillColor, { alpha: fillAlpha });
-
-    if (stickToToken && token) {
-        circle.location(token, { lockToEdge: true, lockToEdgeDirection: false });
-    } else if (config.snapToGrid !== false && config.snapToGrid !== "none") {
-        const snapMode = getGridSnapMode(config);
-        if (snapMode !== 0) circle.snapPosition(snapMode);
+    /**
+     * Resolve the circle graphic asset path or Sequencer key.
+     * @returns {string} Resolved file path or key
+     */
+    getGraphicFile() {
+        if (this.config.circleFile) return closest(this.config.circleFile);
+        const radius = Math.round(this.config.radius ?? 20);
+        const file = this.config.file ? closest(this.config.file) : undefined;
+        return resolveCircleAsset(file, radius * 2);
     }
+}
 
-    if (icon) {
-        circle.icon(resolveCrosshairIcon(icon));
-    }
-
-    circle
-        .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {
-            await circleGraphic(crosshair);
-            alignCrosshairAndEffects(crosshair, config, (config.currentDirection ?? config.direction ?? 0) * (Math.PI / 180));
-        })
-        .callback(Sequencer.Crosshair.CALLBACKS.PLACED, async (...args) => {
-            Sequencer.EffectManager.endEffects({ name: id });
-            resolveCrosshairPlacement(args[0], config, ...args);
-        })
-        .callback(Sequencer.Crosshair.CALLBACKS.CANCEL, () => {
-            Sequencer.EffectManager.endEffects({ name: id });
-            if (context) context.cancel();
-        });
-
-    return [circle, targets];
+/**
+ * Creates and configures a circle crosshair Sequence instance along with any associated target data.
+ *
+ * @param {object|null} token - The token object or document to attach or center the circle crosshair on.
+ * @param {object} [config={}] - Configuration options for the circle crosshair.
+ * @returns {Promise<Array>} A promise resolving to an array containing the configured circle Sequence and targets.
+ */
+async function create(token, config = {}) {
+    const shape = new CircleCrosshairShape(token, config);
+    return shape.create();
 }
 
 /**
@@ -142,24 +108,26 @@ async function create(token, config = {}) {
  * @returns {Promise<any>} A promise resolving when the crosshair sequence finishes playing.
  */
 async function play(token, config = {}) {
-    const [circle] = await create(token, config);
-    return circle.play();
+    const shape = new CircleCrosshairShape(token, config);
+    return shape.play();
 }
 
 /**
  * Stops and terminates active circle crosshair visual effects associated with the specified token and effect ID.
  *
- * @param {object|null} token - The token object or document on which to end active effects.
- * @param {object} [options={}] - Options for stopping the crosshair effects.
- * @param {string} [options.id="Circle Crosshair"] - The effect name identifier to terminate.
- * @returns {Promise<any>} A promise resolving when the matching effects have ended.
+ * @param {object|null} token - The target token associated with the circle crosshair effect.
+ * @param {object} [options={}] - Configuration options for stopping the sequence effect.
+ * @param {string} [options.id="Circle Crosshair"] - Identifier of the circle crosshair effect to terminate.
+ * @returns {Promise<void>} A promise resolving once matching Sequencer effects have ended.
  */
-async function stop(token, { id = `Circle Crosshair` } = {}) {
-    return Sequencer.EffectManager.endEffects({ name: id, object: token });
+async function stop(token, options = {}) {
+    const id = options?.id ?? "Circle Crosshair";
+    return BaseCrosshairShape.stop(token, { id, ...options });
 }
 
 export const circle = {
     create,
     play,
     stop,
+    resolveCircleAsset,
 };

@@ -1,120 +1,90 @@
 import { closest } from "../lib/filemanager.js";
-import { log } from "../lib/logger.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, resolveCrosshairIcon, alignCrosshairAndEffects, getGridSnapMode } from "./util.js";
+import { BaseCrosshairShape } from "./base.js";
+
+/**
+ * Square crosshair shape class encapsulating square/rect animation, dimensions, and top-left/custom anchor point logic.
+ */
+export class SquareCrosshairShape extends BaseCrosshairShape {
+    /**
+     * Get the default shape type string for this crosshair.
+     * @returns {string} The rect type (`"rect"`)
+     */
+    get defaultShapeType() {
+        return "rect";
+    }
+
+    /**
+     * Get the default identifier string for this square sequence effect.
+     * @returns {string} Default square effect identifier (`"Square Crosshair"`)
+     */
+    getDefaultId() {
+        return "Square Crosshair";
+    }
+
+    /**
+     * Get the default normalized animation anchor coordinates (`{ x: 0, y: 0 }`).
+     * @returns {{x: number, y: number}} Top-left corner anchor
+     */
+    get defaultAnimationAnchor() {
+        return { x: 0, y: 0 };
+    }
+
+    /**
+     * Get the default normalized Foundry shape anchor coordinates (`{ x: 0, y: 0 }`).
+     * @returns {{x: number, y: number}} Top-left corner anchor
+     */
+    get defaultShapeAnchor() {
+        return { x: 0, y: 0 };
+    }
+
+    /**
+     * Configure square distance and width on the Sequencer crosshair chain.
+     * @param {Sequence} crosshairSeq - The Sequencer crosshair builder instance
+     * @returns {void}
+     */
+    configureCrosshairShape(crosshairSeq) {
+        const distance = Math.round(this.config.distance ?? 20);
+        const width = Math.round(this.config.width ?? distance);
+        crosshairSeq.distance(distance).width(width);
+    }
+
+    /**
+     * Calculate pixel length, width, and scale factor for the square graphic.
+     * @returns {{widthPx: number, heightPx: number, factor: number, gridUnits: boolean}} Calculated pixel and scale dimensions
+     */
+    getGraphicDimensions() {
+        const distance = Math.round(this.config.distance ?? 20);
+        const width = Math.round(this.config.width ?? distance);
+        const gridDist = canvas?.dimensions?.distance ?? 5;
+        const gridSize = canvas?.dimensions?.size ?? 100;
+        const lengthPixels = (distance / gridDist) * gridSize;
+        const widthPixels = (width / gridDist) * gridSize;
+        const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
+        return { widthPx: lengthPixels, heightPx: widthPixels, factor, gridUnits };
+    }
+
+    /**
+     * Resolve the square graphic asset path or Sequencer key.
+     * @returns {string} Resolved file path or key
+     */
+    getGraphicFile() {
+        if (this.config.squareFile) return closest(this.config.squareFile);
+        if (this.config.file) return closest(this.config.file);
+        return closest("eskie.crosshair.square.thin.white.full");
+    }
+}
 
 /**
  * Creates and configures a square crosshair sequence.
  *
  * @param {object|null} token - The token or object to associate with the crosshair
  * @param {object} [config={}] - Configuration options for the square crosshair
- * @param {number} [config.distance=30] - The distance/length of the square
- * @param {number} [config.width=30] - The width of the square
- * @param {string} [config.id="Square Crosshair"] - Identifier for the square crosshair effect
- * @param {boolean} [config.showLine=true] - Whether to show the center line
- * @param {string} [config.squareFile] - Explicit file path or key for the square graphic
- * @param {string} [config.lineFile] - Explicit file path or key for the line graphic
- * @param {string} [config.borderColor="#ffffff"] - Border color for the square
- * @param {number} [config.borderAlpha=0] - Border alpha transparency
- * @param {string} [config.fillColor="#000000"] - Fill color for the square
- * @param {number} [config.fillAlpha=0] - Fill alpha transparency
- * @param {string} [config.icon] - Icon to display on the crosshair
- * @param {object|null} [config.context=null] - Context object for placement callbacks
  * @returns {Promise<Array<*>>} A promise resolving to an array containing the configured square sequence and targets
  */
 async function create(token, config = {}) {
-    const distance = Math.round(config.distance ?? 20);
-    const width = Math.round(config.width ?? distance);
-    const stickToToken = shouldStickToToken(config, "square");
-
-    const {
-        id = `Square Crosshair`,
-        squareFile = closest("eskie.crosshair.square.thin.white.full"),
-        icon = config.icon,
-        borderColor = "#ffffff",
-        borderAlpha = 0,
-        fillColor = "#000000",
-        fillAlpha = 0,
-        context = null
-    } = config;
-
-    config.token = token;
-    config.stickToToken = Boolean(stickToToken);
-    config.distance = distance;
-    config.width = width;
-
-    let targets;
-
-    /**
-     * Attaches and plays a persistent square graphic sequence effect on the crosshair.
-     *
-     * @param {object} crosshair - The crosshair placeable or object to attach the effect to
-     * @returns {Promise<*>} A promise resolving when the graphic effect sequence plays
-     */
-    async function squareGraphic(crosshair) {
-        const seq = new Sequence().wait(50);
-
-        const gridDist = canvas?.dimensions?.distance ?? 5;
-        const gridSize = canvas?.dimensions?.size ?? 100;
-        const lengthPixels = (distance / gridDist) * gridSize;
-        const widthPixels = ((width ?? distance) / gridDist) * gridSize;
-        const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
-
-        log.debug("squareGraphic | Sizing square graphic:", { distance, width, lengthPixels, widthPixels, factor, gridUnits });
-
-        seq.effect()
-            .name(id)
-            .file(squareFile)
-            .attachTo(crosshair)
-            .anchor({ x: 0, y: 0 })
-            .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits: Boolean(gridUnits) })
-            .opacity(0.8)
-            .belowTokens()
-            .locally()
-            .persist();
-
-        return seq.play();
-    }
-
-    attachWheelRotation(null, config);
-
-    const square = new Sequence()
-        .crosshair("position")
-            .type("rect")
-            .distance(distance)
-            .width(width)
-            .borderColor(borderColor, { alpha: borderAlpha })
-            .fillColor(fillColor, { alpha: fillAlpha });
-
-    if (stickToToken && token) {
-        square.location(token, { lockToEdge: true, lockToEdgeDirection: false });
-    } else if (config.snapToGrid !== false && config.snapToGrid !== "none") {
-        const snapMode = getGridSnapMode(config);
-        if (snapMode !== 0) square.snapPosition(snapMode);
-    }
-
-    if (icon) {
-        square.icon(resolveCrosshairIcon(icon));
-    }
-
-    square
-        .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {
-            if (crosshair?.pivot?.set) crosshair.pivot.set(0, 0);
-            attachWheelRotation(crosshair, config);
-            await squareGraphic(crosshair);
-            alignCrosshairAndEffects(crosshair, config, (config.currentDirection ?? config.direction ?? 0) * (Math.PI / 180));
-        })
-        .callback(Sequencer.Crosshair.CALLBACKS.PLACED, async (...args) => {
-            Sequencer.EffectManager.endEffects({ name: id });
-            resolveCrosshairPlacement(args[0], config, ...args);
-        })
-        .callback(Sequencer.Crosshair.CALLBACKS.CANCEL, () => {
-            detachWheelRotation();
-            Sequencer.EffectManager.endEffects({ name: id });
-            context?.cancel?.();
-        });
-
-    return [square, targets];
+    const shape = new SquareCrosshairShape(token, config);
+    return shape.create();
 }
 
 /**
@@ -122,24 +92,24 @@ async function create(token, config = {}) {
  *
  * @param {object|null} token - The token or object to associate with the crosshair
  * @param {object} [config={}] - Configuration options for the square crosshair
- * @returns {Promise<*>} A promise resolving when the crosshair sequence finishes playing
+ * @returns {Promise<any>} A promise resolving when the sequence finishes playing
  */
 async function play(token, config = {}) {
-    const [square] = await create(token, config);
-    return square.play();
+    const shape = new SquareCrosshairShape(token, config);
+    return shape.play();
 }
 
 /**
- * Stops and clears any persistent square crosshair effects associated with the given token.
+ * Stops and terminates active square crosshair visual effects associated with a token.
  *
- * @param {object|null} token - The token or object whose square crosshair effects should be ended
- * @param {object} [options={}] - Options for stopping the crosshair effects
- * @param {string} [options.id="Square Crosshair"] - The name or identifier of the effect to stop
- * @returns {Promise<*>} A promise resolving when the effects have been ended
+ * @param {object|null} token - The target token object
+ * @param {object} [options={}] - Options for stopping the effect
+ * @param {string} [options.id="Square Crosshair"] - The identifier of the effect to end
+ * @returns {Promise<void>} A promise resolving when matching effects have been terminated
  */
 async function stop(token, options = {}) {
     const id = options?.id ?? "Square Crosshair";
-    return Sequencer.EffectManager.endEffects({ name: id, object: token });
+    return BaseCrosshairShape.stop(token, { id, ...options });
 }
 
 export const square = {

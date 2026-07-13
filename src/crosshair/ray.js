@@ -1,115 +1,90 @@
 import { closest } from "../lib/filemanager.js";
-import { log } from "../lib/logger.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, resolveCrosshairIcon, alignCrosshairAndEffects, getGridSnapMode } from "./util.js";
+import { BaseCrosshairShape } from "./base.js";
+
+/**
+ * Ray crosshair shape class encapsulating ray animation, dimensions, and origin midpoint anchor point logic.
+ */
+export class RayCrosshairShape extends BaseCrosshairShape {
+    /**
+     * Get the default shape type string for this crosshair.
+     * @returns {string} The ray type (`"ray"`)
+     */
+    get defaultShapeType() {
+        return "ray";
+    }
+
+    /**
+     * Get the default identifier string for this ray sequence effect.
+     * @returns {string} Default ray effect identifier (`"Ray Crosshair"`)
+     */
+    getDefaultId() {
+        return "Ray Crosshair";
+    }
+
+    /**
+     * Get the default normalized animation anchor coordinates (`{ x: 0, y: 0.5 }`).
+     * @returns {{x: number, y: number}} Origin midpoint anchor on left side
+     */
+    get defaultAnimationAnchor() {
+        return { x: 0, y: 0.5 };
+    }
+
+    /**
+     * Get the default normalized Foundry shape anchor coordinates (`{ x: 0, y: 0.5 }`).
+     * @returns {{x: number, y: number}} Origin midpoint anchor on left side
+     */
+    get defaultShapeAnchor() {
+        return { x: 0, y: 0.5 };
+    }
+
+    /**
+     * Configure ray distance and width on the Sequencer crosshair chain.
+     * @param {Sequence} crosshairSeq - The Sequencer crosshair builder instance
+     * @returns {void}
+     */
+    configureCrosshairShape(crosshairSeq) {
+        const distance = Math.round(this.config.distance ?? 30);
+        const width = Math.round(this.config.width ?? 5);
+        crosshairSeq.distance(distance).width(width);
+    }
+
+    /**
+     * Calculate pixel length, width, and scale factor for the ray graphic.
+     * @returns {{widthPx: number, heightPx: number, factor: number, gridUnits: boolean}} Calculated pixel and scale dimensions
+     */
+    getGraphicDimensions() {
+        const distance = Math.round(this.config.distance ?? 30);
+        const width = Math.round(this.config.width ?? 5);
+        const gridDist = canvas?.dimensions?.distance ?? 5;
+        const gridSize = canvas?.dimensions?.size ?? 100;
+        const lengthPixels = (distance / gridDist) * gridSize;
+        const widthPixels = Math.max(gridSize, (width / gridDist) * gridSize);
+        const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
+        return { widthPx: lengthPixels, heightPx: widthPixels, factor, gridUnits };
+    }
+
+    /**
+     * Resolve the ray graphic asset path or Sequencer key.
+     * @returns {string} Resolved file path or key
+     */
+    getGraphicFile() {
+        if (this.config.rayFile) return closest(this.config.rayFile);
+        if (this.config.file) return closest(this.config.file);
+        return closest("eskie.crosshair.ray.straight.thin.white.01");
+    }
+}
 
 /**
  * Creates and configures a ray crosshair sequence and associated graphics.
  *
  * @param {object|null} token - The token the ray originates from or adheres to
  * @param {object} [config={}] - Configuration options for the ray crosshair
- * @param {number} [config.distance=30] - The distance/length of the ray
- * @param {number} [config.width=5] - The width of the ray
- * @param {string} [config.id="Ray Crosshair"] - Identifier for the ray crosshair effect
- * @param {boolean} [config.showLine=true] - Whether to show the center line
- * @param {string} [config.rayFile] - Explicit file path or key for the ray graphic
- * @param {string} [config.lineFile] - Explicit file path or key for the line graphic
- * @param {string} [config.borderColor="#ffffff"] - Border color for the ray
- * @param {number} [config.borderAlpha=0] - Border alpha transparency
- * @param {string} [config.fillColor="#000000"] - Fill color for the ray
- * @param {number} [config.fillAlpha=0] - Fill alpha transparency
  * @returns {Promise<Array>} A promise resolving to `[Sequence, targets]` array
  */
 async function create(token, config = {}) {
-    const distance = Math.round(config.distance ?? 30);
-    const width = Math.round(config.width ?? 5);
-    const stickToToken = shouldStickToToken(config, "ray");
-
-    const {
-        id = `Ray Crosshair`,
-        rayFile = closest("eskie.crosshair.ray.straight.thin.white.01"),
-        icon = config.icon,
-        borderColor = "#ffffff",
-        borderAlpha = 0,
-        fillColor = "#000000",
-        fillAlpha = 0,
-        context = null
-    } = config;
-
-    config.token = token;
-    config.stickToToken = Boolean(stickToToken);
-
-    let targets;
-
-    /**
-     * Helper to render the ray graphic effect inside the Sequencer queue.
-     *
-     * @param {object} crosshair - The Sequencer crosshair instance to attach the effect to
-     * @returns {Promise<Sequence>} A promise resolving to the played sequence effect
-     */
-    async function rayGraphic(crosshair) {
-        const seq = new Sequence().wait(50);
-        const gridDist = canvas?.dimensions?.distance ?? 5;
-        const gridSize = canvas?.dimensions?.size ?? 100;
-        const lengthPixels = (distance / gridDist) * gridSize;
-        const widthPixels = Math.max(gridSize, (width / gridDist) * gridSize);
-        const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
-
-        log.debug(`rayGraphic | Sizing ray graphic:`, { distance, width, lengthPixels, widthPixels, factor, gridUnits });
-
-        seq.effect()
-            .name(id)
-            .file(rayFile)
-            .attachTo(crosshair)
-            .anchor({ x: 0, y: 0.5 })
-            .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits: Boolean(gridUnits) })
-            .opacity(0.8)
-            .belowTokens()
-            .locally()
-            .persist();
-
-        return seq.play();
-    }
-
-    attachWheelRotation(null, config);
-
-    let ray = new Sequence()
-        .crosshair("position")
-            .type("ray")
-            .distance(distance)
-            .width(width)
-            .borderColor(borderColor, { alpha: borderAlpha })
-            .fillColor(fillColor, { alpha: fillAlpha });
-
-    if (stickToToken && token) {
-        ray.location(token, { lockToEdge: true, lockToEdgeDirection: false });
-    } else if (config.snapToGrid !== false && config.snapToGrid !== "none") {
-        const snapMode = getGridSnapMode(config);
-        if (snapMode !== 0) ray.snapPosition(snapMode);
-    }
-
-    if (icon) {
-        ray.icon(resolveCrosshairIcon(icon));
-    }
-
-    ray
-        .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {
-            if (crosshair?.pivot?.set) crosshair.pivot.set(0, 0);
-            attachWheelRotation(crosshair, config);
-            await rayGraphic(crosshair);
-            alignCrosshairAndEffects(crosshair, config, (config.currentDirection ?? config.direction ?? 0) * (Math.PI / 180));
-        })
-        .callback(Sequencer.Crosshair.CALLBACKS.PLACED, async (...args) => {
-            Sequencer.EffectManager.endEffects({ name: id });
-            resolveCrosshairPlacement(args[0], config, ...args);
-        })
-        .callback(Sequencer.Crosshair.CALLBACKS.CANCEL, () => {
-            detachWheelRotation();
-            Sequencer.EffectManager.endEffects({ name: id });
-            context?.cancel?.();
-        });
-
-    return [ray, targets];
+    const shape = new RayCrosshairShape(token, config);
+    return shape.create();
 }
 
 /**
@@ -117,11 +92,11 @@ async function create(token, config = {}) {
  *
  * @param {object|null} token - The token the ray originates from or adheres to
  * @param {object} [config={}] - Configuration options for the ray crosshair
- * @returns {Promise<object|boolean>} A promise resolving to the result of playing the sequence
+ * @returns {Promise<any>} A promise resolving to the result of playing the sequence
  */
 async function play(token, config = {}) {
-    let [ray] = await create(token, config);
-    return ray.play();
+    const shape = new RayCrosshairShape(token, config);
+    return shape.play();
 }
 
 /**
@@ -133,8 +108,8 @@ async function play(token, config = {}) {
  * @returns {Promise<void>} A promise resolving when the matching crosshair effects have been terminated
  */
 async function stop(token, options = {}) {
-    const id = options?.id ?? `Ray Crosshair`;
-    return Sequencer.EffectManager.endEffects({ name: id, object: token });
+    const id = options?.id ?? "Ray Crosshair";
+    return BaseCrosshairShape.stop(token, { id, ...options });
 }
 
 export const ray = {

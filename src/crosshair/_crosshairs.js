@@ -1,7 +1,8 @@
-import { cone } from "./cone.js";
-import { circle } from "./circle.js";
-import { ray } from "./ray.js";
-import { square } from "./square.js";
+import { cone, ConeCrosshairShape } from "./cone.js";
+import { circle, CircleCrosshairShape } from "./circle.js";
+import { ray, RayCrosshairShape } from "./ray.js";
+import { square, SquareCrosshairShape } from "./square.js";
+import { BaseCrosshairShape } from "./base.js";
 import { Token } from "../lib/compat.js";
 
 /**
@@ -52,3 +53,12 @@ export const crosshair = {
     square,
     play,
 };
+
+export {
+    BaseCrosshairShape,
+    CircleCrosshairShape,
+    ConeCrosshairShape,
+    RayCrosshairShape,
+    SquareCrosshairShape,
+};
+
