@@ -84,12 +84,14 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 ray: "ray",
                 rect: "square"
             };
-            const distance = doc.distance ?? 0;
+            const shapeType = shapeMap[doc.t] ?? "circle";
+            const distance = shapeType === "square" ? (doc.distance || doc.width || 20) : (doc.distance ?? 0);
+            const width = shapeType === "square" ? (doc.width || distance) : (doc.width ?? 5);
             const result = {
-                type: shapeMap[doc.t] ?? "circle",
+                type: shapeType,
                 distance,
                 radius: distance,
-                width: doc.width ?? 5,
+                width,
                 angle: doc.angle ?? 53.13,
                 x: doc.x ?? 0,
                 y: doc.y ?? 0
@@ -106,19 +108,37 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         else if (shape.type === "rectangle" || shape.type === "polygon") shapeType = "square";
 
         const pxPerFoot = (canvas.dimensions?.size ?? 100) / (canvas.dimensions?.distance ?? 5);
-        const rawRadius = shape.radius ?? 0;
-        const distance = Math.round(rawRadius / pxPerFoot);
 
-        const result = {
+        if (shapeType === "square") {
+            const rawWidthPx = shape.width ?? shape.sizeX ?? 0;
+            const rawHeightPx = shape.height ?? shape.sizeY ?? rawWidthPx;
+            const distInGridUnits = Math.round(rawHeightPx / pxPerFoot);
+            const widthInGridUnits = Math.round(rawWidthPx / pxPerFoot);
+            const distance = distInGridUnits || widthInGridUnits || doc.distance || doc.width || 20;
+            const width = widthInGridUnits || distance;
+            return {
+                type: shapeType,
+                distance,
+                radius: distance,
+                width,
+                angle: shape.angle ?? doc.angle ?? 53.13,
+                x: shape.x ?? doc.x ?? 0,
+                y: shape.y ?? doc.y ?? 0
+            };
+        }
+
+        const rawRadius = shape.radius ?? 0;
+        const distance = Math.round(rawRadius / pxPerFoot) || doc.distance || 0;
+
+        return {
             type: shapeType,
             distance,
             radius: distance,
-            width: shape.width ?? 5,
-            angle: shape.angle ?? 53.13,
-            x: shape.x ?? 0,
-            y: shape.y ?? 0
+            width: shape.width ?? doc.width ?? 5,
+            angle: shape.angle ?? doc.angle ?? 53.13,
+            x: shape.x ?? doc.x ?? 0,
+            y: shape.y ?? doc.y ?? 0
         };
-        return result;
     }
 
     /**
