@@ -66,7 +66,7 @@ async function create(token, config = {}) {
             .name(id)
             .file(squareFile)
             .attachTo(crosshair)
-            .anchor({ x: 0, y: 0 })
+            .anchor({ x: 0.5, y: 0.5 })
             .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
             .belowTokens()
