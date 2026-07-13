@@ -66,7 +66,7 @@ async function create(token, config = {}) {
             .name(id)
             .file(squareFile)
             .attachTo(crosshair)
-            .anchor({ x: 0.5, y: 0.5 })
+            .anchor({ x: 0, y: 0 })
             .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
             .belowTokens()
@@ -99,7 +99,14 @@ async function create(token, config = {}) {
 
     square
         .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {
-            if (crosshair?.pivot?.set) crosshair.pivot.set(0, 0);
+            if (crosshair?.pivot?.set) {
+                const gridDist = canvas?.dimensions?.distance ?? 5;
+                const gridSize = canvas?.dimensions?.size ?? 100;
+                const { factor } = crosshairAdapter.getTemplatePixelFactor();
+                const lenPx = (distance / gridDist) * gridSize * factor;
+                const widPx = ((width ?? distance) / gridDist) * gridSize * factor;
+                crosshair.pivot.set(-lenPx / 2, -widPx / 2);
+            }
             attachWheelRotation(crosshair, config);
             await squareGraphic(crosshair);
             alignCrosshairAndEffects(crosshair, config, (config.currentDirection ?? config.direction ?? 0) * (Math.PI / 180));
