@@ -249,14 +249,16 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @returns {{x: number, y: number, direction: number, rotation: number, distance: number|undefined, radius: number|undefined, width: number|undefined, gridUnits: boolean}} Formatted placement coordinates payload
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
+        const distanceVal = config.distance ?? config.radius ?? config.width;
+        const widthVal = config.width ?? distanceVal;
         return {
             x,
             y,
             direction,
             rotation: direction,
-            distance: config.distance ?? config.radius,
-            radius: config.radius ?? config.distance,
-            width: config.width,
+            distance: distanceVal,
+            radius: config.radius ?? distanceVal,
+            width: widthVal,
             gridUnits: Boolean(config.gridUnits ?? true)
         };
     }
@@ -281,12 +283,18 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         const rad = (shape.rotation ?? 0) * (Math.PI / 180);
 
         if (coords.x !== undefined && coords.y !== undefined) {
-            const isRectShape = originalShape.type === "rectangle" || (originalShape.width !== undefined && originalShape.height !== undefined);
+            const isRectShape = originalShape.type === "rectangle" || (originalShape.width !== undefined && originalShape.height !== undefined) || (originalShape.sizeX !== undefined && originalShape.sizeY !== undefined);
             if (isRectShape) {
-                const w = coords.width ?? shape.width ?? 0;
-                const h = coords.distance ?? coords.radius ?? shape.height ?? w;
-                const wPixels = isGridUnits ? w * pxPerFoot : w;
-                const hPixels = isGridUnits ? h * pxPerFoot : h;
+                const w = coords.width ?? coords.distance ?? coords.radius ?? shape.width ?? shape.sizeX ?? 0;
+                const h = coords.distance ?? coords.radius ?? coords.width ?? shape.height ?? shape.sizeY ?? w;
+                const wPixels = isGridUnits ? Math.round(w * pxPerFoot) : Math.round(w);
+                const hPixels = isGridUnits ? Math.round(h * pxPerFoot) : Math.round(h);
+
+                if (shape.width !== undefined || shape.type === "rectangle") shape.width = wPixels;
+                if (shape.height !== undefined || shape.type === "rectangle") shape.height = hPixels;
+                if (shape.sizeX !== undefined) shape.sizeX = wPixels;
+                if (shape.sizeY !== undefined) shape.sizeY = hPixels;
+
                 const dx = (wPixels / 2) * Math.cos(rad) - (hPixels / 2) * Math.sin(rad);
                 const dy = (wPixels / 2) * Math.sin(rad) + (hPixels / 2) * Math.cos(rad);
                 shape.x = coords.x + dx;
@@ -300,12 +308,14 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             if (coords.y !== undefined) shape.y = coords.y;
         }
 
-        // Convert radius/width from grid distance units (feet/meters) to canvas pixels when placement specifies gridUnits
-        if (coords.radius !== undefined) {
-            shape.radius = isGridUnits ? Math.round(coords.radius * pxPerFoot) : coords.radius;
-        }
-        if (coords.width !== undefined) {
-            shape.width = isGridUnits ? Math.round(coords.width * pxPerFoot) : coords.width;
+        // Convert radius/width from grid distance units (feet/meters) to canvas pixels for non-rectangle circle/cone shapes when placement specifies gridUnits
+        if (originalShape.type !== "rectangle") {
+            if (coords.radius !== undefined) {
+                shape.radius = isGridUnits ? Math.round(coords.radius * pxPerFoot) : coords.radius;
+            }
+            if (coords.width !== undefined) {
+                shape.width = isGridUnits ? Math.round(coords.width * pxPerFoot) : coords.width;
+            }
         }
         return shape;
     }
