@@ -66,7 +66,7 @@ async function create(token, config = {}) {
             .name(id)
             .file(squareFile)
             .attachTo(crosshair)
-            .anchor({ x: 0, y: 0 })
+            .anchor({ x: 0.5, y: 0.5 })
             .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
             .belowTokens()
@@ -99,13 +99,22 @@ async function create(token, config = {}) {
 
     square
         .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {
-            if (crosshair?.pivot?.set) {
-                const gridDist = canvas?.dimensions?.distance ?? 5;
-                const gridSize = canvas?.dimensions?.size ?? 100;
-                const { factor } = crosshairAdapter.getTemplatePixelFactor();
-                const lenPx = (distance / gridDist) * gridSize * factor;
-                const widPx = ((width ?? distance) / gridDist) * gridSize * factor;
-                crosshair.pivot.set(-lenPx / 2, -widPx / 2);
+            const gridDist = canvas?.dimensions?.distance ?? 5;
+            const gridSize = canvas?.dimensions?.size ?? 100;
+            const { factor } = crosshairAdapter.getTemplatePixelFactor();
+            const lenPx = (distance / gridDist) * gridSize * factor;
+            const widPx = ((width ?? distance) / gridDist) * gridSize * factor;
+
+            if (typeof crosshair._onMouseMove === "function") {
+                const origOnMouseMove = crosshair._onMouseMove.bind(crosshair);
+                crosshair._onMouseMove = function(event) {
+                    origOnMouseMove(event);
+                    const rad = this.rotation ?? 0;
+                    const dx = (lenPx / 2) * Math.cos(rad) - (widPx / 2) * Math.sin(rad);
+                    const dy = (lenPx / 2) * Math.sin(rad) + (widPx / 2) * Math.cos(rad);
+                    this.position.x += dx;
+                    this.position.y += dy;
+                };
             }
             attachWheelRotation(crosshair, config);
             await squareGraphic(crosshair);

@@ -303,6 +303,15 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
             }
         } catch (e) {}
     }
+
+    if (typeof crosshair?._onMouseMove === "function" && canvas?.mousePosition) {
+        try {
+            crosshair._onMouseMove({
+                data: { getLocalPosition: () => canvas.mousePosition },
+                point: canvas.mousePosition
+            });
+        } catch (e) {}
+    }
 }
 
 /**

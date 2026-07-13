@@ -277,9 +277,28 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         const isGridUnits = Boolean(coords.gridUnits ?? true);
 
         // Apply placement origin coordinates and rotation directly
-        if (coords.x !== undefined) shape.x = coords.x;
-        if (coords.y !== undefined) shape.y = coords.y;
         if (coords.rotation !== undefined) shape.rotation = coords.rotation;
+        const rad = (shape.rotation ?? 0) * (Math.PI / 180);
+
+        if (coords.x !== undefined && coords.y !== undefined) {
+            const isRectShape = originalShape.type === "rectangle" || (originalShape.width !== undefined && originalShape.height !== undefined);
+            if (isRectShape) {
+                const w = coords.width ?? shape.width ?? 0;
+                const h = coords.distance ?? coords.radius ?? shape.height ?? w;
+                const wGrid = isGridUnits ? w : w / pxPerFoot;
+                const hGrid = isGridUnits ? h : h / pxPerFoot;
+                const dx = (wGrid / 2) * Math.cos(rad) - (hGrid / 2) * Math.sin(rad);
+                const dy = (wGrid / 2) * Math.sin(rad) + (hGrid / 2) * Math.cos(rad);
+                shape.x = coords.x + dx;
+                shape.y = coords.y + dy;
+            } else {
+                shape.x = coords.x;
+                shape.y = coords.y;
+            }
+        } else {
+            if (coords.x !== undefined) shape.x = coords.x;
+            if (coords.y !== undefined) shape.y = coords.y;
+        }
 
         // Convert radius/width from grid distance units (feet/meters) to canvas pixels when placement specifies gridUnits
         if (coords.radius !== undefined) {
