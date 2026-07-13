@@ -27,7 +27,7 @@ async function create(token, config = {}) {
 
     const {
         id = `Ray Crosshair`,
-        rayFile = closest("eskie.crosshair.ray.straight.thin.white.01"),
+        rayFile = closest("eskie.crosshair.ray.fantasy_01.white.full"),
         icon = config.icon,
         borderColor = "#ffffff",
         borderAlpha = 0,
