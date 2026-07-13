@@ -73,12 +73,14 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
             ray: "ray",
             rect: "square"
         };
-        const distance = doc.distance ?? 0;
+        const shapeType = shapeMap[doc.t] ?? "circle";
+        const distance = shapeType === "square" ? (doc.distance || doc.width || 20) : (doc.distance ?? 0);
+        const width = shapeType === "square" ? (doc.width || distance) : (doc.width ?? 0);
         return {
-            type: shapeMap[doc.t] ?? "circle",
+            type: shapeType,
             distance,
             radius: distance,
-            width: doc.width ?? 0,
+            width,
             angle: doc.angle ?? 0,
             x: doc.x ?? 0,
             y: doc.y ?? 0
