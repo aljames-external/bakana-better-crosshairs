@@ -518,8 +518,8 @@ export function registerItemSheetHooks() {
      * @returns {void}
      */
     function addApplicationV2HeaderControl(app, controls) {
-        const item = app.document ?? app.object;
-        if (!item || !(item instanceof Item) || !Boolean(item.isOwner)) return;
+        const item = app.document;
+        if (!item || item.documentName !== "Item" || !Boolean(item.isOwner)) return;
         if (controls.some(c => c.label?.startsWith("BBC") || c.icon === "fa-solid fa-crosshairs")) return;
 
         const customConfig = item.getFlag(MODULE_ID, "customConfig") ?? null;
