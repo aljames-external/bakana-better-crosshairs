@@ -518,8 +518,8 @@ export function registerItemSheetHooks() {
      * @returns {void}
      */
     function addApplicationV2HeaderControl(app, controls) {
-        const item = app.document;
-        if (!item || !Boolean(item.isOwner)) return;
+        const item = app.document ?? app.object;
+        if (!item || !(item instanceof Item) || !Boolean(item.isOwner)) return;
         if (controls.some(c => c.label?.startsWith("BBC") || c.icon === "fa-solid fa-crosshairs")) return;
 
         const customConfig = item.getFlag(MODULE_ID, "customConfig") ?? null;
@@ -536,6 +536,35 @@ export function registerItemSheetHooks() {
         });
     }
 
+    /**
+     * Add a Better Crosshairs header button to ApplicationV1 item sheets for item owners.
+     * @param {Application} app - Item sheet application instance
+     * @param {Array<object>} buttons - Array of header button items
+     * @returns {void}
+     */
+    function addApplicationV1HeaderButton(app, buttons) {
+        const item = app.object ?? app.document;
+        if (!item || !(item instanceof Item) || !Boolean(item.isOwner)) return;
+        if (buttons.some(b => b.label === "BBC" || b.class === "bbc-item-config-btn")) return;
+
+        const customConfig = item.getFlag(MODULE_ID, "customConfig") ?? null;
+        const activityConfigs = item.getFlag(MODULE_ID, "activityConfigs") ?? null;
+        const hasAnyCustom = Boolean(
+            customConfig ||
+            (activityConfigs && typeof activityConfigs === "object" && Object.keys(activityConfigs).length > 0)
+        );
+
+        buttons.unshift({
+            label: "BBC",
+            class: "bbc-item-config-btn",
+            icon: hasAnyCustom ? "fas fa-crosshairs bbc-header-icon-custom" : "fas fa-crosshairs",
+            onclick: () => openItemCrosshairConfig(item)
+        });
+    }
+
+    Hooks.on("getItemSheetHeaderButtons", addApplicationV1HeaderButton);
+    Hooks.on("getHeaderControlsApplicationV2", addApplicationV2HeaderControl);
+    Hooks.on("getHeaderControlsItemSheetV2", addApplicationV2HeaderControl);
     Hooks.on("getHeaderControlsItemSheet5e", addApplicationV2HeaderControl);
     Hooks.on("getHeaderControlsItemSheet5e2", addApplicationV2HeaderControl);
 }
