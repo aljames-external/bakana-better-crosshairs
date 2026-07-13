@@ -104,17 +104,21 @@ async function create(token, config = {}) {
             const lenPx = (distance / gridDist) * gridSize;
             const widPx = ((width ?? distance) / gridDist) * gridSize;
 
-            if (typeof crosshair._onMouseMove === "function") {
-                const origOnMouseMove = crosshair._onMouseMove.bind(crosshair);
-                crosshair._onMouseMove = function(event) {
-                    origOnMouseMove(event);
-                    const rad = this.rotation ?? 0;
-                    const dx = (lenPx / 2) * Math.cos(rad) - (widPx / 2) * Math.sin(rad);
-                    const dy = (lenPx / 2) * Math.sin(rad) + (widPx / 2) * Math.cos(rad);
-                    this.position.x += dx;
-                    this.position.y += dy;
+            if (typeof crosshair.refresh === "function") {
+                const origRefresh = crosshair.refresh.bind(crosshair);
+                crosshair.refresh = function(...args) {
+                    const res = origRefresh(...args);
+                    if (canvas?.mousePosition) {
+                        const rad = this.rotation ?? 0;
+                        const dx = (lenPx / 2) * Math.cos(rad) - (widPx / 2) * Math.sin(rad);
+                        const dy = (lenPx / 2) * Math.sin(rad) + (widPx / 2) * Math.cos(rad);
+                        this.position.x = canvas.mousePosition.x + dx;
+                        this.position.y = canvas.mousePosition.y + dy;
+                    }
+                    return res;
                 };
             }
+
             attachWheelRotation(crosshair, config);
             await squareGraphic(crosshair);
             alignCrosshairAndEffects(crosshair, config, (config.currentDirection ?? config.direction ?? 0) * (Math.PI / 180));
