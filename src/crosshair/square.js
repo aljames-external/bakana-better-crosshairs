@@ -1,7 +1,7 @@
 import { closest } from "../lib/filemanager.js";
 import { log } from "../lib/logger.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, resolveCrosshairIcon, alignCrosshairAndEffects, getGridSnapMode } from "./util.js";
+import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, resolveCrosshairIcon, alignCrosshairAndEffects, alignCrosshairOrigin, getGridSnapMode } from "./util.js";
 
 /**
  * Creates and configures a square crosshair sequence.
@@ -100,22 +100,12 @@ async function create(token, config = {}) {
 
     square
         .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {
-            const gridDist = canvas?.dimensions?.distance ?? 5;
-            const gridSize = canvas?.dimensions?.size ?? 100;
-            const lenPx = (distance / gridDist) * gridSize;
-            const widPx = ((width ?? distance) / gridDist) * gridSize;
-
             if (typeof crosshair.refresh === "function") {
                 const origRefresh = crosshair.refresh.bind(crosshair);
                 crosshair.refresh = function(...args) {
                     const res = origRefresh(...args);
-                    if (canvas?.mousePosition) {
-                        const rad = this.rotation ?? 0;
-                        const dx = (lenPx / 2) * Math.cos(rad) - (widPx / 2) * Math.sin(rad);
-                        const dy = (lenPx / 2) * Math.sin(rad) + (widPx / 2) * Math.cos(rad);
-                        this.position.x = canvas.mousePosition.x + dx;
-                        this.position.y = canvas.mousePosition.y + dy;
-                    }
+                    const rad = this.rotation ?? 0;
+                    alignCrosshairOrigin(this, config, rad);
                     return res;
                 };
             }

@@ -283,6 +283,34 @@ export function attachWheelRotation(crosshair, config = {}) {
 }
 
 /**
+ * Shift crosshair container position relative to canvas cursor coordinate depending on geometry bounding type.
+ * For shapes whose local container origin (0, 0) is at their bounding center (e.g. squares/rects),
+ * shifts crosshair.position by (+dx, +dy) so the top-left corner stays locked to the canvas cursor point.
+ * @param {object} crosshair - Active Sequencer crosshair container
+ * @param {object} [config={}] - Crosshair placement config
+ * @param {number} [rad=0] - Current rotation angle in radians
+ * @returns {void}
+ */
+export function alignCrosshairOrigin(crosshair, config = {}, rad = 0) {
+    if (!crosshair || !canvas?.mousePosition) return;
+    const isRect = crosshair.type === "rect" || crosshair.type === "square" || crosshair.config?.type === "rect" || crosshair.config?.type === "square" || config.type === "rect" || config.type === "square";
+    if (isRect && typeof crosshair.position?.set === "function") {
+        const gridDist = canvas.dimensions?.distance ?? 5;
+        const gridSize = canvas.dimensions?.size ?? 100;
+        const distVal = config.distance ?? crosshair.distance ?? 20;
+        const widthVal = config.width ?? crosshair.width ?? distVal;
+        const lenPx = (distVal / gridDist) * gridSize;
+        const widPx = (widthVal / gridDist) * gridSize;
+
+        const dx = (lenPx / 2) * Math.cos(rad) - (widPx / 2) * Math.sin(rad);
+        const dy = (lenPx / 2) * Math.sin(rad) + (widPx / 2) * Math.cos(rad);
+
+        crosshair.position.x = canvas.mousePosition.x + dx;
+        crosshair.position.y = canvas.mousePosition.y + dy;
+    }
+}
+
+/**
  * Align crosshair container and all active Sequencer effects so their origin (0, 0.5 for cones/rays, 0, 0 for squares, 0.5, 0.5 for circles)
  * sits precisely at the container's origin (0, 0) and rotates around the cursor point.
  * @param {object} crosshair - Active Sequencer crosshair container
@@ -316,21 +344,10 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
         } catch (e) {}
     }
 
+    alignCrosshairOrigin(crosshair, config, rad);
+
     const isRect = crosshair?.type === "rect" || crosshair?.type === "square" || crosshair?.config?.type === "rect" || crosshair?.config?.type === "square" || config.type === "rect" || config.type === "square";
-    if (isRect && canvas?.mousePosition && crosshair?.position) {
-        const gridDist = canvas?.dimensions?.distance ?? 5;
-        const gridSize = canvas?.dimensions?.size ?? 100;
-        const distVal = config.distance ?? crosshair.distance ?? 20;
-        const widthVal = config.width ?? crosshair.width ?? distVal;
-        const lenPx = (distVal / gridDist) * gridSize;
-        const widPx = (widthVal / gridDist) * gridSize;
-
-        const dx = (lenPx / 2) * Math.cos(rad) - (widPx / 2) * Math.sin(rad);
-        const dy = (lenPx / 2) * Math.sin(rad) + (widPx / 2) * Math.cos(rad);
-
-        crosshair.position.x = canvas.mousePosition.x + dx;
-        crosshair.position.y = canvas.mousePosition.y + dy;
-    } else if (typeof crosshair?._onMouseMove === "function" && canvas?.mousePosition) {
+    if (!isRect && typeof crosshair?._onMouseMove === "function" && canvas?.mousePosition) {
         try {
             crosshair._onMouseMove({
                 data: { getLocalPosition: () => canvas.mousePosition },
