@@ -6,6 +6,7 @@ import { dependency } from '../../src/lib/dependency.js';
 test('dependency verification utility correctly inspects active modules and objects', () => {
     assert.equal(dependency.isInstalled({ id: 'bakana-better-crosshairs' }), true);
     assert.equal(dependency.isInstalled({ id: 'sequencer' }), true);
+    assert.equal(dependency.isInstalled({ id: 'socketlib' }), true);
     assert.equal(dependency.isInstalled({ id: 'nonexistent-module' }), false);
 
     assert.equal(dependency.isActivated({ id: 'bakana-better-crosshairs' }), true);
