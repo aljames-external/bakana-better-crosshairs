@@ -114,7 +114,7 @@
                 "noDeclarative": "No (Declarative Config)",
                 "stickOn": "On (Locked to Origin Token)",
                 "stickOff": "Off (Free Cursor Placement)",
-                "stickDefault": "Default (Cone: On, Others: Off)"
+                "stickDefault": "Default behavior per module's System adapter"
             },
             "hints": {
                 "selectToRemove": "Select workflow to remove",

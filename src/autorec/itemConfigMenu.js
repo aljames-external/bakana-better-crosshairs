@@ -265,7 +265,7 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
             placedFill: localize("BBC.autorecMenu.labels.placedFill", "Placed Fill Color"),
             placedBorder: localize("BBC.autorecMenu.labels.placedBorder", "Placed Border Color"),
             alphaLabel: localize("BBC.autorecMenu.labels.alpha", "Alpha:"),
-            stickDefault: localize("BBC.autorecMenu.pills.stickDefault", "Default (Cone: On, Others: Off)"),
+            stickDefault: localize("BBC.autorecMenu.pills.stickDefault", "Default behavior per module's System adapter"),
             stickOn: localize("BBC.autorecMenu.pills.stickOn", "On (Locked to Origin Token)"),
             stickOff: localize("BBC.autorecMenu.pills.stickOff", "Off (Free Cursor Placement)")
         };

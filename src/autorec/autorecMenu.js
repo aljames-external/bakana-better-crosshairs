@@ -123,7 +123,7 @@ export class AutorecMenuApplication extends HandlebarsApplicationMixin(Applicati
             noDeclarative: localize("BBC.autorecMenu.pills.noDeclarative", "No (Declarative Config)"),
             stickOn: localize("BBC.autorecMenu.pills.stickOn", "On (Locked to Origin Token)"),
             stickOff: localize("BBC.autorecMenu.pills.stickOff", "Off (Free Cursor Placement)"),
-            stickDefault: localize("BBC.autorecMenu.pills.stickDefault", "Default (Cone: On, Others: Off)"),
+            stickDefault: localize("BBC.autorecMenu.pills.stickDefault", "Default behavior per module's System adapter"),
             showLineLabel: localize("BBC.autorecMenu.labels.showLine", "Show Line"),
             alphaLabel: localize("BBC.autorecMenu.labels.alpha", "Alpha:"),
             selectToRemoveHint: localize("BBC.autorecMenu.hints.selectToRemove", "Select workflow to remove"),
