@@ -84,12 +84,39 @@ export class BaseSystemAdapter {
     }
 
     /**
-     * Register standard universal ApplicationV2 item sheet header hooks (`ApplicationV2` / `ItemSheetV2`).
-     * @param {Function} handler - Universal header control registration handler
+     * Add a Better Crosshairs header control to an ApplicationV2 item sheet instance.
+     * @param {foundry.applications.api.ApplicationV2} app - Item sheet application instance
+     * @param {Array<object>} controls - Array of header control button items
+     * @param {Function} openConfig - Callback to open the BBC item configuration hub (`openItemCrosshairConfig(item)`)
      * @returns {void} No return value
      */
-    registerItemSheetHooks(handler) {
-        if (typeof Hooks?.on === "function" && typeof handler === "function") {
+    addItemSheetHeaderControl(app, controls, openConfig) {
+        const item = app.document;
+        if (!item || item.documentName !== "Item" || !Boolean(item.isOwner)) return;
+        if (controls.some(c => c.label?.startsWith("BBC") || c.icon === "fa-solid fa-crosshairs")) return;
+
+        const customConfig = item.getFlag("bakana-better-crosshairs", "customConfig") ?? null;
+        const activityConfigs = item.getFlag("bakana-better-crosshairs", "activityConfigs") ?? null;
+        const hasAnyCustom = Boolean(
+            customConfig ||
+            (activityConfigs && typeof activityConfigs === "object" && Object.keys(activityConfigs).length > 0)
+        );
+
+        controls.push({
+            label: "BBC",
+            icon: hasAnyCustom ? "fa-solid fa-crosshairs bbc-header-icon-custom" : "fa-solid fa-crosshairs",
+            onClick: () => openConfig(item)
+        });
+    }
+
+    /**
+     * Register standard universal ApplicationV2 item sheet header hooks (`ApplicationV2` / `ItemSheetV2`).
+     * @param {Function} openConfig - Callback to open the BBC item configuration hub (`openItemCrosshairConfig(item)`)
+     * @returns {void} No return value
+     */
+    registerItemSheetHooks(openConfig) {
+        if (typeof Hooks?.on === "function" && typeof openConfig === "function") {
+            const handler = (app, controls) => this.addItemSheetHeaderControl(app, controls, openConfig);
             Hooks.on("getHeaderControlsApplicationV2", handler);
             Hooks.on("getHeaderControlsItemSheetV2", handler);
         }

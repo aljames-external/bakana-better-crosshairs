@@ -511,30 +511,5 @@ export function openItemCrosshairConfig(item) {
  * @returns {void}
  */
 export function registerItemSheetHooks() {
-    /**
-     * Add a Better Crosshairs header control to ApplicationV2 item sheets for item owners.
-     * @param {foundry.applications.api.ApplicationV2} app - Item sheet application instance
-     * @param {Array<object>} controls - Array of header control button items
-     * @returns {void}
-     */
-    function addApplicationV2HeaderControl(app, controls) {
-        const item = app.document;
-        if (!item || item.documentName !== "Item" || !Boolean(item.isOwner)) return;
-        if (controls.some(c => c.label?.startsWith("BBC") || c.icon === "fa-solid fa-crosshairs")) return;
-
-        const customConfig = item.getFlag(MODULE_ID, "customConfig") ?? null;
-        const activityConfigs = item.getFlag(MODULE_ID, "activityConfigs") ?? null;
-        const hasAnyCustom = Boolean(
-            customConfig ||
-            (activityConfigs && typeof activityConfigs === "object" && Object.keys(activityConfigs).length > 0)
-        );
-
-        controls.push({
-            label: "BBC",
-            icon: hasAnyCustom ? "fa-solid fa-crosshairs bbc-header-icon-custom" : "fa-solid fa-crosshairs",
-            onClick: () => openItemCrosshairConfig(item)
-        });
-    }
-
-    systemAdapter.registerItemSheetHooks(addApplicationV2HeaderControl);
+    systemAdapter.registerItemSheetHooks(openItemCrosshairConfig);
 }
