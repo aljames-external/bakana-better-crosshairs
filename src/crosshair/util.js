@@ -202,6 +202,10 @@ export function attachWheelRotation(crosshair, config = {}) {
     }
 
     config.currentDirection = config.currentDirection ?? config.direction ?? 0;
+    if (systemAdapter && typeof systemAdapter.canRotateShape === "function" && !systemAdapter.canRotateShape(shapeType, config)) {
+        log.debug(`attachWheelRotation | Shape '${shapeType}' rotation is disabled by system adapter (${systemAdapter.id}). Disabling mouse wheel rotation.`);
+        return;
+    }
 
     activeWheelHandler = (event) => {
         const requiresCtrl = systemAdapter?.requiresWheelModifier?.() ?? false;
@@ -287,6 +291,13 @@ export function attachWheelRotation(crosshair, config = {}) {
  * @returns {void}
  */
 export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
+    const shapeType = config.type ?? config.t ?? crosshair?.type ?? "circle";
+    if (systemAdapter && typeof systemAdapter.canRotateShape === "function" && !systemAdapter.canRotateShape(shapeType, config)) {
+        rad = 0;
+        if (config.currentDirection !== undefined) config.currentDirection = 0;
+        if (config.direction !== undefined) config.direction = 0;
+    }
+
     rotateCrosshairInstance(crosshair, config.currentDirection ?? config.direction ?? 0);
 
     // Synchronize rotation across all active Sequencer visual effect graphics without fighting Sequencer's internal pivot/anchor layout
