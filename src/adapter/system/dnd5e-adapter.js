@@ -24,6 +24,20 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
     }
 
     /**
+     * Return whether a given shape type is allowed to rotate in D&D 5e.
+     * In D&D 5e, square and rectangle area templates (`"square"`, `"rect"`) are axis-aligned and cannot be rotated.
+     * @param {string} shapeType - Canonical shape type (`"circle"`, `"cone"`, `"ray"`, `"square"`, `"rect"`)
+     * @param {Object} [config={}] - Crosshair placement configuration
+     * @returns {boolean} True if the shape is allowed to rotate in D&D 5e
+     */
+    canRotateShape(shapeType, config = {}) {
+        if (shapeType === "square" || shapeType === "rect") {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Extract normalized calling item and activity context from a DnD5e Document and flags.
      * @param {Document} document - Template or Region document placed on canvas
      * @param {Object} [baseContext={}] - Initial calling context (`{ item, itemName, itemId, activity, activityName, activityId }`)

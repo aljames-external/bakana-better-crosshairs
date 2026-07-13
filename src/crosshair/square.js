@@ -42,6 +42,7 @@ async function create(token, config = {}) {
     config.stickToToken = Boolean(stickToToken);
     config.distance = distance;
     config.width = width;
+    config.type = "square";
 
     let targets;
 
