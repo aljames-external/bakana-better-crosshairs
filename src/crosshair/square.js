@@ -101,9 +101,8 @@ async function create(token, config = {}) {
         .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async function(crosshair) {
             const gridDist = canvas?.dimensions?.distance ?? 5;
             const gridSize = canvas?.dimensions?.size ?? 100;
-            const { factor } = crosshairAdapter.getTemplatePixelFactor();
-            const lenPx = (distance / gridDist) * gridSize * factor;
-            const widPx = ((width ?? distance) / gridDist) * gridSize * factor;
+            const lenPx = (distance / gridDist) * gridSize;
+            const widPx = ((width ?? distance) / gridDist) * gridSize;
 
             if (typeof crosshair._onMouseMove === "function") {
                 const origOnMouseMove = crosshair._onMouseMove.bind(crosshair);
