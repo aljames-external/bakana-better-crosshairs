@@ -29,7 +29,7 @@ async function create(token, config = {}) {
 
     const {
         id = `Square Crosshair`,
-        squareFile = closest("eskie.crosshair.square.thin.white.full"),
+        squareFile = closest("eskie.crosshair.ray.straight.thin.white.01"),
         icon = config.icon,
         borderColor = "#ffffff",
         borderAlpha = 0,
