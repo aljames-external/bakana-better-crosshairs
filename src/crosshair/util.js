@@ -270,6 +270,7 @@ export function attachWheelRotation(crosshair, config = {}) {
                 }
             }
         }
+        alignCrosshairAndEffects(crosshair, config, rad);
     };
 
     window.addEventListener("wheel", activeWheelHandler, { capture: true, passive: false });
@@ -304,7 +305,21 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
         } catch (e) {}
     }
 
-    if (typeof crosshair?._onMouseMove === "function" && canvas?.mousePosition) {
+    const isRect = crosshair?.type === "rect" || crosshair?.type === "square" || crosshair?.config?.type === "rect" || crosshair?.config?.type === "square" || config.type === "rect" || config.type === "square";
+    if (isRect && canvas?.mousePosition && crosshair?.position) {
+        const gridDist = canvas?.dimensions?.distance ?? 5;
+        const gridSize = canvas?.dimensions?.size ?? 100;
+        const distVal = config.distance ?? crosshair.distance ?? 20;
+        const widthVal = config.width ?? crosshair.width ?? distVal;
+        const lenPx = (distVal / gridDist) * gridSize;
+        const widPx = (widthVal / gridDist) * gridSize;
+
+        const dx = (lenPx / 2) * Math.cos(rad) - (widPx / 2) * Math.sin(rad);
+        const dy = (lenPx / 2) * Math.sin(rad) + (widPx / 2) * Math.cos(rad);
+
+        crosshair.position.x = canvas.mousePosition.x + dx;
+        crosshair.position.y = canvas.mousePosition.y + dy;
+    } else if (typeof crosshair?._onMouseMove === "function" && canvas?.mousePosition) {
         try {
             crosshair._onMouseMove({
                 data: { getLocalPosition: () => canvas.mousePosition },
