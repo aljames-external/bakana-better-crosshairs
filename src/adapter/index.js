@@ -12,6 +12,7 @@ export function registerPlacementHooks(callbacks, options = {}) {
     const fAdapter = options.foundryAdapter ?? crosshairAdapter;
     const sAdapter = options.sysAdapter ?? systemAdapter;
     fAdapter.registerPlacementHooks(callbacks, sAdapter);
+    sAdapter.registerItemSheetHooks();
 }
 
 export { systemAdapter, initializeSystemAdapter, crosshairAdapter, initializeFoundryAdapter };

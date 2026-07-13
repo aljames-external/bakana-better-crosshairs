@@ -492,24 +492,3 @@ export class ItemCrosshairConfigApplication extends HandlebarsApplicationMixin(A
         this.render(false);
     }
 }
-
-/**
- * Open the Item Crosshair Configuration application for a target item.
- * Accessible to any user who owns the item.
- * @param {Document} item - Target Item document
- * @returns {void}
- */
-export function openItemCrosshairConfig(item) {
-    if (!item) return;
-    new ItemCrosshairConfigApplication({ item }).render(true);
-}
-
-/**
- * Register Foundry VTT ApplicationV2 Item sheet header controls (`getHeaderControlsItemSheet5e`
- * and `getHeaderControlsItemSheet5e2`) so item owners see a BBC top-bar / menu control
- * to configure item crosshairs.
- * @returns {void}
- */
-export function registerItemSheetHooks() {
-    systemAdapter.registerItemSheetHooks(openItemCrosshairConfig);
-}

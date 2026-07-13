@@ -1,4 +1,5 @@
 import { log } from "../../lib/logger.js";
+import { ItemCrosshairConfigApplication } from "../../autorec/itemConfigMenu.js";
 
 /**
  * Base System Adapter for system-agnostic decision on whether to replace the default crosshair.
@@ -84,13 +85,23 @@ export class BaseSystemAdapter {
     }
 
     /**
+     * Open the Item Crosshair Configuration application for a target item.
+     * Accessible to any user who owns the item.
+     * @param {Document} item - Target Item document
+     * @returns {void} No return value
+     */
+    openItemCrosshairConfig(item) {
+        if (!item) return;
+        new ItemCrosshairConfigApplication({ item }).render(true);
+    }
+
+    /**
      * Add a Better Crosshairs header control to an ApplicationV2 item sheet instance.
      * @param {foundry.applications.api.ApplicationV2} app - Item sheet application instance
      * @param {Array<object>} controls - Array of header control button items
-     * @param {Function} openConfig - Callback to open the BBC item configuration hub (`openItemCrosshairConfig(item)`)
      * @returns {void} No return value
      */
-    addItemSheetHeaderControl(app, controls, openConfig) {
+    addItemSheetHeaderControl(app, controls) {
         const item = app.document;
         if (!item || item.documentName !== "Item" || !Boolean(item.isOwner)) return;
         if (controls.some(c => c.label?.startsWith("BBC") || c.icon === "fa-solid fa-crosshairs")) return;
@@ -105,18 +116,17 @@ export class BaseSystemAdapter {
         controls.push({
             label: "BBC",
             icon: hasAnyCustom ? "fa-solid fa-crosshairs bbc-header-icon-custom" : "fa-solid fa-crosshairs",
-            onClick: () => openConfig(item)
+            onClick: () => this.openItemCrosshairConfig(item)
         });
     }
 
     /**
      * Register standard universal ApplicationV2 item sheet header hooks (`ApplicationV2` / `ItemSheetV2`).
-     * @param {Function} openConfig - Callback to open the BBC item configuration hub (`openItemCrosshairConfig(item)`)
      * @returns {void} No return value
      */
-    registerItemSheetHooks(openConfig) {
-        if (typeof Hooks?.on === "function" && typeof openConfig === "function") {
-            const handler = (app, controls) => this.addItemSheetHeaderControl(app, controls, openConfig);
+    registerItemSheetHooks() {
+        if (typeof Hooks?.on === "function") {
+            const handler = (app, controls) => this.addItemSheetHeaderControl(app, controls);
             Hooks.on("getHeaderControlsApplicationV2", handler);
             Hooks.on("getHeaderControlsItemSheetV2", handler);
         }

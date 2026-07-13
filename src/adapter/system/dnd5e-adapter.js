@@ -124,12 +124,11 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
 
     /**
      * Register D&D 5e-specific ApplicationV2 item sheet header hooks (`ItemSheet5e` / `ItemSheet5e2`).
-     * @param {Function} openConfig - Callback to open the BBC item configuration hub (`openItemCrosshairConfig(item)`)
      * @returns {void} No return value
      */
-    registerItemSheetHooks(openConfig) {
-        if (typeof Hooks?.on === "function" && typeof openConfig === "function") {
-            const handler = (app, controls) => this.addItemSheetHeaderControl(app, controls, openConfig);
+    registerItemSheetHooks() {
+        if (typeof Hooks?.on === "function") {
+            const handler = (app, controls) => this.addItemSheetHeaderControl(app, controls);
             Hooks.on("getHeaderControlsItemSheet5e", handler);
             Hooks.on("getHeaderControlsItemSheet5e2", handler);
         }
