@@ -121,4 +121,16 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
     handleProgrammaticPlacement(scene, doc, placeable, coords = {}, options = {}) {
         log.debug("Dnd5eSystemAdapter.handleProgrammaticPlacement | DnD5e uses native single-click placement (NOP isolation).");
     }
+
+    /**
+     * Register D&D 5e-specific ApplicationV2 item sheet header hooks (`ItemSheet5e` / `ItemSheet5e2`).
+     * @param {Function} handler - Universal header control registration handler
+     * @returns {void} No return value
+     */
+    registerItemSheetHooks(handler) {
+        if (typeof Hooks?.on === "function" && typeof handler === "function") {
+            Hooks.on("getHeaderControlsItemSheet5e", handler);
+            Hooks.on("getHeaderControlsItemSheet5e2", handler);
+        }
+    }
 }

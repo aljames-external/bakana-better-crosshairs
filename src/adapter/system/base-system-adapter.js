@@ -82,5 +82,12 @@ export class BaseSystemAdapter {
     handleProgrammaticPlacement(scene, doc, placeable, coords = {}, options = {}) {
         return;
     }
-}
 
+    /**
+     * Register any system-specific ApplicationV2 item sheet header hooks.
+     * Base implementation is a NOP for systems using standard universal ApplicationV2 sheet hooks.
+     * @param {Function} handler - Universal header control registration handler
+     * @returns {void} No return value
+     */
+    registerItemSheetHooks(handler) {}
+}
