@@ -108,6 +108,18 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
     }
 
     /**
+     * Determine the D&D 5e system default for whether a crosshair shape should stick to its source token
+     * when no explicit override is configured.
+     * In D&D 5e, cones and rays originate from the caster token, while circles and squares default to free placement.
+     * @param {string} shapeType - The template or crosshair shape (`"cone"`, `"circle"`, `"ray"`, `"rect"`, `"square"`)
+     * @param {object} [config={}] - Optional crosshair configuration object
+     * @returns {boolean} Whether the crosshair shape defaults to sticking to the token in D&D 5e
+     */
+    getDefaultStickToToken(shapeType, config = {}) {
+        return shapeType === "cone" || shapeType === "ray";
+    }
+
+    /**
      * Handle delayed single-click programmatic document creation when native placement listeners are blocked or deferred.
      * In DnD5e, native template placement pointer events fire cleanly on Click #1 without being blocked.
      * Strictly NOP this method to isolate DnD5e from PF2e race workarounds and preserve exact native placement behavior.

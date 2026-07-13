@@ -8,17 +8,26 @@ let activePointerHandler = null;
 
 /**
  * Determine whether a crosshair should remain attached/stuck to its source token.
+ * If no explicit configuration override (`config.stickToToken`) is set, delegates the default
+ * choice to the active game system adapter based on the shape type (`shapeType`).
  * @param {object} config - Configuration object containing placement options
- * @param {boolean} [defaultVal=false] - Default boolean fallback value
+ * @param {string|boolean} [shapeType="circle"] - The shape type (`"cone"`, `"ray"`, `"circle"`, `"square"`, `"rect"`) or fallback boolean
+ * @param {object} [sysAdapter=systemAdapter] - The active system adapter
  * @returns {boolean} Whether the crosshair should stick to the token
  */
-export function shouldStickToToken(config, defaultVal = false) {
-    if (!config || typeof config !== "object") return defaultVal;
+export function shouldStickToToken(config, shapeType = "circle", sysAdapter = systemAdapter) {
+    if (!config || typeof config !== "object") {
+        if (typeof shapeType === "boolean") return shapeType;
+        return Boolean(sysAdapter?.getDefaultStickToToken?.(shapeType, config));
+    }
     const val = config.stickToToken;
-    if (val === undefined || val === null || val === "" || val === "default") return defaultVal;
-    if (val === false || val === "false" || val === "off" || val === "no" || val === 0 || val === "0") return false;
-    if (val === true || val === "true" || val === "on" || val === "yes" || val === 1 || val === "1") return true;
-    return Boolean(val);
+    if (val !== undefined && val !== null && val !== "" && val !== "default") {
+        if (val === false || val === "false" || val === "off" || val === "no" || val === 0 || val === "0") return false;
+        if (val === true || val === "true" || val === "on" || val === "yes" || val === 1 || val === "1") return true;
+        return Boolean(val);
+    }
+    if (typeof shapeType === "boolean") return shapeType;
+    return Boolean(sysAdapter?.getDefaultStickToToken?.(shapeType, config));
 }
 
 /**
@@ -185,8 +194,8 @@ function rotateCrosshairInstance(crosshair, newDirDeg) {
 export function attachWheelRotation(crosshair, config = {}) {
     detachWheelRotation();
 
-    const isCone = config.type === "cone" || config.t === "cone";
-    const isAttached = shouldStickToToken(config, isCone) && Boolean(config.token);
+    const shapeType = config.type ?? config.t ?? "circle";
+    const isAttached = shouldStickToToken(config, shapeType) && Boolean(config.token);
     if (isAttached) {
         log.debug("attachWheelRotation | Crosshair is attached to token. Disabling mouse wheel rotation.");
         return;
@@ -365,8 +374,8 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     const clickX = mousePos.x ?? 0;
     const clickY = mousePos.y ?? 0;
 
-    const isCone = config.type === "cone" || config.t === "cone";
-    const isAnchored = shouldStickToToken(config, isCone) && Boolean(config.token);
+    const shapeType = config.type ?? config.t ?? "circle";
+    const isAnchored = shouldStickToToken(config, shapeType) && Boolean(config.token);
 
     let x = clickX;
     let y = clickY;

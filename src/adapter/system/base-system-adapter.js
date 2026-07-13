@@ -70,6 +70,18 @@ export class BaseSystemAdapter {
     }
 
     /**
+     * Determine the system default for whether a crosshair shape should stick to its source token
+     * when no explicit item/autorec override (`stickToToken`) is defined.
+     * By default across most Foundry systems, cones stick to the token, while circles, rectangles, and rays are placed freely.
+     * @param {string} shapeType - The template or crosshair shape (`"cone"`, `"circle"`, `"ray"`, `"rect"`, `"square"`)
+     * @param {object} [config={}] - Optional crosshair configuration object
+     * @returns {boolean} Whether the crosshair shape defaults to sticking to the token
+     */
+    getDefaultStickToToken(shapeType, config = {}) {
+        return shapeType === "cone";
+    }
+
+    /**
      * Handle delayed single-click programmatic document creation when native placement listeners are blocked or deferred.
      * Base implementation defaults to NOP to preserve native placement behavior across standard game systems.
      * System subclasses that block pointer events on Click #1 (e.g. Pathfinder 2e) override this method.

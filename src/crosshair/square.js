@@ -25,7 +25,7 @@ import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, sh
 async function create(token, config = {}) {
     const distance = Math.round(config.distance ?? 20);
     const width = Math.round(config.width ?? distance);
-    const stickToToken = shouldStickToToken(config, false);
+    const stickToToken = shouldStickToToken(config, "square");
 
     const {
         id = `Square Crosshair`,

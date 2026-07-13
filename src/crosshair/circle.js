@@ -40,7 +40,7 @@ export function resolveCircleAsset(pathOrKey, effectSize = 40) {
 async function create(token, config = {}) {
     const radius = Math.round(config.radius ?? 20);
     const file = config.file ? closest(config.file) : undefined;
-    const stickToToken = shouldStickToToken(config, false);
+    const stickToToken = shouldStickToToken(config, "circle");
 
     const {
         id = `Circle Crosshair`,

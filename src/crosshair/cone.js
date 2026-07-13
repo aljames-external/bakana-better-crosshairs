@@ -26,7 +26,7 @@ import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, sh
 async function create(token, config = {}) {
     const distance = config.distance ?? 30;
     const angle = config.angle ?? 53.13;
-    const stickToToken = shouldStickToToken(config, true);
+    const stickToToken = shouldStickToToken(config, "cone");
 
     const id = config.id ?? "Cone Crosshair";
     const coneSize = config.coneSize ?? "thin";
