@@ -57,6 +57,7 @@ async function create(token, config = {}) {
 
     config.token = token;
     config.stickToToken = stickToToken;
+    config.type = "circle";
 
     let targets;
 

@@ -38,6 +38,7 @@ async function create(token, config = {}) {
 
     config.token = token;
     config.stickToToken = Boolean(stickToToken);
+    config.type = "ray";
 
     let targets;
 

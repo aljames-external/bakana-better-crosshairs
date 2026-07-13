@@ -43,6 +43,7 @@ async function create(token, config = {}) {
     config.stickToToken = Boolean(stickToToken);
     config.distance = distance;
     config.angle = angle;
+    config.type = "cone";
 
     let targets;
 

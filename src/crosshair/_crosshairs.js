@@ -20,10 +20,12 @@ function normalizePlayArguments(typeOrToken, tokenOrConfig, config) {
             options: tokenOrConfig ?? {},
         };
     }
+    const opts = config ?? {};
+    if (!opts.type) opts.type = typeof typeOrToken === "string" ? typeOrToken : "circle";
     return {
         builder: crosshair[typeOrToken] ?? crosshair.circle,
         target: tokenOrConfig,
-        options: config ?? {},
+        options: opts,
     };
 }
 
