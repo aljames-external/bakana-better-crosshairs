@@ -238,6 +238,22 @@ async function handleDrawPreview(placeable) {
             };
             if (placeable.document) placeable.document._bbcDimensions = placeable._bbcDimensions;
 
+            if (crosshairAdapter?.updatePreviewShape && placeable.document) {
+                try {
+                    crosshairAdapter.updatePreviewShape(placeable.document, {
+                        x: placeable.x ?? placeable.document.x,
+                        y: placeable.y ?? placeable.document.y,
+                        direction: finalConfig.direction ?? 0,
+                        rotation: finalConfig.direction ?? 0,
+                        distance: placeable._bbcDimensions.distance,
+                        radius: placeable._bbcDimensions.distance,
+                        width: placeable._bbcDimensions.width,
+                        sticky: Boolean(placeable.document?.flags?.bakana?.token ?? placeable.document?.flags?.bbc?.token ?? placeable._bbcSticky),
+                        gridUnits: placeable._bbcDimensions.gridUnits
+                    });
+                } catch (e) {}
+            }
+
             log.debug(`handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}" with config:`, finalConfig);
             await builder.play(token, finalConfig);
         }

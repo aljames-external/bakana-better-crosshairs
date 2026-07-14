@@ -289,10 +289,7 @@ export function attachWheelRotation(crosshair, config = {}) {
             if (Array.isArray(list)) {
                 for (const p of list) {
                     if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children || p === crosshair?.template) {
-                        const docDir = p.document?.direction ?? p.document?.shapes?.[0]?.rotation ?? p.direction;
-                        if (docDir !== config.currentDirection) {
-                            refreshTemplateHighlights(p, config.currentDirection, rad);
-                        }
+                        refreshTemplateHighlights(p, config.currentDirection, rad);
                     }
                 }
             }
@@ -317,19 +314,11 @@ export function attachWheelRotation(crosshair, config = {}) {
 export function alignCrosshairOrigin(crosshair, config = {}, rad = 0) {
     if (!crosshair || !canvas?.mousePosition) return;
     const isRect = crosshair.type === "rect" || crosshair.type === "square" || crosshair.config?.type === "rect" || crosshair.config?.type === "square" || config.type === "rect" || config.type === "square";
+    const isAttached = shouldStickToToken(config, crosshair?.type ?? config?.type ?? "rect") && Boolean(config.token ?? crosshair?.config?.token ?? crosshair?.token);
+    if (isAttached) return; // Attached squares/rects use ray midpoint on token perimeter
     if (isRect && typeof crosshair.position?.set === "function") {
-        const gridDist = canvas.dimensions?.distance ?? 5;
-        const gridSize = canvas.dimensions?.size ?? 100;
-        const distVal = config.distance ?? crosshair.distance ?? 20;
-        const widthVal = config.width ?? crosshair.width ?? distVal;
-        const lenPx = (distVal / gridDist) * gridSize;
-        const widPx = (widthVal / gridDist) * gridSize;
-
-        const dx = (lenPx / 2) * Math.cos(rad) - (widPx / 2) * Math.sin(rad);
-        const dy = (lenPx / 2) * Math.sin(rad) + (widPx / 2) * Math.cos(rad);
-
-        crosshair.position.x = canvas.mousePosition.x + dx;
-        crosshair.position.y = canvas.mousePosition.y + dy;
+        // Detached squares anchored at top-left {x: 0, y: 0} must keep crosshair.position directly at canvas.mousePosition without (+dx, +dy) center shifts
+        return;
     }
 }
 
@@ -360,20 +349,12 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
             const effects = Sequencer.EffectManager.getEffects({ name: config.id });
             for (const eff of effects) {
                 if (isRect && eff.container && !config.stickToToken && !config.token) {
-                    const gridDist = canvas?.dimensions?.distance ?? 5;
-                    const gridSize = canvas?.dimensions?.size ?? 100;
-                    const { factor } = crosshairAdapter.getTemplatePixelFactor();
-                    const distVal = config.distance ?? crosshair?.distance ?? 20;
-                    const widthVal = config.width ?? crosshair?.width ?? distVal;
-                    const lenPx = (distVal / gridDist) * gridSize * factor;
-                    const widPx = (widthVal / gridDist) * gridSize * factor;
-
-                    eff.container.pivot.set(-lenPx / 2, -widPx / 2);
+                    eff.container.pivot.set(0, 0);
                     if (eff.sprite) eff.sprite.position.set(0, 0);
                     if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
                     if (typeof eff._updatePivot === "function") {
                         eff._updatePivot = () => {
-                            if (eff.container) eff.container.pivot.set(-lenPx / 2, -widPx / 2);
+                            if (eff.container) eff.container.pivot.set(0, 0);
                             if (eff.sprite) eff.sprite.position.set(0, 0);
                             if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
                         };
