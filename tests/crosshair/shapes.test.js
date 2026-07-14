@@ -80,3 +80,65 @@ test('BaseCrosshairShape.getRotatedShapeCoordinates accurately calculates rotate
     assert.equal(Math.round(at270.x), 500);
     assert.equal(Math.round(at270.y), 480);
 });
+
+test('BaseCrosshairShape.playGraphicEffect only creates line animation when placing a circle template', async () => {
+    const originalSequence = globalThis.Sequence;
+    const origModulesGet = globalThis.game?.modules?.get;
+    const effectNames = [];
+    try {
+        if (!globalThis.game) globalThis.game = {};
+        if (!globalThis.game.modules) globalThis.game.modules = new Map();
+        globalThis.game.modules.get = () => ({ active: true, version: '1.0.0' });
+
+        globalThis.Sequence = class MockSequence {
+            wait() { return this; }
+            effect() {
+                const effectObj = {
+                    name: (n) => { effectNames.push(n); return effectObj; },
+                    file: () => effectObj,
+                    attachTo: () => effectObj,
+                    stretchTo: () => { effectNames.push('LINE_STRETCH'); return effectObj; },
+                    anchor: () => effectObj,
+                    size: () => effectObj,
+                    opacity: () => effectObj,
+                    belowTokens: () => effectObj,
+                    locally: () => effectObj,
+                    persist: () => effectObj
+                };
+                return effectObj;
+            }
+            async play() { return true; }
+        };
+
+        const dummyToken = new globalThis.Token();
+
+        // 1. Circle template with token -> MUST play line animation
+        const circleShape = new CircleCrosshairShape(dummyToken, { showLine: true, stickToToken: "false" });
+        effectNames.length = 0;
+        await circleShape.playGraphicEffect({});
+        assert.ok(effectNames.includes('LINE_STRETCH'), 'Circle template should create line stretch effect');
+
+        // 2. Cone template with token -> MUST NOT play line animation
+        const coneShape = new ConeCrosshairShape(dummyToken, { showLine: true, stickToToken: "false" });
+        effectNames.length = 0;
+        await coneShape.playGraphicEffect({});
+        assert.equal(effectNames.includes('LINE_STRETCH'), false, 'Cone template should not create line stretch effect');
+
+        // 3. Ray template with token -> MUST NOT play line animation
+        const rayShape = new RayCrosshairShape(dummyToken, { showLine: true, stickToToken: "false" });
+        effectNames.length = 0;
+        await rayShape.playGraphicEffect({});
+        assert.equal(effectNames.includes('LINE_STRETCH'), false, 'Ray template should not create line stretch effect');
+
+        // 4. Square template with token -> MUST NOT play line animation
+        const squareShape = new SquareCrosshairShape(dummyToken, { showLine: true, stickToToken: "false" });
+        effectNames.length = 0;
+        await squareShape.playGraphicEffect({});
+        assert.equal(effectNames.includes('LINE_STRETCH'), false, 'Square template should not create line stretch effect');
+    } finally {
+        globalThis.Sequence = originalSequence;
+        if (globalThis.game?.modules && origModulesGet) {
+            globalThis.game.modules.get = origModulesGet;
+        }
+    }
+});

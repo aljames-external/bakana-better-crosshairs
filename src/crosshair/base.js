@@ -148,7 +148,7 @@ export class BaseCrosshairShape {
     async playGraphicEffect(crosshair) {
         const seq = new Sequence().wait(50);
 
-        if (this.token && this.showLine && !this.stickToToken) {
+        if (this.type === "circle" && this.token && this.showLine && !this.stickToToken) {
             seq.effect()
                 .name(this.id)
                 .file(this.lineFile)
