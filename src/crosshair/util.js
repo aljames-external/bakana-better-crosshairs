@@ -83,7 +83,23 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
     }
     if (crosshairAdapter?.updatePreviewShape && tmpl.document) {
         try {
-            crosshairAdapter.updatePreviewShape(tmpl.document, { direction: newDirDeg, rotation: newDirDeg });
+            const dims = tmpl._bbcDimensions ?? tmpl.document._bbcDimensions ?? {};
+            const initialDist = dims.distance ?? tmpl.document.distance;
+            const initialWidth = dims.width ?? tmpl.document.width;
+            const isGridUnits = dims.gridUnits ?? true;
+            const targetX = tmpl.x ?? tmpl.document.x;
+            const targetY = tmpl.y ?? tmpl.document.y;
+            crosshairAdapter.updatePreviewShape(tmpl.document, {
+                x: targetX,
+                y: targetY,
+                direction: newDirDeg,
+                rotation: newDirDeg,
+                distance: initialDist,
+                radius: initialDist,
+                width: initialWidth,
+                sticky: Boolean(tmpl.document?.flags?.bakana?.token ?? tmpl.document?.flags?.bbc?.token ?? tmpl._bbcSticky),
+                gridUnits: isGridUnits
+            });
         } catch (e) {}
     }
     tmpl.direction = newDirDeg;
