@@ -79,7 +79,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             throw new Error("FoundryVTTV14Adapter.detectProperties | No shapes found in Region document:", doc);
         }
 
-        const shape = shapesList[0].toObject();
+        const shape = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : (shapesList[0] ?? {});
         let shapeType = undefined;
         switch (shape.type) {
             case "circle":      shapeType = "circle";   break;
@@ -112,7 +112,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @returns {Array} Array of shape objects or models
      */
     _getShapesArray(doc) {
-        return doc.shapes ?? [];
+        if (!doc) return [];
+        return doc.shapes?.contents ?? (Array.isArray(doc.shapes) ? doc.shapes : []);
     }
 
     /**
@@ -135,7 +136,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         const shapesList = this._getShapesArray(previewDoc);
         if (shapesList.length === 0) return;
 
-        const orig = shapesList[0].toObject();
+        const orig = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
         const updatedShape = this._formatRegionShapeUpdate(orig, coords);
         delete updatedShape._id;
         try {
@@ -160,7 +161,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         const updateData = {
             flags: styling.flags
         };
-        const shapeObj = shapesList[0].toObject();
+        const shapeObj = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
         const originalShape = foundry.utils.deepClone(shapeObj);
         const newShape = this._formatRegionShapeUpdate(originalShape, coords);
         delete newShape._id;

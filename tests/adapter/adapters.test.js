@@ -59,7 +59,7 @@ test('foundry and system adapters extract properties and calling context consist
     assert.equal(ctx.itemName, 'Fireball PF2e');
     assert.equal(ctx.itemId, '12345');
 
-    const shapeProps = crosshairAdapter.detectProperties({ document: { t: 'circle', distance: 20 } });
+    const shapeProps = crosshairAdapter.detectProperties({ shapes: [{ type: 'circle', radius: 20 }] });
     assert.ok(shapeProps);
 });
 
