@@ -68,11 +68,6 @@ export function resolveCrosshairIcon(iconPath) {
  */
 function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
     if (!tmpl) return;
-    log.debug("refreshTemplateHighlights | ENTRY:", {
-        tmplClassName: tmpl.constructor?.name,
-        hasDocument: Boolean(tmpl.document),
-        hasAdapterUpdate: Boolean(crosshairAdapter?.updatePreviewShape)
-    });
     if (wheelEvent && typeof tmpl._onRotate === "function" && tmpl !== crosshair?.template && !tmpl.isCrosshair) {
         try {
             tmpl._onRotate(wheelEvent);
@@ -101,13 +96,6 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
                 targetY = snapped.y;
             }
 
-            log.debug("refreshTemplateHighlights | BEFORE updatePreviewShape:", {
-                tmplClassName: tmpl.constructor?.name,
-                tmplPosition: { x: tmpl.x, y: tmpl.y },
-                mousePosition: canvas?.mousePosition,
-                targetCoords: { targetX, targetY, initialDist, initialWidth, isGridUnits, isSticky }
-            });
-
             crosshairAdapter.updatePreviewShape(tmpl.document, {
                 x: targetX,
                 y: targetY,
@@ -119,6 +107,9 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
                 sticky: isSticky,
                 gridUnits: isGridUnits
             });
+
+            if (typeof tmpl.document.x === "number") tmpl.x = tmpl.document.x;
+            if (typeof tmpl.document.y === "number") tmpl.y = tmpl.document.y;
         } catch (e) {}
     }
     tmpl.direction = newDirDeg;
@@ -136,9 +127,11 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
     if (tmpl.shape !== undefined && typeof tmpl.shape.clear === "function") {
         try { tmpl.shape.clear(); } catch (e) {}
     }
-    if (tmpl.ray && Ray && tmpl.ray.origin) {
+    if (tmpl.ray && Ray && (tmpl.ray.origin || (typeof tmpl.x === "number" && typeof tmpl.y === "number"))) {
         try {
-            tmpl.ray = Ray.fromAngle(tmpl.ray.origin.x, tmpl.ray.origin.y, rad, tmpl.ray.distance ?? 1000);
+            const ox = tmpl.ray.origin?.x ?? tmpl.x;
+            const oy = tmpl.ray.origin?.y ?? tmpl.y;
+            tmpl.ray = Ray.fromAngle(ox, oy, rad, tmpl.ray.distance ?? 1000);
         } catch (e) {}
     }
     if (tmpl.renderFlags && tmpl.renderFlags.flags) {
@@ -161,11 +154,6 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
     if (typeof tmpl.highlightGrid === "function") {
         try { tmpl.highlightGrid(); } catch (e) {}
     }
-
-    console.log("%cBBC DIAGNOSTIC | refreshTemplateHighlights AFTER refresh:", "background: #7b2cbf; color: #fff; padding: 2px 4px; border-radius: 2px;", {
-        tmplShape: tmpl.shape ? { x: tmpl.shape.x, y: tmpl.shape.y, width: tmpl.shape.width, height: tmpl.shape.height, bounds: tmpl.shape.bounds } : null,
-        docShapes: tmpl.document?.shapes?.contents?.map?.(s => (typeof s?.toObject === "function" ? s.toObject() : s))
-    });
 }
 
 /**
@@ -308,13 +296,6 @@ export function attachWheelRotation(crosshair, config = {}) {
             crosshair?.template ? [crosshair.template] : null,
             globalThis._activeBBCPlaceable ? [globalThis._activeBBCPlaceable] : null
         ];
-        log.debug("activePointerHandler | pointermove triggered:", {
-            mousePosition: canvas?.mousePosition,
-            hasTemplatesPreview: Boolean(canvas?.templates?.preview?.children?.length),
-            hasRegionsPreview: Boolean(canvas?.regions?.preview?.children?.length),
-            hasCrosshairTemplate: Boolean(crosshair?.template),
-            hasActiveBBCPlaceable: Boolean(globalThis._activeBBCPlaceable)
-        });
         for (const list of previewLists) {
             if (Array.isArray(list)) {
                 for (const p of list) {
