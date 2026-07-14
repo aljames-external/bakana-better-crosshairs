@@ -335,24 +335,26 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
         try {
             const effects = Sequencer.EffectManager.getEffects({ name: config.id });
             for (const eff of effects) {
-                if (isRect && !isAttached && eff.container) {
-                    eff.container.pivot.set(0, 0);
-                    if (eff.sprite) eff.sprite.position.set(0, 0);
-                    if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
-                    if (typeof eff._updatePivot === "function") {
-                        eff._updatePivot = () => {
-                            if (eff.container) eff.container.pivot.set(0, 0);
-                            if (eff.sprite) eff.sprite.position.set(0, 0);
-                            if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
-                        };
+                if (isRect && !isAttached) {
+                    if (eff.container) {
+                        eff.container.pivot.set(0, 0);
+                        if (eff.sprite) eff.sprite.position.set(0, 0);
+                        if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
+                        if (typeof eff._updatePivot === "function") {
+                            eff._updatePivot = () => {
+                                if (eff.container) eff.container.pivot.set(0, 0);
+                                if (eff.sprite) eff.sprite.position.set(0, 0);
+                                if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
+                            };
+                        }
                     }
-                }
-                if (eff.container && typeof eff.container.rotation !== "undefined") {
-                    eff.container.rotation = rad;
-                }
-                if (typeof eff.rotation !== "undefined") eff.rotation = rad;
-                if (typeof eff.update === "function") {
-                    try { eff.update({ rotation: rad }); } catch (e) {}
+                    if (eff.container && typeof eff.container.rotation !== "undefined") {
+                        eff.container.rotation = rad;
+                    }
+                    if (typeof eff.rotation !== "undefined") eff.rotation = rad;
+                    if (typeof eff.update === "function") {
+                        try { eff.update({ rotation: rad }); } catch (e) {}
+                    }
                 }
             }
         } catch (e) {}
