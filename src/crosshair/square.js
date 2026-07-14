@@ -119,7 +119,12 @@ async function create(token, config = {}) {
             }
 
             if (!stickToToken && crosshair?.pivot?.set) {
-                crosshair.pivot.set(0, 0);
+                const gridDist = canvas?.dimensions?.distance ?? 5;
+                const gridSize = canvas?.dimensions?.size ?? 100;
+                const { factor } = crosshairAdapter.getTemplatePixelFactor();
+                const lenPx = (distance / gridDist) * gridSize * factor;
+                const widPx = ((width ?? distance) / gridDist) * gridSize * factor;
+                crosshair.pivot.set(-lenPx / 2, -widPx / 2);
             }
 
             attachWheelRotation(crosshair, config);

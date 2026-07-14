@@ -360,12 +360,20 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
             const effects = Sequencer.EffectManager.getEffects({ name: config.id });
             for (const eff of effects) {
                 if (isRect && eff.container && !config.stickToToken && !config.token) {
-                    eff.container.pivot.set(0, 0);
+                    const gridDist = canvas?.dimensions?.distance ?? 5;
+                    const gridSize = canvas?.dimensions?.size ?? 100;
+                    const { factor } = crosshairAdapter.getTemplatePixelFactor();
+                    const distVal = config.distance ?? crosshair?.distance ?? 20;
+                    const widthVal = config.width ?? crosshair?.width ?? distVal;
+                    const lenPx = (distVal / gridDist) * gridSize * factor;
+                    const widPx = (widthVal / gridDist) * gridSize * factor;
+
+                    eff.container.pivot.set(-lenPx / 2, -widPx / 2);
                     if (eff.sprite) eff.sprite.position.set(0, 0);
                     if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
                     if (typeof eff._updatePivot === "function") {
                         eff._updatePivot = () => {
-                            if (eff.container) eff.container.pivot.set(0, 0);
+                            if (eff.container) eff.container.pivot.set(-lenPx / 2, -widPx / 2);
                             if (eff.sprite) eff.sprite.position.set(0, 0);
                             if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
                         };
