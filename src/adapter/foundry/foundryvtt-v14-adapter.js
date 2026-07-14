@@ -3,7 +3,7 @@ import { log } from "../../lib/logger.js";
 import { localize } from "../../lib/utils.js";
 
 /**
- * Adapter subclass encapsulating Foundry VTT v14+ Region and MeasuredTemplate placement behavior.
+ * Adapter subclass encapsulating Foundry VTT v14+ Region placement behavior.
  */
 export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     /**
@@ -51,7 +51,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @returns {string[]} Base placeable type names
      */
     get supportedBasePlaceables() {
-        return ["MeasuredTemplate", "Region"];
+        return ["Region"];
     }
 
     /**
@@ -59,44 +59,20 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @returns {string[]} Document type names
      */
     get supportedDocumentTypes() {
-        return ["MeasuredTemplate", "Region"];
+        return ["Region"];
     }
 
     /**
      * Detect shape type and geometric dimensions from a Region document.
-     * @param {Document} doc - The Region or MeasuredTemplate document to inspect
+     * @param {Document} doc - The Region document to inspect
      * @returns {{type: string, distance: number, radius: number, width: number, angle: number, x: number, y: number}} Detected geometric properties and shape type
      */
     detectProperties(doc) {
         log.debug("FoundryVTTV14Adapter.detectProperties | Inspecting raw document:", {
             documentName: doc.documentName,
-            t: doc.t,
-            distance: doc.distance,
-            width: doc.width,
             shapes: doc.shapes,
             rawObject: doc.toObject?.() ?? doc
         });
-
-        if (doc.t) {
-            const shapeMap = {
-                circle: "circle",
-                cone: "cone",
-                ray: "ray",
-                rect: "square"
-            };
-            const distance = doc.distance ?? 0;
-            const result = {
-                type: shapeMap[doc.t] ?? "circle",
-                distance,
-                radius: distance,
-                width: doc.width ?? 5,
-                angle: doc.angle ?? 53.13,
-                x: doc.x ?? 0,
-                y: doc.y ?? 0
-            };
-            log.debug("FoundryVTTV14Adapter.detectProperties | Detected from doc.t (MeasuredTemplate):", result);
-            return result;
-        }
 
         const shapesList = this._getShapesArray(doc);
         const shape = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : (shapesList[0] ?? {});
@@ -142,50 +118,32 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
     /**
      * Update live canvas preview shape coordinates during mouse drag.
-     * @param {Document} previewDoc - The Region or MeasuredTemplate preview document being updated
-     * @param {{x?: number, y?: number, rotation?: number, direction?: number, radius?: number, distance?: number, width?: number, gridUnits?: boolean}} coords - The target canvas placement coordinates
+     * @param {Document} previewDoc - The Region preview document being updated
+     * @param {{x?: number, y?: number, rotation?: number, radius?: number, width?: number, gridUnits?: boolean}} coords - The target canvas placement coordinates
      * @returns {void}
      */
     updatePreviewShape(previewDoc, coords) {
         if (!previewDoc || !coords) return;
         const shapesList = this._getShapesArray(previewDoc);
-        if (shapesList.length > 0) {
-            const orig = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
-            const updatedShape = this._formatRegionShapeUpdate(orig, coords);
-            delete updatedShape._id;
-            if (typeof previewDoc.updateSource === "function") {
-                try {
-                    previewDoc.updateSource({ shapes: [updatedShape] });
-                } catch (e) {
-                    previewDoc.shapes = [updatedShape];
-                }
-            } else {
+        if (shapesList.length === 0) return;
+
+        const orig = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
+        const updatedShape = this._formatRegionShapeUpdate(orig, coords);
+        delete updatedShape._id;
+        if (typeof previewDoc.updateSource === "function") {
+            try {
+                previewDoc.updateSource({ shapes: [updatedShape] });
+            } catch (e) {
                 previewDoc.shapes = [updatedShape];
             }
         } else {
-            const updateObj = {};
-            if (coords.x !== undefined) updateObj.x = coords.x;
-            if (coords.y !== undefined) updateObj.y = coords.y;
-            if (coords.direction !== undefined) updateObj.direction = coords.direction;
-            else if (coords.rotation !== undefined) updateObj.direction = coords.rotation;
-            if (coords.distance !== undefined) updateObj.distance = coords.distance;
-            else if (coords.radius !== undefined) updateObj.distance = coords.radius;
-
-            if (typeof previewDoc.updateSource === "function") {
-                try {
-                    previewDoc.updateSource(updateObj);
-                } catch (e) {
-                    Object.assign(previewDoc, updateObj);
-                }
-            } else {
-                Object.assign(previewDoc, updateObj);
-            }
+            previewDoc.shapes = [updatedShape];
         }
     }
 
     /**
-     * Apply resolved placement coordinates and workflow flags onto a Region or MeasuredTemplate document.
-     * @param {Document} doc - The target document to update
+     * Apply resolved placement coordinates and workflow flags onto a Region document.
+     * @param {Document} doc - The target Region document to update
      * @param {Object} [coords={}] - The resolved placement coordinates
      * @param {Object} [config={}] - Optional placement styling and behavior configuration
      * @returns {void}
@@ -193,69 +151,46 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     applyDocumentPlacement(doc, coords = {}, config = {}) {
         const styling = this.extractPlacedStylingFlags(config);
         const shapesList = this._getShapesArray(doc);
-        const isRegion = shapesList.length > 0;
+        if (shapesList.length === 0) return;
 
-        if (isRegion) {
-            const updateData = {
-                flags: styling.flags
-            };
-            const shapeObj = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
-            const originalShape = foundry.utils.deepClone(shapeObj);
-            const newShape = this._formatRegionShapeUpdate(originalShape, coords);
-            delete newShape._id;
-            updateData.shapes = [newShape];
+        const updateData = {
+            flags: styling.flags
+        };
+        const shapeObj = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
+        const originalShape = foundry.utils.deepClone(shapeObj);
+        const newShape = this._formatRegionShapeUpdate(originalShape, coords);
+        delete newShape._id;
+        updateData.shapes = [newShape];
 
-            const targetColor = styling.placedFillColor ? styling.placedFillColor : (styling.placedBorderColor ? styling.placedBorderColor : undefined);
-            if (targetColor) updateData.color = targetColor;
-            if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
-            if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
+        const targetColor = styling.placedFillColor ?? styling.placedBorderColor;
+        if (targetColor) updateData.color = targetColor;
+        if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
+        if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
 
-            const targetAlpha = styling.placedFillAlpha !== undefined ? styling.placedFillAlpha : (styling.placedBorderAlpha !== undefined ? styling.placedBorderAlpha : undefined);
-            if (targetAlpha !== undefined) updateData.alpha = targetAlpha;
-            if (styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
-            if (styling.placedBorderAlpha !== undefined) updateData.borderAlpha = styling.placedBorderAlpha;
+        const targetAlpha = styling.placedFillAlpha ?? styling.placedBorderAlpha;
+        if (targetAlpha !== undefined) updateData.alpha = targetAlpha;
+        if (styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
+        if (styling.placedBorderAlpha !== undefined) updateData.borderAlpha = styling.placedBorderAlpha;
 
-            if (config.hidden || config.hideTemplate) updateData.hidden = true;
+        if (config.hidden || config.hideTemplate) updateData.hidden = true;
 
-            doc.updateSource(updateData);
-        } else {
-            const updateData = {
-                flags: styling.flags
-            };
-            if (coords.x !== undefined) updateData.x = coords.x;
-            if (coords.y !== undefined) updateData.y = coords.y;
-            if (coords.direction !== undefined) updateData.direction = coords.direction;
-            else if (coords.rotation !== undefined) updateData.direction = coords.rotation;
-            if (coords.distance !== undefined) updateData.distance = coords.distance;
-            else if (coords.radius !== undefined) updateData.distance = coords.radius;
-            if (coords.width !== undefined) updateData.width = coords.width;
-
-            if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
-            if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
-            if (styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
-            if (styling.placedBorderAlpha !== undefined) updateData.borderAlpha = styling.placedBorderAlpha;
-            if (config.hidden || config.hideTemplate) updateData.hidden = true;
-
-            doc.updateSource(updateData);
-        }
+        doc.updateSource(updateData);
     }
 
     /**
-     * Format drag destination coordinates into a V14 placement coordinates payload.
+     * Format drag destination coordinates into a V14 Region placement coordinates payload.
      * @param {number} x - Destination x-coordinate
      * @param {number} y - Destination y-coordinate
      * @param {number} direction - Rotation angle in degrees
      * @param {Object} [config={}] - Optional sequence placement configuration
-     * @returns {{x: number, y: number, direction: number, rotation: number, distance: number|undefined, radius: number|undefined, width: number|undefined, gridUnits: boolean}} Formatted placement coordinates payload
+     * @returns {{x: number, y: number, rotation: number, radius: number|undefined, width: number|undefined, gridUnits: boolean}} Formatted placement coordinates payload
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
         return {
             x,
             y,
-            direction,
             rotation: direction,
-            distance: config.distance ?? config.radius,
-            radius: config.radius ?? config.distance,
+            radius: config.radius,
             width: config.width,
             gridUnits: Boolean(config.gridUnits ?? true)
         };

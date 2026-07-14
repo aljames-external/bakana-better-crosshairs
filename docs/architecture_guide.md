@@ -64,7 +64,7 @@ src/
 Located in [`src/adapter/foundry/`](../src/adapter/foundry/), Foundry adapters isolate tabletop version differences:
 - **`BaseFoundryVTTAdapter`**: Implements shared lookup matching (`matchAutorecEntry`), candidate ordering, and live default preview hiding (`hidePreview`).
 - **`FoundryVTTV12Adapter`**: Handles V12 and V13 `MeasuredTemplate` placement hooks (`drawMeasuredTemplate` → `preCreateMeasuredTemplate` → `createMeasuredTemplate`) with legacy pixel sizing (`getTemplatePixelFactor` returning `{ factor: 1, gridUnits: false }`).
-- **`FoundryVTTV14Adapter`**: Handles V14+ `Region` placement hooks (`drawMeasuredTemplate` → `preCreateRegion` → `createRegion`). Converts game feet (`distance`, `width`) to canvas pixels (`* pxPerFoot`) inside `_formatRegionShapeUpdate` and returns `{ factor: 1 / gridSize, gridUnits: true }` so Sequencer effects render accurate grid unit dimensions.
+- **`FoundryVTTV14Adapter`**: Handles V14+ `Region` placement hooks (`drawRegion` → `preCreateRegion` → `createRegion`). Converts game feet (`distance`, `width`) to canvas pixels (`* pxPerFoot`) inside `_formatRegionShapeUpdate` and returns `{ factor: 1 / gridSize, gridUnits: true }` so Sequencer effects render accurate grid unit dimensions.
 
 ### Multi-Activity Priority Matching (`matchAutorecEntry` & `getEntriesForItem`)
 When a template or region for an item (`e.g. Longbow`) is drawn, `matchAutorecEntry` evaluates crosshair overrides according to a strict 4-tier preference hierarchy:

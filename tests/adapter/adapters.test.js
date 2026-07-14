@@ -236,14 +236,14 @@ test('abstracted registerPlacementHooks combines both Foundry version adapter an
             foundryAdapter: adapterV14,
             sysAdapter: pf2eSys
         });
-        assert.ok(registered.includes('drawMeasuredTemplate'));
+        assert.equal(registered.includes('drawMeasuredTemplate'), false, 'V14 adapter does not register MeasuredTemplate draw hooks');
         assert.ok(registered.includes('drawMeasuredTemplatePF2e'));
         assert.ok(registered.includes('drawRegion'));
         assert.ok(registered.includes('drawRegionPF2e'));
         assert.ok(registered.includes('preCreateRegion'));
-        assert.ok(registered.includes('preCreateMeasuredTemplate'));
+        assert.equal(registered.includes('preCreateMeasuredTemplate'), false, 'V14 adapter does not register MeasuredTemplate preCreate hooks');
         assert.ok(registered.includes('createRegion'));
-        assert.ok(registered.includes('createMeasuredTemplate'));
+        assert.equal(registered.includes('createMeasuredTemplate'), false, 'V14 adapter does not register MeasuredTemplate create hooks');
 
         registered.length = 0;
         const adapterV13 = new FoundryVTTV13Adapter();
@@ -262,7 +262,7 @@ test('abstracted registerPlacementHooks combines both Foundry version adapter an
     }
 });
 
-test('FoundryVTTV14Adapter applyDocumentPlacement and updatePreviewShape handle both Region and MeasuredTemplate in V14', () => {
+test('FoundryVTTV14Adapter applyDocumentPlacement and updatePreviewShape strictly handle Region documents in V14', () => {
     const adapterV14 = new FoundryVTTV14Adapter();
 
     // 1. Test Region placement
@@ -283,33 +283,13 @@ test('FoundryVTTV14Adapter applyDocumentPlacement and updatePreviewShape handle 
     assert.equal(regionUpdate.fillAlpha, 0.4);
     assert.equal(regionUpdate.borderAlpha, 0.8);
 
-    // 2. Test MeasuredTemplate placement
-    let templateUpdate = null;
-    const templateDoc = {
-        t: 'circle',
-        updateSource: (data) => { templateUpdate = data; }
-    };
-    adapterV14.applyDocumentPlacement(templateDoc, { x: 300, y: 400, distance: 30 }, { itemName: 'Test Template', placedFillColor: '#ff0000', placedBorderColor: '#0000ff' });
-    assert.equal(templateUpdate.x, 300);
-    assert.equal(templateUpdate.y, 400);
-    assert.equal(templateUpdate.distance, 30);
-    assert.equal(templateUpdate.fillColor, '#ff0000');
-    assert.equal(templateUpdate.borderColor, '#0000ff');
-
-    // 3. Test updatePreviewShape
+    // 2. Test updatePreviewShape on Region document
     const shapePreviewDoc = { shapes: [{ toObject: () => ({ _id: 'old_id', type: 'circle', x: 0, y: 0, radius: 10 }) }] };
     adapterV14.updatePreviewShape(shapePreviewDoc, { x: 150, y: 250, radius: 35, gridUnits: false });
     assert.equal(shapePreviewDoc.shapes[0].x, 150);
     assert.equal(shapePreviewDoc.shapes[0].y, 250);
     assert.equal(shapePreviewDoc.shapes[0].radius, 35);
     assert.equal(shapePreviewDoc.shapes[0]._id, undefined); // Rule 9: no _id property on updated shape
-
-    const templatePreviewDoc = { t: 'cone' };
-    adapterV14.updatePreviewShape(templatePreviewDoc, { x: 50, y: 60, direction: 45, distance: 20 });
-    assert.equal(templatePreviewDoc.x, 50);
-    assert.equal(templatePreviewDoc.y, 60);
-    assert.equal(templatePreviewDoc.direction, 45);
-    assert.equal(templatePreviewDoc.distance, 20);
 });
 
 test('Pf2eSystemAdapter handleProgrammaticPlacement branches between Region shapes and MeasuredTemplate coordinates', async () => {

@@ -85,7 +85,7 @@ For game systems without native integration or modules looking to programmatical
 
 
 Bakana's Better Crosshairs uses a decoupled **System Adapter & Foundry Adapter** architecture:
-* **Foundry VTT V14+ (`Region` Workflows)**: Intercepts targeting via `drawMeasuredTemplate` → `preCreateRegion` → `createRegion`, automatically converting game feet (`30 ft`) into exact canvas pixel dimensions (`* pxPerFoot`) and grid units (`{ gridUnits: true }`) for Sequencer effects.
+* **Foundry VTT V14+ (`Region` Workflows)**: Intercepts targeting via `drawRegion` → `preCreateRegion` → `createRegion`, automatically converting game feet (`30 ft`) into exact canvas pixel dimensions (`* pxPerFoot`) and grid units (`{ gridUnits: true }`) for Sequencer effects.
 * **Foundry VTT V12 & V13 (`MeasuredTemplate` Workflows)**: Runs with version-isolated legacy pixel sizing (`{ factor: 1, gridUnits: false }`) and `MeasuredTemplate` lifecycle hooks (`drawMeasuredTemplate` → `preCreateMeasuredTemplate` → `createMeasuredTemplate`).
 * **D&D 5e (`dnd5e` v3 / v4.x)**: Full support for native Activity workflows (`item.system.activities`), multi-activity priority filtering (`activityId` / `activityName`), and spell origin UUID lookup (`flags.dnd5e.origin`).
 * **System Agnostic (`BaseSystemAdapter`)**: Automatically supports any system that spawns standard `MeasuredTemplate` or `Region` placeables.
