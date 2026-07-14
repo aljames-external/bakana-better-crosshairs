@@ -615,69 +615,63 @@ export class BaseFoundryVTTAdapter {
 
         const snappedMouse = snapPt({ x: rawClickX, y: rawClickY }, centerMode);
 
-        const tx = tok.x ?? 0;
-        const ty = tok.y ?? 0;
-        const w = tok.w ?? size;
-        const h = tok.h ?? size;
+        const tx = tok.x ?? tok.document?.x ?? 0;
+        const ty = tok.y ?? tok.document?.y ?? 0;
+        const w = tok.w ?? (tok.document?.width ? tok.document.width * size : (tok.width ? tok.width * size : size));
+        const h = tok.h ?? (tok.document?.height ? tok.document.height * size : (tok.height ? tok.height * size : size));
+        const centerPoint = tok.center ?? tok.document?.center ?? { x: tx + w / 2, y: ty + h / 2 };
 
         const points = [tx, ty, tx + w, ty, tx + w, ty + h, tx, ty + h];
-        const centerPoint = tok.center;
 
-        const RayClass = foundry?.canvas?.geometry?.Ray ?? globalThis.Ray;
-        if (!RayClass) {
-            return { x: centerPoint.x, y: centerPoint.y, direction: 0 };
-        }
-
-        const ray = new RayClass(centerPoint, snappedMouse);
         let intersection = null;
-        if (typeof ray.intersectSegment === "function") {
+        if (typeof foundry?.utils?.lineSegmentIntersection === "function") {
             for (let i = 0; i < points.length; i += 2) {
                 const p1 = { x: points[i], y: points[i + 1] };
                 const p2Idx = (i + 2) >= points.length ? 0 : (i + 2);
                 const p2 = { x: points[p2Idx], y: points[p2Idx + 1] };
-                intersection = ray.intersectSegment([p1.x, p1.y, p2.x, p2.y]);
+                intersection = foundry.utils.lineSegmentIntersection(centerPoint, snappedMouse, p1, p2);
                 if (intersection) break;
             }
         }
 
         if (!intersection) {
-            intersection = { x: snappedMouse.x, y: snappedMouse.y };
-        }
-
-        let snappedIntersection = snapPt(intersection, edgeMidpointMode);
-
-        const isSquareGrid = canvas?.scene?.grid?.type === (typeof CONST !== "undefined" ? CONST.GRID_TYPES?.SQUARE : 1);
-        if (isSquareGrid) {
-            const left = snappedMouse.x < points[0];
-            const above = snappedMouse.y < points[1];
-            const right = snappedMouse.x > points[2];
-            const below = snappedMouse.y > points[5];
-            if ((left || right) && (below || above)) {
-                snappedIntersection.x = left ? points[0] - size : (right ? points[2] + size : snappedIntersection.x);
-                snappedIntersection.y = above ? points[1] - size : (right ? points[5] + size : snappedIntersection.y);
-                if (above && left) {
-                    snappedIntersection.x = points[0];
-                    snappedIntersection.y = points[1];
-                } else if (above && right) {
-                    snappedIntersection.x = points[2];
-                    snappedIntersection.y = points[3];
-                } else if (below && right) {
-                    snappedIntersection.x = points[4];
-                    snappedIntersection.y = points[5];
-                } else if (below && left) {
-                    snappedIntersection.x = points[6];
-                    snappedIntersection.y = points[7];
+            const RayClass = foundry?.canvas?.geometry?.Ray ?? globalThis.Ray;
+            if (RayClass) {
+                const ray = new RayClass(centerPoint, snappedMouse);
+                if (typeof ray.intersectSegment === "function") {
+                    for (let i = 0; i < points.length; i += 2) {
+                        const p1 = { x: points[i], y: points[i + 1] };
+                        const p2Idx = (i + 2) >= points.length ? 0 : (i + 2);
+                        const p2 = { x: points[p2Idx], y: points[p2Idx + 1] };
+                        intersection = ray.intersectSegment([p1.x, p1.y, p2.x, p2.y]);
+                        if (intersection) break;
+                    }
                 }
             }
         }
 
-        const origin = (snappedIntersection.x === snappedMouse.x && snappedIntersection.y === snappedMouse.y) ? centerPoint : snappedIntersection;
-        let dragAngle = (new RayClass(origin, snappedMouse)).angle;
-        if (typeof dragAngle !== "number" || Number.isNaN(dragAngle)) {
-            dragAngle = Math.atan2(snappedMouse.y - origin.y, snappedMouse.x - origin.x);
+        if (!intersection) {
+            const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+            intersection = {
+                x: clamp(snappedMouse.x, tx, tx + w),
+                y: clamp(snappedMouse.y, ty, ty + h)
+            };
+            if (intersection.x === snappedMouse.x && intersection.y === snappedMouse.y) {
+                const dx = snappedMouse.x - centerPoint.x;
+                const dy = snappedMouse.y - centerPoint.y;
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    intersection.x = dx >= 0 ? tx + w : tx;
+                } else {
+                    intersection.y = dy >= 0 ? ty + h : ty;
+                }
+            }
         }
-        let direction = dragAngle * (180 / Math.PI);
-        if (direction < 0) direction += 360;
+
+        const snappedIntersection = snapPt(intersection, edgeMidpointMode);
+
+        let dragAngle = Math.atan2(snappedMouse.y - centerPoint.y, snappedMouse.x - centerPoint.x) * (180 / Math.PI);
+        if (dragAngle < 0) dragAngle += 360;
+        const direction = dragAngle % 360;
 
         return {
             x: snappedIntersection.x,
