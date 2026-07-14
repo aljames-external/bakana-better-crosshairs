@@ -68,11 +68,6 @@ export function resolveCrosshairIcon(iconPath) {
  */
 function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
     if (!tmpl) return;
-    if (wheelEvent && typeof tmpl._onRotate === "function" && tmpl !== crosshair?.template && !tmpl.isCrosshair) {
-        try {
-            tmpl._onRotate(wheelEvent);
-        } catch (e) {}
-    }
     if (crosshairAdapter?.updatePreviewShape && tmpl.document) {
         try {
             const dims = tmpl._bbcDimensions ?? tmpl.document?._bbcDimensions ?? globalThis._activeBBCDimensions;
