@@ -337,6 +337,13 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 shape.width = isGridUnits ? Math.round(coords.width * pxPerFoot) : coords.width;
             }
         }
+        log.debug("FoundryVTTV14Adapter._formatRegionShapeUpdate | Result:", {
+            shapeType: shape.type,
+            inputCoords: coords,
+            pxPerFoot,
+            isGridUnits,
+            outputShape: shape
+        });
         return shape;
     }
 }

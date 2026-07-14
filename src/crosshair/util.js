@@ -96,6 +96,13 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
                 targetY = snapped.y;
             }
 
+            log.debug("refreshTemplateHighlights | BEFORE updatePreviewShape:", {
+                tmplClassName: tmpl.constructor?.name,
+                tmplPosition: { x: tmpl.x, y: tmpl.y },
+                mousePosition: canvas?.mousePosition,
+                targetCoords: { targetX, targetY, initialDist, initialWidth, isGridUnits, isSticky }
+            });
+
             crosshairAdapter.updatePreviewShape(tmpl.document, {
                 x: targetX,
                 y: targetY,
@@ -149,6 +156,11 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
     if (typeof tmpl.highlightGrid === "function") {
         try { tmpl.highlightGrid(); } catch (e) {}
     }
+
+    log.debug("refreshTemplateHighlights | AFTER refresh:", {
+        tmplShape: tmpl.shape ? { x: tmpl.shape.x, y: tmpl.shape.y, width: tmpl.shape.width, height: tmpl.shape.height, bounds: tmpl.shape.bounds } : null,
+        docShapes: tmpl.document?.shapes?.contents?.map?.(s => (typeof s?.toObject === "function" ? s.toObject() : s))
+    });
 }
 
 /**
@@ -430,7 +442,13 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
 
     const result = crosshairAdapter.formatPlacementCoordinates(x, y, typeof direction === "number" ? direction : 0, config);
 
-    log.debug("resolveCrosshairPlacement | Resolved and formatted placement coordinates:", result);
+    log.debug("resolveCrosshairPlacement | Resolved and formatted placement coordinates:", {
+        rawClick: { clickX, clickY },
+        snapped: { x, y },
+        direction,
+        formattedResult: result,
+        activeDimensions: globalThis._activeBBCDimensions
+    });
 
     config.context?.resolve?.(result);
     if (typeof config._onPlaced === "function") {

@@ -146,6 +146,11 @@ async function handleDrawPreview(placeable) {
                         if (coords.distance !== undefined) deferredData.distance = coords.distance;
                         else if (coords.radius !== undefined) deferredData.distance = coords.radius;
                     }
+                    log.debug(`context.resolve | Invoking createEmbeddedDocuments for ${docName}:`, {
+                        docName,
+                        resolvedCoords: coords,
+                        deferredCreatePayload: deferredData
+                    });
                     try {
                         await canvas.scene.createEmbeddedDocuments(docName, [deferredData]);
                     } catch (err) {
