@@ -189,7 +189,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 previewDoc.shapes = [updatedShape];
             }
         } else {
-            const isRect = previewDoc.t === "rect" || coords.type === "square" || coords.type === "rect" || coords.originalType === "square";
+            const isRect = previewDoc.t === "rect" || coords.type === "square" || coords.type === "rect" || coords.originalType === "square" || coords.t === "rect";
             const isSticky = Boolean(coords.sticky ?? coords.token);
             const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);
             let distFoot = coords.distance ?? coords.radius ?? coords.width;
@@ -214,6 +214,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             if (coords.direction !== undefined) updateObj.direction = coords.direction;
             else if (coords.rotation !== undefined) updateObj.direction = coords.rotation;
             if (isRect) {
+                updateObj.t = "rect";
                 const w = coords.width ?? coords.distance ?? coords.radius ?? 20;
                 const h = coords.distance ?? coords.radius ?? coords.width ?? w;
                 updateObj.distance = Math.round(Math.sqrt(w * w + h * h) * 100) / 100;
@@ -241,22 +242,16 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      */
     applyDocumentPlacement(doc, coords = {}, config = {}) {
         const styling = this.extractPlacedStylingFlags(config);
-        const shapesList = this._getShapesArray(doc);
-        const isRegion = shapesList.length > 0;
-        log.debug("FoundryVTTV14Adapter.applyDocumentPlacement | Input:", {
-            isRegion,
-            docClassName: doc.constructor?.name,
-            coords,
-            configToken: Boolean(config.token)
-        });
-
-        if (isRegion) {
+        const originalShape = doc.shapes?.[0] ?? doc.shapes?.contents?.[0];
+        if (originalShape) {
             const updateData = {
                 flags: styling.flags
             };
-            const shapeObj = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
-            const originalShape = foundry.utils.deepClone(shapeObj);
-            const shapeCoords = { ...coords, sticky: Boolean(config.token ?? coords.token ?? coords.sticky) };
+            const shapeCoords = {
+                ...coords,
+                gridUnits: coords.gridUnits ?? config.gridUnits ?? true,
+                sticky: Boolean(config.token ?? coords.token ?? coords.sticky)
+            };
             const newShape = this._formatRegionShapeUpdate(originalShape, shapeCoords);
             delete newShape._id;
             updateData.shapes = [newShape];
@@ -279,7 +274,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);
             let distFoot = coords.distance ?? coords.radius ?? coords.width;
             const widthFoot = coords.width ?? coords.distance ?? coords.radius;
-            const isRect = (doc.t === "rect" || coords.type === "square" || coords.type === "rect");
+            const isRect = (doc.t === "rect" || coords.type === "square" || coords.type === "rect" || coords.originalType === "square" || config.originalType === "square" || coords.t === "rect" || config.t === "rect" || config.type === "square" || config.type === "rect");
             if (isRect && widthFoot > 0 && distFoot > widthFoot) {
                 const isSquareDiagonal = distFoot <= widthFoot * 1.6;
                 distFoot = isSquareDiagonal ? widthFoot : Math.round(Math.sqrt(Math.max(0, distFoot * distFoot - widthFoot * widthFoot)));
@@ -302,9 +297,17 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             if (targetY !== undefined) updateData.y = targetY;
             if (coords.direction !== undefined) updateData.direction = coords.direction;
             else if (coords.rotation !== undefined) updateData.direction = coords.rotation;
-            if (coords.distance !== undefined) updateData.distance = coords.distance;
-            else if (coords.radius !== undefined) updateData.distance = coords.radius;
-            if (coords.width !== undefined) updateData.width = coords.width;
+            if (isRect) {
+                updateData.t = "rect";
+                const w = coords.width ?? coords.distance ?? coords.radius ?? config.width ?? config.distance ?? config.radius ?? 20;
+                const h = coords.distance ?? coords.radius ?? coords.width ?? config.distance ?? config.radius ?? config.width ?? w;
+                updateData.distance = Math.round(Math.sqrt(w * w + h * h) * 100) / 100;
+                updateData.width = w;
+            } else {
+                if (coords.distance !== undefined) updateData.distance = coords.distance;
+                else if (coords.radius !== undefined) updateData.distance = coords.radius;
+                if (coords.width !== undefined) updateData.width = coords.width;
+            }
 
             if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
             if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
@@ -325,6 +328,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @returns {{x: number, y: number, direction: number, rotation: number, distance: number|undefined, radius: number|undefined, width: number|undefined, gridUnits: boolean, sticky: boolean}} Formatted placement coordinates payload
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
+        const isSquareOrRect = config.originalType === "square" || config.type === "square" || config.type === "rect" || config.t === "rect" || config.t === "square";
         return {
             x,
             y,
@@ -335,8 +339,9 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             width: config.width,
             gridUnits: Boolean(config.gridUnits ?? true),
             sticky: Boolean(config.token),
-            type: config.originalType ?? config.type,
-            originalType: config.originalType
+            type: isSquareOrRect ? "square" : (config.originalType ?? config.type),
+            originalType: config.originalType,
+            t: isSquareOrRect ? "rect" : config.t
         };
     }
 

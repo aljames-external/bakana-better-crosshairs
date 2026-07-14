@@ -94,6 +94,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @returns {{x: number, y: number, direction: number, distance: number|undefined, width: number|undefined}} Formatted placement coordinates payload
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
+        const isSquareOrRect = config.originalType === "square" || config.type === "square" || config.type === "rect" || config.t === "rect" || config.t === "square";
         return {
             x,
             y,
@@ -101,8 +102,9 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
             distance: config.distance,
             width: config.width,
             sticky: Boolean(config.token),
-            type: config.originalType ?? config.type,
-            originalType: config.originalType
+            type: isSquareOrRect ? "square" : (config.originalType ?? config.type),
+            originalType: config.originalType,
+            t: isSquareOrRect ? "rect" : config.t
         };
     }
 
@@ -117,7 +119,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
     /**
      * Update live canvas preview shape coordinates during mouse drag.
      * @param {Document} previewDoc - Preview MeasuredTemplate document
-     * @param {{x?: number, y?: number, direction?: number, distance?: number}} coords - Destination preview coordinates
+     * @param {{x?: number, y?: number, direction?: number, distance?: number, width?: number, type?: string, originalType?: string, t?: string}} coords - Destination preview coordinates
      * @returns {void}
      */
     updatePreviewShape(previewDoc, coords) {
@@ -125,7 +127,16 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
         if (coords.x !== undefined) previewDoc.x = coords.x;
         if (coords.y !== undefined) previewDoc.y = coords.y;
         if (coords.direction !== undefined) previewDoc.direction = coords.direction;
-        if (coords.distance !== undefined) previewDoc.distance = coords.distance;
+        const isRect = previewDoc.t === "rect" || coords.type === "square" || coords.type === "rect" || coords.originalType === "square" || coords.t === "rect";
+        if (isRect) {
+            previewDoc.t = "rect";
+            const w = coords.width ?? coords.distance ?? 20;
+            const h = coords.distance ?? coords.width ?? w;
+            previewDoc.distance = Math.round(Math.sqrt(w * w + h * h) * 100) / 100;
+            previewDoc.width = w;
+        } else if (coords.distance !== undefined) {
+            previewDoc.distance = coords.distance;
+        }
     }
 
     /**
@@ -141,6 +152,15 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
             ...coords,
             flags: styling.flags
         };
+
+        const isRect = doc.t === "rect" || coords.type === "square" || coords.type === "rect" || coords.originalType === "square" || config.originalType === "square" || coords.t === "rect" || config.t === "rect" || config.type === "square" || config.type === "rect";
+        if (isRect) {
+            updateData.t = "rect";
+            const w = coords.width ?? coords.distance ?? config.width ?? config.distance ?? 20;
+            const h = coords.distance ?? coords.width ?? config.distance ?? config.width ?? w;
+            updateData.distance = Math.round(Math.sqrt(w * w + h * h) * 100) / 100;
+            updateData.width = w;
+        }
 
         if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
         if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
