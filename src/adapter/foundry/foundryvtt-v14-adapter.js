@@ -207,6 +207,12 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         const styling = this.extractPlacedStylingFlags(config);
         const shapesList = this._getShapesArray(doc);
         const isRegion = shapesList.length > 0;
+        log.debug("FoundryVTTV14Adapter.applyDocumentPlacement | Input:", {
+            isRegion,
+            docClassName: doc.constructor?.name,
+            coords,
+            configToken: Boolean(config.token)
+        });
 
         if (isRegion) {
             const updateData = {
@@ -231,13 +237,33 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
             if (config.hidden || config.hideTemplate) updateData.hidden = true;
 
+            log.debug("FoundryVTTV14Adapter.applyDocumentPlacement | Applying Region updateSource:", updateData);
             doc.updateSource(updateData);
         } else {
+            const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);
+            let distFoot = coords.distance ?? coords.radius ?? coords.width;
+            const widthFoot = coords.width ?? coords.distance ?? coords.radius;
+            const isRect = (doc.t === "rect" || coords.type === "square" || coords.type === "rect");
+            if (isRect && widthFoot > 0 && distFoot > widthFoot) {
+                const isSquareDiagonal = distFoot <= widthFoot * 1.6;
+                distFoot = isSquareDiagonal ? widthFoot : Math.round(Math.sqrt(Math.max(0, distFoot * distFoot - widthFoot * widthFoot)));
+            }
+
+            let targetX = coords.x;
+            let targetY = coords.y;
+            const rad = ((coords.direction ?? coords.rotation ?? doc.direction ?? 0) * Math.PI) / 180;
+            const isSticky = Boolean(config.token ?? coords.token ?? coords.sticky);
+            if (isRect && isSticky && targetX !== undefined && targetY !== undefined) {
+                const wPx = (widthFoot ?? 20) * pxPerFoot;
+                targetX = Math.round(targetX + (wPx / 2) * Math.sin(rad));
+                targetY = Math.round(targetY - (wPx / 2) * Math.cos(rad));
+            }
+
             const updateData = {
                 flags: styling.flags
             };
-            if (coords.x !== undefined) updateData.x = coords.x;
-            if (coords.y !== undefined) updateData.y = coords.y;
+            if (targetX !== undefined) updateData.x = targetX;
+            if (targetY !== undefined) updateData.y = targetY;
             if (coords.direction !== undefined) updateData.direction = coords.direction;
             else if (coords.rotation !== undefined) updateData.direction = coords.rotation;
             if (coords.distance !== undefined) updateData.distance = coords.distance;
