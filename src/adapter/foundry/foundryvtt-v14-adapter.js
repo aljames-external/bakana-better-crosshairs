@@ -85,13 +85,18 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 rect: "square"
             };
             const shapeType = shapeMap[doc.t] ?? "circle";
-            const distance = shapeType === "square" ? (doc.distance || doc.width || 20) : (doc.distance ?? 0);
-            const width = shapeType === "square" ? (doc.width || distance) : (doc.width ?? 5);
+            const rawDistance = doc.distance ?? 0;
+            const rawWidth = doc.width ?? 0;
+            let distance = rawDistance;
+            if (doc.t === "rect" && rawWidth > 0 && rawDistance > rawWidth) {
+                const isSquareDiagonal = rawDistance <= rawWidth * 1.6;
+                distance = isSquareDiagonal ? rawWidth : Math.round(Math.sqrt(Math.max(0, rawDistance * rawDistance - rawWidth * rawWidth)));
+            }
             const result = {
                 type: shapeType,
                 distance,
                 radius: distance,
-                width,
+                width: rawWidth > 0 ? rawWidth : distance,
                 angle: doc.angle ?? 53.13,
                 x: doc.x ?? 0,
                 y: doc.y ?? 0

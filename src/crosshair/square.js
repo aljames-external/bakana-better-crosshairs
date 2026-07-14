@@ -23,8 +23,14 @@ import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, sh
  * @returns {Promise<Array<*>>} A promise resolving to an array containing the configured square sequence and targets
  */
 async function create(token, config = {}) {
-    const distance = Math.round(config.distance ?? 20);
-    const width = Math.round(config.width ?? distance);
+    const rawDistance = Math.round(config.distance ?? 20);
+    const rawWidth = Math.round(config.width ?? rawDistance);
+    let distance = rawDistance;
+    if (rawWidth > 0 && rawDistance > rawWidth) {
+        const isSquareDiagonal = rawDistance <= rawWidth * 1.6;
+        distance = isSquareDiagonal ? rawWidth : Math.round(Math.sqrt(Math.max(0, rawDistance * rawDistance - rawWidth * rawWidth)));
+    }
+    const width = rawWidth > 0 ? rawWidth : distance;
     const stickToToken = shouldStickToToken(config, "square");
 
     const {
@@ -67,7 +73,7 @@ async function create(token, config = {}) {
             .name(id)
             .file(squareFile)
             .attachTo(crosshair)
-            .anchor(stickToToken ? { x: 0, y: 0.5 } : { x: 0.5, y: 0.5 })
+            .anchor(stickToToken ? { x: 0, y: 0.5 } : { x: 0, y: 0 })
             .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
             .belowTokens()
@@ -110,6 +116,10 @@ async function create(token, config = {}) {
                     }
                     return res;
                 };
+            }
+
+            if (!stickToToken && crosshair?.pivot?.set) {
+                crosshair.pivot.set(0, 0);
             }
 
             attachWheelRotation(crosshair, config);
