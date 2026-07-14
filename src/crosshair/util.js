@@ -96,7 +96,7 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
                 targetY = snapped.y;
             }
 
-            log.debug("refreshTemplateHighlights | BEFORE updatePreviewShape:", {
+            console.log("%cBBC DIAGNOSTIC | refreshTemplateHighlights BEFORE updatePreviewShape:", "background: #7b2cbf; color: #fff; padding: 2px 4px; border-radius: 2px;", {
                 tmplClassName: tmpl.constructor?.name,
                 tmplPosition: { x: tmpl.x, y: tmpl.y },
                 mousePosition: canvas?.mousePosition,
@@ -157,7 +157,7 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
         try { tmpl.highlightGrid(); } catch (e) {}
     }
 
-    log.debug("refreshTemplateHighlights | AFTER refresh:", {
+    console.log("%cBBC DIAGNOSTIC | refreshTemplateHighlights AFTER refresh:", "background: #7b2cbf; color: #fff; padding: 2px 4px; border-radius: 2px;", {
         tmplShape: tmpl.shape ? { x: tmpl.shape.x, y: tmpl.shape.y, width: tmpl.shape.width, height: tmpl.shape.height, bounds: tmpl.shape.bounds } : null,
         docShapes: tmpl.document?.shapes?.contents?.map?.(s => (typeof s?.toObject === "function" ? s.toObject() : s))
     });
@@ -245,46 +245,55 @@ export function attachWheelRotation(crosshair, config = {}) {
 
     const shapeType = config.type ?? config.t ?? "circle";
     const isAttached = shouldStickToToken(config, shapeType) && Boolean(config.token);
-    if (isAttached) {
-        log.debug("attachWheelRotation | Crosshair is attached to token. Disabling mouse wheel rotation.");
-        return;
-    }
-
     config.currentDirection = config.currentDirection ?? config.direction ?? 0;
 
-    activeWheelHandler = (event) => {
-        const requiresCtrl = systemAdapter?.requiresWheelModifier?.() ?? false;
-        if (requiresCtrl && !event.ctrlKey) return;
-        if (typeof event.preventDefault === "function") event.preventDefault();
-        if (typeof event.stopPropagation === "function") event.stopPropagation();
+    if (!isAttached) {
+        activeWheelHandler = (event) => {
+            const requiresCtrl = systemAdapter?.requiresWheelModifier?.() ?? false;
+            if (requiresCtrl && !event.ctrlKey) return;
+            if (typeof event.preventDefault === "function") event.preventDefault();
+            if (typeof event.stopPropagation === "function") event.stopPropagation();
 
-        const step = event.shiftKey ? 1 : 5;
-        const delta = event.deltaY < 0 ? -step : step;
-        config.currentDirection = (config.currentDirection + delta + 360) % 360;
+            const step = event.shiftKey ? 1 : 5;
+            const delta = event.deltaY < 0 ? -step : step;
+            config.currentDirection = (config.currentDirection + delta + 360) % 360;
 
-        const rad = config.currentDirection * (Math.PI / 180);
+            const rad = config.currentDirection * (Math.PI / 180);
 
-        alignCrosshairAndEffects(crosshair, config, rad);
+            alignCrosshairAndEffects(crosshair, config, rad);
 
-        const previewLists = [
-            canvas?.templates?.preview?.children,
-            canvas?.templates?.placeables,
-            canvas?.regions?.preview?.children,
-            canvas?.regions?.placeables,
-            crosshair?.template ? [crosshair.template] : null
-        ];
-        for (const list of previewLists) {
-            if (Array.isArray(list)) {
-                for (const p of list) {
-                    if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children || p === crosshair?.template) {
-                        refreshTemplateHighlights(p, config.currentDirection, rad, event);
+            const previewLists = [
+                canvas?.templates?.preview?.children,
+                canvas?.templates?.placeables,
+                canvas?.regions?.preview?.children,
+                canvas?.regions?.placeables,
+                crosshair?.template ? [crosshair.template] : null
+            ];
+            for (const list of previewLists) {
+                if (Array.isArray(list)) {
+                    for (const p of list) {
+                        if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children || p === crosshair?.template) {
+                            refreshTemplateHighlights(p, config.currentDirection, rad, event);
+                        }
                     }
                 }
             }
-        }
-    };
+        };
+        window.addEventListener("wheel", activeWheelHandler, { capture: true, passive: false });
+    } else {
+        log.debug("attachWheelRotation | Crosshair is attached to token. Disabling mouse wheel rotation.");
+    }
 
     activePointerHandler = () => {
+        if (isAttached && crosshair && canvas?.mousePosition) {
+            const pt = canvas.mousePosition;
+            const origin = config.token?.center ?? { x: crosshair.x, y: crosshair.y };
+            const angleRad = Math.atan2(pt.y - origin.y, pt.x - origin.x);
+            let dir = angleRad * (180 / Math.PI);
+            if (dir < 0) dir += 360;
+            config.currentDirection = dir;
+            alignCrosshairAndEffects(crosshair, config, angleRad);
+        }
         const rad = (config.currentDirection ?? 0) * (Math.PI / 180);
         const previewLists = [
             canvas?.templates?.preview?.children,
@@ -304,9 +313,8 @@ export function attachWheelRotation(crosshair, config = {}) {
         }
     };
 
-    window.addEventListener("wheel", activeWheelHandler, { capture: true, passive: false });
     window.addEventListener("pointermove", activePointerHandler, { capture: true, passive: true });
-    log.debug("attachWheelRotation | Listeners attached for crosshair rotation (capture phase).");
+    log.debug("attachWheelRotation | Listeners attached for crosshair pointer tracking and rotation (capture phase).");
 }
 
 /**
@@ -442,7 +450,7 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
 
     const result = crosshairAdapter.formatPlacementCoordinates(x, y, typeof direction === "number" ? direction : 0, config);
 
-    log.debug("resolveCrosshairPlacement | Resolved and formatted placement coordinates:", {
+    console.log("%cBBC DIAGNOSTIC | resolveCrosshairPlacement Result:", "background: #7b2cbf; color: #fff; padding: 2px 4px; border-radius: 2px;", {
         rawClick: { clickX, clickY },
         snapped: { x, y },
         direction,

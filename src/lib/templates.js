@@ -146,7 +146,7 @@ async function handleDrawPreview(placeable) {
                         if (coords.distance !== undefined) deferredData.distance = coords.distance;
                         else if (coords.radius !== undefined) deferredData.distance = coords.radius;
                     }
-                    log.debug(`context.resolve | Invoking createEmbeddedDocuments for ${docName}:`, {
+                    console.log("%cBBC DIAGNOSTIC | context.resolve createEmbeddedDocuments:", "background: #7b2cbf; color: #fff; padding: 2px 4px; border-radius: 2px;", {
                         docName,
                         resolvedCoords: coords,
                         deferredCreatePayload: deferredData
