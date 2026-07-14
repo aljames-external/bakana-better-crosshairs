@@ -83,7 +83,17 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
     }
     if (crosshairAdapter?.updatePreviewShape && tmpl.document) {
         try {
-            crosshairAdapter.updatePreviewShape(tmpl.document, { direction: newDirDeg, rotation: newDirDeg });
+            crosshairAdapter.updatePreviewShape(tmpl.document, {
+                x: tmpl.x ?? tmpl.document.x,
+                y: tmpl.y ?? tmpl.document.y,
+                direction: newDirDeg,
+                rotation: newDirDeg,
+                distance: tmpl.document.distance,
+                radius: tmpl.document.distance,
+                width: tmpl.document.width,
+                sticky: Boolean(tmpl.document?.flags?.bakana?.token ?? tmpl.document?.flags?.bbc?.token),
+                gridUnits: true
+            });
         } catch (e) {}
     }
     tmpl.direction = newDirDeg;
