@@ -214,7 +214,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             };
             const shapeObj = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
             const originalShape = foundry.utils.deepClone(shapeObj);
-            const newShape = this._formatRegionShapeUpdate(originalShape, coords);
+            const shapeCoords = { ...coords, sticky: Boolean(config.token ?? coords.token ?? coords.sticky) };
+            const newShape = this._formatRegionShapeUpdate(originalShape, shapeCoords);
             delete newShape._id;
             updateData.shapes = [newShape];
 
@@ -259,7 +260,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @param {number} y - Destination y-coordinate
      * @param {number} direction - Rotation angle in degrees
      * @param {Object} [config={}] - Optional sequence placement configuration
-     * @returns {{x: number, y: number, direction: number, rotation: number, distance: number|undefined, radius: number|undefined, width: number|undefined, gridUnits: boolean}} Formatted placement coordinates payload
+     * @returns {{x: number, y: number, direction: number, rotation: number, distance: number|undefined, radius: number|undefined, width: number|undefined, gridUnits: boolean, sticky: boolean}} Formatted placement coordinates payload
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
         return {
@@ -270,7 +271,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             distance: config.distance ?? config.radius,
             radius: config.radius ?? config.distance,
             width: config.width,
-            gridUnits: Boolean(config.gridUnits ?? true)
+            gridUnits: Boolean(config.gridUnits ?? true),
+            sticky: Boolean(config.token)
         };
     }
 
@@ -279,7 +281,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * Converts grid-unit measurements (`radius`, `width`) to canvas pixels when `coords.gridUnits` is true.
      *
      * @param {Object} originalShape - The base V14 Region shape data object (`doc.shapes[0]`)
-     * @param {Object} coords - The placement coordinates payload (`{ x, y, rotation, radius, width, gridUnits }`)
+     * @param {Object} coords - The placement coordinates payload (`{ x, y, rotation, radius, width, gridUnits, sticky }`)
      * @returns {Object} A cloned and formatted Region shape payload
      * @private
      */
@@ -296,13 +298,31 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         else if (coords.direction !== undefined) shape.rotation = coords.direction;
 
         if (shape.type === "rectangle") {
-            const distFoot = coords.distance ?? coords.radius ?? coords.width;
+            let distFoot = coords.distance ?? coords.radius ?? coords.width;
             const widthFoot = coords.width ?? coords.distance ?? coords.radius;
+            if (widthFoot > 0 && distFoot > widthFoot) {
+                const isSquareDiagonal = distFoot <= widthFoot * 1.6;
+                distFoot = isSquareDiagonal ? widthFoot : Math.round(Math.sqrt(Math.max(0, distFoot * distFoot - widthFoot * widthFoot)));
+            }
             if (distFoot !== undefined) {
                 shape.width = isGridUnits ? Math.round(distFoot * pxPerFoot) : distFoot;
             }
             if (widthFoot !== undefined) {
                 shape.height = isGridUnits ? Math.round(widthFoot * pxPerFoot) : widthFoot;
+            }
+
+            if (coords.x !== undefined && coords.y !== undefined) {
+                const wPx = shape.width ?? 200;
+                const hPx = shape.height ?? 200;
+                const rad = ((shape.rotation ?? 0) * Math.PI) / 180;
+                const isSticky = Boolean(coords.sticky ?? coords.token);
+                if (isSticky) {
+                    shape.x = Math.round(coords.x + (wPx / 2) * Math.cos(rad));
+                    shape.y = Math.round(coords.y + (wPx / 2) * Math.sin(rad));
+                } else {
+                    shape.x = Math.round(coords.x + (wPx / 2) * Math.cos(rad) - (hPx / 2) * Math.sin(rad));
+                    shape.y = Math.round(coords.y + (wPx / 2) * Math.sin(rad) + (hPx / 2) * Math.cos(rad));
+                }
             }
         } else if (shape.type === "circle") {
             const radFoot = coords.radius ?? coords.distance ?? coords.width;

@@ -306,14 +306,16 @@ test('FoundryVTTV14Adapter applyDocumentPlacement and updatePreviewShape handle 
 
     const rectShapePreviewDoc = { shapes: [{ toObject: () => ({ type: 'rectangle', x: 0, y: 0, width: 100, height: 100 }) }] };
     adapterV14.updatePreviewShape(rectShapePreviewDoc, { x: 200, y: 300, distance: 30, width: 20, gridUnits: true });
-    assert.equal(rectShapePreviewDoc.shapes[0].x, 200);
-    assert.equal(rectShapePreviewDoc.shapes[0].y, 300);
-    assert.equal(rectShapePreviewDoc.shapes[0].width, 600); // 30 feet * 20 px/foot (100px/5ft)
+    // For 20x20 feet (pxPerFoot = 100/5 = 20), width and height are 400x400 px.
+    // For detached top-left anchor {x: 200, y: 300}, center coordinate (shape.x, shape.y) is (200 + 200, 300 + 200) = (400, 500).
+    assert.equal(rectShapePreviewDoc.shapes[0].x, 400);
+    assert.equal(rectShapePreviewDoc.shapes[0].y, 500);
+    assert.equal(rectShapePreviewDoc.shapes[0].width, 400); // 20 feet * 20 px/foot (normalized from diagonal 30)
     assert.equal(rectShapePreviewDoc.shapes[0].height, 400); // 20 feet * 20 px/foot
 
     const rectDetected = adapterV14.detectProperties(rectShapePreviewDoc);
     assert.equal(rectDetected.type, 'square');
-    assert.equal(rectDetected.distance, 30);
+    assert.equal(rectDetected.distance, 20);
     assert.equal(rectDetected.width, 20);
 
     const templatePreviewDoc = { t: 'cone' };
