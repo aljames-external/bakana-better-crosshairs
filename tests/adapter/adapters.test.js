@@ -555,3 +555,28 @@ test('crosshair.util.attachWheelRotation synchronizes container and effect rotat
         }
     }
 });
+
+test('resolveAnchorPlacement keeps orthogonal angles across flat edges and changes angles only at corners', () => {
+    const adapter = new FoundryVTTV14Adapter();
+    const token = { x: 100, y: 100, w: 100, h: 100, center: { x: 150, y: 150 } };
+
+    // Flat Right Edge
+    const rightRes = adapter.resolveAnchorPlacement(token, { x: 200, y: 150 });
+    assert.equal(rightRes.direction, 0, 'Flat right edge must return 0 degrees');
+
+    // Flat Bottom Edge
+    const bottomRes = adapter.resolveAnchorPlacement(token, { x: 150, y: 200 });
+    assert.equal(bottomRes.direction, 90, 'Flat bottom edge must return 90 degrees');
+
+    // Flat Left Edge
+    const leftRes = adapter.resolveAnchorPlacement(token, { x: 100, y: 150 });
+    assert.equal(leftRes.direction, 180, 'Flat left edge must return 180 degrees');
+
+    // Flat Top Edge
+    const topRes = adapter.resolveAnchorPlacement(token, { x: 150, y: 100 });
+    assert.equal(topRes.direction, 270, 'Flat top edge must return 270 degrees');
+
+    // Bottom-Right Corner
+    const brRes = adapter.resolveAnchorPlacement(token, { x: 200, y: 200 });
+    assert.equal(brRes.direction, 45, 'Bottom-right corner must return 45 degrees');
+});

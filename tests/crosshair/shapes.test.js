@@ -149,3 +149,14 @@ test('SquareCrosshairShape.getGraphicDimensions normalizes diagonal distance on 
     const dims = squareShape.getGraphicDimensions();
     assert.equal(dims.widthPx, dims.heightPx, 'Width and height must be identical for a 20x20 square/cube template');
 });
+
+test('SquareCrosshairShape anchors branch between left-middle when attached to token and top-left when detached', () => {
+    const dummyToken = new globalThis.Token();
+    const stickySquare = new SquareCrosshairShape(dummyToken, { stickToToken: "true" });
+    assert.deepEqual(stickySquare.animationAnchor, { x: 0, y: 0.5 });
+    assert.deepEqual(stickySquare.shapeAnchor, { x: 0, y: 0.5 });
+
+    const detachedSquare = new SquareCrosshairShape(null, { stickToToken: "false" });
+    assert.deepEqual(detachedSquare.animationAnchor, { x: 0, y: 0 });
+    assert.deepEqual(detachedSquare.shapeAnchor, { x: 0, y: 0 });
+});

@@ -619,19 +619,18 @@ export class BaseFoundryVTTAdapter {
 
         const ray = new RayClass(centerPoint, snappedMouse);
         let intersection = null;
-        for (let i = 0; i < points.length; i += 2) {
-            const p1 = { x: points[i], y: points[i + 1] };
-            const p2Idx = (i + 2) >= points.length ? 0 : (i + 2);
-            const p2 = { x: points[p2Idx], y: points[p2Idx + 1] };
-            intersection = ray.intersectSegment([p1.x, p1.y, p2.x, p2.y]);
-            if (intersection) break;
+        if (typeof ray.intersectSegment === "function") {
+            for (let i = 0; i < points.length; i += 2) {
+                const p1 = { x: points[i], y: points[i + 1] };
+                const p2Idx = (i + 2) >= points.length ? 0 : (i + 2);
+                const p2 = { x: points[p2Idx], y: points[p2Idx + 1] };
+                intersection = ray.intersectSegment([p1.x, p1.y, p2.x, p2.y]);
+                if (intersection) break;
+            }
         }
 
         if (!intersection) {
-            const angleRad = Math.atan2(snappedMouse.y - centerPoint.y, snappedMouse.x - centerPoint.x);
-            let dir = angleRad * (180 / Math.PI);
-            if (dir < 0) dir += 360;
-            return { x: centerPoint.x, y: centerPoint.y, direction: dir };
+            intersection = { x: snappedMouse.x, y: snappedMouse.y };
         }
 
         let snappedIntersection = snapPt(intersection, edgeMidpointMode);
@@ -661,9 +660,28 @@ export class BaseFoundryVTTAdapter {
             }
         }
 
-        const dragAngle = (new RayClass(snappedIntersection, snappedMouse)).angle;
-        let direction = dragAngle * (180 / Math.PI);
-        if (direction < 0) direction += 360;
+        const sx = snappedIntersection.x;
+        const sy = snappedIntersection.y;
+
+        const onLeft = Math.abs(sx - tx) < 2;
+        const onRight = Math.abs(sx - (tx + w)) < 2;
+        const onTop = Math.abs(sy - ty) < 2;
+        const onBottom = Math.abs(sy - (ty + h)) < 2;
+
+        let direction = 0;
+        if (onTop && onRight) direction = 315;
+        else if (onBottom && onRight) direction = 45;
+        else if (onBottom && onLeft) direction = 135;
+        else if (onTop && onLeft) direction = 225;
+        else if (onRight) direction = 0;
+        else if (onBottom) direction = 90;
+        else if (onLeft) direction = 180;
+        else if (onTop) direction = 270;
+        else {
+            const dragAngle = (new RayClass(snappedIntersection, snappedMouse)).angle;
+            direction = dragAngle * (180 / Math.PI);
+            if (direction < 0) direction += 360;
+        }
 
         return {
             x: snappedIntersection.x,

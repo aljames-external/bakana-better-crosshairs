@@ -150,11 +150,12 @@ function rotateCrosshairInstance(crosshair, newDirDeg) {
     if (!crosshair) return;
     const rad = newDirDeg * (Math.PI / 180);
 
-    const isRect = crosshair.type === "rect" || crosshair.config?.type === "rect" || crosshair.data?.type === "rect" ||
-                   crosshair.type === "square" || crosshair.config?.type === "square" || crosshair.data?.type === "square";
+    const shapeType = crosshair.type ?? crosshair.config?.type ?? crosshair.data?.type ?? "circle";
+    const isRect = shapeType === "rect" || shapeType === "square";
+    const isAttached = shouldStickToToken(crosshair.config ?? {}, shapeType) && Boolean(crosshair.config?.token ?? crosshair.token);
 
     crosshair.direction = newDirDeg;
-    if (!isRect) {
+    if (!isRect || isAttached) {
         crosshair.rotation = rad;
     } else {
         crosshair.rotation = 0;
@@ -168,7 +169,6 @@ function rotateCrosshairInstance(crosshair, newDirDeg) {
         crosshair.data.direction = newDirDeg;
         crosshair.data.rotation = rad;
     }
-
     const tmpl = crosshair.template;
     if (tmpl) {
         refreshTemplateHighlights(tmpl, newDirDeg, rad);
@@ -203,61 +203,58 @@ export function attachWheelRotation(crosshair, config = {}) {
 
     const shapeType = config.type ?? config.t ?? "circle";
     const isAttached = shouldStickToToken(config, shapeType) && Boolean(config.token);
-    if (isAttached) {
-        log.debug("attachWheelRotation | Crosshair is attached to token. Disabling mouse wheel rotation.");
-        return;
-    }
 
     config.currentDirection = config.currentDirection ?? config.direction ?? 0;
 
-    activeWheelHandler = (event) => {
-        const requiresCtrl = systemAdapter?.requiresWheelModifier?.() ?? false;
-        if (requiresCtrl && !event.ctrlKey) return;
-        if (typeof event.preventDefault === "function") event.preventDefault();
-        if (typeof event.stopPropagation === "function") event.stopPropagation();
+    if (!isAttached) {
+        activeWheelHandler = (event) => {
+            const requiresCtrl = systemAdapter?.requiresWheelModifier?.() ?? false;
+            if (requiresCtrl && !event.ctrlKey) return;
+            if (typeof event.preventDefault === "function") event.preventDefault();
+            if (typeof event.stopPropagation === "function") event.stopPropagation();
 
-        const step = event.shiftKey ? 1 : 5; // 5 degrees normally (72 mousewheel steps per 360° turn)
-        const delta = event.deltaY < 0 ? -step : step;
-        config.currentDirection = (config.currentDirection + delta + 360) % 360;
+            const step = event.shiftKey ? 1 : 5; // 5 degrees normally (72 mousewheel steps per 360° turn)
+            const delta = event.deltaY < 0 ? -step : step;
+            config.currentDirection = (config.currentDirection + delta + 360) % 360;
 
-        const rad = config.currentDirection * (Math.PI / 180);
+            const rad = config.currentDirection * (Math.PI / 180);
 
-        log.debug("Crosshair mousewheel rotation | Wheel scrolled:", {
-            deltaY: event.deltaY,
-            step: delta,
-            newDirection: config.currentDirection
-        });
-        log.debug("Crosshair mousewheel rotation | Preview inspection:", {
-            crosshairType: crosshair?.constructor?.name,
-            hasCrosshairTemplate: Boolean(crosshair?.template),
-            crosshairTemplateType: crosshair?.template?.constructor?.name,
-            crosshairTemplateDocType: crosshair?.template?.document?.constructor?.name,
-            templatesPreviewChildren: canvas?.templates?.preview?.children?.map?.(c => ({ className: c.constructor.name, isPreview: Boolean(c.isPreview) })),
-            regionsPreviewChildren: canvas?.regions?.preview?.children?.map?.(c => ({ className: c.constructor.name, isPreview: Boolean(c.isPreview) }))
-        });
-        alignCrosshairAndEffects(crosshair, config, rad);
+            log.debug("Crosshair mousewheel rotation | Wheel scrolled:", {
+                deltaY: event.deltaY,
+                step: delta,
+                newDirection: config.currentDirection
+            });
+            alignCrosshairAndEffects(crosshair, config, rad);
 
-        // 4. Update any active Core Foundry preview MeasuredTemplate or Region shape & grid highlight overlay
-        const previewLists = [
-            canvas?.templates?.preview?.children,
-            canvas?.templates?.placeables,
-            canvas?.regions?.preview?.children,
-            canvas?.regions?.placeables,
-            crosshair?.template ? [crosshair.template] : null
-        ];
-        for (const list of previewLists) {
-            if (Array.isArray(list)) {
-                for (const p of list) {
-                    if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children || p === crosshair?.template) {
-                        refreshTemplateHighlights(p, config.currentDirection, rad, event);
+            const previewLists = [
+                canvas?.templates?.preview?.children,
+                canvas?.templates?.placeables,
+                canvas?.regions?.preview?.children,
+                canvas?.regions?.placeables,
+                crosshair?.template ? [crosshair.template] : null
+            ];
+            for (const list of previewLists) {
+                if (Array.isArray(list)) {
+                    for (const p of list) {
+                        if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children || p === crosshair?.template) {
+                            refreshTemplateHighlights(p, config.currentDirection, rad, event);
+                        }
                     }
                 }
             }
-        }
-    };
+        };
+        window.addEventListener("wheel", activeWheelHandler, { capture: true, passive: false });
+    }
 
     activePointerHandler = () => {
+        if (isAttached && config.token && canvas?.mousePosition && crosshairAdapter?.resolveAnchorPlacement) {
+            const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, canvas.mousePosition);
+            config.currentDirection = anchored.direction;
+        }
         const rad = config.currentDirection * (Math.PI / 180);
+        if (isAttached && crosshair) {
+            alignCrosshairAndEffects(crosshair, config, rad);
+        }
         const previewLists = [
             canvas?.templates?.preview?.children,
             canvas?.templates?.placeables,
@@ -279,9 +276,8 @@ export function attachWheelRotation(crosshair, config = {}) {
         }
     };
 
-    window.addEventListener("wheel", activeWheelHandler, { capture: true, passive: false });
     window.addEventListener("pointermove", activePointerHandler, { capture: true, passive: true });
-    log.debug("attachWheelRotation | Mousewheel & pointermove listeners attached for crosshair rotation (capture phase).");
+    log.debug("attachWheelRotation | Listeners attached for crosshair rotation (capture phase).");
 }
 
 /**
@@ -295,15 +291,16 @@ export function attachWheelRotation(crosshair, config = {}) {
 export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
     rotateCrosshairInstance(crosshair, config.currentDirection ?? config.direction ?? 0);
 
-    const isRect = config.type === "rect" || config.t === "rect" || config.type === "square" || config.t === "square" ||
-                   crosshair?.type === "rect" || crosshair?.type === "square";
+    const shapeType = config.type ?? config.t ?? crosshair?.type ?? "circle";
+    const isRect = shapeType === "rect" || shapeType === "square";
+    const isAttached = shouldStickToToken(config, shapeType) && Boolean(config.token ?? crosshair?.config?.token ?? crosshair?.token);
 
     // Synchronize rotation across all active Sequencer visual effect graphics without fighting Sequencer's internal pivot/anchor layout
     if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
         try {
             const effects = Sequencer.EffectManager.getEffects({ name: config.id });
             for (const eff of effects) {
-                if (isRect && eff.container) {
+                if (isRect && !isAttached && eff.container) {
                     eff.container.pivot.set(0, 0);
                     if (eff.sprite) eff.sprite.position.set(0, 0);
                     if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);

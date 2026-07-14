@@ -170,7 +170,8 @@ export class BaseCrosshairShape {
             animationAnchor: this.animationAnchor
         });
 
-        const attachOptions = this.type === "rect" ? { align: "top-left" } : {};
+        const isSticky = this.stickToToken && Boolean(this.token);
+        const attachOptions = (this.type === "rect" && !isSticky) ? { align: "top-left" } : { bindRotation: true };
         seq.effect()
             .name(this.id)
             .file(effectFile)
@@ -213,7 +214,7 @@ export class BaseCrosshairShape {
         this.configureCrosshairShape(crosshairSeq);
 
         if (this.stickToToken && this.token) {
-            crosshairSeq.location(this.token, { lockToEdge: true, lockToEdgeDirection: false });
+            crosshairSeq.location(this.token, { lockToEdge: true, lockToEdgeDirection: true });
         } else if (this.config.snapToGrid !== false && this.config.snapToGrid !== "none") {
             const snapMode = getGridSnapMode(this.config);
             if (snapMode !== 0) crosshairSeq.snapPosition(snapMode);
