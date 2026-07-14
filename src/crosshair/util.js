@@ -68,6 +68,12 @@ export function resolveCrosshairIcon(iconPath) {
  */
 function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
     if (!tmpl) return;
+    if (tmpl.isPreview && typeof tmpl._onRotate === "function" && !tmpl._bbcRotateOverridden) {
+        tmpl._bbcRotateOverridden = true;
+        tmpl._onRotate = function(event) {
+            if (event && typeof event.stopPropagation === "function") event.stopPropagation();
+        };
+    }
     if (crosshairAdapter?.updatePreviewShape && tmpl.document) {
         try {
             const dims = tmpl._bbcDimensions ?? tmpl.document?._bbcDimensions ?? globalThis._activeBBCDimensions;
@@ -241,6 +247,7 @@ export function attachWheelRotation(crosshair, config = {}) {
             const requiresCtrl = systemAdapter?.requiresWheelModifier?.() ?? false;
             if (requiresCtrl && !event.ctrlKey) return;
             if (typeof event.preventDefault === "function") event.preventDefault();
+            if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
             if (typeof event.stopPropagation === "function") event.stopPropagation();
 
             const step = event.shiftKey ? 1 : 5;
