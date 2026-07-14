@@ -180,13 +180,32 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 previewDoc.shapes = [updatedShape];
             }
         } else {
+            const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);
+            let distFoot = coords.distance ?? coords.radius ?? coords.width;
+            const widthFoot = coords.width ?? coords.distance ?? coords.radius;
+            const isRect = (previewDoc.t === "rect" || coords.type === "square" || coords.type === "rect");
+            if (isRect && widthFoot > 0 && distFoot > widthFoot) {
+                const isSquareDiagonal = distFoot <= widthFoot * 1.6;
+                distFoot = isSquareDiagonal ? widthFoot : Math.round(Math.sqrt(Math.max(0, distFoot * distFoot - widthFoot * widthFoot)));
+            }
+
+            let targetX = coords.x;
+            let targetY = coords.y;
+            const rad = ((coords.direction ?? coords.rotation ?? previewDoc.direction ?? 0) * Math.PI) / 180;
+            const isSticky = Boolean(coords.sticky ?? coords.token);
+            if (isRect && isSticky && targetX !== undefined && targetY !== undefined) {
+                const wPx = (widthFoot ?? 20) * pxPerFoot;
+                targetX = Math.round(targetX + (wPx / 2) * Math.sin(rad));
+                targetY = Math.round(targetY - (wPx / 2) * Math.cos(rad));
+            }
+
             const updateObj = {};
-            if (coords.x !== undefined) updateObj.x = coords.x;
-            if (coords.y !== undefined) updateObj.y = coords.y;
+            if (targetX !== undefined) updateObj.x = targetX;
+            if (targetY !== undefined) updateObj.y = targetY;
             if (coords.direction !== undefined) updateObj.direction = coords.direction;
             else if (coords.rotation !== undefined) updateObj.direction = coords.rotation;
-            if (coords.distance !== undefined) updateObj.distance = coords.distance;
-            else if (coords.radius !== undefined) updateObj.distance = coords.radius;
+            if (distFoot !== undefined) updateObj.distance = distFoot;
+            if (widthFoot !== undefined) updateObj.width = widthFoot;
 
             try {
                 previewDoc.updateSource(updateObj);
