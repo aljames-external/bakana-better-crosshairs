@@ -75,11 +75,20 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         });
 
         const shapesList = this._getShapesArray(doc);
-        const shape = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : (shapesList[0] ?? {});
-        let shapeType = "circle";
-        if (shape.type === "circle") shapeType = "circle";
-        else if (shape.type === "cone") shapeType = "cone";
-        else if (shape.type === "rectangle" || shape.type === "polygon") shapeType = "square";
+        if (shapesList.length === 0) {
+            throw new Error("FoundryVTTV14Adapter.detectProperties | No shapes found in Region document:", doc);
+        }
+
+        const shape = shapesList[0].toObject();
+        let shapeType = undefined;
+        switch (shape.type) {
+            case "circle":      shapeType = "circle";   break;
+            case "cone":        shapeType = "cone";     break;
+            case "rectangle":
+            case "polygon":     shapeType = "square";   break;
+            default:
+                throw new Error("FoundryVTTV14Adapter.detectProperties | Unrecognized Region shape type:", shape.type);
+        }
 
         const pxPerFoot = (canvas.dimensions?.size ?? 100) / (canvas.dimensions?.distance ?? 5);
         const rawRadius = shape.radius ?? 0;
@@ -103,8 +112,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @returns {Array} Array of shape objects or models
      */
     _getShapesArray(doc) {
-        if (!doc) return [];
-        return doc.shapes?.contents ?? (Array.isArray(doc.shapes) ? doc.shapes : []);
+        return doc.shapes ?? [];
     }
 
     /**
@@ -127,16 +135,12 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         const shapesList = this._getShapesArray(previewDoc);
         if (shapesList.length === 0) return;
 
-        const orig = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
+        const orig = shapesList[0].toObject();
         const updatedShape = this._formatRegionShapeUpdate(orig, coords);
         delete updatedShape._id;
-        if (typeof previewDoc.updateSource === "function") {
-            try {
-                previewDoc.updateSource({ shapes: [updatedShape] });
-            } catch (e) {
-                previewDoc.shapes = [updatedShape];
-            }
-        } else {
+        try {
+            previewDoc.updateSource({ shapes: [updatedShape] }); 
+        } catch (e) {
             previewDoc.shapes = [updatedShape];
         }
     }
@@ -156,7 +160,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         const updateData = {
             flags: styling.flags
         };
-        const shapeObj = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
+        const shapeObj = shapesList[0].toObject();
         const originalShape = foundry.utils.deepClone(shapeObj);
         const newShape = this._formatRegionShapeUpdate(originalShape, coords);
         delete newShape._id;
