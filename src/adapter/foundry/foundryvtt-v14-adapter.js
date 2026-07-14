@@ -87,16 +87,13 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             const shapeType = shapeMap[doc.t] ?? "circle";
             const rawDistance = doc.distance ?? 0;
             const rawWidth = doc.width ?? 0;
-            let distance = rawDistance;
-            if (doc.t === "rect" && rawWidth > 0 && rawDistance > rawWidth) {
-                const isSquareDiagonal = rawDistance <= rawWidth * 1.6;
-                distance = isSquareDiagonal ? rawWidth : Math.round(Math.sqrt(Math.max(0, rawDistance * rawDistance - rawWidth * rawWidth)));
-            }
+            const distance = shapeType === "square" ? (rawDistance || rawWidth || 20) : rawDistance;
+            const width = shapeType === "square" ? (rawWidth || distance) : (rawWidth || 5);
             const result = {
                 type: shapeType,
                 distance,
                 radius: distance,
-                width: rawWidth > 0 ? rawWidth : distance,
+                width,
                 angle: doc.angle ?? 53.13,
                 x: doc.x ?? 0,
                 y: doc.y ?? 0
@@ -205,8 +202,16 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             if (targetY !== undefined) updateObj.y = targetY;
             if (coords.direction !== undefined) updateObj.direction = coords.direction;
             else if (coords.rotation !== undefined) updateObj.direction = coords.rotation;
-            if (coords.distance !== undefined) updateObj.distance = coords.distance;
-            else if (coords.radius !== undefined) updateObj.distance = coords.radius;
+            if (isRect) {
+                const w = coords.width ?? coords.distance ?? coords.radius ?? 20;
+                const h = coords.distance ?? coords.radius ?? coords.width ?? w;
+                updateObj.distance = Math.round(Math.sqrt(w * w + h * h) * 100) / 100;
+                updateObj.width = w;
+            } else {
+                if (coords.distance !== undefined) updateObj.distance = coords.distance;
+                else if (coords.radius !== undefined) updateObj.distance = coords.radius;
+                if (coords.width !== undefined) updateObj.width = coords.width;
+            }
 
             if (typeof previewDoc.updateSource === "function") {
                 try {
@@ -276,9 +281,16 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             if (targetY !== undefined) updateData.y = targetY;
             if (coords.direction !== undefined) updateData.direction = coords.direction;
             else if (coords.rotation !== undefined) updateData.direction = coords.rotation;
-            if (coords.distance !== undefined) updateData.distance = coords.distance;
-            else if (coords.radius !== undefined) updateData.distance = coords.radius;
-            if (coords.width !== undefined) updateData.width = coords.width;
+            if (isRect) {
+                const w = coords.width ?? coords.distance ?? coords.radius ?? 20;
+                const h = coords.distance ?? coords.radius ?? coords.width ?? w;
+                updateData.distance = Math.round(Math.sqrt(w * w + h * h) * 100) / 100;
+                updateData.width = w;
+            } else {
+                if (coords.distance !== undefined) updateData.distance = coords.distance;
+                else if (coords.radius !== undefined) updateData.distance = coords.radius;
+                if (coords.width !== undefined) updateData.width = coords.width;
+            }
 
             if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
             if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
