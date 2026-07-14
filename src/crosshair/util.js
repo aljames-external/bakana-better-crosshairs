@@ -155,6 +155,12 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
     if (typeof tmpl.highlightGrid === "function") {
         try { tmpl.highlightGrid(); } catch (e) {}
     }
+    if (crosshairAdapter?.hidePreview) {
+        try { crosshairAdapter.hidePreview(tmpl); } catch (e) {}
+    }
+    if (tmpl.template) { try { tmpl.template.visible = false; tmpl.template.renderable = false; tmpl.template.alpha = 0; } catch (e) {} }
+    if (tmpl.shape) { try { tmpl.shape.visible = false; tmpl.shape.renderable = false; tmpl.shape.alpha = 0; } catch (e) {} }
+    if (tmpl.border) { try { tmpl.border.visible = false; tmpl.border.renderable = false; tmpl.border.alpha = 0; } catch (e) {} }
 }
 
 /**
