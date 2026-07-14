@@ -239,6 +239,7 @@ async function handleDrawPreview(placeable) {
                 gridUnits: Boolean(finalConfig.gridUnits ?? true)
             };
             globalThis._activeBBCDimensions = initialDims;
+            globalThis._activeBBCPlaceable = placeable;
             placeable._bbcDimensions = initialDims;
             placeable._bbcConfig = finalConfig;
             if (placeable.document) {

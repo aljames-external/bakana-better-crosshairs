@@ -68,6 +68,11 @@ export function resolveCrosshairIcon(iconPath) {
  */
 function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
     if (!tmpl) return;
+    log.debug("refreshTemplateHighlights | ENTRY:", {
+        tmplClassName: tmpl.constructor?.name,
+        hasDocument: Boolean(tmpl.document),
+        hasAdapterUpdate: Boolean(crosshairAdapter?.updatePreviewShape)
+    });
     if (wheelEvent && typeof tmpl._onRotate === "function" && tmpl !== crosshair?.template && !tmpl.isCrosshair) {
         try {
             tmpl._onRotate(wheelEvent);
@@ -96,7 +101,7 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
                 targetY = snapped.y;
             }
 
-            console.log("%cBBC DIAGNOSTIC | refreshTemplateHighlights BEFORE updatePreviewShape:", "background: #7b2cbf; color: #fff; padding: 2px 4px; border-radius: 2px;", {
+            log.debug("refreshTemplateHighlights | BEFORE updatePreviewShape:", {
                 tmplClassName: tmpl.constructor?.name,
                 tmplPosition: { x: tmpl.x, y: tmpl.y },
                 mousePosition: canvas?.mousePosition,
@@ -284,7 +289,7 @@ export function attachWheelRotation(crosshair, config = {}) {
         log.debug("attachWheelRotation | Crosshair is attached to token. Disabling mouse wheel rotation.");
     }
 
-    activePointerHandler = () => {
+    activePointerHandler = (event) => {
         if (isAttached && crosshair && canvas?.mousePosition) {
             const pt = canvas.mousePosition;
             const origin = config.token?.center ?? { x: crosshair.x, y: crosshair.y };
@@ -300,12 +305,20 @@ export function attachWheelRotation(crosshair, config = {}) {
             canvas?.templates?.placeables,
             canvas?.regions?.preview?.children,
             canvas?.regions?.placeables,
-            crosshair?.template ? [crosshair.template] : null
+            crosshair?.template ? [crosshair.template] : null,
+            globalThis._activeBBCPlaceable ? [globalThis._activeBBCPlaceable] : null
         ];
+        log.debug("activePointerHandler | pointermove triggered:", {
+            mousePosition: canvas?.mousePosition,
+            hasTemplatesPreview: Boolean(canvas?.templates?.preview?.children?.length),
+            hasRegionsPreview: Boolean(canvas?.regions?.preview?.children?.length),
+            hasCrosshairTemplate: Boolean(crosshair?.template),
+            hasActiveBBCPlaceable: Boolean(globalThis._activeBBCPlaceable)
+        });
         for (const list of previewLists) {
             if (Array.isArray(list)) {
                 for (const p of list) {
-                    if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children || p === crosshair?.template) {
+                    if (p && (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children || p === crosshair?.template || p === globalThis._activeBBCPlaceable)) {
                         refreshTemplateHighlights(p, config.currentDirection, rad);
                     }
                 }
