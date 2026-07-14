@@ -23,19 +23,19 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
     }
 
     /**
-     * Get the default normalized animation anchor coordinates (`{ x: 0.5, y: 0.5 }`).
-     * @returns {{x: number, y: number}} Center anchor
+     * Get the default normalized animation anchor coordinates (`{ x: 0, y: 0 }`).
+     * @returns {{x: number, y: number}} Top-left corner anchor
      */
     get defaultAnimationAnchor() {
-        return { x: 0.5, y: 0.5 };
+        return { x: 0, y: 0 };
     }
 
     /**
-     * Get the default normalized Foundry shape anchor coordinates (`{ x: 0.5, y: 0.5 }`).
-     * @returns {{x: number, y: number}} Center anchor
+     * Get the default normalized Foundry shape anchor coordinates (`{ x: 0, y: 0 }`).
+     * @returns {{x: number, y: number}} Top-left corner anchor
      */
     get defaultShapeAnchor() {
-        return { x: 0.5, y: 0.5 };
+        return { x: 0, y: 0 };
     }
 
     /**

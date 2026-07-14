@@ -30,8 +30,8 @@ test('Shape classes initialize with canonical default anchors and types', () => 
 
     const square = new SquareCrosshairShape(null, {});
     assert.equal(square.type, 'rect');
-    assert.deepEqual(square.animationAnchor, { x: 0.5, y: 0.5 });
-    assert.deepEqual(square.shapeAnchor, { x: 0.5, y: 0.5 });
+    assert.deepEqual(square.animationAnchor, { x: 0, y: 0 });
+    assert.deepEqual(square.shapeAnchor, { x: 0, y: 0 });
     assert.equal(square.requiresWheelRotation, true);
 });
 

@@ -150,8 +150,15 @@ function rotateCrosshairInstance(crosshair, newDirDeg) {
     if (!crosshair) return;
     const rad = newDirDeg * (Math.PI / 180);
 
+    const isRect = crosshair.type === "rect" || crosshair.config?.type === "rect" || crosshair.data?.type === "rect" ||
+                   crosshair.type === "square" || crosshair.config?.type === "square" || crosshair.data?.type === "square";
+
     crosshair.direction = newDirDeg;
-    crosshair.rotation = rad;
+    if (!isRect) {
+        crosshair.rotation = rad;
+    } else {
+        crosshair.rotation = 0;
+    }
 
     if (crosshair.config) {
         crosshair.config.direction = newDirDeg;
@@ -288,11 +295,26 @@ export function attachWheelRotation(crosshair, config = {}) {
 export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
     rotateCrosshairInstance(crosshair, config.currentDirection ?? config.direction ?? 0);
 
+    const isRect = config.type === "rect" || config.t === "rect" || config.type === "square" || config.t === "square" ||
+                   crosshair?.type === "rect" || crosshair?.type === "square";
+
     // Synchronize rotation across all active Sequencer visual effect graphics without fighting Sequencer's internal pivot/anchor layout
     if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
         try {
             const effects = Sequencer.EffectManager.getEffects({ name: config.id });
             for (const eff of effects) {
+                if (isRect && eff.container) {
+                    eff.container.pivot.set(0, 0);
+                    if (eff.sprite) eff.sprite.position.set(0, 0);
+                    if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
+                    if (typeof eff._updatePivot === "function") {
+                        eff._updatePivot = () => {
+                            if (eff.container) eff.container.pivot.set(0, 0);
+                            if (eff.sprite) eff.sprite.position.set(0, 0);
+                            if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
+                        };
+                    }
+                }
                 if (eff.container && typeof eff.container.rotation !== "undefined") {
                     eff.container.rotation = rad;
                 }

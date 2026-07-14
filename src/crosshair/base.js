@@ -170,10 +170,11 @@ export class BaseCrosshairShape {
             animationAnchor: this.animationAnchor
         });
 
+        const attachOptions = this.type === "rect" ? { align: "top-left" } : {};
         seq.effect()
             .name(this.id)
             .file(effectFile)
-            .attachTo(crosshair)
+            .attachTo(crosshair, attachOptions)
             .anchor(this.animationAnchor)
             .size({ width: widthPx * factor, height: heightPx * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
