@@ -169,8 +169,12 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     updatePreviewShape(previewDoc, coords) {
         if (!previewDoc || !coords) return;
         const shapesList = this._getShapesArray(previewDoc);
+        const orig = shapesList.length > 0 ? (typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0]) : null;
+        if (previewDoc.t === "rect" || coords.type === "square" || coords.type === "rect" || orig?.type === "rectangle") {
+            /* Bypassing square/rect modifications per user instruction */
+            return;
+        }
         if (shapesList.length > 0) {
-            const orig = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
             const updatedShape = this._formatRegionShapeUpdate(orig, coords);
             delete updatedShape._id;
             if (typeof previewDoc.updateSource === "function") {
@@ -211,16 +215,20 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @returns {void}
      */
     applyDocumentPlacement(doc, coords = {}, config = {}) {
-        const styling = this.extractPlacedStylingFlags(config);
         const shapesList = this._getShapesArray(doc);
+        const orig = shapesList.length > 0 ? (typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0]) : null;
+        if (doc?.t === "rect" || coords.type === "square" || coords.type === "rect" || orig?.type === "rectangle") {
+            /* Bypassing square/rect modifications per user instruction */
+            return;
+        }
+        const styling = this.extractPlacedStylingFlags(config);
         const isRegion = shapesList.length > 0;
 
         if (isRegion) {
             const updateData = {
                 flags: styling.flags
             };
-            const shapeObj = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
-            const originalShape = foundry.utils.deepClone(shapeObj);
+            const originalShape = foundry.utils.deepClone(orig);
             const newShape = this._formatRegionShapeUpdate(originalShape, coords);
             delete newShape._id;
             updateData.shapes = [newShape];
@@ -305,20 +313,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         if (coords.x !== undefined && coords.y !== undefined) {
             const isRectShape = originalShape.type === "rectangle" || (originalShape.width !== undefined && originalShape.height !== undefined) || (originalShape.sizeX !== undefined && originalShape.sizeY !== undefined);
             if (isRectShape) {
-                const w = coords.width ?? coords.distance ?? coords.radius ?? shape.width ?? shape.sizeX ?? 0;
-                const h = coords.distance ?? coords.radius ?? coords.width ?? shape.height ?? shape.sizeY ?? w;
-                const wPixels = isGridUnits ? Math.round(w * pxPerFoot) : Math.round(w);
-                const hPixels = isGridUnits ? Math.round(h * pxPerFoot) : Math.round(h);
-
-                if (shape.width !== undefined || shape.type === "rectangle") shape.width = wPixels;
-                if (shape.height !== undefined || shape.type === "rectangle") shape.height = hPixels;
-                if (shape.sizeX !== undefined) shape.sizeX = wPixels;
-                if (shape.sizeY !== undefined) shape.sizeY = hPixels;
-
-                const dx = (wPixels / 2) * Math.cos(rad) - (hPixels / 2) * Math.sin(rad);
-                const dy = (wPixels / 2) * Math.sin(rad) + (hPixels / 2) * Math.cos(rad);
-                shape.x = coords.x + dx;
-                shape.y = coords.y + dy;
+                /* Bypassing square/rect modifications per user instruction */
             } else {
                 shape.x = coords.x;
                 shape.y = coords.y;

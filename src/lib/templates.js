@@ -71,6 +71,13 @@ async function handleDrawPreview(placeable) {
         return;
     }
 
+    const detectedProps = crosshairAdapter.detectProperties(doc);
+    const shapeType = detectedProps.type ?? entry.type ?? (typeof entry.handler === "object" ? entry.handler?.type : null) ?? doc.t ?? "";
+    if (["square", "rect", "rectangle"].includes(String(shapeType).toLowerCase())) {
+        log.debug(`handleDrawPreview | Bypassing square/rect template per user configuration:`, { docId: doc.id, shapeType });
+        return;
+    }
+
     log.debug(`handleDrawPreview | Intercepting template preview for "${entry.itemName}"`, {
         placeableClass: placeable?.constructor?.name,
         docData: doc?.toObject?.(),
@@ -281,6 +288,12 @@ function handlePreCreate(doc, _data, _options, userId) {
 
     if (!entry || !pending) {
         log.debug(`handlePreCreate | [PASS] No matching autorec entry or active pending placement. Allowing standard creation.`);
+        return true;
+    }
+
+    const shapeType = doc.t ?? (doc.shapes?.contents?.[0]?.type ?? doc.shapes?.[0]?.type) ?? entry.type ?? (typeof entry.handler === "object" ? entry.handler?.type : null) ?? "";
+    if (["square", "rect", "rectangle"].includes(String(shapeType).toLowerCase())) {
+        log.debug(`handlePreCreate | [PASS] Bypassing square/rect document creation per user configuration.`);
         return true;
     }
 
