@@ -227,6 +227,14 @@ async function handleDrawPreview(placeable) {
                 file: shapeSpecificFile ?? mergedConfig.file
             };
 
+            placeable._bbcDimensions = {
+                distance: finalConfig.distance ?? detected.distance,
+                width: finalConfig.width ?? detected.width,
+                radius: finalConfig.radius ?? detected.radius,
+                gridUnits: Boolean(finalConfig.gridUnits ?? true)
+            };
+            if (placeable.document) placeable.document._bbcDimensions = placeable._bbcDimensions;
+
             log.debug(`handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}" with config:`, finalConfig);
             await builder.play(token, finalConfig);
         }
