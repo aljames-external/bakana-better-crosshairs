@@ -67,7 +67,7 @@ async function create(token, config = {}) {
             .name(id)
             .file(squareFile)
             .attachTo(crosshair)
-            .anchor({ x: 0.5, y: 0.5 })
+            .anchor(stickToToken ? { x: 0, y: 0.5 } : { x: 0.5, y: 0.5 })
             .size({ width: lengthPixels * factor, height: widthPixels * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
             .belowTokens()
@@ -104,8 +104,10 @@ async function create(token, config = {}) {
                 const origRefresh = crosshair.refresh.bind(crosshair);
                 crosshair.refresh = function(...args) {
                     const res = origRefresh(...args);
-                    const rad = this.rotation ?? 0;
-                    alignCrosshairOrigin(this, config, rad);
+                    if (!stickToToken) {
+                        const rad = this.rotation ?? 0;
+                        alignCrosshairOrigin(this, config, rad);
+                    }
                     return res;
                 };
             }
