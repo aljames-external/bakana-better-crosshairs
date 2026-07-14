@@ -337,7 +337,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 shape.width = isGridUnits ? Math.round(coords.width * pxPerFoot) : coords.width;
             }
         }
-        console.log("%cBBC DIAGNOSTIC | _formatRegionShapeUpdate Result:", "background: #7b2cbf; color: #fff; padding: 2px 4px; border-radius: 2px;", {
+        log.debug("FoundryVTTV14Adapter._formatRegionShapeUpdate | Result:", {
             shapeType: shape.type,
             inputCoords: coords,
             pxPerFoot,
