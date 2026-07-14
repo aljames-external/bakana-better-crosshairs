@@ -660,28 +660,13 @@ export class BaseFoundryVTTAdapter {
             }
         }
 
-        const sx = snappedIntersection.x;
-        const sy = snappedIntersection.y;
-
-        const onLeft = Math.abs(sx - tx) < 2;
-        const onRight = Math.abs(sx - (tx + w)) < 2;
-        const onTop = Math.abs(sy - ty) < 2;
-        const onBottom = Math.abs(sy - (ty + h)) < 2;
-
-        let direction = 0;
-        if (onTop && onRight) direction = 315;
-        else if (onBottom && onRight) direction = 45;
-        else if (onBottom && onLeft) direction = 135;
-        else if (onTop && onLeft) direction = 225;
-        else if (onRight) direction = 0;
-        else if (onBottom) direction = 90;
-        else if (onLeft) direction = 180;
-        else if (onTop) direction = 270;
-        else {
-            const dragAngle = (new RayClass(snappedIntersection, snappedMouse)).angle;
-            direction = dragAngle * (180 / Math.PI);
-            if (direction < 0) direction += 360;
+        const origin = (snappedIntersection.x === snappedMouse.x && snappedIntersection.y === snappedMouse.y) ? centerPoint : snappedIntersection;
+        let dragAngle = (new RayClass(origin, snappedMouse)).angle;
+        if (typeof dragAngle !== "number" || Number.isNaN(dragAngle)) {
+            dragAngle = Math.atan2(snappedMouse.y - origin.y, snappedMouse.x - origin.x);
         }
+        let direction = dragAngle * (180 / Math.PI);
+        if (direction < 0) direction += 360;
 
         return {
             x: snappedIntersection.x,

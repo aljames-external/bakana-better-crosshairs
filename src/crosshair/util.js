@@ -203,58 +203,61 @@ export function attachWheelRotation(crosshair, config = {}) {
 
     const shapeType = config.type ?? config.t ?? "circle";
     const isAttached = shouldStickToToken(config, shapeType) && Boolean(config.token);
+    if (isAttached) {
+        log.debug("attachWheelRotation | Crosshair is attached to token. Disabling mouse wheel rotation.");
+        return;
+    }
 
     config.currentDirection = config.currentDirection ?? config.direction ?? 0;
 
-    if (!isAttached) {
-        activeWheelHandler = (event) => {
-            const requiresCtrl = systemAdapter?.requiresWheelModifier?.() ?? false;
-            if (requiresCtrl && !event.ctrlKey) return;
-            if (typeof event.preventDefault === "function") event.preventDefault();
-            if (typeof event.stopPropagation === "function") event.stopPropagation();
+    activeWheelHandler = (event) => {
+        const requiresCtrl = systemAdapter?.requiresWheelModifier?.() ?? false;
+        if (requiresCtrl && !event.ctrlKey) return;
+        if (typeof event.preventDefault === "function") event.preventDefault();
+        if (typeof event.stopPropagation === "function") event.stopPropagation();
 
-            const step = event.shiftKey ? 1 : 5; // 5 degrees normally (72 mousewheel steps per 360° turn)
-            const delta = event.deltaY < 0 ? -step : step;
-            config.currentDirection = (config.currentDirection + delta + 360) % 360;
+        const step = event.shiftKey ? 1 : 5; // 5 degrees normally (72 mousewheel steps per 360° turn)
+        const delta = event.deltaY < 0 ? -step : step;
+        config.currentDirection = (config.currentDirection + delta + 360) % 360;
 
-            const rad = config.currentDirection * (Math.PI / 180);
+        const rad = config.currentDirection * (Math.PI / 180);
 
-            log.debug("Crosshair mousewheel rotation | Wheel scrolled:", {
-                deltaY: event.deltaY,
-                step: delta,
-                newDirection: config.currentDirection
-            });
-            alignCrosshairAndEffects(crosshair, config, rad);
+        log.debug("Crosshair mousewheel rotation | Wheel scrolled:", {
+            deltaY: event.deltaY,
+            step: delta,
+            newDirection: config.currentDirection
+        });
+        log.debug("Crosshair mousewheel rotation | Preview inspection:", {
+            crosshairType: crosshair?.constructor?.name,
+            hasCrosshairTemplate: Boolean(crosshair?.template),
+            crosshairTemplateType: crosshair?.template?.constructor?.name,
+            crosshairTemplateDocType: crosshair?.template?.document?.constructor?.name,
+            templatesPreviewChildren: canvas?.templates?.preview?.children?.map?.(c => ({ className: c.constructor.name, isPreview: Boolean(c.isPreview) })),
+            regionsPreviewChildren: canvas?.regions?.preview?.children?.map?.(c => ({ className: c.constructor.name, isPreview: Boolean(c.isPreview) }))
+        });
+        alignCrosshairAndEffects(crosshair, config, rad);
 
-            const previewLists = [
-                canvas?.templates?.preview?.children,
-                canvas?.templates?.placeables,
-                canvas?.regions?.preview?.children,
-                canvas?.regions?.placeables,
-                crosshair?.template ? [crosshair.template] : null
-            ];
-            for (const list of previewLists) {
-                if (Array.isArray(list)) {
-                    for (const p of list) {
-                        if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children || p === crosshair?.template) {
-                            refreshTemplateHighlights(p, config.currentDirection, rad, event);
-                        }
+        // 4. Update any active Core Foundry preview MeasuredTemplate or Region shape & grid highlight overlay
+        const previewLists = [
+            canvas?.templates?.preview?.children,
+            canvas?.templates?.placeables,
+            canvas?.regions?.preview?.children,
+            canvas?.regions?.placeables,
+            crosshair?.template ? [crosshair.template] : null
+        ];
+        for (const list of previewLists) {
+            if (Array.isArray(list)) {
+                for (const p of list) {
+                    if (p.isPreview || list === canvas?.templates?.preview?.children || list === canvas?.regions?.preview?.children || p === crosshair?.template) {
+                        refreshTemplateHighlights(p, config.currentDirection, rad, event);
                     }
                 }
             }
-        };
-        window.addEventListener("wheel", activeWheelHandler, { capture: true, passive: false });
-    }
+        }
+    };
 
     activePointerHandler = () => {
-        if (isAttached && config.token && canvas?.mousePosition && crosshairAdapter?.resolveAnchorPlacement) {
-            const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, canvas.mousePosition);
-            config.currentDirection = anchored.direction;
-        }
         const rad = config.currentDirection * (Math.PI / 180);
-        if (isAttached && crosshair) {
-            alignCrosshairAndEffects(crosshair, config, rad);
-        }
         const previewLists = [
             canvas?.templates?.preview?.children,
             canvas?.templates?.placeables,
@@ -276,6 +279,7 @@ export function attachWheelRotation(crosshair, config = {}) {
         }
     };
 
+    window.addEventListener("wheel", activeWheelHandler, { capture: true, passive: false });
     window.addEventListener("pointermove", activePointerHandler, { capture: true, passive: true });
     log.debug("attachWheelRotation | Listeners attached for crosshair rotation (capture phase).");
 }
