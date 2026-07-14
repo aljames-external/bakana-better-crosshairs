@@ -227,13 +227,19 @@ async function handleDrawPreview(placeable) {
                 file: shapeSpecificFile ?? mergedConfig.file
             };
 
-            placeable._bbcDimensions = {
+            const initialDims = {
                 distance: finalConfig.distance ?? detected.distance,
                 width: finalConfig.width ?? detected.width,
                 radius: finalConfig.radius ?? detected.radius,
                 gridUnits: Boolean(finalConfig.gridUnits ?? true)
             };
-            if (placeable.document) placeable.document._bbcDimensions = placeable._bbcDimensions;
+            globalThis._activeBBCDimensions = initialDims;
+            placeable._bbcDimensions = initialDims;
+            placeable._bbcConfig = finalConfig;
+            if (placeable.document) {
+                placeable.document._bbcDimensions = initialDims;
+                placeable.document._bbcConfig = finalConfig;
+            }
 
             log.debug(`handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}" with config:`, finalConfig);
             await builder.play(token, finalConfig);

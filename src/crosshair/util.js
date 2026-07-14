@@ -75,11 +75,26 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
     }
     if (crosshairAdapter?.updatePreviewShape && tmpl.document) {
         try {
-            const initialDist = tmpl._bbcDimensions?.distance ?? tmpl.document._bbcDimensions?.distance ?? tmpl.document.distance ?? (typeof crosshairAdapter.detectProperties === "function" ? crosshairAdapter.detectProperties(tmpl.document).distance : undefined);
-            const initialWidth = tmpl._bbcDimensions?.width ?? tmpl.document._bbcDimensions?.width ?? tmpl.document.width ?? (typeof crosshairAdapter.detectProperties === "function" ? crosshairAdapter.detectProperties(tmpl.document).width : undefined);
-            const isGridUnits = tmpl._bbcDimensions?.gridUnits ?? tmpl.document._bbcDimensions?.gridUnits ?? true;
-            const targetX = tmpl._bbcCrosshair?.x ?? tmpl._bbcCrosshair?.position?.x ?? tmpl.x ?? tmpl.document.x ?? canvas?.mousePosition?.x;
-            const targetY = tmpl._bbcCrosshair?.y ?? tmpl._bbcCrosshair?.position?.y ?? tmpl.y ?? tmpl.document.y ?? canvas?.mousePosition?.y;
+            const dims = tmpl._bbcDimensions ?? tmpl.document?._bbcDimensions ?? globalThis._activeBBCDimensions;
+            const initialDist = dims?.distance ?? tmpl.document.distance ?? (typeof crosshairAdapter.detectProperties === "function" ? crosshairAdapter.detectProperties(tmpl.document).distance : undefined);
+            const initialWidth = dims?.width ?? tmpl.document.width ?? (typeof crosshairAdapter.detectProperties === "function" ? crosshairAdapter.detectProperties(tmpl.document).width : undefined);
+            const isGridUnits = dims?.gridUnits ?? true;
+
+            const cfg = tmpl._bbcConfig ?? tmpl.document?._bbcConfig ?? {};
+            const isSticky = Boolean(tmpl.document?.flags?.bakana?.token ?? tmpl.document?.flags?.bbc?.token ?? tmpl._bbcSticky ?? cfg.token);
+            let targetX = 0, targetY = 0;
+
+            if (isSticky && cfg.token && crosshairAdapter?.resolveAnchorPlacement && canvas?.mousePosition) {
+                const anchored = crosshairAdapter.resolveAnchorPlacement(cfg.token, canvas.mousePosition);
+                targetX = anchored.x;
+                targetY = anchored.y;
+            } else {
+                const mousePos = canvas?.mousePosition ?? { x: tmpl.x ?? tmpl.document?.x ?? 0, y: tmpl.y ?? tmpl.document?.y ?? 0 };
+                const snapMode = getGridSnapMode(cfg);
+                const snapped = snapMode !== 0 ? snapCoordinates(mousePos.x, mousePos.y, snapMode) : mousePos;
+                targetX = snapped.x;
+                targetY = snapped.y;
+            }
 
             crosshairAdapter.updatePreviewShape(tmpl.document, {
                 x: targetX,
@@ -89,7 +104,7 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
                 distance: initialDist,
                 radius: initialDist,
                 width: initialWidth,
-                sticky: Boolean(tmpl.document?.flags?.bakana?.token ?? tmpl.document?.flags?.bbc?.token ?? tmpl._bbcSticky),
+                sticky: isSticky,
                 gridUnits: isGridUnits
             });
         } catch (e) {}

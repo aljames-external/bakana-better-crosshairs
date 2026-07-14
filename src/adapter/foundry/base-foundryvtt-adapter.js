@@ -165,6 +165,17 @@ export class BaseFoundryVTTAdapter {
      */
     hidePreview(placeable) {
         if (!placeable) return;
+        try {
+            placeable._onMouseMove = () => {};
+            placeable._onMouseDrag = () => {};
+            placeable._onDragLeftStart = () => {};
+            placeable._onDragLeftMove = () => {};
+            placeable._onDragLeftDrop = () => {};
+            if (placeable.document) {
+                placeable.document._onMouseMove = () => {};
+                placeable.document._onMouseDrag = () => {};
+            }
+        } catch (e) {}
         const hideContainers = (obj) => {
             if (!obj) return;
             try { obj.visible = false; } catch (e) {}
