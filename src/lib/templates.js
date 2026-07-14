@@ -71,9 +71,6 @@ async function handleDrawPreview(placeable) {
         return;
     }
 
-    const detectedProps = crosshairAdapter.detectProperties(doc);
-    const shapeType = detectedProps.type ?? entry.type ?? (typeof entry.handler === "object" ? entry.handler?.type : null) ?? doc.t ?? "";
-
     log.debug(`handleDrawPreview | Intercepting template preview for "${entry.itemName}"`, {
         placeableClass: placeable?.constructor?.name,
         docData: doc?.toObject?.(),
@@ -149,6 +146,11 @@ async function handleDrawPreview(placeable) {
                         if (coords.distance !== undefined) deferredData.distance = coords.distance;
                         else if (coords.radius !== undefined) deferredData.distance = coords.radius;
                     }
+                    console.log("%cBBC DIAGNOSTIC | context.resolve createEmbeddedDocuments:", "background: #7b2cbf; color: #fff; padding: 2px 4px; border-radius: 2px;", {
+                        docName,
+                        resolvedCoords: coords,
+                        deferredCreatePayload: deferredData
+                    });
                     try {
                         await canvas.scene.createEmbeddedDocuments(docName, [deferredData]);
                     } catch (err) {
@@ -230,28 +232,19 @@ async function handleDrawPreview(placeable) {
                 file: shapeSpecificFile ?? mergedConfig.file
             };
 
-            placeable._bbcDimensions = {
+            const initialDims = {
                 distance: finalConfig.distance ?? detected.distance,
                 width: finalConfig.width ?? detected.width,
                 radius: finalConfig.radius ?? detected.radius,
                 gridUnits: Boolean(finalConfig.gridUnits ?? true)
             };
-            if (placeable.document) placeable.document._bbcDimensions = placeable._bbcDimensions;
-
-            if (crosshairAdapter?.updatePreviewShape && placeable.document) {
-                try {
-                    crosshairAdapter.updatePreviewShape(placeable.document, {
-                        x: placeable.x ?? placeable.document.x,
-                        y: placeable.y ?? placeable.document.y,
-                        direction: finalConfig.direction ?? 0,
-                        rotation: finalConfig.direction ?? 0,
-                        distance: placeable._bbcDimensions.distance,
-                        radius: placeable._bbcDimensions.distance,
-                        width: placeable._bbcDimensions.width,
-                        sticky: Boolean(placeable.document?.flags?.bakana?.token ?? placeable.document?.flags?.bbc?.token ?? placeable._bbcSticky),
-                        gridUnits: placeable._bbcDimensions.gridUnits
-                    });
-                } catch (e) {}
+            globalThis._activeBBCDimensions = initialDims;
+            globalThis._activeBBCPlaceable = placeable;
+            placeable._bbcDimensions = initialDims;
+            placeable._bbcConfig = finalConfig;
+            if (placeable.document) {
+                placeable.document._bbcDimensions = initialDims;
+                placeable.document._bbcConfig = finalConfig;
             }
 
             log.debug(`handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}" with config:`, finalConfig);
@@ -310,8 +303,6 @@ function handlePreCreate(doc, _data, _options, userId) {
         log.debug(`handlePreCreate | [PASS] No matching autorec entry or active pending placement. Allowing standard creation.`);
         return true;
     }
-
-    const shapeType = doc.t ?? (doc.shapes?.contents?.[0]?.type ?? doc.shapes?.[0]?.type) ?? entry.type ?? (typeof entry.handler === "object" ? entry.handler?.type : null) ?? "";
 
     // If the sequencer sequence was right-click cancelled, abort placement
     if (pending.cancelled) {

@@ -3,7 +3,7 @@ import { log } from "../../lib/logger.js";
 import { localize } from "../../lib/utils.js";
 
 /**
- * Adapter subclass encapsulating Foundry VTT v14+ Region and MeasuredTemplate placement behavior.
+ * Adapter subclass encapsulating Foundry VTT v14+ Region placement behavior.
  */
 export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     /**
@@ -50,6 +50,10 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * Return supported base canvas PlaceableObject type names for Foundry VTT v14+.
      * @returns {string[]} Base placeable type names
      */
+    /**
+     * Return supported base canvas PlaceableObject type names for Foundry VTT v14+.
+     * @returns {string[]} Base placeable type names
+     */
     get supportedBasePlaceables() {
         return ["MeasuredTemplate", "Region"];
     }
@@ -63,7 +67,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Detect shape type and geometric dimensions from a Region document.
+     * Detect shape type and geometric dimensions from a Region or MeasuredTemplate document.
      * @param {Document} doc - The Region or MeasuredTemplate document to inspect
      * @returns {{type: string, distance: number, radius: number, width: number, angle: number, x: number, y: number}} Detected geometric properties and shape type
      */
@@ -71,8 +75,6 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         log.debug("FoundryVTTV14Adapter.detectProperties | Inspecting raw document:", {
             documentName: doc.documentName,
             t: doc.t,
-            distance: doc.distance,
-            width: doc.width,
             shapes: doc.shapes,
             rawObject: doc.toObject?.() ?? doc
         });
@@ -84,16 +86,12 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 ray: "ray",
                 rect: "square"
             };
-            const shapeType = shapeMap[doc.t] ?? "circle";
-            const rawDistance = doc.distance ?? 0;
-            const rawWidth = doc.width ?? 0;
-            const distance = shapeType === "square" ? (rawDistance || rawWidth || 20) : rawDistance;
-            const width = shapeType === "square" ? (rawWidth || distance) : (rawWidth || 5);
+            const distance = doc.distance ?? 0;
             const result = {
-                type: shapeType,
+                type: shapeMap[doc.t] ?? "circle",
                 distance,
                 radius: distance,
-                width,
+                width: doc.width ?? 5,
                 angle: doc.angle ?? 53.13,
                 x: doc.x ?? 0,
                 y: doc.y ?? 0
@@ -103,44 +101,54 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         }
 
         const shapesList = this._getShapesArray(doc);
-        const shape = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : (shapesList[0] ?? {});
-        let shapeType = "circle";
-        if (shape.type === "circle") shapeType = "circle";
-        else if (shape.type === "cone") shapeType = "cone";
-        else if (shape.type === "rectangle" || shape.type === "polygon") shapeType = "square";
-
-        const pxPerFoot = (canvas.dimensions?.size ?? 100) / (canvas.dimensions?.distance ?? 5);
-
-        if (shapeType === "square") {
-            const rawWidthPx = shape.width ?? shape.sizeX ?? 0;
-            const rawHeightPx = shape.height ?? shape.sizeY ?? rawWidthPx;
-            const distInGridUnits = Math.round(rawHeightPx / pxPerFoot);
-            const widthInGridUnits = Math.round(rawWidthPx / pxPerFoot);
-            const distance = distInGridUnits || widthInGridUnits || doc.distance || doc.width || 20;
-            const width = widthInGridUnits || distance;
+        if (shapesList.length === 0) {
+            const fallbackDistance = doc.distance ?? doc.radius ?? 0;
             return {
-                type: shapeType,
-                distance,
-                radius: distance,
-                width,
-                angle: shape.angle ?? doc.angle ?? 53.13,
-                x: shape.x ?? doc.x ?? 0,
-                y: shape.y ?? doc.y ?? 0
+                type: "circle",
+                distance: fallbackDistance,
+                radius: fallbackDistance,
+                width: doc.width ?? 5,
+                angle: doc.angle ?? 360,
+                x: doc.x ?? 0,
+                y: doc.y ?? 0
             };
         }
 
-        const rawRadius = shape.radius ?? 0;
-        const distance = Math.round(rawRadius / pxPerFoot) || doc.distance || 0;
+        const shape = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : (shapesList[0] ?? {});
+        let shapeType = undefined;
+        switch (shape.type) {
+            case "circle":      shapeType = "circle";   break;
+            case "cone":        shapeType = "cone";     break;
+            case "rectangle":
+            case "polygon":     shapeType = "square";   break;
+            default:
+                throw new Error("FoundryVTTV14Adapter.detectProperties | Unrecognized Region shape type:", shape.type);
+        }
 
-        return {
+        const pxPerFoot = (canvas.dimensions?.size ?? 100) / (canvas.dimensions?.distance ?? 5);
+        let distance = 0;
+        let width = 5;
+        if (shape.type === "rectangle") {
+            const rawLengthPx = shape.width ?? shape.radius ?? 0;
+            const rawWidthPx = shape.height ?? shape.width ?? shape.radius ?? 0;
+            distance = Math.round(rawLengthPx / pxPerFoot);
+            width = Math.round(rawWidthPx / pxPerFoot);
+        } else {
+            const rawRadius = shape.radius ?? 0;
+            distance = Math.round(rawRadius / pxPerFoot);
+            width = distance;
+        }
+
+        const result = {
             type: shapeType,
             distance,
             radius: distance,
-            width: shape.width ?? doc.width ?? 5,
-            angle: shape.angle ?? doc.angle ?? 53.13,
-            x: shape.x ?? doc.x ?? 0,
-            y: shape.y ?? doc.y ?? 0
+            width,
+            angle: shape.angle ?? 53.13,
+            x: shape.x ?? 0,
+            y: shape.y ?? 0
         };
+        return result;
     }
 
     /**
@@ -171,27 +179,30 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     updatePreviewShape(previewDoc, coords) {
         if (!previewDoc || !coords) return;
         const shapesList = this._getShapesArray(previewDoc);
-        const orig = shapesList.length > 0 ? (typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0]) : null;
         if (shapesList.length > 0) {
+            const orig = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
             const updatedShape = this._formatRegionShapeUpdate(orig, coords);
             delete updatedShape._id;
-            if (typeof previewDoc.updateSource === "function") {
-                try {
-                    previewDoc.updateSource({ shapes: [updatedShape] });
-                } catch (e) {
-                    previewDoc.shapes = [updatedShape];
-                }
-            } else {
+            try {
+                previewDoc.updateSource({ shapes: [updatedShape] }); 
+            } catch (e) {
                 previewDoc.shapes = [updatedShape];
             }
         } else {
-            const isRect = previewDoc.t === "rect" || coords.type === "square" || coords.type === "rect";
+            const isRect = previewDoc.t === "rect" || coords.type === "square" || coords.type === "rect" || coords.originalType === "square";
             const isSticky = Boolean(coords.sticky ?? coords.token);
+            const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);
+            let distFoot = coords.distance ?? coords.radius ?? coords.width;
+            const widthFoot = coords.width ?? coords.distance ?? coords.radius;
+            if (isRect && widthFoot > 0 && distFoot > widthFoot) {
+                const isSquareDiagonal = distFoot <= widthFoot * 1.6;
+                distFoot = isSquareDiagonal ? widthFoot : Math.round(Math.sqrt(Math.max(0, distFoot * distFoot - widthFoot * widthFoot)));
+            }
+
             let targetX = coords.x;
             let targetY = coords.y;
             if (isRect && isSticky && targetX !== undefined && targetY !== undefined) {
-                const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);
-                const wPx = (coords.width ?? coords.distance ?? coords.radius ?? 20) * pxPerFoot;
+                const wPx = (widthFoot ?? 20) * pxPerFoot;
                 const rad = ((coords.direction ?? coords.rotation ?? previewDoc.direction ?? 0) * Math.PI) / 180;
                 targetX = Math.round(targetX + (wPx / 2) * Math.sin(rad));
                 targetY = Math.round(targetY - (wPx / 2) * Math.cos(rad));
@@ -213,13 +224,9 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 if (coords.width !== undefined) updateObj.width = coords.width;
             }
 
-            if (typeof previewDoc.updateSource === "function") {
-                try {
-                    previewDoc.updateSource(updateObj);
-                } catch (e) {
-                    Object.assign(previewDoc, updateObj);
-                }
-            } else {
+            try {
+                previewDoc.updateSource(updateObj);
+            } catch (e) {
                 Object.assign(previewDoc, updateObj);
             }
         }
@@ -227,49 +234,63 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
     /**
      * Apply resolved placement coordinates and workflow flags onto a Region or MeasuredTemplate document.
-     * @param {Document} doc - The target document to update
+     * @param {Document} doc - The target Region or MeasuredTemplate document to update
      * @param {Object} [coords={}] - The resolved placement coordinates
      * @param {Object} [config={}] - Optional placement styling and behavior configuration
      * @returns {void}
      */
     applyDocumentPlacement(doc, coords = {}, config = {}) {
-        const shapesList = this._getShapesArray(doc);
-        const orig = shapesList.length > 0 ? (typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0]) : null;
         const styling = this.extractPlacedStylingFlags(config);
+        const shapesList = this._getShapesArray(doc);
         const isRegion = shapesList.length > 0;
+        log.debug("FoundryVTTV14Adapter.applyDocumentPlacement | Input:", {
+            isRegion,
+            docClassName: doc.constructor?.name,
+            coords,
+            configToken: Boolean(config.token)
+        });
 
         if (isRegion) {
             const updateData = {
                 flags: styling.flags
             };
-            const originalShape = foundry.utils.deepClone(orig);
+            const shapeObj = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
+            const originalShape = foundry.utils.deepClone(shapeObj);
             const shapeCoords = { ...coords, sticky: Boolean(config.token ?? coords.token ?? coords.sticky) };
             const newShape = this._formatRegionShapeUpdate(originalShape, shapeCoords);
             delete newShape._id;
             updateData.shapes = [newShape];
 
-            const targetColor = styling.placedFillColor ? styling.placedFillColor : (styling.placedBorderColor ? styling.placedBorderColor : undefined);
+            const targetColor = styling.placedFillColor ?? styling.placedBorderColor;
             if (targetColor) updateData.color = targetColor;
             if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
             if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
 
-            const targetAlpha = styling.placedFillAlpha !== undefined ? styling.placedFillAlpha : (styling.placedBorderAlpha !== undefined ? styling.placedBorderAlpha : undefined);
+            const targetAlpha = styling.placedFillAlpha ?? styling.placedBorderAlpha;
             if (targetAlpha !== undefined) updateData.alpha = targetAlpha;
             if (styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
             if (styling.placedBorderAlpha !== undefined) updateData.borderAlpha = styling.placedBorderAlpha;
 
             if (config.hidden || config.hideTemplate) updateData.hidden = true;
 
+            log.debug("FoundryVTTV14Adapter.applyDocumentPlacement | Applying Region updateSource:", updateData);
             doc.updateSource(updateData);
         } else {
-            const isRect = doc?.t === "rect" || coords.type === "square" || coords.type === "rect";
-            const isSticky = Boolean(config.token ?? coords.token ?? coords.sticky);
+            const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);
+            let distFoot = coords.distance ?? coords.radius ?? coords.width;
+            const widthFoot = coords.width ?? coords.distance ?? coords.radius;
+            const isRect = (doc.t === "rect" || coords.type === "square" || coords.type === "rect");
+            if (isRect && widthFoot > 0 && distFoot > widthFoot) {
+                const isSquareDiagonal = distFoot <= widthFoot * 1.6;
+                distFoot = isSquareDiagonal ? widthFoot : Math.round(Math.sqrt(Math.max(0, distFoot * distFoot - widthFoot * widthFoot)));
+            }
+
             let targetX = coords.x;
             let targetY = coords.y;
+            const rad = ((coords.direction ?? coords.rotation ?? doc.direction ?? 0) * Math.PI) / 180;
+            const isSticky = Boolean(config.token ?? coords.token ?? coords.sticky);
             if (isRect && isSticky && targetX !== undefined && targetY !== undefined) {
-                const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);
-                const wPx = (coords.width ?? coords.distance ?? coords.radius ?? 20) * pxPerFoot;
-                const rad = ((coords.direction ?? coords.rotation ?? doc?.direction ?? 0) * Math.PI) / 180;
+                const wPx = (widthFoot ?? 20) * pxPerFoot;
                 targetX = Math.round(targetX + (wPx / 2) * Math.sin(rad));
                 targetY = Math.round(targetY - (wPx / 2) * Math.cos(rad));
             }
@@ -281,16 +302,9 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             if (targetY !== undefined) updateData.y = targetY;
             if (coords.direction !== undefined) updateData.direction = coords.direction;
             else if (coords.rotation !== undefined) updateData.direction = coords.rotation;
-            if (isRect) {
-                const w = coords.width ?? coords.distance ?? coords.radius ?? 20;
-                const h = coords.distance ?? coords.radius ?? coords.width ?? w;
-                updateData.distance = Math.round(Math.sqrt(w * w + h * h) * 100) / 100;
-                updateData.width = w;
-            } else {
-                if (coords.distance !== undefined) updateData.distance = coords.distance;
-                else if (coords.radius !== undefined) updateData.distance = coords.radius;
-                if (coords.width !== undefined) updateData.width = coords.width;
-            }
+            if (coords.distance !== undefined) updateData.distance = coords.distance;
+            else if (coords.radius !== undefined) updateData.distance = coords.radius;
+            if (coords.width !== undefined) updateData.width = coords.width;
 
             if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
             if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
@@ -303,25 +317,26 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     }
 
     /**
-     * Format drag destination coordinates into a V14 placement coordinates payload.
+     * Format drag destination coordinates into a V14 placement coordinates payload supporting both Region and MeasuredTemplate properties.
      * @param {number} x - Destination x-coordinate
      * @param {number} y - Destination y-coordinate
      * @param {number} direction - Rotation angle in degrees
      * @param {Object} [config={}] - Optional sequence placement configuration
-     * @returns {{x: number, y: number, direction: number, rotation: number, distance: number|undefined, radius: number|undefined, width: number|undefined, gridUnits: boolean}} Formatted placement coordinates payload
+     * @returns {{x: number, y: number, direction: number, rotation: number, distance: number|undefined, radius: number|undefined, width: number|undefined, gridUnits: boolean, sticky: boolean}} Formatted placement coordinates payload
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
-        const distanceVal = config.distance ?? config.radius ?? config.width;
-        const widthVal = config.width ?? distanceVal;
         return {
             x,
             y,
             direction,
             rotation: direction,
-            distance: distanceVal,
-            radius: config.radius ?? distanceVal,
-            width: widthVal,
-            gridUnits: Boolean(config.gridUnits ?? true)
+            distance: config.distance ?? config.radius,
+            radius: config.radius ?? config.distance,
+            width: config.width,
+            gridUnits: Boolean(config.gridUnits ?? true),
+            sticky: Boolean(config.token),
+            type: config.originalType ?? config.type,
+            originalType: config.originalType
         };
     }
 
@@ -330,7 +345,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * Converts grid-unit measurements (`radius`, `width`) to canvas pixels when `coords.gridUnits` is true.
      *
      * @param {Object} originalShape - The base V14 Region shape data object (`doc.shapes[0]`)
-     * @param {Object} coords - The placement coordinates payload (`{ x, y, rotation, radius, width, gridUnits }`)
+     * @param {Object} coords - The placement coordinates payload (`{ x, y, rotation, radius, width, gridUnits, sticky }`)
      * @returns {Object} A cloned and formatted Region shape payload
      * @private
      */
@@ -341,43 +356,44 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         const isGridUnits = Boolean(coords.gridUnits ?? true);
 
         // Apply placement origin coordinates and rotation directly
+        if (coords.x !== undefined) shape.x = coords.x;
+        if (coords.y !== undefined) shape.y = coords.y;
         if (coords.rotation !== undefined) shape.rotation = coords.rotation;
-        const rad = (shape.rotation ?? 0) * (Math.PI / 180);
+        else if (coords.direction !== undefined) shape.rotation = coords.direction;
 
-        if (coords.x !== undefined && coords.y !== undefined) {
-            const isRectShape = originalShape.type === "rectangle" || (originalShape.width !== undefined && originalShape.height !== undefined) || (originalShape.sizeX !== undefined && originalShape.sizeY !== undefined);
-            if (isRectShape) {
-                const w = coords.width ?? coords.distance ?? coords.radius ?? shape.width ?? shape.sizeX ?? 0;
-                const h = coords.distance ?? coords.radius ?? coords.width ?? shape.height ?? shape.sizeY ?? w;
-                const wPixels = isGridUnits ? Math.round(w * pxPerFoot) : Math.round(w);
-                const hPixels = isGridUnits ? Math.round(h * pxPerFoot) : Math.round(h);
+        if (shape.type === "rectangle") {
+            let distFoot = coords.distance ?? coords.radius ?? coords.width;
+            const widthFoot = coords.width ?? coords.distance ?? coords.radius;
+            if (widthFoot > 0 && distFoot > widthFoot) {
+                const isSquareDiagonal = distFoot <= widthFoot * 1.6;
+                distFoot = isSquareDiagonal ? widthFoot : Math.round(Math.sqrt(Math.max(0, distFoot * distFoot - widthFoot * widthFoot)));
+            }
+            if (distFoot !== undefined) {
+                shape.width = isGridUnits ? Math.round(distFoot * pxPerFoot) : distFoot;
+            }
+            if (widthFoot !== undefined) {
+                shape.height = isGridUnits ? Math.round(widthFoot * pxPerFoot) : widthFoot;
+            }
 
-                if (shape.width !== undefined || shape.type === "rectangle") shape.width = wPixels;
-                if (shape.height !== undefined || shape.type === "rectangle") shape.height = hPixels;
-                if (shape.sizeX !== undefined) shape.sizeX = wPixels;
-                if (shape.sizeY !== undefined) shape.sizeY = hPixels;
-
+            if (coords.x !== undefined && coords.y !== undefined) {
+                const wPx = shape.width ?? 200;
+                const hPx = shape.height ?? 200;
+                const rad = ((shape.rotation ?? 0) * Math.PI) / 180;
                 const isSticky = Boolean(coords.sticky ?? coords.token);
                 if (isSticky) {
-                    shape.x = Math.round(coords.x + (wPixels / 2) * Math.cos(rad));
-                    shape.y = Math.round(coords.y + (wPixels / 2) * Math.sin(rad));
+                    shape.x = Math.round(coords.x + (wPx / 2) * Math.cos(rad));
+                    shape.y = Math.round(coords.y + (wPx / 2) * Math.sin(rad));
                 } else {
-                    const dx = (wPixels / 2) * Math.cos(rad) - (hPixels / 2) * Math.sin(rad);
-                    const dy = (wPixels / 2) * Math.sin(rad) + (hPixels / 2) * Math.cos(rad);
-                    shape.x = coords.x + dx;
-                    shape.y = coords.y + dy;
+                    shape.x = Math.round(coords.x + (wPx / 2) * Math.cos(rad) - (hPx / 2) * Math.sin(rad));
+                    shape.y = Math.round(coords.y + (wPx / 2) * Math.sin(rad) + (hPx / 2) * Math.cos(rad));
                 }
-            } else {
-                shape.x = coords.x;
-                shape.y = coords.y;
+            }
+        } else if (shape.type === "circle") {
+            const radFoot = coords.radius ?? coords.distance ?? coords.width;
+            if (radFoot !== undefined) {
+                shape.radius = isGridUnits ? Math.round(radFoot * pxPerFoot) : radFoot;
             }
         } else {
-            if (coords.x !== undefined) shape.x = coords.x;
-            if (coords.y !== undefined) shape.y = coords.y;
-        }
-
-        // Convert radius/width from grid distance units (feet/meters) to canvas pixels for non-rectangle circle/cone shapes when placement specifies gridUnits
-        if (originalShape.type !== "rectangle") {
             if (coords.radius !== undefined) {
                 shape.radius = isGridUnits ? Math.round(coords.radius * pxPerFoot) : coords.radius;
             }
@@ -385,6 +401,13 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 shape.width = isGridUnits ? Math.round(coords.width * pxPerFoot) : coords.width;
             }
         }
+        log.debug("FoundryVTTV14Adapter._formatRegionShapeUpdate | Result:", {
+            shapeType: shape.type,
+            inputCoords: coords,
+            pxPerFoot,
+            isGridUnits,
+            outputShape: shape
+        });
         return shape;
     }
 }

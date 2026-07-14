@@ -165,6 +165,17 @@ export class BaseFoundryVTTAdapter {
      */
     hidePreview(placeable) {
         if (!placeable) return;
+        try {
+            placeable._onMouseMove = () => {};
+            placeable._onMouseDrag = () => {};
+            placeable._onDragLeftStart = () => {};
+            placeable._onDragLeftMove = () => {};
+            placeable._onDragLeftDrop = () => {};
+            if (placeable.document) {
+                placeable.document._onMouseMove = () => {};
+                placeable.document._onMouseDrag = () => {};
+            }
+        } catch (e) {}
         const hideContainers = (obj) => {
             if (!obj) return;
             try { obj.visible = false; } catch (e) {}
@@ -548,7 +559,7 @@ export class BaseFoundryVTTAdapter {
      * @returns {{x: number, y: number, direction: number}} Formatted placement coordinates object
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
-        return { x, y, direction };
+        return { x, y, direction, type: config.originalType ?? config.type, originalType: config.originalType };
     }
 
     /**

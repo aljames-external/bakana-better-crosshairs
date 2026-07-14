@@ -97,27 +97,19 @@ export class Pf2eSystemAdapter extends BaseSystemAdapter {
                 const createData = foundry.utils.deepClone(doc.toObject());
                 delete createData._id;
 
-                const rawCoords = stillPending.coords;
-                const safeCoords = {
-                    ...rawCoords,
-                    distance: rawCoords.distance || rawCoords.radius || rawCoords.width || createData.distance || 20,
-                    radius: rawCoords.radius || rawCoords.distance || rawCoords.width || createData.distance || 20,
-                    width: rawCoords.width || rawCoords.distance || rawCoords.radius || createData.width || 20
-                };
-
                 const shapesList = createData.shapes?.contents ?? (Array.isArray(createData.shapes) ? createData.shapes : []);
                 if (shapesList.length > 0 && crosshairAdapter && typeof crosshairAdapter._formatRegionShapeUpdate === "function") {
                     const origShape = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
-                    const newShape = crosshairAdapter._formatRegionShapeUpdate(origShape, safeCoords);
+                    const newShape = crosshairAdapter._formatRegionShapeUpdate(origShape, stillPending.coords);
                     delete newShape._id;
                     createData.shapes = [newShape];
                 } else {
-                    if (safeCoords.x !== undefined) createData.x = safeCoords.x;
-                    if (safeCoords.y !== undefined) createData.y = safeCoords.y;
-                    if (safeCoords.direction !== undefined) createData.direction = safeCoords.direction;
-                    else if (safeCoords.rotation !== undefined) createData.direction = safeCoords.rotation;
-                    createData.distance = safeCoords.distance;
-                    if (safeCoords.width !== undefined) createData.width = safeCoords.width;
+                    if (stillPending.coords.x !== undefined) createData.x = stillPending.coords.x;
+                    if (stillPending.coords.y !== undefined) createData.y = stillPending.coords.y;
+                    if (stillPending.coords.direction !== undefined) createData.direction = stillPending.coords.direction;
+                    else if (stillPending.coords.rotation !== undefined) createData.direction = stillPending.coords.rotation;
+                    if (stillPending.coords.distance !== undefined) createData.distance = stillPending.coords.distance;
+                    else if (stillPending.coords.radius !== undefined) createData.distance = stillPending.coords.radius;
                 }
 
                 const proto = placeable ? Object.getPrototypeOf(placeable) : null;

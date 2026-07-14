@@ -22,8 +22,8 @@ export const DEFAULT_AUTOREC_ENTRY = {
     fillAlpha: 0,
     circleFile: "eskie.crosshair.circle.fantasy_01.white.full",
     coneFile: "eskie.crosshair.cone.thin.fantasy_01.white.full",
-    rayFile: "eskie.crosshair.ray.fantasy_01.white.full",
-    squareFile: "eskie.crosshair.ray.fantasy_01.white.full",
+    rayFile: "eskie.crosshair.ray.fantasy_01.white",
+    squareFile: "eskie.crosshair.square.fantasy_01.white",
     lineFile: "eskie.crosshair.line.generic_01.white",
     placedFillColor: "#000000",
     placedFillAlpha: 0,
@@ -599,8 +599,8 @@ export class AutorecManager {
             const isDefault = Boolean(config.isDefault);
             const circleFile = config.circleFile ?? "eskie.crosshair.circle.fantasy_01.white.full";
             const coneFile = config.coneFile ?? "eskie.crosshair.cone.thin.fantasy_01.white.full";
-            const rayFile = config.rayFile ?? "eskie.crosshair.ray.fantasy_01.white.full";
-            const squareFile = config.squareFile ?? "eskie.crosshair.ray.fantasy_01.white.full";
+            const rayFile = config.rayFile ?? "eskie.crosshair.ray.fantasy_01.white";
+            const squareFile = config.squareFile ?? "eskie.crosshair.square.fantasy_01.white";
 
             const unitFt = localize("BBC.Units.Feet", "ft");
             const distVal = config.distance ?? config.radius;

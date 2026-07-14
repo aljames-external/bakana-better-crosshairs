@@ -32,17 +32,6 @@ export class BaseSystemAdapter {
     }
 
     /**
-     * Return whether a given shape type is allowed to rotate on mouse wheel or pointer movement.
-     * Base implementation allows all shapes to rotate unless overridden by game system rules.
-     * @param {string} shapeType - Canonical shape type (`"circle"`, `"cone"`, `"ray"`, `"square"`, `"rect"`)
-     * @param {Object} [config={}] - Crosshair placement configuration
-     * @returns {boolean} True if the shape is allowed to rotate
-     */
-    canRotateShape(shapeType, config = {}) {
-        return true;
-    }
-
-    /**
      * Extract or refine calling context for the specific game system.
      * Base implementation returns the standard calling context passed by upstream workflow.
      * @param {Document} document - Template or Region document placed on canvas
