@@ -54,8 +54,15 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * @returns {{widthPx: number, heightPx: number, factor: number, gridUnits: boolean}} Calculated pixel and scale dimensions
      */
     getGraphicDimensions() {
-        const distance = Math.round(this.config.distance ?? 20);
-        const width = Math.round(this.config.width ?? distance);
+        const rawDistance = Math.round(this.config.distance ?? 20);
+        const rawWidth = Math.round(this.config.width ?? rawDistance);
+        let distance = rawDistance;
+        if (rawWidth > 0 && rawDistance > rawWidth) {
+            const isSquareDiagonal = rawDistance <= rawWidth * 1.6;
+            distance = isSquareDiagonal ? rawWidth : Math.round(Math.sqrt(Math.max(0, rawDistance * rawDistance - rawWidth * rawWidth)));
+        }
+        const width = rawWidth > 0 ? rawWidth : distance;
+
         const gridDist = canvas?.dimensions?.distance ?? 5;
         const gridSize = canvas?.dimensions?.size ?? 100;
         const lengthPixels = (distance / gridDist) * gridSize;

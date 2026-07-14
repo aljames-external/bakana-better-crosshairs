@@ -142,3 +142,10 @@ test('BaseCrosshairShape.playGraphicEffect only creates line animation when plac
         }
     }
 });
+
+test('SquareCrosshairShape.getGraphicDimensions normalizes diagonal distance on square/cube templates so width is not 50% too wide', () => {
+    // For a 20-foot cube in D&D 5e, distance is 30 (diagonal hypotenuse) and width is 20
+    const squareShape = new SquareCrosshairShape(null, { distance: 30, width: 20 });
+    const dims = squareShape.getGraphicDimensions();
+    assert.equal(dims.widthPx, dims.heightPx, 'Width and height must be identical for a 20x20 square/cube template');
+});
