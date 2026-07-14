@@ -381,8 +381,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 const rad = ((shape.rotation ?? 0) * Math.PI) / 180;
                 const isSticky = Boolean(coords.sticky ?? coords.token);
                 if (isSticky) {
-                    shape.x = Math.round(coords.x + (wPx / 2) * Math.cos(rad));
-                    shape.y = Math.round(coords.y + (wPx / 2) * Math.sin(rad));
+                    shape.x = Math.round(coords.x + (wPx / 2) * Math.sin(rad));
+                    shape.y = Math.round(coords.y - (wPx / 2) * Math.cos(rad));
                 } else {
                     shape.x = Math.round(coords.x + (wPx / 2) * Math.cos(rad) - (hPx / 2) * Math.sin(rad));
                     shape.y = Math.round(coords.y + (wPx / 2) * Math.sin(rad) + (hPx / 2) * Math.cos(rad));
