@@ -192,9 +192,10 @@ function rotateCrosshairInstance(crosshair, newDirDeg) {
         refreshTemplateHighlights(tmpl, newDirDeg, rad);
     }
 
-    const isRay = crosshair.type === "ray" || crosshair.config?.type === "ray" || crosshair.data?.type === "ray";
+    const isRayOrCone = crosshair.type === "ray" || crosshair.config?.type === "ray" || crosshair.data?.type === "ray" ||
+                        crosshair.type === "cone" || crosshair.config?.type === "cone" || crosshair.data?.type === "cone";
 
-    if (!isRay) {
+    if (!isRayOrCone) {
         if (typeof crosshair.refresh === "function") {
             try { crosshair.refresh(); } catch (e) {}
         }

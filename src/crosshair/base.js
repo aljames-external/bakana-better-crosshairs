@@ -256,7 +256,7 @@ export class BaseCrosshairShape {
             crosshair.shapeInstance = this;
         }
         if (this.requiresWheelRotation) {
-            if (crosshair?.pivot?.set) {
+            if ((this.type === "rect" || this.type === "square") && !this.stickToToken && !this.config?.token && crosshair?.pivot?.set) {
                 crosshair.pivot.set(0, 0);
             }
             attachWheelRotation(crosshair, this.config);
