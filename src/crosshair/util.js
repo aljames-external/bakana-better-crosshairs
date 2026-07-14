@@ -16,11 +16,6 @@ let activePointerHandler = null;
  * @returns {boolean} Whether the crosshair should stick to the token
  */
 export function shouldStickToToken(config, shapeType = "circle", sysAdapter = systemAdapter) {
-    const sType = String(shapeType ?? config?.type ?? config?.t ?? "").toLowerCase();
-    if (["square", "rect", "rectangle"].includes(sType)) {
-        /* Bypassing square/rect sticking per user instruction */
-        return false;
-    }
     if (!config || typeof config !== "object") {
         if (typeof shapeType === "boolean") return shapeType;
         return Boolean(sysAdapter?.getDefaultStickToToken?.(shapeType, config));

@@ -31,9 +31,6 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * @returns {boolean} True if the shape is allowed to rotate in D&D 5e
      */
     canRotateShape(shapeType, config = {}) {
-        if ((shapeType === "square" || shapeType === "rect") && !config.stickToToken && !config.token) {
-            return false;
-        }
         return true;
     }
 
