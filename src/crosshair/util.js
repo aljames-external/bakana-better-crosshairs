@@ -199,15 +199,15 @@ function rotateCrosshairInstance(crosshair, newDirDeg) {
         if (typeof crosshair.refresh === "function") {
             try { crosshair.refresh(); } catch (e) {}
         }
-    }
-    if (typeof crosshair._onMouseMove === "function" && canvas?.mousePosition) {
-        try {
-            crosshair._onMouseMove({
-                data: { getLocalPosition: () => canvas.mousePosition },
-                clientX: canvas.mousePosition.x,
-                clientY: canvas.mousePosition.y
-            });
-        } catch (e) {}
+        if (typeof crosshair._onMouseMove === "function" && canvas?.mousePosition) {
+            try {
+                crosshair._onMouseMove({
+                    data: { getLocalPosition: () => canvas.mousePosition },
+                    clientX: canvas.mousePosition.x,
+                    clientY: canvas.mousePosition.y
+                });
+            } catch (e) {}
+        }
     }
 }
 
@@ -305,6 +305,9 @@ export function attachWheelRotation(crosshair, config = {}) {
                     }
                 }
             }
+        }
+        if (!isAttached) {
+            alignCrosshairAndEffects(crosshair, config, rad);
         }
     };
 
