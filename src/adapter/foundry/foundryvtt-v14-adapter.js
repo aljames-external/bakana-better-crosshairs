@@ -117,14 +117,24 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         }
 
         const pxPerFoot = (canvas.dimensions?.size ?? 100) / (canvas.dimensions?.distance ?? 5);
-        const rawRadius = shape.radius ?? 0;
-        const distance = Math.round(rawRadius / pxPerFoot);
+        let distance = 0;
+        let width = 5;
+        if (shape.type === "rectangle") {
+            const rawLengthPx = shape.width ?? shape.radius ?? 0;
+            const rawWidthPx = shape.height ?? shape.width ?? shape.radius ?? 0;
+            distance = Math.round(rawLengthPx / pxPerFoot);
+            width = Math.round(rawWidthPx / pxPerFoot);
+        } else {
+            const rawRadius = shape.radius ?? 0;
+            distance = Math.round(rawRadius / pxPerFoot);
+            width = distance;
+        }
 
         const result = {
             type: shapeType,
             distance,
             radius: distance,
-            width: shape.width ?? 5,
+            width,
             angle: shape.angle ?? 53.13,
             x: shape.x ?? 0,
             y: shape.y ?? 0
@@ -283,13 +293,29 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         if (coords.x !== undefined) shape.x = coords.x;
         if (coords.y !== undefined) shape.y = coords.y;
         if (coords.rotation !== undefined) shape.rotation = coords.rotation;
+        else if (coords.direction !== undefined) shape.rotation = coords.direction;
 
-        // Convert radius/width from grid distance units (feet/meters) to canvas pixels when placement specifies gridUnits
-        if (coords.radius !== undefined) {
-            shape.radius = isGridUnits ? Math.round(coords.radius * pxPerFoot) : coords.radius;
-        }
-        if (coords.width !== undefined) {
-            shape.width = isGridUnits ? Math.round(coords.width * pxPerFoot) : coords.width;
+        if (shape.type === "rectangle") {
+            const distFoot = coords.distance ?? coords.radius ?? coords.width;
+            const widthFoot = coords.width ?? coords.distance ?? coords.radius;
+            if (distFoot !== undefined) {
+                shape.width = isGridUnits ? Math.round(distFoot * pxPerFoot) : distFoot;
+            }
+            if (widthFoot !== undefined) {
+                shape.height = isGridUnits ? Math.round(widthFoot * pxPerFoot) : widthFoot;
+            }
+        } else if (shape.type === "circle") {
+            const radFoot = coords.radius ?? coords.distance ?? coords.width;
+            if (radFoot !== undefined) {
+                shape.radius = isGridUnits ? Math.round(radFoot * pxPerFoot) : radFoot;
+            }
+        } else {
+            if (coords.radius !== undefined) {
+                shape.radius = isGridUnits ? Math.round(coords.radius * pxPerFoot) : coords.radius;
+            }
+            if (coords.width !== undefined) {
+                shape.width = isGridUnits ? Math.round(coords.width * pxPerFoot) : coords.width;
+            }
         }
         return shape;
     }

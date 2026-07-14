@@ -304,6 +304,18 @@ test('FoundryVTTV14Adapter applyDocumentPlacement and updatePreviewShape handle 
     assert.equal(shapePreviewDoc.shapes[0].radius, 35);
     assert.equal(shapePreviewDoc.shapes[0]._id, undefined); // Rule 9: no _id property on updated shape
 
+    const rectShapePreviewDoc = { shapes: [{ toObject: () => ({ type: 'rectangle', x: 0, y: 0, width: 100, height: 100 }) }] };
+    adapterV14.updatePreviewShape(rectShapePreviewDoc, { x: 200, y: 300, distance: 30, width: 20, gridUnits: true });
+    assert.equal(rectShapePreviewDoc.shapes[0].x, 200);
+    assert.equal(rectShapePreviewDoc.shapes[0].y, 300);
+    assert.equal(rectShapePreviewDoc.shapes[0].width, 600); // 30 feet * 20 px/foot (100px/5ft)
+    assert.equal(rectShapePreviewDoc.shapes[0].height, 400); // 20 feet * 20 px/foot
+
+    const rectDetected = adapterV14.detectProperties(rectShapePreviewDoc);
+    assert.equal(rectDetected.type, 'square');
+    assert.equal(rectDetected.distance, 30);
+    assert.equal(rectDetected.width, 20);
+
     const templatePreviewDoc = { t: 'cone' };
     adapterV14.updatePreviewShape(templatePreviewDoc, { x: 50, y: 60, direction: 45, distance: 20 });
     assert.equal(templatePreviewDoc.x, 50);
