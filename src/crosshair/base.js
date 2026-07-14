@@ -214,7 +214,7 @@ export class BaseCrosshairShape {
         this.configureCrosshairShape(crosshairSeq);
 
         if (this.stickToToken && this.token) {
-            crosshairSeq.location(this.token, { lockToEdge: true, lockToEdgeDirection: true });
+            crosshairSeq.location(this.token, { lockToEdge: true, lockToEdgeDirection: false });
         } else if (this.config.snapToGrid !== false && this.config.snapToGrid !== "none") {
             const snapMode = getGridSnapMode(this.config);
             if (snapMode !== 0) crosshairSeq.snapPosition(snapMode);

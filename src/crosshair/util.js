@@ -257,7 +257,17 @@ export function attachWheelRotation(crosshair, config = {}) {
     };
 
     activePointerHandler = () => {
-        const rad = config.currentDirection * (Math.PI / 180);
+        const isRect = shapeType === "rect" || shapeType === "square" || crosshair?.type === "rect" || crosshair?.type === "square";
+        if (isAttached && isRect && crosshair && canvas?.mousePosition) {
+            const pt = canvas.mousePosition;
+            const origin = (crosshair.x === pt.x && crosshair.y === pt.y) ? (config.token?.center ?? pt) : { x: crosshair.x, y: crosshair.y };
+            const angleRad = Math.atan2(pt.y - origin.y, pt.x - origin.x);
+            let dir = angleRad * (180 / Math.PI);
+            if (dir < 0) dir += 360;
+            config.currentDirection = dir;
+            alignCrosshairAndEffects(crosshair, config, angleRad);
+        }
+        const rad = (config.currentDirection ?? 0) * (Math.PI / 180);
         const previewLists = [
             canvas?.templates?.preview?.children,
             canvas?.templates?.placeables,
