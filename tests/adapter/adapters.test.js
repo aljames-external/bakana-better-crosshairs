@@ -4,8 +4,10 @@ import assert from 'node:assert/strict';
 import { closest } from '../../src/lib/filemanager.js';
 import { initializeFoundryAdapter, crosshairAdapter, BaseFoundryVTTAdapter } from '../../src/adapter/foundry/index.js';
 import { initializeSystemAdapter, systemAdapter } from '../../src/adapter/system/index.js';
-import { registerPlacementHooks } from '../../src/adapter/index.js';
+import { registerPlacementHooks, initializeHooks } from '../../src/adapter/index.js';
 import { snapCoordinates, attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement } from '../../src/crosshair/util.js';
+import { Token } from '../../src/lib/compat.js';
+import { autorecManager } from '../../src/autorec/autorecManager.js';
 import { FoundryVTTV13Adapter } from '../../src/adapter/foundry/foundryvtt-v13-adapter.js';
 import { FoundryVTTV14Adapter } from '../../src/adapter/foundry/foundryvtt-v14-adapter.js';
 import { Dnd5eSystemAdapter } from '../../src/adapter/system/dnd5e-adapter.js';
@@ -628,4 +630,119 @@ test('resolveAnchorPlacement and resolveCrosshairPlacement in attached mode lock
     assert.equal(resolvedPlacement.x, 150);
     assert.equal(resolvedPlacement.y, 100);
     assert.equal(resolvedPlacement.direction, 270);
+});
+
+test('foundry adapter layer encapsulates isOwner and toToken helper methods', () => {
+    const adapterV14 = new FoundryVTTV14Adapter();
+    assert.equal(adapterV14.isOwner({ id: null }), true, 'Preview template with no ID belongs to local user');
+    assert.equal(adapterV14.isOwner({ id: 'doc1', author: { id: globalThis.game.user.id } }), true);
+    assert.equal(adapterV14.isOwner({ id: 'doc2', author: { id: 'user_remote' } }), false);
+
+    const mockTokenInstance = new Token({ name: 'Hero' });
+    const mockTokenObject = { object: mockTokenInstance };
+    assert.equal(adapterV14.toToken(mockTokenInstance), mockTokenInstance);
+    assert.equal(adapterV14.toToken(mockTokenObject), mockTokenInstance);
+    assert.equal(adapterV14.toToken(null), null);
+});
+
+test('foundry adapter layer handlePreCreate manages pending placement lifecycle, cancellation, resolution, and deferral', () => {
+    const adapterV14 = new FoundryVTTV14Adapter();
+    const origUserId = globalThis.game.user.id;
+    globalThis.game.user.id = 'user_test';
+    autorecManager.register('Fireball', { itemName: 'Fireball', enabled: true, local: true });
+    autorecManager.register('Lightning', { itemName: 'Lightning', enabled: true, local: true });
+    autorecManager.register('ConeOfCold', { itemName: 'ConeOfCold', enabled: true, local: true });
+
+    try {
+        // 1. Skip remote user
+        const remoteRes = adapterV14.handlePreCreate({ documentName: 'Region', id: 'r1' }, {}, {}, 'remote_user');
+        assert.equal(remoteRes, true);
+
+        // 2. Abort if cancelled
+        adapterV14.pendingPlacements.set('Fireball_user_test', { itemName: 'Fireball', cancelled: true, resolved: true });
+        const abortRes = adapterV14.handlePreCreate({ documentName: 'Region', id: 'r2', item: { name: 'Fireball', getFlag: () => null } }, {}, {}, 'user_test');
+        assert.equal(abortRes, false);
+        assert.equal(adapterV14.pendingPlacements.has('Fireball_user_test'), false);
+
+        // 3. Apply if resolved
+        let updatedSource = null;
+        adapterV14.pendingPlacements.set('Lightning_user_test', {
+            itemName: 'Lightning',
+            cancelled: false,
+            resolved: true,
+            coords: { x: 100, y: 200, radius: 15 }
+        });
+        const applyRes = adapterV14.handlePreCreate({
+            documentName: 'Region',
+            id: 'r3',
+            item: { name: 'Lightning', getFlag: () => null },
+            shapes: [{ type: 'circle', x: 0, y: 0, radius: 5 }],
+            updateSource: (data) => { updatedSource = data; }
+        }, {}, {}, 'user_test');
+        assert.equal(applyRes, true);
+        assert.ok(updatedSource);
+        assert.equal(updatedSource.shapes[0].x, 100);
+        assert.equal(adapterV14.pendingPlacements.has('Lightning_user_test'), false);
+
+        // 4. Defer if sequence is still interactive
+        const pendingObj = { itemName: 'ConeOfCold', cancelled: false, resolved: false, coords: null };
+        adapterV14.pendingPlacements.set('ConeOfCold_user_test', pendingObj);
+        const deferRes = adapterV14.handlePreCreate({
+            documentName: 'Region',
+            id: 'r4',
+            item: { name: 'ConeOfCold', getFlag: () => null },
+            toObject: () => ({ name: 'ConeOfCold Doc' })
+        }, {}, {}, 'user_test');
+        assert.equal(deferRes, false);
+        assert.equal(pendingObj.deferredCreateData.name, 'ConeOfCold Doc');
+    } finally {
+        globalThis.game.user.id = origUserId;
+        autorecManager.unregister('Fireball');
+        autorecManager.unregister('Lightning');
+        autorecManager.unregister('ConeOfCold');
+    }
+});
+
+test('initializeHooks registers placement hooks using default handlers from active foundry adapter', () => {
+    let preCreateHandler = null;
+    const origOn = globalThis.Hooks.on;
+    try {
+        globalThis.Hooks.on = (event, fn) => {
+            if (event === 'preCreateRegion') preCreateHandler = fn;
+        };
+        const adapterV14 = new FoundryVTTV14Adapter();
+        initializeHooks({ foundryAdapter: adapterV14, sysAdapter: systemAdapter });
+        assert.ok(preCreateHandler, 'preCreateRegion hook should be registered');
+    } finally {
+        globalThis.Hooks.on = origOn;
+    }
+});
+
+test('createDeferredDocument delegates document creation appropriately in V13 MeasuredTemplate vs V14 Region subclasses', async () => {
+    let createdDocName = null;
+    let createdDocPayload = null;
+    const mockScene = {
+        name: "Test Scene",
+        createEmbeddedDocuments: async (docName, data) => {
+            createdDocName = docName;
+            createdDocPayload = data[0];
+            return data;
+        }
+    };
+
+    const adapterV13 = new FoundryVTTV13Adapter();
+    await adapterV13.createDeferredDocument(mockScene, { _id: "temp1", t: "circle", distance: 15 }, { x: 100, y: 200, distance: 20 });
+    assert.equal(createdDocName, "MeasuredTemplate");
+    assert.equal(createdDocPayload.x, 100);
+    assert.equal(createdDocPayload.y, 200);
+    assert.equal(createdDocPayload.distance, 20);
+    assert.equal(createdDocPayload._id, undefined);
+
+    const adapterV14 = new FoundryVTTV14Adapter();
+    await adapterV14.createDeferredDocument(mockScene, { _id: "temp2", shapes: [{ type: "circle", x: 0, y: 0, radius: 10 }] }, { x: 300, y: 400, radius: 25, gridUnits: false });
+    assert.equal(createdDocName, "Region");
+    assert.equal(createdDocPayload.shapes[0].x, 300);
+    assert.equal(createdDocPayload.shapes[0].y, 400);
+    assert.equal(createdDocPayload.shapes[0].radius, 25);
+    assert.equal(createdDocPayload._id, undefined);
 });

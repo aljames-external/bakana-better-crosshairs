@@ -70,8 +70,11 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {Object} [sysAdapter=systemAdapter] - Active System Adapter instance
      * @returns {Array<{event: string, handler: Function, category: string, targetName: string}>} Array of generated hook descriptor objects
      */
-    generatePlacementHooks(callbacks, sysAdapter = systemAdapter) {
+    generatePlacementHooks(callbacks = {}, sysAdapter = systemAdapter) {
         const targetSysAdapter = sysAdapter ?? systemAdapter;
+        const onDrawPreview = callbacks?.onDrawPreview ?? ((placeable) => this.handleDrawPreview(placeable));
+        const onPreCreate = callbacks?.onPreCreate ?? ((doc, _data, _options, userId) => this.handlePreCreate(doc, _data, _options, userId));
+        const onCreate = callbacks?.onCreate ?? ((doc, _options, userId) => this.handleCreateDocument(doc, _options, userId));
         const basePlaceables = this.supportedBasePlaceables;
         const customPlaceables = targetSysAdapter?.getCustomPlaceableClassNames?.() ?? [];
         const dynamicPlaceables = [];
@@ -87,7 +90,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
 
         const drawPlaceables = new Set([...basePlaceables, ...customPlaceables, ...dynamicPlaceables]);
         const drawHooks = Array.from(drawPlaceables).flatMap((placeableName) => [
-            { event: `draw${placeableName}`, handler: (template) => callbacks.onDrawPreview(template), category: "draw", targetName: placeableName },
+            { event: `draw${placeableName}`, handler: onDrawPreview, category: "draw", targetName: placeableName },
             { event: `refresh${placeableName}`, handler: (template) => this.handleMeasuredTemplateRefresh(template), category: "refresh", targetName: placeableName }
         ]);
 
@@ -106,8 +109,8 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
 
         const createDocumentTypes = new Set([...baseDocumentTypes, ...customDocumentTypes, ...dynamicDocumentTypes]);
         const documentHooks = Array.from(createDocumentTypes).flatMap((docType) => [
-            { event: `preCreate${docType}`, handler: (doc, _data, _options, userId) => callbacks.onPreCreate(doc, _data, _options, userId), category: "preCreate", targetName: docType },
-            { event: `create${docType}`, handler: (doc, _options, userId) => callbacks.onCreate(doc, _options, userId), category: "create", targetName: docType }
+            { event: `preCreate${docType}`, handler: onPreCreate, category: "preCreate", targetName: docType },
+            { event: `create${docType}`, handler: onCreate, category: "create", targetName: docType }
         ]);
 
         const generatedHooks = [...drawHooks, ...documentHooks];
@@ -230,5 +233,37 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
         if (config.hidden || config.hideTemplate) updateData.hidden = true;
 
         doc.updateSource(updateData);
+    }
+
+    /**
+     * Resume deferred MeasuredTemplate creation in V13 when an interactive Sequencer placement resolves.
+     * @param {Scene} scene - Target Canvas Scene
+     * @param {Object} deferredData - Initial raw document creation data (`doc.toObject()`)
+     * @param {Object} coords - Resolved placement coordinates from Sequencer (`{ x, y, direction, distance, ... }`)
+     * @returns {Promise<void>} Resolves when deferred document creation completes
+     */
+    async createDeferredDocument(scene, deferredData, coords) {
+        if (!scene || !deferredData || !coords) return;
+        const data = foundry.utils.deepClone(deferredData);
+        delete data._id;
+
+        if (coords.x !== undefined) data.x = coords.x;
+        if (coords.y !== undefined) data.y = coords.y;
+        if (coords.direction !== undefined) data.direction = coords.direction;
+        else if (coords.rotation !== undefined) data.direction = coords.rotation;
+        if (coords.distance !== undefined) data.distance = coords.distance;
+        else if (coords.radius !== undefined) data.distance = coords.radius;
+
+        console.log("%cBBC DIAGNOSTIC | V13 createDeferredDocument:", "background: #7b2cbf; color: #fff; padding: 2px 4px; border-radius: 2px;", {
+            docName: "MeasuredTemplate",
+            resolvedCoords: coords,
+            deferredCreatePayload: data
+        });
+
+        try {
+            await scene.createEmbeddedDocuments("MeasuredTemplate", [data]);
+        } catch (err) {
+            log.error("FoundryVTTV13Adapter.createDeferredDocument | Failed to create deferred MeasuredTemplate:", err);
+        }
     }
 }

@@ -20,7 +20,7 @@ sequenceDiagram
     autonumber
     actor Player
     participant FVTT as Foundry VTT Canvas
-    participant Hook as templates.js (handleDrawPreview)
+    participant Hook as BaseFoundryVTTAdapter (handleDrawPreview)
     participant Autorec as autorecManager
     participant Adapter as Dnd5eSystemAdapter
     participant Seq as Sequencer Crosshair
@@ -28,8 +28,8 @@ sequenceDiagram
 
     Player->>FVTT: Cast Item / Draw Template Preview
     FVTT->>Hook: MeasuredTemplate.prototype.drawPreview
-    Hook->>Autorec: getRegisteredEntry(placeable)
-    Autorec->>Adapter: extractCallingContext(doc) + shouldReplace(context, entry)
+    Hook->>Autorec: getEntryForDocument(placeable.document)
+    Autorec->>Adapter: extractCallingContext(doc) + isMatch(context, entry)
     Adapter-->>Autorec: Return Matched Entry Config
     Autorec-->>Hook: Return Handler Config
     Hook->>FVTT: hidePreview(placeable)
@@ -41,7 +41,7 @@ sequenceDiagram
         Resolver->>Resolver: resolveAnchorPlacement(token, shape, direction, distance)
     end
     Resolver->>FVTT: Store updateData in temporary document flag
-    FVTT->>Hook: preCreateMeasuredTemplate Hook
+    FVTT->>Hook: preCreateMeasuredTemplate / preCreateRegion Hook
     Hook->>FVTT: doc.updateSource(updateData) (Exact x, y, direction)
 ```
 
@@ -50,33 +50,33 @@ sequenceDiagram
 ## Module Function Tree
 
 ```text
-src/index.js
+src/module.js
 ├── Hooks.once("init")
-│   ├── registerSettings()
-│   ├── registerKeybindings()
-│   └── autorecManager.initialize()
-└── Hooks.on("preCreateMeasuredTemplate", handlePreCreate)
+│   ├── registerModuleSettings()
+│   ├── initializeSystemAdapter()
+│   ├── initializeFoundryAdapter()
+│   └── initializeHooks()
+└── Hooks.once("ready", autorecManager.initializeReadySync)
 
-src/lib/templates.js
-├── handleDrawPreview(placeable)
-│   ├── autorecManager.getRegisteredEntry(placeable)
-│   ├── crosshairAdapter.hidePreview(placeable)
-│   └── crosshairModule.create(token, handlerConfig)
-└── handlePreCreate(doc, _data, _options, userId)
-    └── crosshairAdapter.formatDocumentUpdate(doc, coords, config)
-
-src/autorec/autorecManager.js
-├── getEntriesForItem(itemName)
-│   └── Prioritizes activity-named workflows over general item fallbacks
-└── getRegisteredEntry(target)
-    └── crosshairAdapter.matchAutorecEntry(target, registeredHandlers, this)
+src/adapter/index.js
+├── registerPlacementHooks(callbacks, options)
+│   ├── crosshairAdapter.registerPlacementHooks(callbacks, systemAdapter)
+│   └── systemAdapter.registerItemSheetHooks()
+└── initializeHooks(options)
 
 src/adapter/foundry/base-foundryvtt-adapter.js
+├── handleDrawPreview(placeable)
+│   ├── autorecManager.getEntryForDocument(doc)
+│   ├── crosshairAdapter.hidePreview(placeable)
+│   └── crosshairModule.play(token, handlerConfig)
+├── handlePreCreate(doc, _data, _options, userId)
+│   └── crosshairAdapter.applyDocumentPlacement(doc, coords, config)
+├── handleCreateDocument(doc, _options, userId)
 ├── extractCallingContext(target)
 │   └── systemAdapter.extractCallingContext(document, baseContext)
-└── matchAutorecEntry(doc, entries, manager)
+└── matchAutorecEntry(doc, entries)
     ├── Sort candidate entries: activity rules first, item fallback last
-    └── systemAdapter.shouldReplace(context, entry)
+    └── systemAdapter.isMatch(context, entry)
 
 src/adapter/foundry/foundryvtt-v12-adapter.js
 ├── formatDocumentUpdate(doc, coords, config) # Legacy MeasuredTemplate update

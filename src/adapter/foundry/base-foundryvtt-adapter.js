@@ -1,9 +1,12 @@
 import { systemAdapter } from "../system/index.js";
 import { log } from "../../lib/logger.js";
-import { clearHighlightLayer } from "../../lib/compat.js";
+import { clearHighlightLayer, Token } from "../../lib/compat.js";
 import { MODULE_ID } from "../../lib/constants.js";
-import { DEFAULT_AUTOREC_ENTRY } from "../../autorec/autorecManager.js";
+import { DEFAULT_AUTOREC_ENTRY, autorecManager } from "../../autorec/autorecManager.js";
 import { CrosshairConfiguration } from "../../autorec/CrosshairConfiguration.js";
+import { notify } from "../../lib/notifier.js";
+import { crosshair } from "../../crosshair/_crosshairs.js";
+import { runConcurrentScript } from "../../crosshair/util.js";
 /**
  * Base abstract class for Foundry VTT version-specific adapters.
  */
@@ -13,6 +16,7 @@ export class BaseFoundryVTTAdapter {
      */
     constructor() {
         this.version = 0;
+        this.pendingPlacements = new Map();
     }
 
     /**
@@ -128,9 +132,9 @@ export class BaseFoundryVTTAdapter {
             }
         }
 
-        const itemConfig = context.item?.getFlag(MODULE_ID, "customConfig") ?? null;
-        const activityConfig = context.activityId
-            ? (context.item?.getFlag(MODULE_ID, "activityConfigs")?.[context.activityId] ?? null)
+        const itemConfig = typeof context.item?.getFlag === "function" ? context.item.getFlag(MODULE_ID, "customConfig") : null;
+        const activityConfig = context.activityId && typeof context.item?.getFlag === "function"
+            ? (context.item.getFlag(MODULE_ID, "activityConfigs")?.[context.activityId] ?? null)
             : null;
 
         if (!itemConfig && !activityConfig) {
@@ -582,6 +586,17 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
+     * Resume deferred document creation when an interactive Sequencer crosshair placement resolves.
+     * @param {Scene} scene - Target Canvas Scene
+     * @param {Object} deferredData - Initial raw document creation data (`doc.toObject()`)
+     * @param {Object} coords - Resolved placement coordinates from Sequencer
+     * @returns {Promise<void>} Resolves when deferred document creation completes
+     */
+    async createDeferredDocument(scene, deferredData, coords) {
+        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement createDeferredDocument(scene, deferredData, coords).");
+    }
+
+    /**
      * Resolve placement anchor coordinates {x, y, direction} on a token's edge toward a click coordinate.
      * Takes only a normalized Token object and {x, y} click coordinates.
      * Implements 1-to-1 the exact algorithm from Sequencer 4.2.2 (#handleLockedEdge in CrosshairsPlaceable.js).
@@ -666,5 +681,338 @@ export class BaseFoundryVTTAdapter {
      */
     getTemplatePixelFactor() {
         return { factor: 1, gridUnits: false };
+    }
+
+    /**
+     * Check if the current user is the author or owner of the document or preview.
+     * @param {Document} doc - Template or Region document
+     * @returns {boolean} True if the current user owns or authored the document
+     */
+    isOwner(doc) {
+        if (!doc || !doc.id) return true; // Preview templates on canvas are always local to the drawing client
+        const userId = doc.author?.id ?? doc.author ?? game?.user?.id;
+        return userId === game?.user?.id;
+    }
+
+    /**
+     * Normalize an item or placeable object into a canonical Token instance.
+     * Normalizes single concrete input type before passing down to placement helpers.
+     * @param {Token|Item|Actor|Object|null} target - Candidate object to normalize
+     * @returns {Token|null} Canonical Token object or null
+     */
+    toToken(target) {
+        if (!target) return null;
+        if (target instanceof Token) return target;
+        if (target.object instanceof Token) return target.object;
+        return target;
+    }
+
+    /**
+     * Handle preview drawing (v13 drawMeasuredTemplate / v14 drawRegion).
+     * @param {PlaceableObject} placeable - Canvas PlaceableObject representing the preview template or region
+     * @returns {Promise<void>} Resolves when preview handling is complete
+     */
+    async handleDrawPreview(placeable) {
+        if (!placeable || !placeable.document) return;
+        const doc = placeable.document;
+        const isPreview = this.isPreview(placeable);
+
+        log.debug("BaseFoundryVTTAdapter.handleDrawPreview | Hook fired:", {
+            docId: doc.id,
+            isPreview,
+            isOwner: this.isOwner(doc),
+            placeable
+        });
+
+        if (!isPreview || !this.isOwner(doc)) {
+            log.debug("BaseFoundryVTTAdapter.handleDrawPreview | Skipping non-preview or non-owned placeable:", { docId: doc.id, isPreview });
+            return;
+        }
+
+        const entry = autorecManager.getEntryForDocument(doc);
+        if (!entry) {
+            log.debug("BaseFoundryVTTAdapter.handleDrawPreview | No registered handler matched for preview.");
+            return;
+        }
+
+        log.debug(`BaseFoundryVTTAdapter.handleDrawPreview | Intercepting template preview for "${entry.itemName}"`, {
+            placeableClass: placeable?.constructor?.name,
+            docData: typeof doc.toObject === "function" ? doc.toObject() : doc,
+            docFlags: doc.flags
+        });
+
+        // 1. Immediately hide the Foundry template/region preview graphic completely so custom Sequencer visuals take over
+        this.hidePreview(placeable);
+
+        // 2. Resolve token and item context deterministically through version adapter
+        const callingContext = this.extractCallingContext(doc);
+        const item = entry.item ?? callingContext.item;
+        const rawToken = item?.parent?.getActiveTokens?.()[0] ?? canvas?.tokens?.controlled?.[0];
+        const token = this.toToken(rawToken);
+        const actor = token?.actor ?? item?.actor;
+
+        log.debug("BaseFoundryVTTAdapter.handleDrawPreview | Using token context:", token?.name);
+
+        const placementKey = `${entry.itemName}_${game?.user?.id}`;
+        const entryConfig = typeof entry.handler === "object" && entry.handler !== null ? entry.handler : entry;
+        const pending = {
+            itemName: entry.itemName,
+            resolved: false,
+            cancelled: false,
+            coords: null,
+            config: entryConfig,
+            placeable: placeable
+        };
+        this.pendingPlacements.set(placementKey, pending);
+
+        const self = this;
+        const context = {
+            x: undefined,
+            y: undefined,
+            distance: undefined,
+            direction: undefined,
+            t: undefined,
+            radius: undefined,
+            rotation: undefined,
+            type: undefined,
+            cancelled: false,
+            resolved: false,
+            /**
+             * Resolve the pending sequencer crosshair placement with specified coordinates.
+             * @param {Object} [coords={}] - Placed coordinates and properties
+             * @returns {Promise<void>} Resolves when deferred document placement is processed
+             */
+            async resolve(coords = {}) {
+                log.debug(`context.resolve | Sequencer crosshair PLACED at (${coords.x}, ${coords.y}):`, coords);
+                Object.assign(this, coords);
+                this.resolved = true;
+
+                const pendingItem = self.pendingPlacements.get(placementKey);
+                if (pendingItem) {
+                    pendingItem.coords = coords;
+                    pendingItem.resolved = true;
+
+                    if (pendingItem.deferredCreateData && typeof canvas !== "undefined" && canvas.scene) {
+                        log.debug(`context.resolve | Resuming deferred document creation on scene "${canvas.scene.name}"`);
+                        await self.createDeferredDocument(canvas.scene, pendingItem.deferredCreateData, coords);
+                        if (placeable && typeof self.dismissPreview === "function") {
+                            self.dismissPreview(placeable);
+                        }
+                    } else if (doc && typeof canvas !== "undefined" && canvas.scene) {
+                        systemAdapter.handleProgrammaticPlacement(canvas.scene, doc, placeable, coords, {
+                            crosshairAdapter: self,
+                            pendingPlacements: self.pendingPlacements,
+                            placementKey
+                        });
+                    }
+                }
+            },
+            /**
+             * Cancel the pending sequencer crosshair placement.
+             * @returns {void}
+             */
+            cancel() {
+                log.debug(`context.cancel | Sequencer crosshair CANCELLED for "${entry.itemName}"`);
+                this.cancelled = true;
+                this.resolved = true;
+                const pendingItem = self.pendingPlacements.get(placementKey);
+                if (pendingItem) {
+                    pendingItem.cancelled = true;
+                    pendingItem.resolved = true;
+                }
+                self.pendingPlacements.delete(placementKey);
+                if (placeable && typeof self.dismissPreview === "function") {
+                    self.dismissPreview(placeable);
+                }
+            }
+        };
+
+        try {
+            // 3. Auto-detect template properties and assemble sequence config
+            const detected = this.detectProperties(doc);
+            const autoConfig = {
+                ...detected,
+                context,
+                icon: doc.item?.img ?? doc.flags?.['midi-qol']?.itemImg,
+                item,
+                actor,
+                scope: { item, actor, token, doc }
+            };
+
+            const mergedConfig = {
+                ...autoConfig,
+                ...entryConfig,
+                context: autoConfig.context,
+                scope: autoConfig.scope
+            };
+
+            if (mergedConfig.concurrentCode) {
+                log.debug(`BaseFoundryVTTAdapter.handleDrawPreview | Executing pre-placement script before template placement selection for "${entry.itemName}"`);
+                await runConcurrentScript(token, mergedConfig, null);
+            }
+
+            if (typeof entry.handler === "function") {
+                await entry.handler(token, mergedConfig);
+            } else {
+                const explicitType = entryConfig.type;
+                const isKnownType = ["circle", "cone", "ray", "square", "rect"].includes(String(explicitType ?? "").toLowerCase());
+                const crosshairType = isKnownType
+                    ? (String(explicitType).toLowerCase() === "rect" ? "square" : String(explicitType).toLowerCase())
+                    : (detected.type ?? "circle");
+                const builder = crosshair[crosshairType] ?? crosshair.circle;
+
+                const shapeFileKey = `${crosshairType}File`;
+                const shapeSpecificFile = entryConfig[shapeFileKey]
+                    ?? (typeof entryConfig.file === "string" && entryConfig.file.includes(crosshairType) ? entryConfig.file : null);
+
+                const finalConfig = {
+                    ...mergedConfig,
+                    type: crosshairType,
+                    file: shapeSpecificFile ?? mergedConfig.file
+                };
+
+                const initialDims = {
+                    distance: finalConfig.distance ?? detected.distance,
+                    width: finalConfig.width ?? detected.width,
+                    radius: finalConfig.radius ?? detected.radius,
+                    gridUnits: Boolean(finalConfig.gridUnits ?? true)
+                };
+                globalThis._activeBBCDimensions = initialDims;
+                globalThis._activeBBCPlaceable = placeable;
+                placeable._bbcDimensions = initialDims;
+                placeable._bbcConfig = finalConfig;
+                if (placeable.document) {
+                    placeable.document._bbcDimensions = initialDims;
+                    placeable.document._bbcConfig = finalConfig;
+                }
+
+                log.debug(`BaseFoundryVTTAdapter.handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}" with config:`, finalConfig);
+                await builder.play(token, finalConfig);
+            }
+
+            log.debug(`BaseFoundryVTTAdapter.handleDrawPreview | Sequencer crosshair sequence completed for "${entry.itemName}".`);
+        } catch (err) {
+            const msg = typeof err === "string" ? err : (err?.message ?? "Failed to play Sequencer crosshair effect");
+            log.debug(`BaseFoundryVTTAdapter.handleDrawPreview | Error running sequencer sequence for "${entry.itemName}":`, err);
+            notify.error(msg);
+            pending.cancelled = true;
+            pending.resolved = true;
+        }
+    }
+
+    /**
+     * Handle document preCreate (v13 preCreateMeasuredTemplate / v14 preCreateRegion).
+     * @param {Document} doc - Template or Region document being created
+     * @param {Object} _data - Initial document creation data
+     * @param {Object} _options - Document creation options
+     * @param {string} userId - ID of the user creating the document
+     * @returns {boolean} True to proceed with normal creation, false to abort or defer
+     */
+    handlePreCreate(doc, _data, _options, userId) {
+        log.debug(`BaseFoundryVTTAdapter.handlePreCreate | [ENTRY] preCreate hook triggered for docName=${doc.documentName}, id=${doc.id}, userId=${userId}, localUser=${game?.user?.id}`);
+
+        if (userId !== game?.user?.id) {
+            log.debug(`BaseFoundryVTTAdapter.handlePreCreate | [SKIP] Skipping document from remote user ${userId}`);
+            return true;
+        }
+
+        let entry = autorecManager.getEntryForDocument(doc);
+        let placementKey = null;
+        let pending = null;
+
+        if (entry) {
+            placementKey = `${entry.itemName}_${game?.user?.id}`;
+            pending = this.pendingPlacements.get(placementKey);
+        } else {
+            // Fallback: match any active uncancelled pending placement for the local user
+            for (const [key, val] of this.pendingPlacements.entries()) {
+                if (key.endsWith(`_${game?.user?.id}`) && !val.cancelled) {
+                    pending = val;
+                    placementKey = key;
+                    entry = { itemName: val.itemName, handler: val.config };
+                    log.debug(`BaseFoundryVTTAdapter.handlePreCreate | [FALLBACK MATCH] Matched active pending placement "${val.itemName}" (key=${key})`);
+                    break;
+                }
+            }
+        }
+
+        log.debug(`BaseFoundryVTTAdapter.handlePreCreate | [LOOKUP RESULT] entry="${entry?.itemName ?? null}", hasPending=${Boolean(pending)}, pending.resolved=${pending?.resolved}, pending.coords=`, pending?.coords);
+
+        if (!entry || !pending) {
+            log.debug(`BaseFoundryVTTAdapter.handlePreCreate | [PASS] No matching autorec entry or active pending placement. Allowing standard creation.`);
+            return true;
+        }
+
+        // If the sequencer sequence was right-click cancelled, abort placement
+        if (pending.cancelled) {
+            log.debug(`BaseFoundryVTTAdapter.handlePreCreate | [ABORT] Placement was cancelled by user ("${entry.itemName}"). Returning false.`);
+            this.pendingPlacements.delete(placementKey);
+            return false;
+        }
+
+        // If the sequencer sequence has resolved with coordinates, update the document
+        if (pending.resolved && pending.coords) {
+            log.debug(`BaseFoundryVTTAdapter.handlePreCreate | [APPLY] Sequencer placement resolved for "${entry.itemName}". Applying placement onto document:`, pending.coords);
+            this.applyDocumentPlacement(doc, pending.coords, pending.config);
+            if (pending.placeable && typeof this.dismissPreview === "function") {
+                this.dismissPreview(pending.placeable);
+            }
+            this.pendingPlacements.delete(placementKey);
+            log.debug(`BaseFoundryVTTAdapter.handlePreCreate | [APPLY COMPLETE] Document updated successfully.`);
+            return true;
+        }
+
+        // If sequence is still interactive/running, defer creation until sequence resolves
+        pending.deferredCreateData = typeof doc.toObject === "function" ? doc.toObject() : doc;
+        log.debug(`BaseFoundryVTTAdapter.handlePreCreate | [DEFER] Sequencer crosshair is still interactive ("${entry.itemName}"). Deferring document creation until click.`);
+        return false;
+    }
+
+    /**
+     * Handle document post-creation hook (v13 createMeasuredTemplate / v14 createRegion).
+     * Executes user-configured post-placement Javascript inside a try/catch block with standard context variables.
+     * @param {Document} doc - Template or Region document that was created
+     * @param {Object} _options - Document creation options
+     * @param {string} userId - ID of the user creating the document
+     * @returns {Promise<void>} Resolves when post-placement execution completes
+     */
+    async handleCreateDocument(doc, _options, userId) {
+        if (userId !== game?.user?.id) return;
+
+        const flagsConfig = doc.flags?.bbc;
+        const entry = autorecManager.getEntryForDocument(doc);
+        const config = {
+            ...entry,
+            ...flagsConfig
+        };
+
+        const code = config.postPlacementCode;
+        log.debug(`BaseFoundryVTTAdapter.handleCreateDocument | Evaluated post-placement hook for ${doc.documentName} (${doc.id}):`, { hasCode: Boolean(code), code, flagsConfig });
+        if (!code || typeof code !== "string" || !code.trim()) return;
+
+        const callingContext = this.extractCallingContext(doc);
+        const item = config.item ?? callingContext.item;
+        const rawToken = item?.parent?.getActiveTokens?.()[0] ?? canvas?.tokens?.controlled?.[0];
+        const token = this.toToken(rawToken);
+        const actor = token?.actor ?? item?.actor;
+        const scope = { doc, token, actor, item, config };
+
+        try {
+            const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+            const fn = new AsyncFunction(
+                "doc",
+                "token",
+                "actor",
+                "item",
+                "scope",
+                "config",
+                "canvas",
+                "game",
+                code
+            );
+            await fn(doc, token, actor, item, scope, config, typeof canvas !== "undefined" ? canvas : undefined, typeof game !== "undefined" ? game : undefined);
+        } catch (e) {
+            log.error(`BaseFoundryVTTAdapter.handleCreateDocument | Error executing post-placement script for ${doc.documentName}:`, e);
+        }
     }
 }

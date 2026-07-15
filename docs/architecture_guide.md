@@ -51,9 +51,8 @@ src/
 ├── lib/
 │   ├── compat.js                          # Safe Foundry version compatibility wrappers
 │   ├── filemanager.js                     # Sequencer database path/asset resolution
-│   ├── logger.js                          # Structured logging system
-│   └── templates.js                       # MeasuredTemplate & Region preview interceptors
-└── index.js                               # Main entrypoint & hook registration
+│   └── logger.js                          # Structured logging system
+└── module.js                              # Main entrypoint & hook registration
 ```
 
 ---
@@ -61,9 +60,9 @@ src/
 ## Decoupled Adapter Pattern
 
 ### Foundry Adapters (`BaseFoundryVTTAdapter` & Version Subclasses)
-Located in [`src/adapter/foundry/`](../src/adapter/foundry/), Foundry adapters isolate tabletop version differences:
-- **`BaseFoundryVTTAdapter`**: Implements shared lookup matching (`matchAutorecEntry`), candidate ordering, and live default preview hiding (`hidePreview`).
-- **`FoundryVTTV12Adapter`**: Handles V12 and V13 `MeasuredTemplate` placement hooks (`drawMeasuredTemplate` → `preCreateMeasuredTemplate` → `createMeasuredTemplate`) with legacy pixel sizing (`getTemplatePixelFactor` returning `{ factor: 1, gridUnits: false }`).
+Located in [`src/adapter/foundry/`](../src/adapter/foundry/), Foundry adapters isolate tabletop version differences and host preview interceptors:
+- **`BaseFoundryVTTAdapter`**: Implements shared lookup matching (`matchAutorecEntry`), candidate ordering, live default preview hiding (`hidePreview`), and core placement lifecycle handlers (`handleDrawPreview`, `handlePreCreate`, `handleCreateDocument`).
+- **`FoundryVTTV13Adapter`**: Handles V13 `MeasuredTemplate` placement hooks (`drawMeasuredTemplate` → `preCreateMeasuredTemplate` → `createMeasuredTemplate`) with legacy pixel sizing (`getTemplatePixelFactor` returning `{ factor: 1, gridUnits: false }`).
 - **`FoundryVTTV14Adapter`**: Handles V14+ `Region` placement hooks (`drawMeasuredTemplate` → `preCreateRegion` → `createRegion`). Converts game feet (`distance`, `width`) to canvas pixels (`* pxPerFoot`) inside `_formatRegionShapeUpdate` and returns `{ factor: 1 / gridSize, gridUnits: true }` so Sequencer effects render accurate grid unit dimensions.
 
 ### Multi-Activity Priority Matching (`matchAutorecEntry` & `getEntriesForItem`)
@@ -94,8 +93,8 @@ Located in [`src/adapter/system/`](../src/adapter/system/), system adapters dete
 
 When a player or workflow initiates template placement (`MeasuredTemplate.prototype.drawPreview`), the following sequence occurs:
 
-1. **Draw Interception**: `handleDrawPreview(placeable)` (`src/lib/templates.js`) inspects the placeable document.
-2. **Rule Lookup**: `autorecManager.getRegisteredEntry(placeable)` queries `crosshairAdapter.matchAutorecEntry(target, registeredHandlers)`.
+1. **Draw Interception**: `handleDrawPreview(placeable)` (`BaseFoundryVTTAdapter` / `crosshairAdapter`) inspects the placeable document.
+2. **Rule Lookup**: `autorecManager.getEntryForDocument(placeable.document)` queries `crosshairAdapter.matchAutorecEntry(doc, registeredHandlers)`.
 3. **Hide Default Visuals**: If a match is found, `crosshairAdapter.hidePreview(placeable)` hides Foundry's default template mesh.
 4. **Spawn Crosshair**: The corresponding shape builder (`Circle`, `Cone`, `Ray`, `Square`) constructs a dynamic `new Sequence().crosshair(...)` reticle and attaches custom callbacks (`SHOW`, `PLACED`, `CANCEL`).
 

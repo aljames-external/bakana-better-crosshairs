@@ -111,6 +111,7 @@ const settingsStore = new Map([
 const registeredCallbacks = new Map();
 
 globalThis.game = {
+    user: { id: "test-user", isGM: true },
     version: "13.335",
     system: { id: "dnd5e", title: "Dungeons & Dragons 5th Edition" },
     i18n: {
