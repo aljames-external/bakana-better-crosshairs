@@ -67,7 +67,7 @@ sequenceDiagram
         PreCreateHandler->>PreCreateHandler: dismissPreview(placeable) + pendingPlacements.delete()
         PreCreateHandler-->>FVTT: return true (Document persists to database)
     else Deferred Creation Flow (preCreate fired before click)
-        PreCreateHandler-->>FVTT: return false (Document creation deferred; saved in pending.deferredCreateData)
+        PreCreateHandler-->>FVTT: return false (Document creation deferred, saved in pending.deferredCreateData)
         Resolver->>Hook: context.resolve(coords) triggers self.createDeferredDocument(scene, deferredData, coords)
         Hook->>FVTT: scene.createEmbeddedDocuments(docName, [formattedData])
     end
