@@ -1,4 +1,6 @@
 import { BaseFoundryVTTAdapter } from "./base-foundryvtt-adapter.js";
+import { systemAdapter } from "../system/index.js";
+import { log } from "../../lib/logger.js";
 import { localize } from "../../lib/utils.js";
 
 /**
@@ -59,6 +61,65 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      */
     get supportedDocumentTypes() {
         return ["MeasuredTemplate"];
+    }
+
+    /**
+     * Generate structured placement hook descriptors for Foundry VTT v13.
+     * Quarantined directly inside FoundryVTTV13Adapter without relying on base class generation logic.
+     * @param {Object} callbacks - Placement hook callbacks (`{ onDrawPreview, onPreCreate, onCreate }`)
+     * @param {Object} [sysAdapter=systemAdapter] - Active System Adapter instance
+     * @returns {Array<{event: string, handler: Function, category: string, targetName: string}>} Array of generated hook descriptor objects
+     */
+    generatePlacementHooks(callbacks, sysAdapter = systemAdapter) {
+        const targetSysAdapter = sysAdapter ?? systemAdapter;
+        const basePlaceables = this.supportedBasePlaceables;
+        const customPlaceables = targetSysAdapter?.getCustomPlaceableClassNames?.() ?? [];
+        const dynamicPlaceables = [];
+
+        if (typeof CONFIG !== "undefined") {
+            for (const base of basePlaceables) {
+                const customClass = CONFIG[base]?.objectClass?.name;
+                if (customClass && typeof customClass === "string" && !basePlaceables.includes(customClass) && !customPlaceables.includes(customClass)) {
+                    dynamicPlaceables.push(customClass);
+                }
+            }
+        }
+
+        const drawPlaceables = new Set([...basePlaceables, ...customPlaceables, ...dynamicPlaceables]);
+        const drawHooks = Array.from(drawPlaceables).flatMap((placeableName) => [
+            { event: `draw${placeableName}`, handler: (template) => callbacks.onDrawPreview(template), category: "draw", targetName: placeableName },
+            { event: `refresh${placeableName}`, handler: (template) => this.handleMeasuredTemplateRefresh(template), category: "refresh", targetName: placeableName }
+        ]);
+
+        const baseDocumentTypes = this.supportedDocumentTypes;
+        const customDocumentTypes = targetSysAdapter?.getCustomDocumentTypes?.() ?? [];
+        const dynamicDocumentTypes = [];
+
+        if (typeof CONFIG !== "undefined") {
+            for (const docType of baseDocumentTypes) {
+                const customDocName = CONFIG[docType]?.documentClass?.documentName;
+                if (customDocName && typeof customDocName === "string" && !baseDocumentTypes.includes(customDocName) && !customDocumentTypes.includes(customDocName)) {
+                    dynamicDocumentTypes.push(customDocName);
+                }
+            }
+        }
+
+        const createDocumentTypes = new Set([...baseDocumentTypes, ...customDocumentTypes, ...dynamicDocumentTypes]);
+        const documentHooks = Array.from(createDocumentTypes).flatMap((docType) => [
+            { event: `preCreate${docType}`, handler: (doc, _data, _options, userId) => callbacks.onPreCreate(doc, _data, _options, userId), category: "preCreate", targetName: docType },
+            { event: `create${docType}`, handler: (doc, _options, userId) => callbacks.onCreate(doc, _options, userId), category: "create", targetName: docType }
+        ]);
+
+        const generatedHooks = [...drawHooks, ...documentHooks];
+
+        if (targetSysAdapter && typeof targetSysAdapter.modifyPlacementHooks === "function") {
+            const modifiedHooks = targetSysAdapter.modifyPlacementHooks(generatedHooks, callbacks, this);
+            log.debug("FoundryVTTV13Adapter.generatePlacementHooks | Modified placement hooks from system adapter:", modifiedHooks);
+            return modifiedHooks;
+        }
+
+        log.debug("FoundryVTTV13Adapter.generatePlacementHooks | Generated placement hooks:", generatedHooks);
+        return generatedHooks;
     }
 
     /**

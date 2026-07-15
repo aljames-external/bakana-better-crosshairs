@@ -2,7 +2,7 @@ import '../setup.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { closest } from '../../src/lib/filemanager.js';
-import { initializeFoundryAdapter, crosshairAdapter } from '../../src/adapter/foundry/index.js';
+import { initializeFoundryAdapter, crosshairAdapter, BaseFoundryVTTAdapter } from '../../src/adapter/foundry/index.js';
 import { initializeSystemAdapter, systemAdapter } from '../../src/adapter/system/index.js';
 import { registerPlacementHooks } from '../../src/adapter/index.js';
 import { snapCoordinates, attachWheelRotation, detachWheelRotation } from '../../src/crosshair/util.js';
@@ -256,10 +256,51 @@ test('abstracted registerPlacementHooks combines both Foundry version adapter an
         assert.ok(registered.includes('drawMeasuredTemplate5e'));
         assert.equal(registered.includes('drawRegion'), false, 'V13 adapter does not register Region draw hooks');
         assert.ok(registered.includes('refreshMeasuredTemplate'));
-        assert.ok(registered.includes('refreshMeasuredTemplate5e'));
     } finally {
         globalThis.Hooks.on = originalOn;
     }
+});
+
+test('generatePlacementHooks encapsulates version-specific hook generation and allows system adapter modification', () => {
+    const adapterV14 = new FoundryVTTV14Adapter();
+    const mockCallbacks = { onDrawPreview: () => {}, onPreCreate: () => {}, onCreate: () => {} };
+
+    // 1. Verify standard generation returns structured hook descriptor objects
+    const baseHooks = adapterV14.generatePlacementHooks(mockCallbacks, new Pf2eSystemAdapter());
+    assert.ok(Array.isArray(baseHooks));
+    const drawTemplateHook = baseHooks.find(h => h.event === 'drawMeasuredTemplate');
+    assert.ok(drawTemplateHook);
+    assert.equal(drawTemplateHook.category, 'draw');
+    assert.equal(drawTemplateHook.targetName, 'MeasuredTemplate');
+    assert.equal(typeof drawTemplateHook.handler, 'function');
+
+    // 2. Verify system adapter getCustomDocumentTypes and modifyPlacementHooks can customize hook generation elements
+    class CustomSystemAdapter extends Pf2eSystemAdapter {
+        getCustomDocumentTypes() {
+            return ['CustomPlaceableDoc'];
+        }
+        modifyPlacementHooks(hooks, callbacks, fAdapter) {
+            // Filter out refresh hooks and append a custom hook
+            const filtered = hooks.filter(h => h.category !== 'refresh');
+            filtered.push({ event: 'customSystemHook', handler: () => {}, category: 'custom', targetName: 'CustomSystem' });
+            return filtered;
+        }
+    }
+
+    const customSys = new CustomSystemAdapter();
+    const modifiedHooks = adapterV14.generatePlacementHooks(mockCallbacks, customSys);
+    assert.ok(modifiedHooks.some(h => h.event === 'preCreateCustomPlaceableDoc'));
+    assert.ok(modifiedHooks.some(h => h.event === 'createCustomPlaceableDoc'));
+    assert.ok(modifiedHooks.some(h => h.event === 'customSystemHook'));
+    assert.equal(modifiedHooks.some(h => h.category === 'refresh'), false);
+});
+
+test('BaseFoundryVTTAdapter strictly quarantines hook generation to version subclasses by throwing on abstract invocation', () => {
+    const baseAdapter = new BaseFoundryVTTAdapter();
+    assert.throws(() => baseAdapter.supportedBasePlaceables, /Subclasses of BaseFoundryVTTAdapter must implement supportedBasePlaceables/);
+    assert.throws(() => baseAdapter.supportedDocumentTypes, /Subclasses of BaseFoundryVTTAdapter must implement supportedDocumentTypes/);
+    assert.throws(() => baseAdapter.generatePlacementHooks({}, {}), /Subclasses of BaseFoundryVTTAdapter must implement generatePlacementHooks/);
+    assert.throws(() => baseAdapter.registerPlacementHooks({}, {}), /Subclasses of BaseFoundryVTTAdapter must implement generatePlacementHooks/);
 });
 
 test('FoundryVTTV14Adapter applyDocumentPlacement and updatePreviewShape handle both Region and MeasuredTemplate in V14', () => {

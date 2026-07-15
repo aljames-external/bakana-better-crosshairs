@@ -403,52 +403,50 @@ export class BaseFoundryVTTAdapter {
 
     /**
      * Return supported base canvas PlaceableObject type names for this Foundry VTT generation.
+     * @abstract
      * @returns {string[]} Base placeable type names (`e.g. ["MeasuredTemplate"]`)
      */
     get supportedBasePlaceables() {
-        return ["MeasuredTemplate"];
+        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement supportedBasePlaceables getter.");
     }
 
     /**
      * Return supported document creation type names (`preCreate`/`create` hook suffixes) for this Foundry VTT generation.
+     * @abstract
      * @returns {string[]} Document type names (`e.g. ["MeasuredTemplate"]`)
      */
     get supportedDocumentTypes() {
-        return ["MeasuredTemplate"];
+        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement supportedDocumentTypes getter.");
     }
 
     /**
-     * Register placement hooks (`onDrawPreview`, `onPreCreate`, `onCreate`, and `refresh`) across all placeable and document types.
-     * Abstracted to depend cleanly on both the Foundry VTT generation adapter (`supportedBasePlaceables`, `supportedDocumentTypes`)
-     * AND the System adapter (`getCustomPlaceableClassNames`).
+     * Generate structured placement hook descriptors across all supported placeable and document types.
+     * Abstract method quarantined into version-specific subclasses (`FoundryVTTV13Adapter`, `FoundryVTTV14Adapter`).
+     * @abstract
      * @param {Object} callbacks - Placement hook callbacks (`{ onDrawPreview, onPreCreate, onCreate }`)
      * @param {Object} [sysAdapter=systemAdapter] - Active System Adapter instance
-     * @returns {void} No return value
+     * @returns {Array<{event: string, handler: Function, category: string, targetName: string}>} Array of generated hook descriptor objects
+     */
+    generatePlacementHooks(callbacks, sysAdapter = systemAdapter) {
+        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement generatePlacementHooks(callbacks, sysAdapter).");
+    }
+
+    /**
+     * Register placement hooks across all placeable and document types for the active version.
+     * Delegates to the version-specific `generatePlacementHooks` subclass implementation to get structured hook descriptors,
+     * allowing system adapter customization, and then registers each hook using `Hooks.on`.
+     * @param {Object} callbacks - Placement hook callbacks (`{ onDrawPreview, onPreCreate, onCreate }`)
+     * @param {Object} [sysAdapter=systemAdapter] - Active System Adapter instance
+     * @returns {Array<{event: string, handler: Function, category: string, targetName: string}>} Array of registered hook descriptor objects
      */
     registerPlacementHooks(callbacks, sysAdapter = systemAdapter) {
-        const basePlaceables = this.supportedBasePlaceables;
-        const customPlaceables = sysAdapter?.getCustomPlaceableClassNames?.() ?? [];
-        const dynamicPlaceables = [];
-
-        if (typeof CONFIG !== "undefined") {
-            for (const base of basePlaceables) {
-                const customClass = CONFIG[base]?.objectClass?.name;
-                if (customClass && typeof customClass === "string" && !basePlaceables.includes(customClass) && !customPlaceables.includes(customClass)) {
-                    dynamicPlaceables.push(customClass);
-                }
+        const hooks = this.generatePlacementHooks(callbacks, sysAdapter);
+        for (const hook of hooks) {
+            if (hook?.event && typeof hook.handler === "function") {
+                Hooks.on(hook.event, hook.handler);
             }
         }
-
-        const drawPlaceables = new Set([...basePlaceables, ...customPlaceables, ...dynamicPlaceables]);
-        for (const placeableName of drawPlaceables) {
-            Hooks.on(`draw${placeableName}`, (template) => callbacks.onDrawPreview(template));
-            Hooks.on(`refresh${placeableName}`, (template) => this.handleMeasuredTemplateRefresh(template));
-        }
-
-        for (const docType of this.supportedDocumentTypes) {
-            Hooks.on(`preCreate${docType}`, (doc, _data, _options, userId) => callbacks.onPreCreate(doc, _data, _options, userId));
-            Hooks.on(`create${docType}`, (doc, _options, userId) => callbacks.onCreate(doc, _options, userId));
-        }
+        return hooks;
     }
 
     /**

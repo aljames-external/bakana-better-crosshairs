@@ -23,6 +23,27 @@ export class BaseSystemAdapter {
     }
 
     /**
+     * Return list of custom Document type names introduced by this game system for placement creation hooks.
+     * @returns {string[]} Array of custom document type names
+     */
+    getCustomDocumentTypes() {
+        return [];
+    }
+
+    /**
+     * Modify or refine the generated list of placement hook descriptors for the active game system.
+     * Allows the system adapter layer to modify elements of hook generation (such as adding, replacing, or filtering hooks).
+     * @param {Array<{event: string, handler: Function, category: string, targetName: string}>} hooks - Array of generated hook descriptor objects
+     * @param {Object} callbacks - Placement hook callbacks (`{ onDrawPreview, onPreCreate, onCreate }`)
+     * @param {Object|null} [foundryAdapter=null] - Active Foundry VTT generation adapter instance
+     * @returns {Array<{event: string, handler: Function, category: string, targetName: string}>} Modified or filtered array of hook descriptor objects
+     */
+    modifyPlacementHooks(hooks, callbacks, foundryAdapter = null) {
+        if (!Array.isArray(hooks)) return [];
+        return hooks;
+    }
+
+    /**
      * Return whether mouse wheel rotation of a crosshair requires holding the Control / Command modifier key.
      * Base implementation returns false (normal mouse wheel scrolling rotates crosshair unless overridden by system).
      * @returns {boolean} True if the Control / Command key must be held to rotate the crosshair via mouse wheel.

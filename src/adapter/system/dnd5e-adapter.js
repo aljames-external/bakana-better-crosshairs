@@ -24,6 +24,26 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
     }
 
     /**
+     * Return list of custom Document type names introduced by DnD5e for placement creation hooks.
+     * @returns {string[]} Array of custom document type names
+     */
+    getCustomDocumentTypes() {
+        return super.getCustomDocumentTypes();
+    }
+
+    /**
+     * Modify or refine the generated list of placement hook descriptors for DnD5e.
+     * Delegates to base system adapter unless custom hook filtering or additions are required.
+     * @param {Array<{event: string, handler: Function, category: string, targetName: string}>} hooks - Array of generated hook descriptor objects
+     * @param {Object} callbacks - Placement hook callbacks (`{ onDrawPreview, onPreCreate, onCreate }`)
+     * @param {Object|null} [foundryAdapter=null] - Active Foundry VTT generation adapter instance
+     * @returns {Array<{event: string, handler: Function, category: string, targetName: string}>} Modified array of hook descriptor objects
+     */
+    modifyPlacementHooks(hooks, callbacks, foundryAdapter = null) {
+        return super.modifyPlacementHooks(hooks, callbacks, foundryAdapter);
+    }
+
+    /**
      * Extract normalized calling item and activity context from a DnD5e Document and flags.
      * @param {Document} document - Template or Region document placed on canvas
      * @param {Object} [baseContext={}] - Initial calling context (`{ item, itemName, itemId, activity, activityName, activityId }`)
