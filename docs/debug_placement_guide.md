@@ -12,14 +12,14 @@ The diagram below traces the end-to-end placement pipeline in strict chronologic
 sequenceDiagram
     autonumber
     actor User
-    participant FVTT as Foundry VTT Canvas
-    participant Hook as BaseFoundryVTTAdapter<br/>(handleDrawPreview)
-    participant Autorec as autorecManager
-    participant Crosshair as BaseCrosshairShape<br/>(Circle / Cone / Ray / Square)
-    participant Util as crosshair/util.js<br/>(Pointer & Wheel Tracking)
-    participant Resolver as crosshair/util.js<br/>(resolveCrosshairPlacement)
-    participant PreCreate as BaseFoundryVTTAdapter<br/>(handlePreCreate)
-    participant Create as BaseFoundryVTTAdapter<br/>(handleCreateDocument)
+    participant FVTT as "Foundry VTT Canvas"
+    participant Hook as "BaseFoundryVTTAdapter (handleDrawPreview)"
+    participant Autorec as "autorecManager"
+    participant Crosshair as "BaseCrosshairShape (Circle / Cone / Ray / Square)"
+    participant Util as "crosshair/util.js (Pointer & Wheel Tracking)"
+    participant Resolver as "crosshair/util.js (resolveCrosshairPlacement)"
+    participant PreCreateHandler as "BaseFoundryVTTAdapter (handlePreCreate)"
+    participant PostCreateHandler as "BaseFoundryVTTAdapter (handleCreateDocument)"
 
     Note over User,FVTT: PHASE 1: PREVIEW DRAWING & INTERCEPTION
     User->>FVTT: Click Spell / Activity (Draw Template/Region Preview)
@@ -59,20 +59,20 @@ sequenceDiagram
         Resolver->>Hook: context.resolve(coords) -> Mark pending.resolved = true & pending.coords = coords
     end
 
-    Note over FVTT,Create: PHASE 4: DOCUMENT PRE-CREATE & POST-CREATE LIFECYCLE
+    Note over FVTT,PostCreateHandler: PHASE 4: DOCUMENT PRE-CREATE & POST-CREATE LIFECYCLE
     alt Normal Creation Flow (preCreate fires after context.resolve)
-        FVTT->>PreCreate: Hook: preCreateMeasuredTemplate / preCreateRegion (doc, data, options, userId)
-        PreCreate->>PreCreate: Lookup pending in this.pendingPlacements
-        PreCreate->>PreCreate: applyDocumentPlacement(doc, pending.coords, pending.config)
-        PreCreate->>PreCreate: dismissPreview(placeable) + pendingPlacements.delete()
-        PreCreate-->>FVTT: return true (Document persists to database)
+        FVTT->>PreCreateHandler: Hook: preCreateMeasuredTemplate / preCreateRegion (doc, data, options, userId)
+        PreCreateHandler->>PreCreateHandler: Lookup pending in this.pendingPlacements
+        PreCreateHandler->>PreCreateHandler: applyDocumentPlacement(doc, pending.coords, pending.config)
+        PreCreateHandler->>PreCreateHandler: dismissPreview(placeable) + pendingPlacements.delete()
+        PreCreateHandler-->>FVTT: return true (Document persists to database)
     else Deferred Creation Flow (preCreate fired before click)
-        PreCreate-->>FVTT: return false (Document creation deferred; saved in pending.deferredCreateData)
+        PreCreateHandler-->>FVTT: return false (Document creation deferred; saved in pending.deferredCreateData)
         Resolver->>Hook: context.resolve(coords) triggers self.createDeferredDocument(scene, deferredData, coords)
         Hook->>FVTT: scene.createEmbeddedDocuments(docName, [formattedData])
     end
-    FVTT->>Create: Hook: createMeasuredTemplate / createRegion (doc, options, userId)
-    Create->>Create: Extract bbc flags + evaluate user postPlacementCode script
+    FVTT->>PostCreateHandler: Hook: createMeasuredTemplate / createRegion (doc, options, userId)
+    PostCreateHandler->>PostCreateHandler: Extract bbc flags + evaluate user postPlacementCode script
 ```
 
 ---
