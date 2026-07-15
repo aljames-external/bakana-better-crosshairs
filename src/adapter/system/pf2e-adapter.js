@@ -23,26 +23,6 @@ export class Pf2eSystemAdapter extends BaseSystemAdapter {
     }
 
     /**
-     * Return list of custom Document type names introduced by Pathfinder 2e for placement creation hooks.
-     * @returns {string[]} Array of custom document type names
-     */
-    getCustomDocumentTypes() {
-        return super.getCustomDocumentTypes();
-    }
-
-    /**
-     * Modify or refine the generated list of placement hook descriptors for Pathfinder 2e.
-     * Delegates to base system adapter unless custom hook filtering or additions are required.
-     * @param {Array<{event: string, handler: Function, category: string, targetName: string}>} hooks - Array of generated hook descriptor objects
-     * @param {Object} callbacks - Placement hook callbacks (`{ onDrawPreview, onPreCreate, onCreate }`)
-     * @param {Object|null} [foundryAdapter=null] - Active Foundry VTT generation adapter instance
-     * @returns {Array<{event: string, handler: Function, category: string, targetName: string}>} Modified array of hook descriptor objects
-     */
-    modifyPlacementHooks(hooks, callbacks, foundryAdapter = null) {
-        return super.modifyPlacementHooks(hooks, callbacks, foundryAdapter);
-    }
-
-    /**
      * Return whether mouse wheel rotation of a crosshair requires holding the Control / Command modifier key.
      * In Pathfinder 2e, rotating a region/template requires holding Ctrl + mousewheel, so normal mousewheel zooms the canvas.
      * @returns {boolean} True (Pathfinder 2e requires Control key for crosshair wheel rotation)
