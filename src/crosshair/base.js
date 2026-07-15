@@ -254,6 +254,7 @@ export class BaseCrosshairShape {
     async onShowCallback(crosshair) {
         if (crosshair) {
             crosshair.shapeInstance = this;
+            globalThis._activeBBCCrosshair = crosshair;
         }
         if (this.requiresWheelRotation) {
             if ((this.type === "rect" || this.type === "square") && !this.stickToToken && !this.config?.token && crosshair?.pivot?.set) {

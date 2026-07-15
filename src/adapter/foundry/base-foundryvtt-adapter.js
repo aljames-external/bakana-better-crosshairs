@@ -594,24 +594,8 @@ export class BaseFoundryVTTAdapter {
         const rawClickY = clickCoords.y ?? 0;
         if (!tok) return { x: rawClickX, y: rawClickY, direction: 0 };
 
-        const centerMode = typeof CONST !== "undefined" && CONST.GRID_SNAPPING_MODES ? CONST.GRID_SNAPPING_MODES.CENTER : 1;
-        const edgeMidpointMode = typeof CONST !== "undefined" && CONST.GRID_SNAPPING_MODES ? CONST.GRID_SNAPPING_MODES.EDGE_MIDPOINT : 16;
         const size = canvas?.grid?.size ?? 100;
-
-        /**
-         * Helper to snap a point using the canvas grid if available.
-         * @param {{x: number, y: number}} pt - Point coordinates to snap
-         * @param {number} mode - Snapping mode constant
-         * @returns {{x: number, y: number}} The snapped or original point coordinates
-         */
-        const snapPt = (pt, mode) => {
-            if (canvas?.grid?.getSnappedPoint) {
-                try { return canvas.grid.getSnappedPoint(pt, { mode, resolution: size }); } catch (e) { }
-            }
-            return pt;
-        };
-
-        const snappedMouse = snapPt({ x: rawClickX, y: rawClickY }, centerMode);
+        const targetMouse = { x: rawClickX, y: rawClickY };
 
         const tx = tok.x ?? tok.document?.x ?? 0;
         const ty = tok.y ?? tok.document?.y ?? 0;
@@ -627,7 +611,7 @@ export class BaseFoundryVTTAdapter {
                 const p1 = { x: points[i], y: points[i + 1] };
                 const p2Idx = (i + 2) >= points.length ? 0 : (i + 2);
                 const p2 = { x: points[p2Idx], y: points[p2Idx + 1] };
-                intersection = foundry.utils.lineSegmentIntersection(centerPoint, snappedMouse, p1, p2);
+                intersection = foundry.utils.lineSegmentIntersection(centerPoint, targetMouse, p1, p2);
                 if (intersection) break;
             }
         }
@@ -635,7 +619,7 @@ export class BaseFoundryVTTAdapter {
         if (!intersection) {
             const RayClass = foundry?.canvas?.geometry?.Ray ?? globalThis.Ray;
             if (RayClass) {
-                const ray = new RayClass(centerPoint, snappedMouse);
+                const ray = new RayClass(centerPoint, targetMouse);
                 if (typeof ray.intersectSegment === "function") {
                     for (let i = 0; i < points.length; i += 2) {
                         const p1 = { x: points[i], y: points[i + 1] };
@@ -651,12 +635,12 @@ export class BaseFoundryVTTAdapter {
         if (!intersection) {
             const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
             intersection = {
-                x: clamp(snappedMouse.x, tx, tx + w),
-                y: clamp(snappedMouse.y, ty, ty + h)
+                x: clamp(targetMouse.x, tx, tx + w),
+                y: clamp(targetMouse.y, ty, ty + h)
             };
-            if (intersection.x === snappedMouse.x && intersection.y === snappedMouse.y) {
-                const dx = snappedMouse.x - centerPoint.x;
-                const dy = snappedMouse.y - centerPoint.y;
+            if (intersection.x === targetMouse.x && intersection.y === targetMouse.y) {
+                const dx = targetMouse.x - centerPoint.x;
+                const dy = targetMouse.y - centerPoint.y;
                 if (Math.abs(dx) > Math.abs(dy)) {
                     intersection.x = dx >= 0 ? tx + w : tx;
                 } else {
@@ -665,15 +649,13 @@ export class BaseFoundryVTTAdapter {
             }
         }
 
-        const snappedIntersection = snapPt(intersection, edgeMidpointMode);
-
-        let dragAngle = Math.atan2(snappedMouse.y - centerPoint.y, snappedMouse.x - centerPoint.x) * (180 / Math.PI);
+        let dragAngle = Math.atan2(targetMouse.y - centerPoint.y, targetMouse.x - centerPoint.x) * (180 / Math.PI);
         if (dragAngle < 0) dragAngle += 360;
         const direction = dragAngle % 360;
 
         return {
-            x: snappedIntersection.x,
-            y: snappedIntersection.y,
+            x: intersection.x,
+            y: intersection.y,
             direction
         };
     }

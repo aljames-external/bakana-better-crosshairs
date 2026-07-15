@@ -5,7 +5,7 @@ import { closest } from '../../src/lib/filemanager.js';
 import { initializeFoundryAdapter, crosshairAdapter, BaseFoundryVTTAdapter } from '../../src/adapter/foundry/index.js';
 import { initializeSystemAdapter, systemAdapter } from '../../src/adapter/system/index.js';
 import { registerPlacementHooks } from '../../src/adapter/index.js';
-import { snapCoordinates, attachWheelRotation, detachWheelRotation } from '../../src/crosshair/util.js';
+import { snapCoordinates, attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement } from '../../src/crosshair/util.js';
 import { FoundryVTTV13Adapter } from '../../src/adapter/foundry/foundryvtt-v13-adapter.js';
 import { FoundryVTTV14Adapter } from '../../src/adapter/foundry/foundryvtt-v14-adapter.js';
 import { Dnd5eSystemAdapter } from '../../src/adapter/system/dnd5e-adapter.js';
@@ -595,4 +595,37 @@ test('crosshair.util.attachWheelRotation synchronizes container and effect rotat
             globalThis.window.removeEventListener = origRemoveEvent;
         }
     }
+});
+
+test('resolveAnchorPlacement and resolveCrosshairPlacement in attached mode lock template origin exactly to Sequencer visual without shifting', () => {
+    const adapterV14 = new FoundryVTTV14Adapter();
+    const mockToken = {
+        x: 100,
+        y: 100,
+        w: 100,
+        h: 100,
+        center: { x: 150, y: 150 }
+    };
+
+    // 1. Verify resolveAnchorPlacement uses exact ray to edge without artificial grid midpoint/center snapping jumps
+    const anchorResult = adapterV14.resolveAnchorPlacement(mockToken, { x: 150, y: 50 });
+    assert.equal(anchorResult.x, 150);
+    assert.equal(anchorResult.y, 100);
+    assert.equal(anchorResult.direction, 270);
+
+    // 2. Verify resolveCrosshairPlacement in attached mode uses exact visual coordinates from Sequencer when provided
+    let resolvedPlacement = null;
+    const config = {
+        type: 'cone',
+        stickToToken: true,
+        token: mockToken,
+        context: { resolve: (res) => { resolvedPlacement = res; } }
+    };
+    const mockSequencerVisual = { x: 150, y: 100, direction: 270 };
+    resolveCrosshairPlacement(mockSequencerVisual, config);
+
+    assert.ok(resolvedPlacement);
+    assert.equal(resolvedPlacement.x, 150);
+    assert.equal(resolvedPlacement.y, 100);
+    assert.equal(resolvedPlacement.direction, 270);
 });

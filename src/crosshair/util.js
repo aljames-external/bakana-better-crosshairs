@@ -85,7 +85,11 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
             const isSticky = Boolean(tmpl.document?.flags?.bakana?.token ?? tmpl.document?.flags?.bbc?.token ?? tmpl._bbcSticky ?? cfg.token);
             let targetX = 0, targetY = 0;
 
-            if (isSticky && cfg.token && crosshairAdapter?.resolveAnchorPlacement && canvas?.mousePosition) {
+            const visual = tmpl._bbcCrosshair ?? globalThis._activeBBCCrosshair;
+            if (isSticky && cfg.token && visual && typeof visual.x === "number" && !isNaN(visual.x) && typeof visual.y === "number" && !isNaN(visual.y)) {
+                targetX = visual.x;
+                targetY = visual.y;
+            } else if (isSticky && cfg.token && crosshairAdapter?.resolveAnchorPlacement && canvas?.mousePosition) {
                 const anchored = crosshairAdapter.resolveAnchorPlacement(cfg.token, canvas.mousePosition);
                 targetX = anchored.x;
                 targetY = anchored.y;
@@ -429,11 +433,17 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     let y = clickY;
 
     if (isAnchored && config.token) {
-        const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, { x: clickX, y: clickY });
-        x = anchored.x;
-        y = anchored.y;
-        if (direction === undefined) direction = anchored.direction;
-        log.debug("resolveCrosshairPlacement | Token anchored placement via version adapter ->", { x, y, direction });
+        if (crosshair && typeof crosshair.x === "number" && !isNaN(crosshair.x) && typeof crosshair.y === "number" && !isNaN(crosshair.y)) {
+            x = crosshair.x;
+            y = crosshair.y;
+            log.debug("resolveCrosshairPlacement | Token anchored placement using exact Sequencer attached visual position ->", { x, y, direction });
+        } else {
+            const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, { x: clickX, y: clickY });
+            x = anchored.x;
+            y = anchored.y;
+            if (direction === undefined) direction = anchored.direction;
+            log.debug("resolveCrosshairPlacement | Token anchored placement via version adapter fallback ->", { x, y, direction });
+        }
     } else {
         // Detached / free cursor placement: Origin is where the user clicked (clickX, clickY)
         x = clickX;
