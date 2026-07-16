@@ -3,6 +3,8 @@
 [![Foundry VTT Version](https://img.shields.io/badge/Foundry%20VTT-v12%20--%20v14+-orange.svg)](https://foundryvtt.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+[![Latest Module Downloads](https://img.shields.io/github/downloads/aljames-arctic/bakana-better-crosshairs/latest/module.zip?style=flat-square&label=latest%20downloads&color=blue)](https://github.com/aljames-arctic/bakana-better-crosshairs/releases) [![Total Module Downloads](https://img.shields.io/github/downloads-pre/aljames-arctic/bakana-better-crosshairs/module.zip?style=flat-square&label=total%20downloads&color=success)](https://github.com/aljames-arctic/bakana-better-crosshairs/releases)
+
 A high-performance, modular targeting crosshair replacement and automated recognition (**Autorec**) engine for **Foundry VTT (v12–v14+)**, powered by **[Sequencer](https://fantasycomputer.works/FoundryVTT-Sequencer/)**.
 
 **Bakana's Better Crosshairs (`BBC`)** replaces Foundry's static, flat template placement previews (`MeasuredTemplate`, `Region`) with vibrant, animated Sequencer crosshairs (`Circle`, `Cone`, `Ray`, `Square`). With **Autorec**, developers, GMs, and players can map unique animated crosshairs, origin stretch lines, colors, and targeting behaviors directly to individual spells, weapons, or system activities.
