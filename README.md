@@ -1,6 +1,6 @@
 # Bakana's Better Crosshairs
 
-[![Foundry VTT Version](https://img.shields.io/badge/Foundry%20VTT-v12%20--%20v14+-orange.svg)](https://foundryvtt.com/)
+[![Foundry VTT Version](https://img.shields.io/badge/Foundry%20VTT-v13+-orange.svg)](https://foundryvtt.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 [![Latest Module Downloads](https://img.shields.io/github/downloads/aljames-arctic/bakana-better-crosshairs/latest/module.zip?style=flat-square&label=latest%20downloads&color=blue)](https://github.com/aljames-arctic/bakana-better-crosshairs/releases) [![Total Module Downloads](https://img.shields.io/github/downloads-pre/aljames-arctic/bakana-better-crosshairs/module.zip?style=flat-square&label=total%20downloads&color=success)](https://github.com/aljames-arctic/bakana-better-crosshairs/releases)
