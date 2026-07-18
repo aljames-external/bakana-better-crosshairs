@@ -132,22 +132,32 @@ function rotateCrosshairInstance(crosshair, newDirDeg) {
     const isRect = shapeType === "rect" || shapeType === "square";
     const isAttached = shouldStickToToken(crosshair.config ?? {}, shapeType) && Boolean(crosshair.config?.token ?? crosshair.token);
 
-    crosshair.direction = newDirDeg;
     if (!isAttached) {
+        crosshair.direction = newDirDeg;
         if (!isRect) {
             crosshair.rotation = rad;
         } else {
             crosshair.rotation = 0;
         }
-    }
-
-    if (crosshair.config) {
-        crosshair.config.direction = newDirDeg;
-        crosshair.config.rotation = rad;
-    }
-    if (crosshair.data) {
-        crosshair.data.direction = newDirDeg;
-        crosshair.data.rotation = rad;
+        if (crosshair.config) {
+            crosshair.config.direction = newDirDeg;
+            crosshair.config.rotation = rad;
+        }
+        if (crosshair.data) {
+            crosshair.data.direction = newDirDeg;
+            crosshair.data.rotation = rad;
+        }
+    } else {
+        crosshair.direction = 0;
+        crosshair.rotation = 0;
+        if (crosshair.config) {
+            crosshair.config.direction = 0;
+            crosshair.config.rotation = 0;
+        }
+        if (crosshair.data) {
+            crosshair.data.direction = 0;
+            crosshair.data.rotation = 0;
+        }
     }
     const tmpl = crosshair.template;
     if (tmpl) {
