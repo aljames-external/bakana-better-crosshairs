@@ -278,7 +278,7 @@ export class BaseCrosshairShape {
             crosshair.shapeInstance = this;
             globalThis._activeBBCCrosshair = crosshair;
         }
-        if (this.requiresWheelRotation) {
+        if (this.requiresWheelRotation || this.stickToToken) {
             if ((this.type === "rect" || this.type === "square") && !this.stickToToken && !this.config?.token && crosshair?.pivot?.set) {
                 crosshair.pivot.set(0, 0);
             }
