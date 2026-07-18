@@ -881,3 +881,51 @@ test('REGRESSION: BaseCrosshairShape.playGraphicEffect() does not throw Referenc
     await shape.playGraphicEffect({});
     assert.ok(playCalled, 'playGraphicEffect should execute cleanly and call Sequence.play() without throwing errors');
 });
+
+test('REGRESSION: BaseCrosshairShape.onCancelCallback() unconditionally detaches wheel/pointer listeners for all shapes including circles', () => {
+    let addEventListenerCalled = false;
+    let removeEventListenerCalled = false;
+    const origAdd = globalThis.window?.addEventListener;
+    const origRemove = globalThis.window?.removeEventListener;
+
+    try {
+        if (!globalThis.window) globalThis.window = {};
+        globalThis.window.addEventListener = (event, handler) => {
+            addEventListenerCalled = true;
+        };
+        globalThis.window.removeEventListener = (event, handler) => {
+            removeEventListenerCalled = true;
+        };
+
+        const mockDocument = {
+            direction: 0,
+            updateSource: () => {}
+        };
+        const mockPlaceable = {
+            document: mockDocument,
+            direction: 0,
+            x: 10,
+            y: 20
+        };
+        const config = {
+            type: 'circle',
+            stickToToken: true,
+            token: { center: { x: 10, y: 20 } },
+            id: "circle-effect"
+        };
+
+        const shape = new BaseCrosshairShape(mockPlaceable, config);
+        // Explicitly trigger onShow to attach the event listeners
+        shape.onShowCallback({});
+        assert.ok(addEventListenerCalled, 'addEventListener should be called when circle is attached to token');
+
+        // Now trigger onCancelCallback
+        shape.onCancelCallback();
+        assert.ok(removeEventListenerCalled, 'removeEventListener should be unconditionally called to detach wheel/pointer listeners when circle is canceled');
+    } finally {
+        if (globalThis.window) {
+            globalThis.window.addEventListener = origAdd;
+            globalThis.window.removeEventListener = origRemove;
+        }
+    }
+});

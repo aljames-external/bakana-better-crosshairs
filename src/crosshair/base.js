@@ -304,9 +304,7 @@ export class BaseCrosshairShape {
      * @returns {void}
      */
     onCancelCallback() {
-        if (this.requiresWheelRotation) {
-            detachWheelRotation();
-        }
+        detachWheelRotation();
         Sequencer.EffectManager.endEffects({ name: this.id });
         if (this.context && typeof this.context.cancel === "function") {
             this.context.cancel();
@@ -417,7 +415,7 @@ export class BaseCrosshairShape {
             this.config.rotation = rad;
         }
 
-        if (this.sequencerCrosshair) {
+        if (this.sequencerCrosshair && !this.sequencerCrosshair._destroyed) {
             const isRect = this.type === "rect" || this.type === "square";
             const isAttached = Boolean(this.stickToToken && this.token);
             if (!isAttached) {
