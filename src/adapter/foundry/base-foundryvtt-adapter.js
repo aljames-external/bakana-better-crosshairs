@@ -585,6 +585,17 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
+     * Refresh the rendering and grid highlights of a preview template or region.
+     * Prevents the native template borders/shapes from flashing visible on rendering cycles.
+     * @param {PlaceableObject} tmpl - The placeable template or region preview
+     * @param {number} direction - The current direction/rotation in degrees
+     * @returns {void}
+     */
+    refreshTemplateHighlights(tmpl, direction) {
+        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement refreshTemplateHighlights(tmpl, direction).");
+    }
+
+    /**
      * Resume deferred document creation when an interactive Sequencer crosshair placement resolves.
      * @param {Scene} scene - Target Canvas Scene
      * @param {Object} deferredData - Initial raw document creation data (`doc.toObject()`)

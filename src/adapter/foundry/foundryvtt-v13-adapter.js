@@ -266,4 +266,56 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
             log.error("FoundryVTTV13Adapter.createDeferredDocument | Failed to create deferred MeasuredTemplate:", err);
         }
     }
+
+    /**
+     * Refresh the rendering and grid highlights of a preview MeasuredTemplate.
+     * Prevents the native template borders/shapes from flashing visible on rendering cycles.
+     * @param {PlaceableObject} tmpl - The preview MeasuredTemplate
+     * @param {number} direction - The current direction in degrees
+     * @returns {void}
+     */
+    refreshTemplateHighlights(tmpl, direction) {
+        if (!tmpl) return;
+
+        if (tmpl.isPreview && !tmpl._bbcRotateOverridden) {
+            tmpl._bbcRotateOverridden = true;
+            tmpl._onRotate = function(event) {
+                if (event && typeof event.stopPropagation === "function") event.stopPropagation();
+            };
+        }
+
+        const rad = direction * (Math.PI / 180);
+        tmpl.direction = direction;
+
+        const doc = tmpl.document;
+        if (doc) {
+            doc.direction = direction;
+            doc.updateSource({ direction });
+            doc._shape = null;
+            if (doc.shape?.clear) doc.shape.clear();
+        }
+        tmpl._shape = null;
+        if (tmpl.shape?.clear) tmpl.shape.clear();
+
+        if (tmpl.ray && globalThis.Ray) {
+            const ox = tmpl.ray.origin?.x ?? tmpl.x;
+            const oy = tmpl.ray.origin?.y ?? tmpl.y;
+            tmpl.ray = globalThis.Ray.fromAngle(ox, oy, rad, tmpl.ray.distance ?? 1000);
+        }
+
+        if (tmpl.renderFlags) {
+            tmpl.renderFlags.set({
+                refreshShape: true,
+                refreshTemplate: true,
+                refreshGrid: true,
+                refreshState: true,
+                refresh: true
+            });
+        }
+        if (typeof tmpl.applyRenderFlags === "function") tmpl.applyRenderFlags();
+        if (typeof tmpl._refreshShape === "function") tmpl._refreshShape();
+        if (typeof tmpl.highlightGrid === "function") tmpl.highlightGrid();
+
+        this.hidePreview(tmpl);
+    }
 }

@@ -515,4 +515,69 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             log.error(`FoundryVTTV14Adapter.createDeferredDocument | Failed to create deferred ${docName} document:`, err);
         }
     }
+
+    /**
+     * Refresh the rendering and grid highlights of a preview Region or MeasuredTemplate.
+     * Prevents the native template/region borders/shapes from flashing visible on rendering cycles.
+     * @param {PlaceableObject} tmpl - The preview Region or MeasuredTemplate
+     * @param {number} direction - The current direction in degrees
+     * @returns {void}
+     */
+    refreshTemplateHighlights(tmpl, direction) {
+        if (!tmpl) return;
+
+        const doc = tmpl.document;
+        if (!doc) return;
+
+        const isRegion = doc.documentName === "Region";
+
+        if (isRegion) {
+            if (tmpl.renderFlags) {
+                tmpl.renderFlags.set({ refreshState: true, refresh: true });
+            }
+            if (typeof tmpl.applyRenderFlags === "function") tmpl.applyRenderFlags();
+            this.hidePreview(tmpl);
+            return;
+        }
+
+        // MeasuredTemplate in V14:
+        if (tmpl.isPreview && !tmpl._bbcRotateOverridden) {
+            tmpl._bbcRotateOverridden = true;
+            tmpl._onRotate = function(event) {
+                if (event && typeof event.stopPropagation === "function") event.stopPropagation();
+            };
+        }
+
+        const rad = direction * (Math.PI / 180);
+        tmpl.direction = direction;
+
+        doc.direction = direction;
+        doc.updateSource({ direction });
+        doc._shape = null;
+        if (doc.shape?.clear) doc.shape.clear();
+
+        tmpl._shape = null;
+        if (tmpl.shape?.clear) tmpl.shape.clear();
+
+        if (tmpl.ray && globalThis.Ray) {
+            const ox = tmpl.ray.origin?.x ?? tmpl.x;
+            const oy = tmpl.ray.origin?.y ?? tmpl.y;
+            tmpl.ray = globalThis.Ray.fromAngle(ox, oy, rad, tmpl.ray.distance ?? 1000);
+        }
+
+        if (tmpl.renderFlags) {
+            tmpl.renderFlags.set({
+                refreshShape: true,
+                refreshTemplate: true,
+                refreshGrid: true,
+                refreshState: true,
+                refresh: true
+            });
+        }
+        if (typeof tmpl.applyRenderFlags === "function") tmpl.applyRenderFlags();
+        if (typeof tmpl._refreshShape === "function") tmpl._refreshShape();
+        if (typeof tmpl.highlightGrid === "function") tmpl.highlightGrid();
+
+        this.hidePreview(tmpl);
+    }
 }
