@@ -420,10 +420,12 @@ export class BaseCrosshairShape {
             this.sequencerCrosshair.direction = newAngleDeg;
             const isRect = this.type === "rect" || this.type === "square";
             const isAttached = Boolean(this.stickToToken && this.token);
-            if (!isRect && !isAttached) {
-                this.sequencerCrosshair.rotation = rad;
-            } else {
-                this.sequencerCrosshair.rotation = 0;
+            if (!isAttached) {
+                if (!isRect) {
+                    this.sequencerCrosshair.rotation = rad;
+                } else {
+                    this.sequencerCrosshair.rotation = 0;
+                }
             }
 
             if (this.sequencerCrosshair.config) {
