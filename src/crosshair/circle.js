@@ -59,8 +59,7 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
      * @returns {void}
      */
     configureCrosshairShape(crosshairSeq) {
-        const radius = Math.round(this.config.radius ?? 20);
-        crosshairSeq.distance(radius);
+        crosshairSeq.distance(Math.round(this.config.radius));
     }
 
     /**
@@ -68,7 +67,7 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
      * @returns {{widthPx: number, heightPx: number, factor: number, gridUnits: boolean}} Calculated pixel and scale dimensions
      */
     getGraphicDimensions() {
-        const radius = Math.round(this.config.radius ?? 20);
+        const radius = Math.round(this.config.radius);
         const gridDist = canvas?.dimensions?.distance ?? 5;
         const gridSize = canvas?.dimensions?.size ?? 100;
         const diameterPixels = ((radius * 2) / gridDist) * gridSize;
@@ -82,9 +81,8 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
      */
     getGraphicFile() {
         if (this.config.circleFile) return closest(this.config.circleFile);
-        const radius = Math.round(this.config.radius ?? 20);
-        const file = this.config.file ? closest(this.config.file) : undefined;
-        return resolveCircleAsset(file, radius * 2);
+        const radius = Math.round(this.config.radius);
+        return resolveCircleAsset(this.config.file, radius * 2);
     }
 }
 

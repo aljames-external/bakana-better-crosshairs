@@ -1,6 +1,6 @@
 import { systemAdapter } from "../system/index.js";
 import { log } from "../../lib/logger.js";
-import { clearHighlightLayer, Token } from "../../lib/compat.js";
+import { Token } from "../../lib/compat.js";
 import { MODULE_ID } from "../../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY, autorecManager } from "../../autorec/autorecManager.js";
 import { CrosshairConfiguration } from "../../autorec/CrosshairConfiguration.js";
@@ -181,74 +181,69 @@ export class BaseFoundryVTTAdapter {
         } catch (e) {}
         const hideContainers = (obj) => {
             if (!obj) return;
-            try { obj.visible = false; } catch (e) {}
-            try { obj.renderable = false; } catch (e) {}
-            try { obj.alpha = 0; } catch (e) {}
+            obj.visible = false;
+            obj.renderable = false;
+            obj.alpha = 0;
             if (obj.template) {
-                try { obj.template.visible = false; } catch (e) {}
-                try { obj.template.renderable = false; } catch (e) {}
-                try { obj.template.alpha = 0; } catch (e) {}
+                obj.template.visible = false;
+                obj.template.renderable = false;
+                obj.template.alpha = 0;
             }
             if (obj.ruler) {
-                try { obj.ruler.visible = false; } catch (e) {}
-                try { obj.ruler.renderable = false; } catch (e) {}
+                obj.ruler.visible = false;
+                obj.ruler.renderable = false;
                 try { obj.ruler.text = ""; } catch (e) {}
             }
             if (obj.controlIcon) {
-                try { obj.controlIcon.visible = false; } catch (e) {}
+                obj.controlIcon.visible = false;
             }
             if (obj.mesh) {
-                try { obj.mesh.visible = false; } catch (e) {}
-                try { obj.mesh.renderable = false; } catch (e) {}
-                try { obj.mesh.alpha = 0; } catch (e) {}
+                obj.mesh.visible = false;
+                obj.mesh.renderable = false;
+                obj.mesh.alpha = 0;
             }
             if (obj.shape) {
-                try { obj.shape.visible = false; } catch (e) {}
-                try { obj.shape.renderable = false; } catch (e) {}
-                try { obj.shape.alpha = 0; } catch (e) {}
+                obj.shape.visible = false;
+                obj.shape.renderable = false;
+                obj.shape.alpha = 0;
             }
             if (obj.border) {
-                try { obj.border.visible = false; } catch (e) {}
-                try { obj.border.renderable = false; } catch (e) {}
-                try { obj.border.alpha = 0; } catch (e) {}
+                obj.border.visible = false;
+                obj.border.renderable = false;
+                obj.border.alpha = 0;
             }
             if (Array.isArray(obj.children)) {
                 for (const child of obj.children) {
-                    if (!child) continue;
-                    try { child.visible = false; } catch (e) {}
-                    try { child.renderable = false; } catch (e) {}
-                    try { child.alpha = 0; } catch (e) {}
+                    if (child) {
+                        child.visible = false;
+                        child.renderable = false;
+                        child.alpha = 0;
+                    }
                 }
             }
             if (Array.isArray(obj._measurementLines)) {
                 for (const line of obj._measurementLines) {
-                    if (!line) continue;
-                    try { line.visible = false; } catch (e) {}
-                    try { line.alpha = 0; } catch (e) {}
+                    if (line) {
+                        line.visible = false;
+                        line.alpha = 0;
+                    }
                 }
             }
             if (Array.isArray(obj._measurementLabels)) {
                 for (const label of obj._measurementLabels) {
-                    if (!label) continue;
-                    try { label.visible = false; } catch (e) {}
-                    try { label.alpha = 0; } catch (e) {}
+                    if (label) {
+                        label.visible = false;
+                        label.alpha = 0;
+                    }
                 }
             }
 
-            const hId = obj.highlightId || obj.id || "preview";
+            const hId = obj.highlightId ?? obj.id ?? "preview";
             if (typeof canvas !== "undefined") {
-                if (canvas.grid?.clearHighlightLayer && typeof canvas.grid.clearHighlightLayer === "function") {
-                    try { canvas.grid.clearHighlightLayer(hId); } catch (e) {}
-                }
-                if (canvas.interface?.grid?.clearHighlightLayer && typeof canvas.interface.grid.clearHighlightLayer === "function") {
-                    try { canvas.interface.grid.clearHighlightLayer(hId); } catch (e) {}
-                }
-                if (canvas.regions?.clearHighlightLayer && typeof canvas.regions.clearHighlightLayer === "function") {
-                    try { canvas.regions.clearHighlightLayer(hId); } catch (e) {}
-                }
-                if (canvas.regions?.highlight?.clear && typeof canvas.regions.highlight.clear === "function") {
-                    try { canvas.regions.highlight.clear(); } catch (e) {}
-                }
+                canvas.grid?.clearHighlightLayer?.(hId);
+                canvas.interface?.grid?.clearHighlightLayer?.(hId);
+                canvas.regions?.clearHighlightLayer?.(hId);
+                canvas.regions?.highlight?.clear?.();
             }
         };
 
@@ -291,9 +286,6 @@ export class BaseFoundryVTTAdapter {
         try { Object.defineProperty(placeable, 'isPreview', { get: () => false, configurable: true }); } catch (e) {}
         try { Object.defineProperty(placeable, 'visible', { get: () => false, configurable: true }); } catch (e) {}
         try { Object.defineProperty(placeable, 'renderable', { get: () => false, configurable: true }); } catch (e) {}
-        try { placeable.isPreview = false; } catch (e) {}
-        try { placeable.visible = false; } catch (e) {}
-        try { placeable.renderable = false; } catch (e) {}
 
         if (placeable.renderFlags && typeof placeable.renderFlags.clear === "function") {
             try { placeable.renderFlags.clear(); } catch (e) {}
@@ -602,8 +594,8 @@ export class BaseFoundryVTTAdapter {
      * @param {Object} coords - Resolved placement coordinates from Sequencer
      * @returns {Promise<void>} Resolves when deferred document creation completes
      */
-    async createDeferredDocument(scene, deferredData, coords) {
-        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement createDeferredDocument(scene, deferredData, coords).");
+    async createDeferredDocument(scene, deferredData, coords, documentName) {
+        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement createDeferredDocument(scene, deferredData, coords, documentName).");
     }
 
     /**
@@ -804,7 +796,7 @@ export class BaseFoundryVTTAdapter {
 
                     if (pendingItem.deferredCreateData && typeof canvas !== "undefined" && canvas.scene) {
                         log.debug(`context.resolve | Resuming deferred document creation on scene "${canvas.scene.name}"`);
-                        await self.createDeferredDocument(canvas.scene, pendingItem.deferredCreateData, coords);
+                        await self.createDeferredDocument(canvas.scene, pendingItem.deferredCreateData, coords, pendingItem.documentName);
                         if (placeable && typeof self.dismissPreview === "function") {
                             self.dismissPreview(placeable);
                         }
@@ -975,6 +967,7 @@ export class BaseFoundryVTTAdapter {
 
         // If sequence is still interactive/running, defer creation until sequence resolves
         pending.deferredCreateData = typeof doc.toObject === "function" ? doc.toObject() : doc;
+        pending.documentName = doc.documentName;
         log.debug(`BaseFoundryVTTAdapter.handlePreCreate | [DEFER] Sequencer crosshair is still interactive ("${entry.itemName}"). Deferring document creation until click.`);
         return false;
     }

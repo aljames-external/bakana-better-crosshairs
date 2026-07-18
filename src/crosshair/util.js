@@ -71,8 +71,9 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
 
     if (tmpl.document) {
         const dims = tmpl._bbcDimensions ?? tmpl.document._bbcDimensions ?? globalThis._activeBBCDimensions;
-        const initialDist = dims?.distance ?? tmpl.document.distance ?? crosshairAdapter.detectProperties(tmpl.document).distance;
-        const initialWidth = dims?.width ?? tmpl.document.width ?? crosshairAdapter.detectProperties(tmpl.document).width;
+        const docProps = crosshairAdapter.detectProperties(tmpl.document);
+        const initialDist = dims?.distance ?? docProps.distance;
+        const initialWidth = dims?.width ?? docProps.width;
         const isGridUnits = dims?.gridUnits ?? true;
 
         const cfg = tmpl._bbcConfig ?? tmpl.document._bbcConfig ?? {};
@@ -152,21 +153,18 @@ function rotateCrosshairInstance(crosshair, newDirDeg) {
         refreshTemplateHighlights(tmpl, newDirDeg, rad);
     }
 
-    const isRayOrCone = crosshair.type === "ray" || crosshair.config?.type === "ray" || crosshair.data?.type === "ray" ||
-                        crosshair.type === "cone" || crosshair.config?.type === "cone" || crosshair.data?.type === "cone";
+    const isRayOrCone = shapeType === "ray" || shapeType === "cone";
 
     if (!isRayOrCone) {
-        if (typeof crosshair.refresh === "function") {
-            try { crosshair.refresh(); } catch (e) {}
+        if (crosshair.refresh) {
+            crosshair.refresh();
         }
-        if (typeof crosshair._onMouseMove === "function" && canvas?.mousePosition) {
-            try {
-                crosshair._onMouseMove({
-                    data: { getLocalPosition: () => canvas.mousePosition },
-                    clientX: canvas.mousePosition.x,
-                    clientY: canvas.mousePosition.y
-                });
-            } catch (e) {}
+        if (crosshair._onMouseMove && canvas?.mousePosition) {
+            crosshair._onMouseMove({
+                data: { getLocalPosition: () => canvas.mousePosition },
+                clientX: canvas.mousePosition.x,
+                clientY: canvas.mousePosition.y
+            });
         }
     }
 }
@@ -206,7 +204,7 @@ export function attachWheelRotation(shape, config = {}) {
 
     if (!isAttached) {
         activeWheelHandler = (event) => {
-            const requiresCtrl = systemAdapter?.requiresWheelModifier?.() ?? false;
+            const requiresCtrl = systemAdapter.requiresWheelModifier();
             if (requiresCtrl && !event.ctrlKey) return;
             if (typeof event.preventDefault === "function") event.preventDefault();
             if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
@@ -476,44 +474,35 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
 export function snapCoordinates(x, y, mode = "all") {
     if (!canvas?.grid || mode === false || mode === "none" || mode === 0 || mode === "0") return { x, y };
 
-    try {
-        const size = canvas.grid.size ?? 100;
+    const size = canvas.grid.size ?? 100;
 
-        if (typeof canvas.grid.getSnappedPosition === "function" && mode !== "center" && mode !== "corner" && mode !== "corners") {
-            const numMode = typeof mode === "number" ? mode : getGridSnapMode({ snapToGrid: mode });
-            if (numMode !== 0) {
-                const snapped = canvas.grid.getSnappedPosition(x, y, numMode);
-                return { x: snapped.x, y: snapped.y };
-            }
+    if (mode !== "center" && mode !== "corner" && mode !== "corners") {
+        const numMode = typeof mode === "number" ? mode : getGridSnapMode({ snapToGrid: mode });
+        if (numMode !== 0) {
+            const snapped = canvas.grid.getSnappedPosition(x, y, numMode);
+            return { x: snapped.x, y: snapped.y };
         }
-
-        if (mode === "center" || mode === 1) {
-            if (typeof canvas.grid.getCenter === "function") {
-                const [cx, cy] = canvas.grid.getCenter(x, y);
-                return { x: cx, y: cy };
-            }
-            if (typeof canvas.grid.getCenterPoint === "function") {
-                const pt = canvas.grid.getCenterPoint({ x, y });
-                return { x: pt.x, y: pt.y };
-            }
-        }
-
-        if (mode === "corner" || mode === "corners" || mode === 2) {
-            const sx = Math.round(x / size) * size;
-            const sy = Math.round(y / size) * size;
-            return { x: sx, y: sy };
-        }
-
-        if (mode === "all" || mode === true || mode === "default" || mode === "edges" || mode === "edge" || typeof mode === "number") {
-            // Snaps to nearest of: center, corners, or edges (half-grid interval size / 2)
-            const half = size / 2;
-            const sx = Math.round(x / half) * half;
-            const sy = Math.round(y / half) * half;
-            return { x: sx, y: sy };
-        }
-    } catch (e) {
-        log.warn("snapCoordinates | Error snapping coordinates:", e);
     }
+
+    if (mode === "center" || mode === 1) {
+        const pt = canvas.grid.getCenterPoint({ x, y });
+        return { x: pt.x, y: pt.y };
+    }
+
+    if (mode === "corner" || mode === "corners" || mode === 2) {
+        const sx = Math.round(x / size) * size;
+        const sy = Math.round(y / size) * size;
+        return { x: sx, y: sy };
+    }
+
+    if (mode === "all" || mode === true || mode === "default" || mode === "edges" || mode === "edge" || typeof mode === "number") {
+        // Snaps to nearest of: center, corners, or edges (half-grid interval size / 2)
+        const half = size / 2;
+        const sx = Math.round(x / half) * half;
+        const sy = Math.round(y / half) * half;
+        return { x: sx, y: sy };
+    }
+
     return { x, y };
 }
 
@@ -527,11 +516,12 @@ export function snapCoordinates(x, y, mode = "all") {
  */
 export function getTokenEdgePoint(tok, targetX, targetY, sticky = false) {
     if (!tok) return { x: targetX, y: targetY, direction: 0 };
+    const token = tok.object ?? tok;
     const size = canvas?.grid?.size ?? 100;
-    const cx = tok.center?.x ?? (tok.x + (tok.w ?? 0) / 2);
-    const cy = tok.center?.y ?? (tok.y + (tok.h ?? 0) / 2);
-    const hw = (tok.w ?? size) / 2;
-    const hh = (tok.h ?? size) / 2;
+    const cx = token.center?.x ?? (token.x + (token.w ?? size) / 2);
+    const cy = token.center?.y ?? (token.y + (token.h ?? size) / 2);
+    const hw = (token.w ?? size) / 2;
+    const hh = (token.h ?? size) / 2;
 
     const dx = targetX - cx;
     const dy = targetY - cy;

@@ -44,8 +44,8 @@ export class ConeCrosshairShape extends BaseCrosshairShape {
      * @returns {void}
      */
     configureCrosshairShape(crosshairSeq) {
-        const distance = Math.round(this.config.distance ?? 30);
-        const angle = this.config.angle ?? 53.13;
+        const distance = Math.round(this.config.distance);
+        const angle = this.config.angle;
         crosshairSeq.distance(distance).angle(angle);
     }
 
@@ -54,8 +54,8 @@ export class ConeCrosshairShape extends BaseCrosshairShape {
      * @returns {{widthPx: number, heightPx: number, factor: number, gridUnits: boolean}} Calculated pixel and scale dimensions
      */
     getGraphicDimensions() {
-        const distance = Math.round(this.config.distance ?? 30);
-        const angle = this.config.angle ?? 53.13;
+        const distance = Math.round(this.config.distance);
+        const angle = this.config.angle;
         const gridDist = canvas?.dimensions?.distance ?? 5;
         const gridSize = canvas?.dimensions?.size ?? 100;
         const lengthPixels = (distance / gridDist) * gridSize;

@@ -138,7 +138,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             rawObject: doc.toObject?.() ?? doc
         });
 
-        if (doc.t) {
+        const docName = doc.documentName ?? (doc.t ? "MeasuredTemplate" : "Region");
+        if (docName === "MeasuredTemplate") {
             const shapeMap = {
                 circle: "circle",
                 cone: "cone",
@@ -237,8 +238,9 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      */
     updatePreviewShape(previewDoc, coords) {
         if (!previewDoc || !coords) return;
-        const shapesList = this._getShapesArray(previewDoc);
-        if (shapesList.length > 0) {
+        const docName = previewDoc.documentName ?? (previewDoc.shapes ? "Region" : "MeasuredTemplate");
+        if (docName === "Region") {
+            const shapesList = this._getShapesArray(previewDoc);
             const orig = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
             const updatedShape = this._formatRegionShapeUpdate(orig, coords);
             delete updatedShape._id;
@@ -301,34 +303,37 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      */
     applyDocumentPlacement(doc, coords = {}, config = {}) {
         const styling = this.extractPlacedStylingFlags(config);
-        const originalShape = doc.shapes?.[0] ?? doc.shapes?.contents?.[0];
-        if (originalShape) {
-            const updateData = {
-                flags: styling.flags
-            };
-            const shapeCoords = {
-                ...coords,
-                gridUnits: coords.gridUnits ?? config.gridUnits ?? true,
-                sticky: Boolean(config.token ?? coords.token ?? coords.sticky)
-            };
-            const newShape = this._formatRegionShapeUpdate(originalShape, shapeCoords);
-            delete newShape._id;
-            updateData.shapes = [newShape];
+        const docName = doc.documentName ?? (doc.shapes ? "Region" : "MeasuredTemplate");
+        if (docName === "Region") {
+            const originalShape = doc.shapes?.[0] ?? doc.shapes?.contents?.[0];
+            if (originalShape) {
+                const updateData = {
+                    flags: styling.flags
+                };
+                const shapeCoords = {
+                    ...coords,
+                    gridUnits: coords.gridUnits ?? config.gridUnits ?? true,
+                    sticky: Boolean(config.token ?? coords.token ?? coords.sticky)
+                };
+                const newShape = this._formatRegionShapeUpdate(originalShape, shapeCoords);
+                delete newShape._id;
+                updateData.shapes = [newShape];
 
-            const targetColor = styling.placedFillColor ?? styling.placedBorderColor;
-            if (targetColor) updateData.color = targetColor;
-            if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
-            if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
+                const targetColor = styling.placedFillColor ?? styling.placedBorderColor;
+                if (targetColor) updateData.color = targetColor;
+                if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
+                if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
 
-            const targetAlpha = styling.placedFillAlpha ?? styling.placedBorderAlpha;
-            if (targetAlpha !== undefined) updateData.alpha = targetAlpha;
-            if (styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
-            if (styling.placedBorderAlpha !== undefined) updateData.borderAlpha = styling.placedBorderAlpha;
+                const targetAlpha = styling.placedFillAlpha ?? styling.placedBorderAlpha;
+                if (targetAlpha !== undefined) updateData.alpha = targetAlpha;
+                if (styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
+                if (styling.placedBorderAlpha !== undefined) updateData.borderAlpha = styling.placedBorderAlpha;
 
-            if (config.hidden || config.hideTemplate) updateData.hidden = true;
+                if (config.hidden || config.hideTemplate) updateData.hidden = true;
 
-            log.debug("FoundryVTTV14Adapter.applyDocumentPlacement | Applying Region updateSource:", updateData);
-            doc.updateSource(updateData);
+                log.debug("FoundryVTTV14Adapter.applyDocumentPlacement | Applying Region updateSource:", updateData);
+                doc.updateSource(updateData);
+            }
         } else {
             const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);
             let distFoot = coords.distance ?? coords.radius ?? coords.width;
@@ -482,12 +487,12 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @param {Object} coords - Resolved placement coordinates from Sequencer
      * @returns {Promise<void>} Resolves when deferred document creation completes
      */
-    async createDeferredDocument(scene, deferredData, coords) {
+    async createDeferredDocument(scene, deferredData, coords, documentName) {
         if (!scene || !deferredData || !coords) return;
         const data = foundry.utils.deepClone(deferredData);
         delete data._id;
 
-        const docName = data.shapes ? "Region" : "MeasuredTemplate";
+        const docName = documentName ?? (data.shapes ? "Region" : "MeasuredTemplate");
         const shapesList = data.shapes?.contents ?? (Array.isArray(data.shapes) ? data.shapes : []);
         if (shapesList.length > 0) {
             const origShape = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
@@ -503,7 +508,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             else if (coords.radius !== undefined) data.distance = coords.radius;
         }
 
-        console.log("%cBBC DIAGNOSTIC | V14 createDeferredDocument:", "background: #7b2cbf; color: #fff; padding: 2px 4px; border-radius: 2px;", {
+        log.debug(`FoundryVTTV14Adapter.createDeferredDocument | Deferred ${docName} payload:`, {
             docName,
             resolvedCoords: coords,
             deferredCreatePayload: data

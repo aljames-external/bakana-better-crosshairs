@@ -46,8 +46,8 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * @returns {void}
      */
     configureCrosshairShape(crosshairSeq) {
-        const distance = Math.round(this.config.distance ?? 20);
-        const width = Math.round(this.config.width ?? distance);
+        const distance = Math.round(this.config.distance);
+        const width = Math.round(this.config.width);
         crosshairSeq.distance(distance).width(width);
     }
 
@@ -56,8 +56,8 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * @returns {{widthPx: number, heightPx: number, factor: number, gridUnits: boolean}} Calculated pixel and scale dimensions
      */
     getGraphicDimensions() {
-        const rawDistance = Math.round(this.config.distance ?? 20);
-        const rawWidth = Math.round(this.config.width ?? rawDistance);
+        const rawDistance = Math.round(this.config.distance);
+        const rawWidth = Math.round(this.config.width);
         let distance = rawDistance;
         if (rawWidth > 0 && rawDistance > rawWidth) {
             const isSquareDiagonal = rawDistance <= rawWidth * 1.6;
@@ -95,36 +95,14 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
                 type: "ray",
                 t: "ray",
                 originalType: "square",
-                distance: this.config.distance ?? 20,
-                width: this.config.width ?? this.config.distance ?? 20,
+                distance: this.config.distance,
+                width: this.config.width,
                 rayFile: this.config.squareFile ?? this.config.file ?? closest("eskie.crosshair.ray.fantasy_01.white.full")
             };
             const rayShape = new RayCrosshairShape(this.placeable, rayConfig);
             return rayShape.create();
         }
         return super.create();
-    }
-
-    /**
-     * Play the square sequence. Converts to an equivalent ray object when attached to a token.
-     * @returns {Promise<any>} Played sequence result
-     */
-    async play() {
-        if (this.stickToToken && Boolean(this.token)) {
-            log.debug("SquareCrosshairShape.play | Attached square detected. Converting to equivalent ray object.");
-            const rayConfig = {
-                ...this.config,
-                type: "ray",
-                t: "ray",
-                originalType: "square",
-                distance: this.config.distance ?? 20,
-                width: this.config.width ?? this.config.distance ?? 20,
-                rayFile: this.config.squareFile ?? this.config.file ?? closest("eskie.crosshair.ray.fantasy_01.white.full")
-            };
-            const rayShape = new RayCrosshairShape(this.placeable, rayConfig);
-            return rayShape.play();
-        }
-        return super.play();
     }
 }
 

@@ -44,8 +44,8 @@ export class RayCrosshairShape extends BaseCrosshairShape {
      * @returns {void}
      */
     configureCrosshairShape(crosshairSeq) {
-        const distance = Math.round(this.config.distance ?? 30);
-        const width = Math.round(this.config.width ?? 5);
+        const distance = Math.round(this.config.distance);
+        const width = Math.round(this.config.width);
         crosshairSeq.distance(distance).width(width);
     }
 
@@ -54,8 +54,8 @@ export class RayCrosshairShape extends BaseCrosshairShape {
      * @returns {{widthPx: number, heightPx: number, factor: number, gridUnits: boolean}} Calculated pixel and scale dimensions
      */
     getGraphicDimensions() {
-        const distance = Math.round(this.config.distance ?? 30);
-        const width = Math.round(this.config.width ?? 5);
+        const distance = Math.round(this.config.distance);
+        const width = Math.round(this.config.width);
         const gridDist = canvas?.dimensions?.distance ?? 5;
         const gridSize = canvas?.dimensions?.size ?? 100;
         const lengthPixels = (distance / gridDist) * gridSize;

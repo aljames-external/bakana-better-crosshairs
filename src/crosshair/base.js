@@ -23,6 +23,13 @@ export class BaseCrosshairShape {
         const rawToken = config.token ?? flagsToken;
         this.token = crosshairAdapter.toToken(rawToken);
 
+        // Normalize config properties using adapter properties extraction
+        const docProps = doc ? crosshairAdapter.detectProperties(doc) : {};
+        config.radius = config.radius ?? docProps.radius ?? docProps.distance ?? 20;
+        config.distance = config.distance ?? docProps.distance ?? 30;
+        config.width = config.width ?? docProps.width ?? 5;
+        config.angle = config.angle ?? docProps.angle ?? 53.13;
+
         this.id = config.id ?? this.getDefaultId();
         this.type = this.defaultShapeType;
         this.stickToToken = shouldStickToToken(config, this.type);
@@ -216,10 +223,6 @@ export class BaseCrosshairShape {
      * @returns {Promise<Array>} A promise resolving to an array `[Sequence, targets]`
      */
     async create() {
-        if (this.requiresWheelRotation) {
-            attachWheelRotation(null, this.config);
-        }
-
         const crosshairSeq = new Sequence()
             .crosshair("position")
                 .type(this.type)
@@ -328,13 +331,8 @@ export class BaseCrosshairShape {
         return Sequencer.EffectManager.endEffects({ name: id, object: token });
     }
 
-    /**
-     * Hide the instantiating preview template/region.
-     */
     hide() {
-        if (crosshairAdapter?.hidePreview) {
-            try { crosshairAdapter.hidePreview(this.placeable); } catch (e) {}
-        }
+        crosshairAdapter.hidePreview(this.placeable);
     }
 
     /**

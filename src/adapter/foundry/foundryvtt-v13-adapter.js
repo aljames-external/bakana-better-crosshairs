@@ -242,7 +242,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {Object} coords - Resolved placement coordinates from Sequencer (`{ x, y, direction, distance, ... }`)
      * @returns {Promise<void>} Resolves when deferred document creation completes
      */
-    async createDeferredDocument(scene, deferredData, coords) {
+    async createDeferredDocument(scene, deferredData, coords, documentName) {
         if (!scene || !deferredData || !coords) return;
         const data = foundry.utils.deepClone(deferredData);
         delete data._id;
@@ -254,7 +254,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
         if (coords.distance !== undefined) data.distance = coords.distance;
         else if (coords.radius !== undefined) data.distance = coords.radius;
 
-        console.log("%cBBC DIAGNOSTIC | V13 createDeferredDocument:", "background: #7b2cbf; color: #fff; padding: 2px 4px; border-radius: 2px;", {
+        log.debug("FoundryVTTV13Adapter.createDeferredDocument | Deferred MeasuredTemplate payload:", {
             docName: "MeasuredTemplate",
             resolvedCoords: coords,
             deferredCreatePayload: data
