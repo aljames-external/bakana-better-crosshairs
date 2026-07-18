@@ -68,33 +68,28 @@ export function resolveCrosshairIcon(iconPath) {
  */
 function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
     if (!tmpl) return;
-    if (tmpl.isPreview && typeof tmpl._onRotate === "function" && !tmpl._bbcRotateOverridden) {
-        tmpl._bbcRotateOverridden = true;
-        tmpl._onRotate = function(event) {
-            if (event && typeof event.stopPropagation === "function") event.stopPropagation();
-        };
-    }
+
     if (crosshairAdapter?.updatePreviewShape && tmpl.document) {
         try {
-            const dims = tmpl._bbcDimensions ?? tmpl.document?._bbcDimensions ?? globalThis._activeBBCDimensions;
-            const initialDist = dims?.distance ?? tmpl.document.distance ?? (typeof crosshairAdapter.detectProperties === "function" ? crosshairAdapter.detectProperties(tmpl.document).distance : undefined);
-            const initialWidth = dims?.width ?? tmpl.document.width ?? (typeof crosshairAdapter.detectProperties === "function" ? crosshairAdapter.detectProperties(tmpl.document).width : undefined);
+            const dims = tmpl._bbcDimensions ?? tmpl.document._bbcDimensions ?? globalThis._activeBBCDimensions;
+            const initialDist = dims?.distance ?? tmpl.document.distance ?? crosshairAdapter.detectProperties(tmpl.document).distance;
+            const initialWidth = dims?.width ?? tmpl.document.width ?? crosshairAdapter.detectProperties(tmpl.document).width;
             const isGridUnits = dims?.gridUnits ?? true;
 
             const cfg = tmpl._bbcConfig ?? tmpl.document?._bbcConfig ?? {};
-            const isSticky = Boolean(tmpl.document?.flags?.bakana?.token ?? tmpl.document?.flags?.bbc?.token ?? tmpl._bbcSticky ?? cfg.token);
+            const isSticky = Boolean(tmpl.document.flags?.bakana?.token ?? tmpl.document.flags?.bbc?.token ?? tmpl._bbcSticky ?? cfg.token);
             let targetX = 0, targetY = 0;
 
             const visual = tmpl._bbcCrosshair ?? globalThis._activeBBCCrosshair;
             if (isSticky && cfg.token && visual && typeof visual.x === "number" && !isNaN(visual.x) && typeof visual.y === "number" && !isNaN(visual.y)) {
                 targetX = visual.x;
                 targetY = visual.y;
-            } else if (isSticky && cfg.token && crosshairAdapter?.resolveAnchorPlacement && canvas?.mousePosition) {
+            } else if (isSticky && cfg.token && canvas?.mousePosition) {
                 const anchored = crosshairAdapter.resolveAnchorPlacement(cfg.token, canvas.mousePosition);
                 targetX = anchored.x;
                 targetY = anchored.y;
             } else {
-                const mousePos = canvas?.mousePosition ?? { x: tmpl.x ?? tmpl.document?.x ?? 0, y: tmpl.y ?? tmpl.document?.y ?? 0 };
+                const mousePos = canvas?.mousePosition ?? { x: tmpl.x ?? tmpl.document.x ?? 0, y: tmpl.y ?? tmpl.document.y ?? 0 };
                 const snapMode = getGridSnapMode(cfg);
                 const snapped = snapMode !== 0 ? snapCoordinates(mousePos.x, mousePos.y, snapMode) : mousePos;
                 targetX = snapped.x;
@@ -113,58 +108,14 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
                 gridUnits: isGridUnits
             });
 
-            if (typeof tmpl.document.x === "number") tmpl.x = tmpl.document.x;
-            if (typeof tmpl.document.y === "number") tmpl.y = tmpl.document.y;
+            tmpl.x = tmpl.document.x;
+            tmpl.y = tmpl.document.y;
         } catch (e) {}
     }
-    tmpl.direction = newDirDeg;
-    if (tmpl.document) {
-        tmpl.document.direction = newDirDeg;
-        if (typeof tmpl.document.updateSource === "function") {
-            try { tmpl.document.updateSource({ direction: newDirDeg }); } catch (e) {}
-        }
-        if (tmpl.document._shape !== undefined) tmpl.document._shape = null;
-        if (tmpl.document.shape !== undefined && typeof tmpl.document.shape.clear === "function") {
-            try { tmpl.document.shape.clear(); } catch (e) {}
-        }
+
+    if (crosshairAdapter?.refreshTemplateHighlights) {
+        crosshairAdapter.refreshTemplateHighlights(tmpl, newDirDeg);
     }
-    if (tmpl._shape !== undefined) tmpl._shape = null;
-    if (tmpl.shape !== undefined && typeof tmpl.shape.clear === "function") {
-        try { tmpl.shape.clear(); } catch (e) {}
-    }
-    if (tmpl.ray && Ray && (tmpl.ray.origin || (typeof tmpl.x === "number" && typeof tmpl.y === "number"))) {
-        try {
-            const ox = tmpl.ray.origin?.x ?? tmpl.x;
-            const oy = tmpl.ray.origin?.y ?? tmpl.y;
-            tmpl.ray = Ray.fromAngle(ox, oy, rad, tmpl.ray.distance ?? 1000);
-        } catch (e) {}
-    }
-    if (tmpl.renderFlags && tmpl.renderFlags.flags) {
-        const flagsToSet = {};
-        for (const flagName of ["refreshShape", "refreshTemplate", "refreshGrid", "refreshState", "refresh"]) {
-            if (flagName in tmpl.renderFlags.flags) {
-                flagsToSet[flagName] = true;
-            }
-        }
-        if (Object.keys(flagsToSet).length > 0) {
-            tmpl.renderFlags.set(flagsToSet);
-        }
-    }
-    if (typeof tmpl.applyRenderFlags === "function") {
-        try { tmpl.applyRenderFlags(); } catch (e) {}
-    }
-    if (typeof tmpl._refreshShape === "function") {
-        try { tmpl._refreshShape(); } catch (e) {}
-    }
-    if (typeof tmpl.highlightGrid === "function") {
-        try { tmpl.highlightGrid(); } catch (e) {}
-    }
-    if (crosshairAdapter?.hidePreview) {
-        try { crosshairAdapter.hidePreview(tmpl); } catch (e) {}
-    }
-    if (tmpl.template) { try { tmpl.template.visible = false; tmpl.template.renderable = false; tmpl.template.alpha = 0; } catch (e) {} }
-    if (tmpl.shape) { try { tmpl.shape.visible = false; tmpl.shape.renderable = false; tmpl.shape.alpha = 0; } catch (e) {} }
-    if (tmpl.border) { try { tmpl.border.visible = false; tmpl.border.renderable = false; tmpl.border.alpha = 0; } catch (e) {} }
 }
 
 /**
