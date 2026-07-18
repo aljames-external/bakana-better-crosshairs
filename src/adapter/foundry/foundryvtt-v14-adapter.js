@@ -339,6 +339,9 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
                 log.debug("FoundryVTTV14Adapter.applyDocumentPlacement | Applying Region updateSource:", updateData);
                 doc.updateSource(updateData);
+                try {
+                    doc.shapes = [newShape];
+                } catch (e) {}
             }
         } else {
             const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);

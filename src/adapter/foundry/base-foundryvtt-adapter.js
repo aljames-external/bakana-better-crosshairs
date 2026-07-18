@@ -181,9 +181,14 @@ export class BaseFoundryVTTAdapter {
             placeable._onDragLeftStart = () => {};
             placeable._onDragLeftMove = () => {};
             placeable._onDragLeftDrop = () => {};
+            placeable._onRotate = () => {};
+            placeable._onWheel = () => {};
+            placeable._onMouseWheel = () => {};
             if (placeable.document) {
                 placeable.document._onMouseMove = () => {};
                 placeable.document._onMouseDrag = () => {};
+                placeable.document._onRotate = () => {};
+                placeable.document._onWheel = () => {};
             }
         } catch (e) {}
         const hideContainers = (obj) => {
