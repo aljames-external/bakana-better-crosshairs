@@ -398,7 +398,7 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     detachWheelRotation();
     log.debug("resolveCrosshairPlacement | Inspecting arguments passed to PLACED callback:", crosshair, config, extraArgs);
 
-    const shape = (crosshair && typeof crosshair.getPlacementUpdates === "function") ? crosshair : (crosshair?.shapeInstance);
+    const shape = (crosshair && typeof crosshair.getPlacementUpdates === "function") ? crosshair : (crosshair?.shapeInstance ?? config?.shapeInstance ?? globalThis._activeBBCCrosshair?.shapeInstance);
     if (shape && typeof shape.getPlacementUpdates === "function") {
         const result = shape.getPlacementUpdates();
         console.log("%cBBC DIAGNOSTIC | resolveCrosshairPlacement Result (ShapeInstance):", "background: #7b2cbf; color: #fff; padding: 2px 4px; border-radius: 2px;", {
@@ -412,21 +412,29 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
         return result;
     }
 
-    let direction = typeof config.currentDirection === "number" ? config.currentDirection : undefined;
+    let direction = (typeof config.currentDirection === "number")
+        ? config.currentDirection
+        : (typeof config.direction === "number")
+            ? config.direction
+            : (typeof shape?.direction === "number")
+                ? shape.direction
+                : undefined;
 
-    // Search arguments for explicit rotation/direction
-    const allArgs = [crosshair, config, ...extraArgs];
-    for (const arg of allArgs) {
-        if (!arg || typeof arg !== "object") continue;
-        let foundDir = arg.direction ?? arg.data?.direction ?? arg.template?.direction;
-        if (typeof foundDir === "number" && direction === undefined) {
-            direction = foundDir;
-        } else if (arg.ray && typeof arg.ray.angle === "number" && direction === undefined) {
-            direction = arg.ray.angle * (180 / Math.PI);
-        } else if (direction === undefined) {
-            const rot = arg.rotation ?? arg.data?.rotation ?? arg._rotation;
-            if (typeof rot === "number") {
-                direction = (Math.abs(rot) <= Math.PI * 2 && rot !== 0) ? (rot * (180 / Math.PI)) : rot;
+    // Search extra arguments for explicit rotation/direction if not already set by placement config
+    if (direction === undefined) {
+        const allArgs = [crosshair, config, ...extraArgs];
+        for (const arg of allArgs) {
+            if (!arg || typeof arg !== "object") continue;
+            let foundDir = arg.currentDirection ?? arg.direction ?? arg.data?.direction ?? arg.template?.direction;
+            if (typeof foundDir === "number" && direction === undefined) {
+                direction = foundDir;
+            } else if (arg.ray && typeof arg.ray.angle === "number" && direction === undefined) {
+                direction = arg.ray.angle * (180 / Math.PI);
+            } else if (direction === undefined) {
+                const rot = arg.rotation ?? arg.data?.rotation ?? arg._rotation;
+                if (typeof rot === "number") {
+                    direction = (Math.abs(rot) <= Math.PI * 2 && rot !== 0) ? (rot * (180 / Math.PI)) : rot;
+                }
             }
         }
     }
