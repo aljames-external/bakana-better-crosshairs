@@ -69,48 +69,46 @@ export function resolveCrosshairIcon(iconPath) {
 function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
     if (!tmpl) return;
 
-    if (crosshairAdapter?.updatePreviewShape && tmpl.document) {
-        try {
-            const dims = tmpl._bbcDimensions ?? tmpl.document._bbcDimensions ?? globalThis._activeBBCDimensions;
-            const initialDist = dims?.distance ?? tmpl.document.distance ?? crosshairAdapter.detectProperties(tmpl.document).distance;
-            const initialWidth = dims?.width ?? tmpl.document.width ?? crosshairAdapter.detectProperties(tmpl.document).width;
-            const isGridUnits = dims?.gridUnits ?? true;
+    if (tmpl.document) {
+        const dims = tmpl._bbcDimensions ?? tmpl.document._bbcDimensions ?? globalThis._activeBBCDimensions;
+        const initialDist = dims?.distance ?? tmpl.document.distance ?? crosshairAdapter.detectProperties(tmpl.document).distance;
+        const initialWidth = dims?.width ?? tmpl.document.width ?? crosshairAdapter.detectProperties(tmpl.document).width;
+        const isGridUnits = dims?.gridUnits ?? true;
 
-            const cfg = tmpl._bbcConfig ?? tmpl.document?._bbcConfig ?? {};
-            const isSticky = Boolean(tmpl.document.flags?.bakana?.token ?? tmpl.document.flags?.bbc?.token ?? tmpl._bbcSticky ?? cfg.token);
-            let targetX = 0, targetY = 0;
+        const cfg = tmpl._bbcConfig ?? tmpl.document._bbcConfig ?? {};
+        const isSticky = Boolean(tmpl.document.flags?.bakana?.token ?? tmpl.document.flags?.bbc?.token ?? tmpl._bbcSticky ?? cfg.token);
+        let targetX = 0, targetY = 0;
 
-            const visual = tmpl._bbcCrosshair ?? globalThis._activeBBCCrosshair;
-            if (isSticky && cfg.token && visual && typeof visual.x === "number" && !isNaN(visual.x) && typeof visual.y === "number" && !isNaN(visual.y)) {
-                targetX = visual.x;
-                targetY = visual.y;
-            } else if (isSticky && cfg.token && canvas?.mousePosition) {
-                const anchored = crosshairAdapter.resolveAnchorPlacement(cfg.token, canvas.mousePosition);
-                targetX = anchored.x;
-                targetY = anchored.y;
-            } else {
-                const mousePos = canvas?.mousePosition ?? { x: tmpl.x ?? tmpl.document.x ?? 0, y: tmpl.y ?? tmpl.document.y ?? 0 };
-                const snapMode = getGridSnapMode(cfg);
-                const snapped = snapMode !== 0 ? snapCoordinates(mousePos.x, mousePos.y, snapMode) : mousePos;
-                targetX = snapped.x;
-                targetY = snapped.y;
-            }
+        const visual = tmpl._bbcCrosshair ?? globalThis._activeBBCCrosshair;
+        if (isSticky && cfg.token && visual && typeof visual.x === "number" && typeof visual.y === "number") {
+            targetX = visual.x;
+            targetY = visual.y;
+        } else if (isSticky && cfg.token && canvas?.mousePosition) {
+            const anchored = crosshairAdapter.resolveAnchorPlacement(cfg.token, canvas.mousePosition);
+            targetX = anchored.x;
+            targetY = anchored.y;
+        } else {
+            const mousePos = canvas?.mousePosition ?? { x: tmpl.x ?? tmpl.document.x ?? 0, y: tmpl.y ?? tmpl.document.y ?? 0 };
+            const snapMode = getGridSnapMode(cfg);
+            const snapped = snapMode !== 0 ? snapCoordinates(mousePos.x, mousePos.y, snapMode) : mousePos;
+            targetX = snapped.x;
+            targetY = snapped.y;
+        }
 
-            crosshairAdapter.updatePreviewShape(tmpl.document, {
-                x: targetX,
-                y: targetY,
-                direction: newDirDeg,
-                rotation: newDirDeg,
-                distance: initialDist,
-                radius: initialDist,
-                width: initialWidth,
-                sticky: isSticky,
-                gridUnits: isGridUnits
-            });
+        crosshairAdapter.updatePreviewShape(tmpl.document, {
+            x: targetX,
+            y: targetY,
+            direction: newDirDeg,
+            rotation: newDirDeg,
+            distance: initialDist,
+            radius: initialDist,
+            width: initialWidth,
+            sticky: isSticky,
+            gridUnits: isGridUnits
+        });
 
-            tmpl.x = tmpl.document.x;
-            tmpl.y = tmpl.document.y;
-        } catch (e) {}
+        tmpl.x = tmpl.document.x;
+        tmpl.y = tmpl.document.y;
     }
 
     if (crosshairAdapter?.refreshTemplateHighlights) {
