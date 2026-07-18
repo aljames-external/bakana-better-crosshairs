@@ -554,11 +554,6 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         tmpl._shape = null;
         if (tmpl.shape?.clear) tmpl.shape.clear();
 
-        if (tmpl.ray && Ray) {
-            const ox = tmpl.ray.origin?.x ?? tmpl.x;
-            const oy = tmpl.ray.origin?.y ?? tmpl.y;
-            tmpl.ray = Ray.fromAngle(ox, oy, rad, tmpl.ray.distance ?? 1000);
-        }
 
         if (tmpl.renderFlags) {
             tmpl.renderFlags.set({
