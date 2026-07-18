@@ -80,25 +80,25 @@ export class ConeCrosshairShape extends BaseCrosshairShape {
 /**
  * Creates a cone crosshair sequence and configures visual effects and placement callbacks.
  *
- * @param {object|null} token - The token object to center or attach the cone crosshair to
+ * @param {object} placeable - The preview template/region placeable.
  * @param {object} [config={}] - Configuration options for the cone crosshair
  * @returns {Promise<Array>} A promise resolving to an array containing the configured cone sequence and targets [cone, targets]
  */
-async function create(token, config = {}) {
-    const shape = new ConeCrosshairShape(token, config);
+async function create(placeable, config = {}) {
+    const shape = new ConeCrosshairShape(placeable, config);
     return shape.create();
 }
 
 /**
  * Creates and immediately plays a cone crosshair sequence.
  *
- * @param {object|null} token - The token object associated with the cone crosshair
+ * @param {object} placeable - The preview template/region placeable.
  * @param {object} [config={}] - Configuration options for the cone crosshair
  * @returns {Promise<any>} A promise resolving when the crosshair sequence finishes playing
  */
-async function play(token, config = {}) {
-    const shape = new ConeCrosshairShape(token, config);
-    return shape.play();
+async function play(placeable, config = {}) {
+    const [seq] = await create(placeable, config);
+    return seq.play();
 }
 
 /**

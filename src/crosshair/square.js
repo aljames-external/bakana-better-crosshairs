@@ -99,7 +99,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
                 width: this.config.width ?? this.config.distance ?? 20,
                 rayFile: this.config.squareFile ?? this.config.file ?? closest("eskie.crosshair.ray.fantasy_01.white.full")
             };
-            const rayShape = new RayCrosshairShape(this.token, rayConfig);
+            const rayShape = new RayCrosshairShape(this.placeable, rayConfig);
             return rayShape.create();
         }
         return super.create();
@@ -121,7 +121,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
                 width: this.config.width ?? this.config.distance ?? 20,
                 rayFile: this.config.squareFile ?? this.config.file ?? closest("eskie.crosshair.ray.fantasy_01.white.full")
             };
-            const rayShape = new RayCrosshairShape(this.token, rayConfig);
+            const rayShape = new RayCrosshairShape(this.placeable, rayConfig);
             return rayShape.play();
         }
         return super.play();
@@ -131,25 +131,25 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
 /**
  * Creates and configures a square crosshair sequence.
  *
- * @param {object|null} token - The token or object to associate with the crosshair
+ * @param {object} placeable - The preview template/region placeable.
  * @param {object} [config={}] - Configuration options for the square crosshair
  * @returns {Promise<Array<*>>} A promise resolving to an array containing the configured square sequence and targets
  */
-async function create(token, config = {}) {
-    const shape = new SquareCrosshairShape(token, config);
+async function create(placeable, config = {}) {
+    const shape = new SquareCrosshairShape(placeable, config);
     return shape.create();
 }
 
 /**
  * Creates and plays a square crosshair sequence.
  *
- * @param {object|null} token - The token or object to associate with the crosshair
+ * @param {object} placeable - The preview template/region placeable.
  * @param {object} [config={}] - Configuration options for the square crosshair
  * @returns {Promise<any>} A promise resolving when the sequence finishes playing
  */
-async function play(token, config = {}) {
-    const shape = new SquareCrosshairShape(token, config);
-    return shape.play();
+async function play(placeable, config = {}) {
+    const [seq] = await create(placeable, config);
+    return seq.play();
 }
 
 /**

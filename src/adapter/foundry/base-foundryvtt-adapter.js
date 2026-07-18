@@ -5,7 +5,6 @@ import { MODULE_ID } from "../../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY, autorecManager } from "../../autorec/autorecManager.js";
 import { CrosshairConfiguration } from "../../autorec/CrosshairConfiguration.js";
 import { notify } from "../../lib/notifier.js";
-import { crosshair } from "../../crosshair/_crosshairs.js";
 import { runConcurrentScript } from "../../crosshair/util.js";
 /**
  * Base abstract class for Foundry VTT version-specific adapters.
@@ -859,6 +858,7 @@ export class BaseFoundryVTTAdapter {
                 const crosshairType = isKnownType
                     ? (String(explicitType).toLowerCase() === "rect" ? "square" : String(explicitType).toLowerCase())
                     : (detected.type ?? "circle");
+                const { crosshair } = await import("../../crosshair/_crosshairs.js");
                 const builder = crosshair[crosshairType] ?? crosshair.circle;
 
                 const shapeFileKey = `${crosshairType}File`;
@@ -887,7 +887,7 @@ export class BaseFoundryVTTAdapter {
                 }
 
                 log.debug(`BaseFoundryVTTAdapter.handleDrawPreview | Playing "${crosshairType}" crosshair for "${entry.itemName}" with config:`, finalConfig);
-                await builder.play(token, finalConfig);
+                await builder.play(placeable, finalConfig);
             }
 
             log.debug(`BaseFoundryVTTAdapter.handleDrawPreview | Sequencer crosshair sequence completed for "${entry.itemName}".`);

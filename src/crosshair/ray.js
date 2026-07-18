@@ -78,25 +78,25 @@ export class RayCrosshairShape extends BaseCrosshairShape {
 /**
  * Creates and configures a ray crosshair sequence and associated graphics.
  *
- * @param {object|null} token - The token the ray originates from or adheres to
+ * @param {object} placeable - The preview template/region placeable.
  * @param {object} [config={}] - Configuration options for the ray crosshair
  * @returns {Promise<Array>} A promise resolving to `[Sequence, targets]` array
  */
-async function create(token, config = {}) {
-    const shape = new RayCrosshairShape(token, config);
+async function create(placeable, config = {}) {
+    const shape = new RayCrosshairShape(placeable, config);
     return shape.create();
 }
 
 /**
  * Creates and plays a ray crosshair sequence.
  *
- * @param {object|null} token - The token the ray originates from or adheres to
+ * @param {object} placeable - The preview template/region placeable.
  * @param {object} [config={}] - Configuration options for the ray crosshair
  * @returns {Promise<any>} A promise resolving to the result of playing the sequence
  */
-async function play(token, config = {}) {
-    const shape = new RayCrosshairShape(token, config);
-    return shape.play();
+async function play(placeable, config = {}) {
+    const [seq] = await create(placeable, config);
+    return seq.play();
 }
 
 /**

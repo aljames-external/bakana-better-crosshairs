@@ -91,25 +91,25 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
 /**
  * Creates and configures a circle crosshair Sequence instance along with any associated target data.
  *
- * @param {object|null} token - The token object or document to attach or center the circle crosshair on.
+ * @param {object} placeable - The preview template/region placeable.
  * @param {object} [config={}] - Configuration options for the circle crosshair.
  * @returns {Promise<Array>} A promise resolving to an array containing the configured circle Sequence and targets.
  */
-async function create(token, config = {}) {
-    const shape = new CircleCrosshairShape(token, config);
+async function create(placeable, config = {}) {
+    const shape = new CircleCrosshairShape(placeable, config);
     return shape.create();
 }
 
 /**
  * Creates and immediately plays the circle crosshair sequence alongside any concurrent placement scripts.
  *
- * @param {object|null} token - The token object or document associated with the circle crosshair.
+ * @param {object} placeable - The preview template/region placeable.
  * @param {object} [config={}] - Configuration options for the circle crosshair.
  * @returns {Promise<any>} A promise resolving when the crosshair sequence finishes playing.
  */
-async function play(token, config = {}) {
-    const shape = new CircleCrosshairShape(token, config);
-    return shape.play();
+async function play(placeable, config = {}) {
+    const [seq] = await create(placeable, config);
+    return seq.play();
 }
 
 /**

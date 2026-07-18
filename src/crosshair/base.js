@@ -1,7 +1,7 @@
 import { closest } from "../lib/filemanager.js";
 import { log } from "../lib/logger.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
-import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, resolveCrosshairIcon, alignCrosshairAndEffects, getGridSnapMode } from "./util.js";
+import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, resolveCrosshairIcon, alignCrosshairAndEffects, getGridSnapMode, snapCoordinates } from "./util.js";
 
 /**
  * Base class for crosshair shape instances, managing Sequencer animations, grid alignments,
@@ -10,12 +10,19 @@ import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, sh
 export class BaseCrosshairShape {
     /**
      * Create a new crosshair shape instance.
-     * @param {object|null} token - Target Token document or placeable object
+     * @param {PlaceableObject} placeable - Target template preview placeable
      * @param {object} [config={}] - Configuration options for the crosshair shape
      */
-    constructor(token, config = {}) {
-        this.token = token;
+    constructor(placeable, config = {}) {
+        this.placeable = placeable;
         this.config = config;
+
+        // Resolve token from placeable flags/document/config
+        const doc = placeable.document;
+        const flagsToken = doc?.flags?.bbc?.token ?? doc?.flags?.bakana?.token ?? placeable._bbcSticky;
+        const rawToken = config.token ?? flagsToken;
+        this.token = crosshairAdapter.toToken(rawToken);
+
         this.id = config.id ?? this.getDefaultId();
         this.type = this.defaultShapeType;
         this.stickToToken = shouldStickToToken(config, this.type);
@@ -28,8 +35,16 @@ export class BaseCrosshairShape {
         this.showLine = config.showLine !== false;
         this._rawLineFile = config.lineFile ?? "eskie.crosshair.line.generic_01.white";
 
+        // Keep a reference to Sequencer visual container
+        this.sequencerCrosshair = null;
+
+        // Position and direction state tracking
+        this.x = placeable.x ?? 0;
+        this.y = placeable.y ?? 0;
+        this.direction = config.direction ?? 0;
+
         // Normalize boolean flags on config for clean direct boolean evaluation
-        config.token = token;
+        config.token = this.token;
         config.stickToToken = Boolean(this.stickToToken);
         config.shapeInstance = this;
 
@@ -253,6 +268,7 @@ export class BaseCrosshairShape {
      */
     async onShowCallback(crosshair) {
         if (crosshair) {
+            this.sequencerCrosshair = crosshair;
             crosshair.shapeInstance = this;
             globalThis._activeBBCCrosshair = crosshair;
         }
@@ -260,7 +276,7 @@ export class BaseCrosshairShape {
             if ((this.type === "rect" || this.type === "square") && !this.stickToToken && !this.config?.token && crosshair?.pivot?.set) {
                 crosshair.pivot.set(0, 0);
             }
-            attachWheelRotation(crosshair, this.config);
+            attachWheelRotation(this, this.config);
         }
         await this.playGraphicEffect(crosshair);
         alignCrosshairAndEffects(crosshair, this.config, (this.config.currentDirection ?? this.config.direction ?? 0) * (Math.PI / 180));
@@ -310,5 +326,214 @@ export class BaseCrosshairShape {
     static async stop(token, options = {}) {
         const id = options?.id ?? "Crosshair";
         return Sequencer.EffectManager.endEffects({ name: id, object: token });
+    }
+
+    /**
+     * Hide the instantiating preview template/region.
+     */
+    hide() {
+        if (crosshairAdapter?.hidePreview) {
+            try { crosshairAdapter.hidePreview(this.placeable); } catch (e) {}
+        }
+    }
+
+    /**
+     * Update the visual position of BOTH the Sequencer graphic and the hidden Foundry placeable template.
+     * @param {number} x - New target X coordinate (pre-snapping)
+     * @param {number} y - New target Y coordinate (pre-snapping)
+     */
+    move(x, y) {
+        let targetX = x;
+        let targetY = y;
+
+        if (this.stickToToken && this.token) {
+            const anchored = crosshairAdapter.resolveAnchorPlacement(this.token, { x, y });
+            targetX = anchored.x;
+            targetY = anchored.y;
+            if (anchored.direction !== undefined && this.config.currentDirection === undefined) {
+                this.direction = anchored.direction;
+            }
+        } else {
+            const snapMode = getGridSnapMode(this.config);
+            if (snapMode !== 0) {
+                const snapped = snapCoordinates(targetX, targetY, snapMode);
+                targetX = snapped.x;
+                targetY = snapped.y;
+            }
+        }
+
+        this.x = targetX;
+        this.y = targetY;
+
+        if (this.sequencerCrosshair) {
+            this.sequencerCrosshair.x = targetX;
+            this.sequencerCrosshair.y = targetY;
+        }
+
+        if (crosshairAdapter?.updatePreviewShape && this.placeable.document) {
+            const dims = this.placeable._bbcDimensions ?? this.placeable.document?._bbcDimensions ?? globalThis._activeBBCDimensions;
+            const initialDist = dims?.distance ?? this.placeable.document.distance ?? (typeof crosshairAdapter.detectProperties === "function" ? crosshairAdapter.detectProperties(this.placeable.document).distance : undefined);
+            const initialWidth = dims?.width ?? this.placeable.document.width ?? (typeof crosshairAdapter.detectProperties === "function" ? crosshairAdapter.detectProperties(this.placeable.document).width : undefined);
+            const isGridUnits = dims?.gridUnits ?? true;
+
+            crosshairAdapter.updatePreviewShape(this.placeable.document, {
+                x: targetX,
+                y: targetY,
+                direction: this.direction,
+                rotation: this.direction,
+                distance: initialDist,
+                radius: initialDist,
+                width: initialWidth,
+                sticky: this.stickToToken,
+                gridUnits: isGridUnits
+            });
+
+            if (typeof this.placeable.document.x === "number") this.placeable.x = this.placeable.document.x;
+            if (typeof this.placeable.document.y === "number") this.placeable.y = this.placeable.document.y;
+        }
+
+        this.refreshTemplateHighlights();
+    }
+
+    /**
+     * Update the rotation/direction of BOTH the Sequencer graphic and the hidden Foundry placeable template.
+     * @param {number} newAngleDeg - New direction in degrees
+     */
+    rotate(newAngleDeg) {
+        if (typeof newAngleDeg === "number") {
+            while (newAngleDeg < 0) newAngleDeg += 360;
+            newAngleDeg = newAngleDeg % 360;
+        } else {
+            newAngleDeg = 0;
+        }
+
+        this.direction = newAngleDeg;
+        const rad = newAngleDeg * (Math.PI / 180);
+
+        if (this.config) {
+            this.config.currentDirection = newAngleDeg;
+            this.config.direction = newAngleDeg;
+            this.config.rotation = rad;
+        }
+
+        if (this.sequencerCrosshair) {
+            this.sequencerCrosshair.direction = newAngleDeg;
+            const isRect = this.type === "rect" || this.type === "square";
+            if (!isRect || this.stickToToken) {
+                this.sequencerCrosshair.rotation = rad;
+            } else {
+                this.sequencerCrosshair.rotation = 0;
+            }
+
+            if (this.sequencerCrosshair.config) {
+                this.sequencerCrosshair.config.direction = newAngleDeg;
+                this.sequencerCrosshair.config.rotation = rad;
+            }
+            if (this.sequencerCrosshair.data) {
+                this.sequencerCrosshair.data.direction = newAngleDeg;
+                this.sequencerCrosshair.data.rotation = rad;
+            }
+
+            alignCrosshairAndEffects(this.sequencerCrosshair, this.config, rad);
+        }
+
+        if (this.placeable.document) {
+            this.placeable.document.direction = newAngleDeg;
+            if (typeof this.placeable.document.updateSource === "function") {
+                try { this.placeable.document.updateSource({ direction: newAngleDeg }); } catch (e) {}
+            }
+        }
+        this.placeable.direction = newAngleDeg;
+
+        this.refreshTemplateHighlights();
+
+        const isRayOrCone = this.type === "ray" || this.type === "cone";
+        if (!isRayOrCone && this.sequencerCrosshair) {
+            if (typeof this.sequencerCrosshair.refresh === "function") {
+                try { this.sequencerCrosshair.refresh(); } catch (e) {}
+            }
+            if (typeof this.sequencerCrosshair._onMouseMove === "function" && canvas?.mousePosition) {
+                try {
+                    this.sequencerCrosshair._onMouseMove({
+                        data: { getLocalPosition: () => canvas.mousePosition },
+                        clientX: canvas.mousePosition.x,
+                        clientY: canvas.mousePosition.y
+                    });
+                } catch (e) {}
+            }
+        }
+    }
+
+    /**
+     * Re-render and refresh grid highlights of the preview template/region.
+     */
+    refreshTemplateHighlights() {
+        const tmpl = this.placeable;
+        if (!tmpl) return;
+
+        if (tmpl.isPreview && typeof tmpl._onRotate === "function" && !tmpl._bbcRotateOverridden) {
+            tmpl._bbcRotateOverridden = true;
+            tmpl._onRotate = function(event) {
+                if (event && typeof event.stopPropagation === "function") event.stopPropagation();
+            };
+        }
+
+        const rad = this.direction * (Math.PI / 180);
+
+        tmpl.direction = this.direction;
+        if (tmpl.document) {
+            tmpl.document.direction = this.direction;
+            if (typeof tmpl.document.updateSource === "function") {
+                try { tmpl.document.updateSource({ direction: this.direction }); } catch (e) {}
+            }
+            if (tmpl.document._shape !== undefined) tmpl.document._shape = null;
+            if (tmpl.document.shape !== undefined && typeof tmpl.document.shape.clear === "function") {
+                try { tmpl.document.shape.clear(); } catch (e) {}
+            }
+        }
+        if (tmpl._shape !== undefined) tmpl._shape = null;
+        if (tmpl.shape !== undefined && typeof tmpl.shape.clear === "function") {
+            try { tmpl.shape.clear(); } catch (e) {}
+        }
+        if (tmpl.ray && Ray && (tmpl.ray.origin || (typeof tmpl.x === "number" && typeof tmpl.y === "number"))) {
+            try {
+                const ox = tmpl.ray.origin?.x ?? tmpl.x;
+                const oy = tmpl.ray.origin?.y ?? tmpl.y;
+                tmpl.ray = Ray.fromAngle(ox, oy, rad, tmpl.ray.distance ?? 1000);
+            } catch (e) {}
+        }
+        if (tmpl.renderFlags && tmpl.renderFlags.flags) {
+            const flagsToSet = {};
+            for (const flagName of ["refreshShape", "refreshTemplate", "refreshGrid", "refreshState", "refresh"]) {
+                if (flagName in tmpl.renderFlags.flags) {
+                    flagsToSet[flagName] = true;
+                }
+            }
+            if (Object.keys(flagsToSet).length > 0) {
+                tmpl.renderFlags.set(flagsToSet);
+            }
+        }
+        if (typeof tmpl.applyRenderFlags === "function") {
+            try { tmpl.applyRenderFlags(); } catch (e) {}
+        }
+        if (typeof tmpl._refreshShape === "function") {
+            try { tmpl._refreshShape(); } catch (e) {}
+        }
+        if (typeof tmpl.highlightGrid === "function") {
+            try { tmpl.highlightGrid(); } catch (e) {}
+        }
+        if (crosshairAdapter?.hidePreview) {
+            try { crosshairAdapter.hidePreview(tmpl); } catch (e) {}
+        }
+        if (tmpl.template) { try { tmpl.template.visible = false; tmpl.template.renderable = false; tmpl.template.alpha = 0; } catch (e) {} }
+        if (tmpl.shape) { try { tmpl.shape.visible = false; tmpl.shape.renderable = false; tmpl.shape.alpha = 0; } catch (e) {} }
+        if (tmpl.border) { try { tmpl.border.visible = false; tmpl.border.renderable = false; tmpl.border.alpha = 0; } catch (e) {} }
+    }
+
+    /**
+     * Return updates for placement document.
+     */
+    getPlacementUpdates() {
+        return crosshairAdapter.formatPlacementCoordinates(this.x, this.y, this.direction, this.config);
     }
 }
