@@ -479,14 +479,26 @@ export function snapCoordinates(x, y, mode = "all") {
     if (mode !== "center" && mode !== "corner" && mode !== "corners") {
         const numMode = typeof mode === "number" ? mode : getGridSnapMode({ snapToGrid: mode });
         if (numMode !== 0) {
-            const snapped = canvas.grid.getSnappedPosition(x, y, numMode);
-            return { x: snapped.x, y: snapped.y };
+            if (typeof canvas.grid.getSnappedPoint === "function") {
+                const snapped = canvas.grid.getSnappedPoint({ x, y }, { mode: numMode });
+                return { x: snapped.x, y: snapped.y };
+            }
+            if (typeof canvas.grid.getSnappedPosition === "function") {
+                const snapped = canvas.grid.getSnappedPosition(x, y, numMode);
+                return { x: snapped.x, y: snapped.y };
+            }
         }
     }
 
     if (mode === "center" || mode === 1) {
-        const pt = canvas.grid.getCenterPoint({ x, y });
-        return { x: pt.x, y: pt.y };
+        if (typeof canvas.grid.getCenterPoint === "function") {
+            const pt = canvas.grid.getCenterPoint({ x, y });
+            return { x: pt.x, y: pt.y };
+        }
+        if (typeof canvas.grid.getCenter === "function") {
+            const [cx, cy] = canvas.grid.getCenter(x, y);
+            return { x: cx, y: cy };
+        }
     }
 
     if (mode === "corner" || mode === "corners" || mode === 2) {
@@ -496,6 +508,14 @@ export function snapCoordinates(x, y, mode = "all") {
     }
 
     if (mode === "all" || mode === true || mode === "default" || mode === "edges" || mode === "edge" || typeof mode === "number") {
+        if (typeof canvas.grid.getSnappedPoint === "function") {
+            const snapped = canvas.grid.getSnappedPoint({ x, y }, { mode: 1 });
+            return { x: snapped.x, y: snapped.y };
+        }
+        if (typeof canvas.grid.getSnappedPosition === "function") {
+            const snapped = canvas.grid.getSnappedPosition(x, y, 1);
+            return { x: snapped.x, y: snapped.y };
+        }
         // Snaps to nearest of: center, corners, or edges (half-grid interval size / 2)
         const half = size / 2;
         const sx = Math.round(x / half) * half;
