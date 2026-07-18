@@ -193,7 +193,7 @@ export class BaseCrosshairShape {
         });
 
         const attachOptions = {
-            bindRotation: false,
+            bindRotation: true,
             ...((this.type === "rect" && !isSticky) ? { align: "top-left" } : {})
         };
         seq.effect()
@@ -419,7 +419,8 @@ export class BaseCrosshairShape {
         if (this.sequencerCrosshair) {
             this.sequencerCrosshair.direction = newAngleDeg;
             const isRect = this.type === "rect" || this.type === "square";
-            if (!isRect || this.stickToToken) {
+            const isAttached = Boolean(this.stickToToken && this.token);
+            if (!isRect && !isAttached) {
                 this.sequencerCrosshair.rotation = rad;
             } else {
                 this.sequencerCrosshair.rotation = 0;
