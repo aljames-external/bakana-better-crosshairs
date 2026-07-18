@@ -131,3 +131,41 @@ test('SquareCrosshairShape V14 region lifecycle and debug logging stages 1..5', 
     mockRegionDoc.shapes[0] = modifiedRegionShape;
     await adapter.handleCreateDocument(mockRegionDoc, {}, 'test-user');
 });
+
+test('Square findings: MeasuredTemplate diagonal distance, sticky false evaluation, and unshifted rotated region origin', async () => {
+    const { FoundryVTTV14Adapter } = await import('../../src/adapter/foundry/foundryvtt-v14-adapter.js');
+    const adapter = new FoundryVTTV14Adapter();
+
+    // 1. MeasuredTemplate rect diagonal normalization: doc.distance = 28.284271247461902, doc.width = 20 -> distance = 20
+    const mockTmplDoc = {
+        documentName: 'MeasuredTemplate',
+        t: 'rect',
+        distance: 28.284271247461902,
+        width: 20
+    };
+    const detected = adapter.detectProperties(mockTmplDoc);
+    assert.equal(detected.type, 'square');
+    assert.equal(detected.distance, 20);
+    assert.equal(detected.width, 20);
+
+    // 2. formatPlacementCoordinates sticky boolean check: token exists but stickToToken is false -> sticky = false
+    const mockToken = { name: 'Archmage' };
+    const coordsFree = adapter.formatPlacementCoordinates(5000, 6500, 325, {
+        token: mockToken,
+        stickToToken: false,
+        distance: 20,
+        width: 20,
+        originalType: 'square'
+    });
+    assert.equal(coordsFree.sticky, false);
+    assert.equal(coordsFree.x, 5000);
+    assert.equal(coordsFree.y, 6500);
+
+    // 3. Unshifted rotated region origin: free placement region rectangle rotated at 325 deg must stay at (5000, 6500)
+    const origRegionShape = { type: 'rectangle', x: 0, y: 0, width: 400, height: 400, rotation: 0 };
+    const formattedShape = adapter._formatRegionShapeUpdate(origRegionShape, coordsFree);
+    assert.equal(formattedShape.type, 'rectangle');
+    assert.equal(formattedShape.x, 5000);
+    assert.equal(formattedShape.y, 6500);
+    assert.equal(formattedShape.rotation, 325);
+});
