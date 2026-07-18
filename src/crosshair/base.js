@@ -192,6 +192,7 @@ export class BaseCrosshairShape {
             animationAnchor: this.animationAnchor
         });
 
+        const isSticky = Boolean(this.stickToToken && this.token);
         const attachOptions = {
             bindRotation: true,
             ...((this.type === "rect" && !isSticky) ? { align: "top-left" } : {})

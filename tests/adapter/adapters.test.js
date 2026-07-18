@@ -837,3 +837,47 @@ test('REGRESSION: FoundryVTTV14Adapter.refreshTemplateHighlights does not overwr
     // Assert that mockRay reference remains unchanged (not overwritten by new Ray)
     assert.strictEqual(mockTmpl.ray, mockRay);
 });
+
+test('REGRESSION: BaseCrosshairShape.playGraphicEffect() does not throw ReferenceError: isSticky is not defined for rectangle shapes', async () => {
+    let playCalled = false;
+    globalThis.Sequence = class {
+        wait() { return this; }
+        effect() { return this; }
+        name() { return this; }
+        file() { return this; }
+        attachTo() { return this; }
+        anchor() { return this; }
+        size() { return this; }
+        opacity() { return this; }
+        belowTokens() { return this; }
+        locally() { return this; }
+        persist() { return this; }
+        play() {
+            playCalled = true;
+            return Promise.resolve();
+        }
+    };
+
+    const mockDocument = {
+        direction: 0,
+        updateSource: () => {}
+    };
+    const mockPlaceable = {
+        document: mockDocument,
+        direction: 0,
+        x: 10,
+        y: 20
+    };
+    const config = {
+        type: 'rect',
+        stickToToken: false,
+        id: "rect-effect"
+    };
+
+    const shape = new BaseCrosshairShape(mockPlaceable, config);
+    // Explicitly set type to rect
+    shape.type = "rect";
+
+    await shape.playGraphicEffect({});
+    assert.ok(playCalled, 'playGraphicEffect should execute cleanly and call Sequence.play() without throwing errors');
+});
