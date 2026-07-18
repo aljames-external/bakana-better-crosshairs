@@ -311,7 +311,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         const styling = this.extractPlacedStylingFlags(config);
         const docName = doc.documentName ?? (doc.shapes ? "Region" : "MeasuredTemplate");
         if (docName === "Region") {
-            const originalShape = doc.shapes?.[0] ?? doc.shapes?.contents?.[0];
+            const originalShape = doc.shapes?.[0] ?? doc.shapes?.contents?.[0] ?? doc._source?.shapes?.[0] ?? data?.shapes?.[0] ?? { type: "rectangle" };
             if (originalShape) {
                 const updateData = {
                     flags: styling.flags
@@ -344,11 +344,13 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                     doc.shapes = [newShape];
                 } catch (e) {}
                 if (data && typeof data === "object") {
+                    data.shapes = foundry.utils.deepClone(updateData.shapes);
                     if (typeof foundry?.utils?.mergeObject === "function") {
-                        foundry.utils.mergeObject(data, updateData);
+                        foundry.utils.mergeObject(data, updateData, { recursive: true, overwrite: true });
                     } else {
                         Object.assign(data, updateData);
                     }
+                    data.shapes = foundry.utils.deepClone(updateData.shapes);
                 }
             }
         } else {
