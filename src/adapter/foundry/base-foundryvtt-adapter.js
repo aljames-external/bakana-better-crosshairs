@@ -371,7 +371,8 @@ export class BaseFoundryVTTAdapter {
      */
     isPreview(placeable) {
         if (!placeable) return false;
-        return Boolean(placeable.isPreview ?? !placeable.document?.id);
+        if (placeable.document?.id) return false;
+        return Boolean(placeable.isPreview ?? true);
     }
 
     /**

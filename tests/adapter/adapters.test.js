@@ -440,6 +440,9 @@ test('crosshairAdapter.isPreview reliably recognizes both Region and MeasuredTem
 
     const persistedRegion = { isPreview: false, document: { id: 'reg_abc123' } };
     assert.equal(adapter.isPreview(persistedRegion), false);
+
+    const editedPersistedRegion = { isPreview: true, document: { id: 'reg_abc123' } };
+    assert.equal(adapter.isPreview(editedPersistedRegion), false);
 });
 
 test('FoundryVTTV14Adapter and Pf2eSystemAdapter handle Collection shapes via .contents and Region behaviors', () => {
