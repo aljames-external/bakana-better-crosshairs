@@ -119,7 +119,14 @@ export class BaseFoundryVTTAdapter {
         for (const entry of candidateEntries) {
             if (systemAdapter.isMatch(context, entry)) {
                 log.debug(`matchAutorecEntry | [MATCH FOUND] Specific global entry "${entry.itemName}" matched calling item "${context.itemName}"`);
-                baseEntry = { ...entry, item: context.item, activity: context.activity };
+                const defaultEntry = entries.get("DEFAULT") ?? {};
+                baseEntry = {
+                    ...defaultEntry,
+                    ...entry,
+                    stickToToken: (entry.stickToToken && entry.stickToToken !== "default") ? entry.stickToToken : (defaultEntry.stickToToken ?? "default"),
+                    item: context.item,
+                    activity: context.activity
+                };
                 break;
             }
         }
