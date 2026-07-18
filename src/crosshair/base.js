@@ -193,7 +193,10 @@ export class BaseCrosshairShape {
         });
 
         const isSticky = this.stickToToken && Boolean(this.token);
-        const attachOptions = (this.type === "rect" && !isSticky) ? { align: "top-left" } : {};
+        const attachOptions = {
+            bindRotation: true,
+            ...((this.type === "rect" && !isSticky) ? { align: "top-left" } : {})
+        };
         seq.effect()
             .name(this.id)
             .file(effectFile)
