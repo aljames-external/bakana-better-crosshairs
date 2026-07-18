@@ -307,7 +307,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @param {Object} [config={}] - Optional placement styling and behavior configuration
      * @returns {void}
      */
-    applyDocumentPlacement(doc, coords = {}, config = {}) {
+    applyDocumentPlacement(doc, coords = {}, config = {}, data = null) {
         const styling = this.extractPlacedStylingFlags(config);
         const docName = doc.documentName ?? (doc.shapes ? "Region" : "MeasuredTemplate");
         if (docName === "Region") {
@@ -342,6 +342,13 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 try {
                     doc.shapes = [newShape];
                 } catch (e) {}
+                if (data && typeof data === "object") {
+                    if (typeof foundry?.utils?.mergeObject === "function") {
+                        foundry.utils.mergeObject(data, updateData);
+                    } else {
+                        Object.assign(data, updateData);
+                    }
+                }
             }
         } else {
             const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);
@@ -389,6 +396,13 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             if (config.hidden || config.hideTemplate) updateData.hidden = true;
 
             doc.updateSource(updateData);
+            if (data && typeof data === "object") {
+                if (typeof foundry?.utils?.mergeObject === "function") {
+                    foundry.utils.mergeObject(data, updateData);
+                } else {
+                    Object.assign(data, updateData);
+                }
+            }
         }
     }
 

@@ -1051,7 +1051,7 @@ export class BaseFoundryVTTAdapter {
         // If the sequencer sequence has resolved with coordinates, update the document
         if (pending.resolved && pending.coords) {
             log.debug(`BaseFoundryVTTAdapter.handlePreCreate | [APPLY] Sequencer placement resolved for "${entry.itemName}". Applying placement onto document:`, pending.coords);
-            this.applyDocumentPlacement(doc, pending.coords, pending.config);
+            this.applyDocumentPlacement(doc, pending.coords, pending.config, _data);
             if (pending.placeable && typeof this.dismissPreview === "function") {
                 this.dismissPreview(pending.placeable);
             }

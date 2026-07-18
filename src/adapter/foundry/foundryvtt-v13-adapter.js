@@ -216,7 +216,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {Object} [config={}] - Workflow placement configuration
      * @returns {void}
      */
-    applyDocumentPlacement(doc, coords = {}, config = {}) {
+    applyDocumentPlacement(doc, coords = {}, config = {}, data = null) {
         const styling = this.extractPlacedStylingFlags(config);
         const updateData = {
             ...coords,
@@ -239,6 +239,13 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
         if (config.hidden || config.hideTemplate) updateData.hidden = true;
 
         doc.updateSource(updateData);
+        if (data && typeof data === "object") {
+            if (typeof foundry?.utils?.mergeObject === "function") {
+                foundry.utils.mergeObject(data, updateData);
+            } else {
+                Object.assign(data, updateData);
+            }
+        }
     }
 
     /**
