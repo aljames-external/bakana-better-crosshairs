@@ -477,6 +477,15 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
 
     const result = crosshairAdapter.formatPlacementCoordinates(x, y, typeof direction === "number" ? direction : 0, config);
 
+    log.debug("resolveCrosshairPlacement | [Square Lifecycle 3/5] After left click location of Sequencer animation shape:", {
+        rawClick: { clickX, clickY },
+        snapped: { x, y },
+        direction,
+        sequencerPosition: crosshair ? { x: crosshair.x, y: crosshair.y, direction: crosshair.direction } : null,
+        formattedResult: result,
+        activeDimensions: globalThis._activeBBCDimensions
+    });
+
     console.log("%cBBC DIAGNOSTIC | resolveCrosshairPlacement Result:", "background: #7b2cbf; color: #fff; padding: 2px 4px; border-radius: 2px;", {
         rawClick: { clickX, clickY },
         snapped: { x, y },

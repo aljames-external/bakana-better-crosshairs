@@ -75,3 +75,59 @@ test('ConeCrosshairShape default anchors and configureCrosshairShape', () => {
     const dimensions = shape.getGraphicDimensions();
     assert.ok(dimensions.widthPx > 0);
 });
+
+test('SquareCrosshairShape V14 region lifecycle and debug logging stages 1..5', async () => {
+    const { FoundryVTTV14Adapter } = await import('../../src/adapter/foundry/foundryvtt-v14-adapter.js');
+    const { SquareCrosshairShape } = await import('../../src/crosshair/square.js');
+    const { resolveCrosshairPlacement } = await import('../../src/crosshair/util.js');
+
+    const adapter = new FoundryVTTV14Adapter();
+
+    // 1. Stage 1: Detect properties from raw V14 Region document containing rectangle shape
+    const mockRegionDoc = {
+        documentName: 'Region',
+        id: 'region-123',
+        shapes: [
+            { type: 'rectangle', x: 0, y: 0, width: 200, height: 200, rotation: 0 }
+        ],
+        toObject() {
+            return { documentName: this.documentName, id: this.id, shapes: this.shapes };
+        }
+    };
+
+    const detected = adapter.detectProperties(mockRegionDoc);
+    assert.equal(detected.type, 'square');
+    assert.equal(detected.width, 10);
+    assert.equal(detected.distance, 10);
+
+    // 2. Stage 2: Instantiate SquareCrosshairShape and configure Sequencer crosshair
+    const mockPlaceable = { x: 100, y: 100, document: mockRegionDoc };
+    const squareShape = new SquareCrosshairShape(mockPlaceable, { type: 'square', distance: 10, width: 10 });
+
+    const mockCrosshairSeq = {
+        dist: 0,
+        w: 0,
+        distance(d) { this.dist = d; return this; },
+        width(w) { this.w = w; return this; }
+    };
+    squareShape.configureCrosshairShape(mockCrosshairSeq);
+    assert.equal(mockCrosshairSeq.dist, 10);
+    assert.equal(mockCrosshairSeq.w, 10);
+
+    // 3. Stage 3: Resolve placement after left-click
+    const clickCoords = resolveCrosshairPlacement(squareShape, { distance: 10, width: 10, originalType: 'square' }, 100, 100);
+    assert.equal(clickCoords.x, 100);
+    assert.equal(clickCoords.y, 100);
+    assert.equal(clickCoords.type, 'square');
+
+    // 4. Stage 4: Modify Region shape for Foundry after left click
+    const origShape = mockRegionDoc.shapes[0];
+    const modifiedRegionShape = adapter._formatRegionShapeUpdate(origShape, clickCoords);
+    assert.equal(modifiedRegionShape.type, 'rectangle');
+    assert.equal(modifiedRegionShape.x, 100);
+    assert.equal(modifiedRegionShape.y, 100);
+
+    // 5. Stage 5: Handle post-creation hook for Region document
+    mockRegionDoc.shapes[0] = modifiedRegionShape;
+    await adapter.handleCreateDocument(mockRegionDoc, {}, 'test-user');
+});

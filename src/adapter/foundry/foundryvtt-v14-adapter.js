@@ -132,11 +132,12 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @returns {{type: string, distance: number, radius: number, width: number, angle: number, x: number, y: number}} Detected geometric properties and shape type
      */
     detectProperties(doc) {
-        log.debug("FoundryVTTV14Adapter.detectProperties | Inspecting raw document:", {
-            documentName: doc.documentName,
+        const shapesList = this._getShapesArray(doc);
+        log.debug("FoundryVTTV14Adapter | [Square Lifecycle 1/5] Original shape from Foundry:", {
+            documentName: doc.documentName ?? (doc.t ? "MeasuredTemplate" : "Region"),
             t: doc.t,
-            shapes: doc.shapes,
-            rawObject: doc.toObject?.() ?? doc
+            shapes: shapesList,
+            rawDocument: typeof doc.toObject === "function" ? doc.toObject() : doc
         });
 
         const docName = doc.documentName ?? (doc.t ? "MeasuredTemplate" : "Region");
@@ -147,12 +148,17 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 ray: "ray",
                 rect: "square"
             };
-            const distance = doc.distance ?? 0;
+            let distance = doc.distance ?? 0;
+            const width = doc.width ?? 5;
+            if (doc.t === "rect" && width > 0 && distance > width) {
+                const isSquareDiagonal = distance <= width * 1.6;
+                distance = isSquareDiagonal ? width : Math.round(Math.sqrt(Math.max(0, distance * distance - width * width)));
+            }
             const result = {
                 type: shapeMap[doc.t] ?? "circle",
                 distance,
                 radius: distance,
-                width: doc.width ?? 5,
+                width,
                 angle: doc.angle ?? 53.13,
                 x: doc.x ?? 0,
                 y: doc.y ?? 0
@@ -161,7 +167,6 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             return result;
         }
 
-        const shapesList = this._getShapesArray(doc);
         if (shapesList.length === 0) {
             const fallbackDistance = doc.distance ?? doc.radius ?? 0;
             return {
@@ -394,6 +399,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      */
     formatPlacementCoordinates(x, y, direction, config = {}) {
         const isSquareOrRect = config.originalType === "square" || config.type === "square" || config.type === "rect" || config.t === "rect" || config.t === "square";
+        const isSticky = Boolean((config.stickToToken ?? config.sticky) && config.token);
         return {
             x,
             y,
@@ -403,7 +409,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             radius: config.radius ?? config.distance,
             width: config.width,
             gridUnits: Boolean(config.gridUnits ?? true),
-            sticky: Boolean(config.token),
+            sticky: isSticky,
             type: isSquareOrRect ? "square" : (config.originalType ?? config.type),
             originalType: config.originalType,
             t: isSquareOrRect ? "rect" : config.t
@@ -447,15 +453,14 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
             if (coords.x !== undefined && coords.y !== undefined) {
                 const wPx = shape.width ?? 200;
-                const hPx = shape.height ?? 200;
                 const rad = ((shape.rotation ?? 0) * Math.PI) / 180;
                 const isSticky = Boolean(coords.sticky ?? coords.token);
                 if (isSticky) {
                     shape.x = Math.round(coords.x + (wPx / 2) * Math.sin(rad));
                     shape.y = Math.round(coords.y - (wPx / 2) * Math.cos(rad));
                 } else {
-                    shape.x = Math.round(coords.x + (wPx / 2) * Math.cos(rad) - (hPx / 2) * Math.sin(rad));
-                    shape.y = Math.round(coords.y + (wPx / 2) * Math.sin(rad) + (hPx / 2) * Math.cos(rad));
+                    shape.x = Math.round(coords.x);
+                    shape.y = Math.round(coords.y);
                 }
             }
         } else if (shape.type === "circle") {
@@ -471,12 +476,12 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 shape.width = isGridUnits ? Math.round(coords.width * pxPerFoot) : coords.width;
             }
         }
-        log.debug("FoundryVTTV14Adapter._formatRegionShapeUpdate | Result:", {
-            shapeType: shape.type,
+        log.debug("FoundryVTTV14Adapter._formatRegionShapeUpdate | [Square Lifecycle 4/5] Region shape modified for Foundry after left click:", {
+            originalShape,
             inputCoords: coords,
             pxPerFoot,
             isGridUnits,
-            outputShape: shape
+            modifiedRegionShape: shape
         });
         return shape;
     }
@@ -569,6 +574,28 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         if (typeof tmpl.highlightGrid === "function") tmpl.highlightGrid();
 
         this.hidePreview(tmpl);
+    }
+
+    /**
+     * Handle document post-creation hook for V14 (createRegion / createMeasuredTemplate).
+     * Logs the actual region/template shape that Foundry ended up making, and delegates to base implementation.
+     * @param {Document} doc - Template or Region document that was created
+     * @param {Object} _options - Document creation options
+     * @param {string} userId - ID of the user creating the document
+     * @returns {Promise<void>} Resolves when post-placement execution completes
+     */
+    async handleCreateDocument(doc, _options, userId) {
+        await super.handleCreateDocument(doc, _options, userId);
+        if (userId === game?.user?.id && doc) {
+            const docName = doc.documentName ?? (doc.shapes ? "Region" : "MeasuredTemplate");
+            const shapesList = this._getShapesArray(doc);
+            log.debug("FoundryVTTV14Adapter.handleCreateDocument | [Square Lifecycle 5/5] Actual region shape Foundry ended up making:", {
+                docId: doc.id,
+                documentName: docName,
+                shapes: shapesList,
+                rawDocument: typeof doc.toObject === "function" ? doc.toObject() : doc
+            });
+        }
     }
 
     _snapPoint(x, y, numMode) {

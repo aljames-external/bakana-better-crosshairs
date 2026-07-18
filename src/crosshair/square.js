@@ -49,6 +49,15 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
         const distance = Math.round(this.config.distance);
         const width = Math.round(this.config.width);
         crosshairSeq.distance(distance).width(width);
+        log.debug("SquareCrosshairShape | [Square Lifecycle 2/5] Sequencer shape we create:", {
+            id: this.id,
+            type: this.type,
+            distance,
+            width,
+            animationAnchor: this.animationAnchor,
+            shapeAnchor: this.shapeAnchor,
+            config: this.config
+        });
     }
 
     /**
