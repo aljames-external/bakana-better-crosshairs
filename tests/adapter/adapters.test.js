@@ -991,3 +991,24 @@ test('REGRESSION: alignCrosshairAndEffects updates visual effect rotation for co
         globalThis.Sequencer = origSequencer;
     }
 });
+
+test('REGRESSION: getPlacementUpdates prioritizes sequencerCrosshair visual container coordinates over fallback shape coordinates', () => {
+    const mockDocument = { direction: 0, updateSource: () => {} };
+    const mockPlaceable = { document: mockDocument, direction: 0, x: 10, y: 20 };
+    const config = {
+        type: 'circle',
+        stickToToken: true,
+        token: { center: { x: 100, y: 100 } }
+    };
+
+    const shape = new BaseCrosshairShape(mockPlaceable, config);
+    shape.x = 10;
+    shape.y = 20;
+
+    // Attach sequencerCrosshair object with actual visual animation coordinates on canvas (e.g. 150, 100)
+    shape.sequencerCrosshair = { x: 150, y: 100 };
+
+    const updates = shape.getPlacementUpdates();
+    assert.equal(updates.x, 150, 'placement X must match sequencerCrosshair visual position (150) where animation appeared');
+    assert.equal(updates.y, 100, 'placement Y must match sequencerCrosshair visual position (100) where animation appeared');
+});

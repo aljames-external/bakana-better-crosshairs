@@ -485,6 +485,12 @@ export class BaseCrosshairShape {
      * Return updates for placement document.
      */
     getPlacementUpdates() {
-        return crosshairAdapter.formatPlacementCoordinates(this.x, this.y, this.direction, this.config);
+        let posX = this.x;
+        let posY = this.y;
+        if (this.sequencerCrosshair && typeof this.sequencerCrosshair.x === "number" && !isNaN(this.sequencerCrosshair.x) && typeof this.sequencerCrosshair.y === "number" && !isNaN(this.sequencerCrosshair.y)) {
+            posX = this.sequencerCrosshair.x;
+            posY = this.sequencerCrosshair.y;
+        }
+        return crosshairAdapter.formatPlacementCoordinates(posX, posY, this.direction, this.config);
     }
 }
