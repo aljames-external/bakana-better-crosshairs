@@ -1048,7 +1048,7 @@ export class BaseFoundryVTTAdapter {
             return false;
         }
 
-        // If the sequencer sequence has resolved with coordinates, update the document
+        // If placement sequence has resolved with coordinates, apply placement onto document payload
         if (pending.resolved && pending.coords) {
             log.debug(`BaseFoundryVTTAdapter.handlePreCreate | [APPLY] Sequencer placement resolved for "${entry.itemName}". Applying placement onto document:`, pending.coords);
             this.applyDocumentPlacement(doc, pending.coords, pending.config, _data);

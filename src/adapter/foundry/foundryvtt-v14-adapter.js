@@ -339,7 +339,9 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 if (config.hidden || config.hideTemplate) updateData.hidden = true;
 
                 log.debug("FoundryVTTV14Adapter.applyDocumentPlacement | Applying Region updateSource:", updateData);
-                doc.updateSource(updateData);
+                if (typeof doc?.updateSource === "function") {
+                    doc.updateSource(updateData);
+                }
                 try {
                     doc.shapes = [newShape];
                 } catch (e) {}
