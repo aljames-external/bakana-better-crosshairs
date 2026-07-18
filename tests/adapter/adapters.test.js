@@ -5,7 +5,8 @@ import { closest } from '../../src/lib/filemanager.js';
 import { initializeFoundryAdapter, crosshairAdapter, BaseFoundryVTTAdapter } from '../../src/adapter/foundry/index.js';
 import { initializeSystemAdapter, systemAdapter } from '../../src/adapter/system/index.js';
 import { registerPlacementHooks, initializeHooks } from '../../src/adapter/index.js';
-import { snapCoordinates, attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement } from '../../src/crosshair/util.js';
+import { snapCoordinates, attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement, alignCrosshairAndEffects } from '../../src/crosshair/util.js';
+import { BaseCrosshairShape } from '../../src/crosshair/base.js';
 import { Token } from '../../src/lib/compat.js';
 import { autorecManager } from '../../src/autorec/autorecManager.js';
 import { FoundryVTTV13Adapter } from '../../src/adapter/foundry/foundryvtt-v13-adapter.js';
@@ -745,4 +746,94 @@ test('createDeferredDocument delegates document creation appropriately in V13 Me
     assert.equal(createdDocPayload.shapes[0].y, 400);
     assert.equal(createdDocPayload.shapes[0].radius, 25);
     assert.equal(createdDocPayload._id, undefined);
+});
+
+test('REGRESSION: BaseCrosshairShape.rotate() does not throw ReferenceError and sets sequencerCrosshair direction properties to 0 in attached mode', () => {
+    const mockDocument = {
+        direction: 0,
+        updateSource: () => {}
+    };
+    const mockPlaceable = {
+        document: mockDocument,
+        direction: 0
+    };
+    const mockToken = {
+        center: { x: 100, y: 100 }
+    };
+    const config = {
+        stickToToken: true,
+        token: mockToken,
+        id: "test-effect"
+    };
+
+    const shape = new BaseCrosshairShape(mockPlaceable, config);
+    const mockSequencerCrosshair = {
+        direction: 180,
+        rotation: Math.PI,
+        config: { direction: 180, rotation: Math.PI },
+        data: { direction: 180, rotation: Math.PI }
+    };
+    shape.sequencerCrosshair = mockSequencerCrosshair;
+
+    // Trigger rotate which should not throw ReferenceError and should set sequencer properties to 0 because stickToToken is true
+    shape.rotate(180);
+
+    assert.equal(shape.direction, 180);
+    assert.equal(mockSequencerCrosshair.direction, 0);
+    assert.equal(mockSequencerCrosshair.rotation, 0);
+    assert.equal(mockSequencerCrosshair.config.direction, 0);
+    assert.equal(mockSequencerCrosshair.config.rotation, 0);
+    assert.equal(mockSequencerCrosshair.data.direction, 0);
+    assert.equal(mockSequencerCrosshair.data.rotation, 0);
+});
+
+test('REGRESSION: alignCrosshairAndEffects resolves token attachment and keeps directions at 0', () => {
+    const mockToken = { center: { x: 100, y: 100 } };
+    const config = {
+        id: "test-effect",
+        stickToToken: true,
+        token: mockToken,
+        currentDirection: 180
+    };
+    const mockSequencerCrosshair = {
+        direction: 180,
+        rotation: Math.PI,
+        config: { direction: 180, rotation: Math.PI },
+        data: { direction: 180, rotation: Math.PI }
+    };
+
+    alignCrosshairAndEffects(mockSequencerCrosshair, config, Math.PI);
+
+    assert.equal(mockSequencerCrosshair.direction, 0);
+    assert.equal(mockSequencerCrosshair.rotation, 0);
+    assert.equal(mockSequencerCrosshair.config.direction, 0);
+    assert.equal(mockSequencerCrosshair.config.rotation, 0);
+    assert.equal(mockSequencerCrosshair.data.direction, 0);
+    assert.equal(mockSequencerCrosshair.data.rotation, 0);
+});
+
+test('REGRESSION: FoundryVTTV14Adapter.refreshTemplateHighlights does not overwrite tmpl.ray', () => {
+    const adapter = new FoundryVTTV14Adapter();
+    const mockRay = {
+        origin: { x: 50, y: 50 },
+        distance: 100
+    };
+    const mockDoc = {
+        documentName: "MeasuredTemplate",
+        direction: 0,
+        updateSource: () => {}
+    };
+    const mockTmpl = {
+        document: mockDoc,
+        direction: 0,
+        ray: mockRay,
+        x: 50,
+        y: 50,
+        renderFlags: { set: () => {} }
+    };
+
+    adapter.refreshTemplateHighlights(mockTmpl, 90);
+
+    // Assert that mockRay reference remains unchanged (not overwritten by new Ray)
+    assert.strictEqual(mockTmpl.ray, mockRay);
 });
