@@ -183,6 +183,10 @@ export class BaseCrosshairShape {
 
         const { widthPx, heightPx, factor, gridUnits } = this.getGraphicDimensions();
         const effectFile = this.getGraphicFile();
+        if (!effectFile) {
+            log.debug(`BaseCrosshairShape.playGraphicEffect | No valid graphic file for "${this.id}". Skipping effect.`);
+            return seq.play();
+        }
 
         log.debug(`BaseCrosshairShape.playGraphicEffect | Sizing graphic for "${this.id}":`, {
             widthPx,

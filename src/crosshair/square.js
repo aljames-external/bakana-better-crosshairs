@@ -87,9 +87,11 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * @returns {string} Resolved file path or key
      */
     getGraphicFile() {
-        if (this.config.squareFile) return closest(this.config.squareFile);
-        if (this.config.file) return closest(this.config.file);
-        return closest("eskie.crosshair.square.thin.white.full");
+        let file = null;
+        if (this.config.squareFile) file = closest(this.config.squareFile);
+        if (!file && this.config.file) file = closest(this.config.file);
+        if (!file) file = closest("eskie.crosshair.square.thin.white.full");
+        return file ?? "eskie.crosshair.square.thin.white.full";
     }
 
     /**

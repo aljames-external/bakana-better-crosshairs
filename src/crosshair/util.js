@@ -136,9 +136,9 @@ function rotateCrosshairInstance(crosshair, newDirDeg, config = {}) {
     if (!isAttached) {
         crosshair.direction = newDirDeg;
         if (!isRect) {
-            crosshair.rotation = rad;
+            try { crosshair.rotation = rad; } catch (e) {}
         } else {
-            crosshair.rotation = 0;
+            try { crosshair.rotation = 0; } catch (e) {}
         }
         if (crosshair.config) {
             crosshair.config.direction = newDirDeg;
@@ -150,7 +150,7 @@ function rotateCrosshairInstance(crosshair, newDirDeg, config = {}) {
         }
     } else {
         crosshair.direction = 0;
-        crosshair.rotation = 0;
+        try { crosshair.rotation = 0; } catch (e) {}
         if (crosshair.config) {
             crosshair.config.direction = 0;
             crosshair.config.rotation = 0;

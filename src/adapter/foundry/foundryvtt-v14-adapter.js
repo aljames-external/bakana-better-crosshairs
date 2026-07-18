@@ -439,8 +439,13 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
         if (shape.type === "rectangle") {
             let distFoot = coords.distance ?? coords.radius ?? coords.width;
-            const widthFoot = coords.width ?? coords.distance ?? coords.radius;
-            if (widthFoot > 0 && distFoot > widthFoot) {
+            let widthFoot = coords.width ?? coords.distance ?? coords.radius;
+            const isSquare = coords.type === "square" || coords.originalType === "square" || coords.t === "rect" || (distFoot > 0 && distFoot === widthFoot);
+            if (isSquare) {
+                const sideLength = widthFoot ?? distFoot ?? 20;
+                distFoot = sideLength;
+                widthFoot = sideLength;
+            } else if (widthFoot > 0 && distFoot > widthFoot) {
                 const isSquareDiagonal = distFoot <= widthFoot * 1.6;
                 distFoot = isSquareDiagonal ? widthFoot : Math.round(Math.sqrt(Math.max(0, distFoot * distFoot - widthFoot * widthFoot)));
             }
