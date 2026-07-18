@@ -1,6 +1,6 @@
 import { systemAdapter } from "../system/index.js";
 import { log } from "../../lib/logger.js";
-import { Token } from "../../lib/compat.js";
+import { Token, Ray } from "../../lib/compat.js";
 import { MODULE_ID } from "../../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY, autorecManager } from "../../autorec/autorecManager.js";
 import { CrosshairConfiguration } from "../../autorec/CrosshairConfiguration.js";
@@ -716,9 +716,8 @@ export class BaseFoundryVTTAdapter {
         }
 
         if (!intersection) {
-            const RayClass = foundry?.canvas?.geometry?.Ray ?? globalThis.Ray;
-            if (RayClass) {
-                const ray = new RayClass(centerPoint, targetMouse);
+            if (Ray) {
+                const ray = new Ray(centerPoint, targetMouse);
                 if (typeof ray.intersectSegment === "function") {
                     for (let i = 0; i < points.length; i += 2) {
                         const p1 = { x: points[i], y: points[i + 1] };

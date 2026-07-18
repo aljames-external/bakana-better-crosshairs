@@ -10,9 +10,8 @@ export const Token = foundry.canvas.placeables.Token;
 
 /**
  * Reference to the Foundry VTT Ray geometry class.
- * @type {typeof foundry.canvas.geometry.Ray}
  */
-export const Ray = foundry.canvas.geometry.Ray;
+export const Ray = globalThis.foundry?.canvas?.geometry?.Ray ?? globalThis.Ray;
 
 /**
  * Clears the specified grid highlight layer.

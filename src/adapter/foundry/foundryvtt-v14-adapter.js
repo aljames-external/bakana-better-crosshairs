@@ -2,6 +2,7 @@ import { BaseFoundryVTTAdapter } from "./base-foundryvtt-adapter.js";
 import { systemAdapter } from "../system/index.js";
 import { log } from "../../lib/logger.js";
 import { localize } from "../../lib/utils.js";
+import { Ray } from "../../lib/compat.js";
 
 /**
  * Adapter subclass encapsulating Foundry VTT v14+ Region placement behavior.
@@ -553,10 +554,10 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         tmpl._shape = null;
         if (tmpl.shape?.clear) tmpl.shape.clear();
 
-        if (tmpl.ray && globalThis.Ray) {
+        if (tmpl.ray && Ray) {
             const ox = tmpl.ray.origin?.x ?? tmpl.x;
             const oy = tmpl.ray.origin?.y ?? tmpl.y;
-            tmpl.ray = globalThis.Ray.fromAngle(ox, oy, rad, tmpl.ray.distance ?? 1000);
+            tmpl.ray = Ray.fromAngle(ox, oy, rad, tmpl.ray.distance ?? 1000);
         }
 
         if (tmpl.renderFlags) {
