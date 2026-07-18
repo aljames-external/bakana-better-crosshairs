@@ -926,6 +926,7 @@ export class BaseFoundryVTTAdapter {
                 icon: doc.item?.img ?? doc.flags?.['midi-qol']?.itemImg,
                 item,
                 actor,
+                token,
                 scope: { item, actor, token, doc }
             };
 
