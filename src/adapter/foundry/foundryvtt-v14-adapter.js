@@ -322,7 +322,8 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                     sticky: Boolean(config.token ?? coords.token ?? coords.sticky)
                 };
                 const newShape = this._formatRegionShapeUpdate(originalShape, shapeCoords);
-                delete newShape._id;
+                if (originalShape._id) newShape._id = originalShape._id;
+                else if (originalShape.id) newShape.id = originalShape.id;
                 updateData.shapes = [newShape];
 
                 const targetColor = styling.placedFillColor ?? styling.placedBorderColor;
