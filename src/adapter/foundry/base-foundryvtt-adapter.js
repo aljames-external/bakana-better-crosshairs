@@ -599,6 +599,17 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
+     * Snap canvas coordinates to the grid using version-appropriate grid API.
+     * @param {number} x - Raw x coordinate
+     * @param {number} y - Raw y coordinate
+     * @param {string|number|boolean} mode - Snapping mode config/bitmask
+     * @returns {{x: number, y: number}} Snapped x and y coordinates
+     */
+    snapCoordinates(x, y, mode) {
+        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement snapCoordinates(x, y, mode).");
+    }
+
+    /**
      * Resolve placement anchor coordinates {x, y, direction} on a token's edge toward a click coordinate.
      * Takes only a normalized Token object and {x, y} click coordinates.
      * Implements 1-to-1 the exact algorithm from Sequencer 4.2.2 (#handleLockedEdge in CrosshairsPlaceable.js).

@@ -472,58 +472,7 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
  * @returns {object} Snapped coordinates `{ x, y }`
  */
 export function snapCoordinates(x, y, mode = "all") {
-    if (!canvas?.grid || mode === false || mode === "none" || mode === 0 || mode === "0") return { x, y };
-
-    const size = canvas.grid.size ?? 100;
-
-    if (mode !== "center" && mode !== "corner" && mode !== "corners") {
-        const numMode = typeof mode === "number" ? mode : getGridSnapMode({ snapToGrid: mode });
-        if (numMode !== 0) {
-            if (typeof canvas.grid.getSnappedPoint === "function") {
-                const snapped = canvas.grid.getSnappedPoint({ x, y }, { mode: numMode });
-                return { x: snapped.x, y: snapped.y };
-            }
-            if (typeof canvas.grid.getSnappedPosition === "function") {
-                const snapped = canvas.grid.getSnappedPosition(x, y, numMode);
-                return { x: snapped.x, y: snapped.y };
-            }
-        }
-    }
-
-    if (mode === "center" || mode === 1) {
-        if (typeof canvas.grid.getCenterPoint === "function") {
-            const pt = canvas.grid.getCenterPoint({ x, y });
-            return { x: pt.x, y: pt.y };
-        }
-        if (typeof canvas.grid.getCenter === "function") {
-            const [cx, cy] = canvas.grid.getCenter(x, y);
-            return { x: cx, y: cy };
-        }
-    }
-
-    if (mode === "corner" || mode === "corners" || mode === 2) {
-        const sx = Math.round(x / size) * size;
-        const sy = Math.round(y / size) * size;
-        return { x: sx, y: sy };
-    }
-
-    if (mode === "all" || mode === true || mode === "default" || mode === "edges" || mode === "edge" || typeof mode === "number") {
-        if (typeof canvas.grid.getSnappedPoint === "function") {
-            const snapped = canvas.grid.getSnappedPoint({ x, y }, { mode: 1 });
-            return { x: snapped.x, y: snapped.y };
-        }
-        if (typeof canvas.grid.getSnappedPosition === "function") {
-            const snapped = canvas.grid.getSnappedPosition(x, y, 1);
-            return { x: snapped.x, y: snapped.y };
-        }
-        // Snaps to nearest of: center, corners, or edges (half-grid interval size / 2)
-        const half = size / 2;
-        const sx = Math.round(x / half) * half;
-        const sy = Math.round(y / half) * half;
-        return { x: sx, y: sy };
-    }
-
-    return { x, y };
+    return crosshairAdapter.snapCoordinates(x, y, mode);
 }
 
 /**

@@ -318,4 +318,76 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
 
         this.hidePreview(tmpl);
     }
+
+    /**
+     * Snap canvas coordinates to the grid using V13 appropriate grid API.
+     * @param {number} x - Raw x coordinate
+     * @param {number} y - Raw y coordinate
+     * @param {string|number|boolean} mode - Snapping mode config/bitmask
+     * @returns {{x: number, y: number}} Snapped x and y coordinates
+     */
+    snapCoordinates(x, y, mode = "all") {
+        if (!canvas?.grid || mode === false || mode === "none" || mode === 0 || mode === "0") return { x, y };
+
+        const size = canvas.grid.size ?? 100;
+
+        if (mode !== "center" && mode !== "corner" && mode !== "corners") {
+            const numMode = typeof mode === "number" ? mode : this._getGridSnapMode(mode);
+            if (numMode !== 0) {
+                if (typeof canvas.grid.getSnappedPoint === "function") {
+                    const snapped = canvas.grid.getSnappedPoint({ x, y }, { mode: numMode });
+                    return { x: snapped.x, y: snapped.y };
+                }
+                if (typeof canvas.grid.getSnappedPosition === "function") {
+                    const snapped = canvas.grid.getSnappedPosition(x, y, numMode);
+                    return { x: snapped.x, y: snapped.y };
+                }
+            }
+        }
+
+        if (mode === "center" || mode === 1) {
+            if (typeof canvas.grid.getCenterPoint === "function") {
+                const pt = canvas.grid.getCenterPoint({ x, y });
+                return { x: pt.x, y: pt.y };
+            }
+            if (typeof canvas.grid.getCenter === "function") {
+                const [cx, cy] = canvas.grid.getCenter(x, y);
+                return { x: cx, y: cy };
+            }
+        }
+
+        if (mode === "corner" || mode === "corners" || mode === 2) {
+            const sx = Math.round(x / size) * size;
+            const sy = Math.round(y / size) * size;
+            return { x: sx, y: sy };
+        }
+
+        if (mode === "all" || mode === true || mode === "default" || mode === "edges" || mode === "edge" || typeof mode === "number") {
+            if (typeof canvas.grid.getSnappedPoint === "function") {
+                const snapped = canvas.grid.getSnappedPoint({ x, y }, { mode: 1 });
+                return { x: snapped.x, y: snapped.y };
+            }
+            if (typeof canvas.grid.getSnappedPosition === "function") {
+                const snapped = canvas.grid.getSnappedPosition(x, y, 1);
+                return { x: snapped.x, y: snapped.y };
+            }
+            const half = size / 2;
+            const sx = Math.round(x / half) * half;
+            const sy = Math.round(y / half) * half;
+            return { x: sx, y: sy };
+        }
+
+        return { x, y };
+    }
+
+    _getGridSnapMode(snapToGrid) {
+        if (snapToGrid === false || snapToGrid === "none" || snapToGrid === 0 || snapToGrid === "0") return 0;
+        if (typeof snapToGrid === "number") return snapToGrid;
+        if (snapToGrid === "center") return globalThis.CONST?.GRID_SNAPPING_MODES?.CENTER ?? 1;
+        if (snapToGrid === "corner" || snapToGrid === "vertex" || snapToGrid === "corners") return globalThis.CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2;
+        if (snapToGrid === "side" || snapToGrid === "edge" || snapToGrid === "edges") return globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE_MIDPOINT ?? globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE ?? 4;
+        return (globalThis.CONST?.GRID_SNAPPING_MODES?.CENTER ?? 1) |
+               (globalThis.CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2) |
+               (globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE_MIDPOINT ?? globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE ?? 4);
+    }
 }
