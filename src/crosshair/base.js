@@ -296,7 +296,7 @@ export class BaseCrosshairShape {
      */
     async onPlacedCallback(crosshair, ...extraArgs) {
         Sequencer.EffectManager.endEffects({ name: this.id });
-        resolveCrosshairPlacement(crosshair, this.config, ...extraArgs);
+        resolveCrosshairPlacement(this, this.config, ...extraArgs);
     }
 
     /**

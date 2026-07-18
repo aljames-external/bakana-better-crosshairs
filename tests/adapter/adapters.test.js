@@ -929,3 +929,30 @@ test('REGRESSION: BaseCrosshairShape.onCancelCallback() unconditionally detaches
         }
     }
 });
+
+test('REGRESSION: resolveCrosshairPlacement resolves exact shape instance coordinates (edge/snapped) rather than raw click coordinates', () => {
+    let resolvedPlacement = null;
+    const mockDocument = { direction: 0, updateSource: () => {} };
+    const mockPlaceable = { document: mockDocument, direction: 0, x: 10, y: 20 };
+    const config = {
+        type: 'cone',
+        stickToToken: true,
+        token: { center: { x: 100, y: 100 } },
+        context: { resolve: (res) => { resolvedPlacement = res; } }
+    };
+
+    const shape = new BaseCrosshairShape(mockPlaceable, config);
+    // Move shape to token edge (e.g. 150, 100)
+    shape.x = 150;
+    shape.y = 100;
+    shape.direction = 180;
+
+    // Simulate clicking at raw mouse click position (300, 300) which is far from shape edge position
+    const rawClickCoord = { x: 300, y: 300 };
+    shape.onPlacedCallback(rawClickCoord);
+
+    assert.ok(resolvedPlacement, 'placement should be resolved');
+    assert.equal(resolvedPlacement.x, 150, 'placement X should be shape.x (150) where sequencer visual indicated, not clickX (300)');
+    assert.equal(resolvedPlacement.y, 100, 'placement Y should be shape.y (100) where sequencer visual indicated, not clickY (300)');
+    assert.equal(resolvedPlacement.direction, 180);
+});

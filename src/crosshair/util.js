@@ -396,7 +396,7 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     detachWheelRotation();
     log.debug("resolveCrosshairPlacement | Inspecting arguments passed to PLACED callback:", crosshair, config, extraArgs);
 
-    const shape = crosshair?.shapeInstance;
+    const shape = (crosshair && typeof crosshair.getPlacementUpdates === "function") ? crosshair : (crosshair?.shapeInstance);
     if (shape && typeof shape.getPlacementUpdates === "function") {
         const result = shape.getPlacementUpdates();
         console.log("%cBBC DIAGNOSTIC | resolveCrosshairPlacement Result (ShapeInstance):", "background: #7b2cbf; color: #fff; padding: 2px 4px; border-radius: 2px;", {
