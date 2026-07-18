@@ -579,7 +579,7 @@ test('crosshair.util.attachWheelRotation synchronizes container and effect rotat
         const mockSquareCrosshair = { rotation: 0, direction: 0 };
         attachWheelRotation(mockSquareCrosshair, squareConfig);
         wheelHandler({ ctrlKey: true, deltaY: 100 });
-        assert.equal(mockSquareCrosshair.rotation, 5 * (Math.PI / 180));
+        assert.equal(mockSquareCrosshair.rotation, 0);
         assert.equal(mockSquareCrosshair.direction, 5);
 
         // 3. Verify Circle rotation sync

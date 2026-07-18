@@ -124,13 +124,14 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
  * @param {number} newDirDeg - New direction angle in degrees
  * @returns {void}
  */
-function rotateCrosshairInstance(crosshair, newDirDeg) {
+function rotateCrosshairInstance(crosshair, newDirDeg, config = {}) {
     if (!crosshair) return;
     const rad = newDirDeg * (Math.PI / 180);
 
-    const shapeType = crosshair.type ?? crosshair.config?.type ?? crosshair.data?.type ?? "circle";
+    const mergedConfig = { ...crosshair.config, ...config };
+    const shapeType = mergedConfig.type ?? mergedConfig.t ?? crosshair.type ?? "circle";
     const isRect = shapeType === "rect" || shapeType === "square";
-    const isAttached = shouldStickToToken(crosshair.config ?? {}, shapeType) && Boolean(crosshair.config?.token ?? crosshair.token);
+    const isAttached = shouldStickToToken(mergedConfig, shapeType) && Boolean(mergedConfig.token);
 
     if (!isAttached) {
         crosshair.direction = newDirDeg;
@@ -187,11 +188,11 @@ function rotateCrosshairInstance(crosshair, newDirDeg) {
  * @returns {void}
  */
 export function detachWheelRotation() {
-    if (activeWheelHandler) {
+    if (activeWheelHandler && typeof window?.removeEventListener === "function") {
         window.removeEventListener("wheel", activeWheelHandler, { capture: true });
         activeWheelHandler = null;
     }
-    if (activePointerHandler) {
+    if (activePointerHandler && typeof window?.removeEventListener === "function") {
         window.removeEventListener("pointermove", activePointerHandler, { capture: true });
         activePointerHandler = null;
     }
@@ -328,7 +329,7 @@ export function attachWheelRotation(shape, config = {}) {
  * @returns {void}
  */
 export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
-    rotateCrosshairInstance(crosshair, config.currentDirection ?? config.direction ?? 0);
+    rotateCrosshairInstance(crosshair, config.currentDirection ?? config.direction ?? 0, config);
 
     const shapeType = config.type ?? config.t ?? crosshair?.type ?? "circle";
     const isRect = shapeType === "rect" || shapeType === "square";
