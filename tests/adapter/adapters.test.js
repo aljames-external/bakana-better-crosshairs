@@ -956,3 +956,38 @@ test('REGRESSION: resolveCrosshairPlacement resolves exact shape instance coordi
     assert.equal(resolvedPlacement.y, 100, 'placement Y should be shape.y (100) where sequencer visual indicated, not clickY (300)');
     assert.equal(resolvedPlacement.direction, 180);
 });
+
+test('REGRESSION: alignCrosshairAndEffects updates visual effect rotation for cones and rays in detached mode', () => {
+    let mockEffectRotation = null;
+    let mockContainerRotation = null;
+    const mockEffect = {
+        container: { rotation: 0 },
+        rotation: 0,
+        update: ({ rotation }) => { mockEffectRotation = rotation; }
+    };
+
+    const origSequencer = globalThis.Sequencer;
+    try {
+        globalThis.Sequencer = {
+            EffectManager: {
+                getEffects: () => [mockEffect]
+            }
+        };
+
+        const config = {
+            id: "test-cone",
+            type: "cone",
+            stickToToken: false,
+            currentDirection: 45
+        };
+
+        alignCrosshairAndEffects({}, config, 45 * (Math.PI / 180));
+
+        const expectedRad = 45 * (Math.PI / 180);
+        assert.equal(mockEffect.container.rotation, expectedRad);
+        assert.equal(mockEffect.rotation, expectedRad);
+        assert.equal(mockEffectRotation, expectedRad);
+    } finally {
+        globalThis.Sequencer = origSequencer;
+    }
+});
