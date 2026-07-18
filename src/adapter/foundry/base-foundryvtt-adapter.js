@@ -595,18 +595,89 @@ export class BaseFoundryVTTAdapter {
      * @returns {Promise<void>} Resolves when deferred document creation completes
      */
     async createDeferredDocument(scene, deferredData, coords, documentName) {
-        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement createDeferredDocument(scene, deferredData, coords, documentName).");
+        if (!scene || !deferredData || !coords) return;
+        const data = foundry.utils.deepClone(deferredData);
+        delete data._id;
+
+        const docName = this._getDeferredDocumentName(data, documentName);
+        await this._applyDeferredCoordinates(data, coords, docName);
+
+        log.debug(`Adapter.createDeferredDocument | Deferred ${docName} payload:`, {
+            docName,
+            resolvedCoords: coords,
+            deferredCreatePayload: data
+        });
+
+        try {
+            await scene.createEmbeddedDocuments(docName, [data]);
+        } catch (err) {
+            log.error(`Adapter.createDeferredDocument | Failed to create deferred ${docName} document:`, err);
+        }
     }
 
-    /**
-     * Snap canvas coordinates to the grid using version-appropriate grid API.
-     * @param {number} x - Raw x coordinate
-     * @param {number} y - Raw y coordinate
-     * @param {string|number|boolean} mode - Snapping mode config/bitmask
-     * @returns {{x: number, y: number}} Snapped x and y coordinates
-     */
-    snapCoordinates(x, y, mode) {
-        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement snapCoordinates(x, y, mode).");
+    _getDeferredDocumentName(data, documentName) {
+        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement _getDeferredDocumentName(data, documentName).");
+    }
+
+    _applyDeferredCoordinates(data, coords, docName) {
+        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement _applyDeferredCoordinates(data, coords, docName).");
+    }
+
+    snapCoordinates(x, y, mode = "all") {
+        if (!canvas?.grid || mode === false || mode === "none" || mode === 0 || mode === "0") return { x, y };
+
+        const size = canvas.grid.size ?? 100;
+
+        if (mode !== "center" && mode !== "corner" && mode !== "corners") {
+            const numMode = typeof mode === "number" ? mode : this._getGridSnapMode(mode);
+            if (numMode !== 0) {
+                const snapped = this._snapPoint(x, y, numMode);
+                if (snapped) return snapped;
+            }
+        }
+
+        if (mode === "center" || mode === 1) {
+            const center = this._getGridCenterPoint(x, y);
+            if (center) return center;
+        }
+
+        if (mode === "corner" || mode === "corners" || mode === 2) {
+            const sx = Math.round(x / size) * size;
+            const sy = Math.round(y / size) * size;
+            return { x: sx, y: sy };
+        }
+
+        if (mode === "all" || mode === true || mode === "default" || mode === "edges" || mode === "edge" || typeof mode === "number") {
+            const snapped = this._snapPoint(x, y, 1);
+            if (snapped) return snapped;
+
+            // Fallback: manual half-grid snap
+            const half = size / 2;
+            const sx = Math.round(x / half) * half;
+            const sy = Math.round(y / half) * half;
+            return { x: sx, y: sy };
+        }
+
+        return { x, y };
+    }
+
+    _getGridSnapMode(snapToGrid) {
+        if (snapToGrid === false || snapToGrid === "none" || snapToGrid === 0 || snapToGrid === "0") return 0;
+        if (typeof snapToGrid === "number") return snapToGrid;
+        if (snapToGrid === "center") return globalThis.CONST?.GRID_SNAPPING_MODES?.CENTER ?? 1;
+        if (snapToGrid === "corner" || snapToGrid === "vertex" || snapToGrid === "corners") return globalThis.CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2;
+        if (snapToGrid === "side" || snapToGrid === "edge" || snapToGrid === "edges") return globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE_MIDPOINT ?? globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE ?? 4;
+        return (globalThis.CONST?.GRID_SNAPPING_MODES?.CENTER ?? 1) |
+               (globalThis.CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2) |
+               (globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE_MIDPOINT ?? globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE ?? 4);
+    }
+
+    _snapPoint(x, y, numMode) {
+        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement _snapPoint(x, y, numMode).");
+    }
+
+    _getGridCenterPoint(x, y) {
+        throw new Error("Subclasses of BaseFoundryVTTAdapter must implement _getGridCenterPoint(x, y).");
     }
 
     /**

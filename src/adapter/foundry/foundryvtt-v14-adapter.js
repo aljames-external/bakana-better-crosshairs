@@ -487,18 +487,19 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @param {Object} coords - Resolved placement coordinates from Sequencer
      * @returns {Promise<void>} Resolves when deferred document creation completes
      */
-    async createDeferredDocument(scene, deferredData, coords, documentName) {
-        if (!scene || !deferredData || !coords) return;
-        const data = foundry.utils.deepClone(deferredData);
-        delete data._id;
+    _getDeferredDocumentName(data, documentName) {
+        return documentName ?? (data.shapes ? "Region" : "MeasuredTemplate");
+    }
 
-        const docName = documentName ?? (data.shapes ? "Region" : "MeasuredTemplate");
-        const shapesList = data.shapes?.contents ?? (Array.isArray(data.shapes) ? data.shapes : []);
-        if (shapesList.length > 0) {
-            const origShape = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
-            const newShape = this._formatRegionShapeUpdate(origShape, coords);
-            delete newShape._id;
-            data.shapes = [newShape];
+    _applyDeferredCoordinates(data, coords, docName) {
+        if (docName === "Region") {
+            const shapesList = data.shapes?.contents ?? (Array.isArray(data.shapes) ? data.shapes : []);
+            if (shapesList.length > 0) {
+                const origShape = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
+                const newShape = this._formatRegionShapeUpdate(origShape, coords);
+                delete newShape._id;
+                data.shapes = [newShape];
+            }
         } else {
             if (coords.x !== undefined) data.x = coords.x;
             if (coords.y !== undefined) data.y = coords.y;
@@ -506,18 +507,6 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             else if (coords.rotation !== undefined) data.direction = coords.rotation;
             if (coords.distance !== undefined) data.distance = coords.distance;
             else if (coords.radius !== undefined) data.distance = coords.radius;
-        }
-
-        log.debug(`FoundryVTTV14Adapter.createDeferredDocument | Deferred ${docName} payload:`, {
-            docName,
-            resolvedCoords: coords,
-            deferredCreatePayload: data
-        });
-
-        try {
-            await scene.createEmbeddedDocuments(docName, [data]);
-        } catch (err) {
-            log.error(`FoundryVTTV14Adapter.createDeferredDocument | Failed to create deferred ${docName} document:`, err);
         }
     }
 
@@ -586,53 +575,13 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         this.hidePreview(tmpl);
     }
 
-    /**
-     * Snap canvas coordinates to the grid using V14 appropriate grid API.
-     * @param {number} x - Raw x coordinate
-     * @param {number} y - Raw y coordinate
-     * @param {string|number|boolean} mode - Snapping mode config/bitmask
-     * @returns {{x: number, y: number}} Snapped x and y coordinates
-     */
-    snapCoordinates(x, y, mode = "all") {
-        if (!canvas?.grid || mode === false || mode === "none" || mode === 0 || mode === "0") return { x, y };
-
-        const size = canvas.grid.size ?? 100;
-
-        if (mode !== "center" && mode !== "corner" && mode !== "corners") {
-            const numMode = typeof mode === "number" ? mode : this._getGridSnapMode(mode);
-            if (numMode !== 0) {
-                const snapped = canvas.grid.getSnappedPoint({ x, y }, { mode: numMode });
-                return { x: snapped.x, y: snapped.y };
-            }
-        }
-
-        if (mode === "center" || mode === 1) {
-            const pt = canvas.grid.getCenterPoint({ x, y });
-            return { x: pt.x, y: pt.y };
-        }
-
-        if (mode === "corner" || mode === "corners" || mode === 2) {
-            const sx = Math.round(x / size) * size;
-            const sy = Math.round(y / size) * size;
-            return { x: sx, y: sy };
-        }
-
-        if (mode === "all" || mode === true || mode === "default" || mode === "edges" || mode === "edge" || typeof mode === "number") {
-            const snapped = canvas.grid.getSnappedPoint({ x, y }, { mode: 1 });
-            return { x: snapped.x, y: snapped.y };
-        }
-
-        return { x, y };
+    _snapPoint(x, y, numMode) {
+        const snapped = canvas.grid.getSnappedPoint({ x, y }, { mode: numMode });
+        return { x: snapped.x, y: snapped.y };
     }
 
-    _getGridSnapMode(snapToGrid) {
-        if (snapToGrid === false || snapToGrid === "none" || snapToGrid === 0 || snapToGrid === "0") return 0;
-        if (typeof snapToGrid === "number") return snapToGrid;
-        if (snapToGrid === "center") return globalThis.CONST?.GRID_SNAPPING_MODES?.CENTER ?? 1;
-        if (snapToGrid === "corner" || snapToGrid === "vertex" || snapToGrid === "corners") return globalThis.CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2;
-        if (snapToGrid === "side" || snapToGrid === "edge" || snapToGrid === "edges") return globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE_MIDPOINT ?? globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE ?? 4;
-        return (globalThis.CONST?.GRID_SNAPPING_MODES?.CENTER ?? 1) |
-               (globalThis.CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2) |
-               (globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE_MIDPOINT ?? globalThis.CONST?.GRID_SNAPPING_MODES?.SIDE ?? 4);
+    _getGridCenterPoint(x, y) {
+        const pt = canvas.grid.getCenterPoint({ x, y });
+        return { x: pt.x, y: pt.y };
     }
 }
