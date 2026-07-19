@@ -577,9 +577,17 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 tmplMethods: Object.getOwnPropertyNames(Object.getPrototypeOf(tmpl)).filter(m => m.includes("refresh") || m.includes("Grid") || m.includes("Shape"))
             });
             if (tmpl.renderFlags) {
-                tmpl.renderFlags.set({ refreshState: true, refresh: true });
+                tmpl.renderFlags.set({
+                    refreshShape: true,
+                    refreshGrid: true,
+                    refreshHighlight: true,
+                    refreshState: true,
+                    refresh: true
+                });
             }
             if (typeof tmpl.applyRenderFlags === "function") tmpl.applyRenderFlags();
+            if (typeof tmpl.highlightGrid === "function") tmpl.highlightGrid();
+            if (typeof tmpl._refreshShape === "function") tmpl._refreshShape();
             this.hidePreview(tmpl);
             return;
         }
