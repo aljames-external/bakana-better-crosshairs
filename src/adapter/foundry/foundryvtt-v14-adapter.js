@@ -456,25 +456,26 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         else if (coords.direction !== undefined) shape.rotation = coords.direction;
 
         if (shape.type === "rectangle") {
-            const isSquare = coords.type === "square" || coords.originalType === "square" || coords.t === "rect" || (originalShape.type === "rectangle" && originalShape.width > 0 && (originalShape.height === originalShape.width || !originalShape.height));
+            const isSquare = coords.type === "square" || coords.originalType === "square" || coords.t === "rect" || (originalShape.type === "rectangle" && (originalShape.width === originalShape.height || !originalShape.height));
             const origW = originalShape.width ?? 400;
             const origH = originalShape.height ?? origW;
 
             let targetW = origW;
             let targetH = origH;
 
-            if (coords.width !== undefined && coords.width > 0) {
-                targetW = isGridUnits ? Math.round(coords.width * pxPerFoot) : coords.width;
-                targetH = isSquare ? targetW : (coords.distance !== undefined && coords.distance > 0 ? (isGridUnits ? Math.round(coords.distance * pxPerFoot) : coords.distance) : targetW);
-            } else if (coords.distance !== undefined && coords.distance > 0) {
-                let distPx = isGridUnits ? Math.round(coords.distance * pxPerFoot) : coords.distance;
-                if (isSquare) {
-                    const sidePx = (distPx > origW * 1.1) ? Math.round(distPx / Math.SQRT2) : distPx;
+            if (isSquare) {
+                let sideVal = coords.width ?? (coords.distance ? coords.distance / Math.SQRT2 : undefined);
+                if (sideVal !== undefined && sideVal > 0) {
+                    const sidePx = isGridUnits ? Math.round(sideVal * pxPerFoot) : sideVal;
                     targetW = sidePx;
                     targetH = sidePx;
-                } else {
-                    targetW = distPx;
-                    targetH = distPx;
+                }
+            } else {
+                if (coords.width !== undefined && coords.width > 0) {
+                    targetW = isGridUnits ? Math.round(coords.width * pxPerFoot) : coords.width;
+                }
+                if (coords.distance !== undefined && coords.distance > 0) {
+                    targetH = isGridUnits ? Math.round(coords.distance * pxPerFoot) : coords.distance;
                 }
             }
 
