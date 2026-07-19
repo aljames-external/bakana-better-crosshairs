@@ -1,0 +1,166 @@
+{
+    "BBC": {
+        "settings": {
+            "autorecMenu": {
+                "name": "Autorecognition Menu",
+                "label": "View Autorecognition",
+                "hint": "Inspect and explore all registered crosshair animation workflows."
+            },
+            "registeredTemplates": {
+                "name": "Registered Templates"
+            },
+            "logVerbosity": {
+                "name": "Log Verbosity Level",
+                "hint": "Controls the level of detail printed to the browser console.",
+                "choices": {
+                    "error": "Errors Only",
+                    "warn": "Warnings & Errors (Default)",
+                    "info": "Info, Warnings & Errors",
+                    "debug": "Debug (Everything)"
+                }
+            }
+        },
+        "itemConfigMenu": {
+
+            "title": "Bakana's Better Crosshairs Custom Item Configuration",
+            "deleteCustomBtn": "Delete",
+            "saveCustomBtn": "Save",
+            "overridePrePlacement": "Override Pre-Placement Script",
+            "overrideAnimation": "Override Animation Configuration",
+            "overridePlacedStyling": "Override Placed Document Styling",
+            "overridePostPlacement": "Override Post-Placement Script",
+            "preSectionDesc": "Executes custom Javascript code before starting placement selection.",
+            "animationDesc": "Sequencer crosshair graphic asset and interactive rendering properties.",
+            "placedSectionDesc": "Configure fill and border highlight colors applied to the created document.",
+            "postSectionDesc": "Executes custom Javascript code immediately after the document is created on the canvas.",
+            "badges": {
+                "custom": "CUSTOM",
+                "autorec": "AUTOREC",
+                "default": "DEFAULT"
+            }
+        },
+        "autorecMenu": {
+
+            "title": "Bakana's Better Crosshairs — Autorecognition Menu",
+            "menuHint": "Inspect registered crosshair animation workflows and their configuration.",
+            "preRegionPlacement": "Pre-Region Placement",
+            "preTemplatePlacement": "Pre-Template Placement",
+            "regionPlacementConfig": "Region Placement Configuration",
+            "templatePlacementConfig": "Template Placement Configuration",
+            "postTemplatePlacement": "Post-Template Placement",
+            "term": {
+                "region": "region",
+                "template": "template"
+            },
+            "addWorkflow": {
+                "title": "Add New Crosshair Workflow",
+                "label": "Add Workflow",
+                "itemName": "Workflow Item Name:",
+                "itemNameHint": "e.g. Fireball or Longbow",
+                "activityName": "Activity ID or Name (Optional):",
+                "activityNameHint": "e.g. Attack or Save"
+            },
+            "notify": {
+                "added": "Added workflow:",
+                "selectRemove": "Please select one or more workflows to remove.",
+                "removedMany": "Removed workflow(s).",
+                "removedOne": "Removed workflow",
+                "copied": "Copied to clipboard.",
+                "saved": "Saved workflow configurations and synced across all clients."
+            },
+            "labels": {
+                "searchPlaceholder": "Filter registered workflows (e.g. Fireball)...",
+                "editMode": "Edit Mode",
+                "registeredWorkflows": "Registered Workflows",
+                "addBtn": "Add",
+                "removeBtn": "Remove",
+                "emptySidebar": "No crosshair animations registered yet.",
+                "selectWorkflowTitle": "Select a Registered Workflow",
+                "selectWorkflowDesc": "Click on any item name in the sidebar to inspect its pre-animation, core animation, and post-animation configuration.",
+                "preSectionDesc": "Executes custom Javascript code concurrent with placement selection.",
+                "noScript": "No custom script configured",
+                "animationTitle": "Animation Configuration",
+                "animationDesc": "Sequencer crosshair graphic asset and interactive rendering properties.",
+                "workflowEnabled": "Workflow Enabled",
+                "callingItemName": "Calling Item Name",
+                "callingActivity": "Calling Activity ID / Name (DnD5e)",
+                "registrationScope": "Registration Scope",
+                "circleFile": "Circle Sequencer Filepath",
+                "coneFile": "Cone Sequencer Filepath",
+                "rayFile": "Ray Sequencer Filepath",
+                "squareFile": "Square Sequencer Filepath",
+                "customHandler": "Custom Function Handler",
+                "lockToToken": "Lock to Token (Stick)",
+                "originLine": "Origin Stretch Line",
+                "borderStyling": "Border Styling (Tile Highlight)",
+                "fillStyling": "Fill Styling (Tile Highlight)",
+                "customIcon": "Custom Cursor Icon",
+                "placedSectionDesc": "Configures the fill color, border color, and alpha opacities of the final placed document on the canvas.",
+                "placedFill": "Placed Fill Styling",
+                "placedBorder": "Placed Border Styling",
+                "defaultPlacementNote": "Using default Foundry / Game System placement colors (Enable Edit Mode to customize).",
+                "postSectionDesc": "Executes custom Javascript code after final document creation.",
+                "noPostScript": "No custom post-placement script configured",
+                "showLine": "Show Line",
+                "alpha": "Alpha:"
+            },
+            "pills": {
+                "enabled": "Enabled",
+                "disabled": "Disabled",
+                "allActivities": "All Activities",
+                "localOnly": "Local Only (Session Scope)",
+                "worldSynced": "World Synced (Persisted)",
+                "yesCustomScript": "Yes (Custom Script)",
+                "noDeclarative": "No (Declarative Config)",
+                "stickOn": "On (Locked to Origin Token)",
+                "stickOff": "Off (Free Cursor Placement)",
+                "stickDefault": "Default behavior per module's System adapter"
+            },
+            "hints": {
+                "selectToRemove": "Select workflow to remove",
+                "globalFallback": "Global Fallback Entry",
+                "activityPrefix": "Activity: ",
+                "deleteWorkflow": "Delete Workflow",
+                "localOnly": "Local Only (Session Scope)"
+            },
+            "badges": {
+                "default": "DEFAULT",
+                "globalFallback": "Global Fallback",
+                "local": "Local"
+            }
+        },
+        "Autorec": {
+            "Type": {
+                "CustomScript": "Custom Script",
+                "AutoDetect": "Auto-Detect"
+            },
+            "File": {
+                "FunctionHandler": "Function Handler"
+            }
+        },
+        "Conflicts": {
+            "PSFX": "Both PSFX Patreon and Free are activated, both modules use the path `psfx.` to prefix files! This will cause conflicts! Recommend disabling / uninstalling the free version.",
+            "JB2A": "Both JB2A Patreon and Free are activated, both modules use the path `jb2a.` to prefix files. This will cause conflicts! Recommend disabling / uninstalling the free version.",
+            "BLFX": "Both Boss Loot Assets Premium and Free are activated, both modules use the path `blfx.` to prefix files. This will cause conflicts! Recommend disabling / uninstalling the free version."
+        },
+        "Dependency": {
+            "MinVersion": "Minimum version: ",
+            "MaxVersion": "Maximum version: ",
+            "CurVersion": "Current version: ",
+            "CurState": "Current state: ",
+            "StateNotInstalled": "NOT INSTALLED",
+            "StateIncompatible": "INCOMPATIBLE",
+            "StateNotActivated": "NOT ACTIVATED",
+            "WarnNotActivated": "Warning: not activated and between expected versions:",
+            "WarnNotInstalled": "Warning: not installed and between expected versions:",
+            "RecommendInstalling": "Recommend installing the following:",
+            "RecommendInstallingOne": "Recommend installing one of the following:",
+            "RequiresAll": "Requires all of the following to be installed and activated:\n",
+            "RequiresOne": "Requires at least one of the following to be installed and activated:\n",
+            "ModuleLabel": "Module: "
+        },
+        "Units": {
+            "Feet": "ft"
+        }
+    }
+}
