@@ -1017,3 +1017,78 @@ test('REGRESSION: getPlacementUpdates prioritizes sequencerCrosshair visual cont
     assert.equal(updates.x, 150, 'placement X must match sequencerCrosshair visual position (150) where animation appeared');
     assert.equal(updates.y, 100, 'placement Y must match sequencerCrosshair visual position (100) where animation appeared');
 });
+
+test('REGRESSION: FoundryVTTV14Adapter strips MeasuredTemplate schema properties from Region updateData payload', () => {
+    const adapterV14 = new FoundryVTTV14Adapter();
+    let updatedPayload = null;
+    const mockRegionDoc = {
+        documentName: 'Region',
+        shapes: [{ type: 'rectangle', x: 0, y: 0, width: 400, height: 400 }],
+        updateSource(data) { updatedPayload = data; }
+    };
+
+    const config = {
+        itemName: 'Arcane Burst',
+        placedFillColor: '#0099ff',
+        placedBorderColor: '#fc753b',
+        placedFillAlpha: 0.25,
+        placedBorderAlpha: 0.6
+    };
+
+    const creationData = { flags: {}, shapes: [{ type: 'rectangle', x: 0, y: 0, width: 400, height: 400 }] };
+    adapterV14.applyDocumentPlacement(mockRegionDoc, { x: 4050, y: 7050, distance: 20, width: 20, gridUnits: true, type: 'square' }, config, creationData);
+
+    assert.ok(updatedPayload);
+    assert.equal(updatedPayload.color, '#0099ff');
+    assert.equal(updatedPayload.fillColor, undefined, 'Region payload must not leak MeasuredTemplate fillColor');
+    assert.equal(updatedPayload.borderColor, undefined, 'Region payload must not leak MeasuredTemplate borderColor');
+    assert.equal(updatedPayload.alpha, undefined, 'Region payload must not leak MeasuredTemplate alpha');
+    assert.equal(updatedPayload.fillAlpha, undefined, 'Region payload must not leak MeasuredTemplate fillAlpha');
+    assert.equal(updatedPayload.borderAlpha, undefined, 'Region payload must not leak MeasuredTemplate borderAlpha');
+
+    assert.equal(creationData.fillColor, undefined);
+    assert.equal(creationData.borderColor, undefined);
+    assert.equal(creationData.flags.bbc.placedFillColor, '#0099ff');
+    assert.equal(creationData.flags.bbc.placedBorderColor, '#fc753b');
+});
+
+test('REGRESSION: FoundryVTTV14Adapter._formatRegionShapeUpdate strips stale _source property from shape payload', () => {
+    const adapterV14 = new FoundryVTTV14Adapter();
+    const staleShapeInstance = {
+        type: 'rectangle',
+        x: 4050,
+        y: 7050,
+        width: 400,
+        height: 400,
+        _source: { type: 'rectangle', x: 4050, y: 7050, width: 565.6000000000004, height: 0 },
+        toObject() {
+            return { type: 'rectangle', x: 4050, y: 7050, width: 400, height: 400, _source: this._source };
+        }
+    };
+
+    const formatted = adapterV14._formatRegionShapeUpdate(staleShapeInstance, { x: 4050, y: 7050, distance: 20, width: 20, gridUnits: true, type: 'square' });
+    assert.equal(formatted.width, 400);
+    assert.equal(formatted.height, 400);
+    assert.equal(formatted._source, undefined, '_formatRegionShapeUpdate must strip shape._source to prevent DataModel source corruption');
+});
+
+test('REGRESSION: FoundryVTTV14Adapter._formatRegionShapeUpdate converts diagonal distance (565.6px) to exact square side dimensions (400px x 400px)', () => {
+    const adapterV14 = new FoundryVTTV14Adapter();
+    const baseShape = { type: 'rectangle', x: 4050, y: 7050, width: 400, height: 400 };
+
+    // Pass diagonal distance payload (28.284271247461902 ft, which is 565.6000000000004 px on 100px/5ft grid)
+    const diagonalCoords = {
+        x: 4050,
+        y: 7050,
+        distance: 28.284271247461902,
+        gridUnits: true,
+        type: 'square',
+        t: 'rect'
+    };
+
+    const formatted = adapterV14._formatRegionShapeUpdate(baseShape, diagonalCoords);
+    assert.equal(formatted.type, 'rectangle');
+    assert.equal(formatted.width, 400, 'square side length must be derived as 400px from 28.284ft diagonal distance');
+    assert.equal(formatted.height, 400, 'square height must match side length 400px');
+    assert.equal(formatted._source, undefined);
+});

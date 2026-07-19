@@ -24,15 +24,15 @@ function deepClone(obj) {
 }
 
 function mergeObject(original, other = {}, options = {}) {
-    const target = deepClone(original ?? {});
+    if (!original || typeof original !== 'object') return other;
     for (const [k, v] of Object.entries(other)) {
-        if (v && typeof v === 'object' && !Array.isArray(v) && target[k] && typeof target[k] === 'object') {
-            target[k] = mergeObject(target[k], v, options);
+        if (v && typeof v === 'object' && !Array.isArray(v) && original[k] && typeof original[k] === 'object' && !Array.isArray(original[k])) {
+            mergeObject(original[k], v, options);
         } else {
-            target[k] = v;
+            original[k] = deepClone(v);
         }
     }
-    return target;
+    return original;
 }
 
 function isNewerVersion(v1, v2) {
