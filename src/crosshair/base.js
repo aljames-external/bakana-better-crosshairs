@@ -455,9 +455,8 @@ export class BaseCrosshairShape {
 
         if (this.placeable.document) {
             this.placeable.document.direction = newAngleDeg;
-            this.placeable.document.angle = newAngleDeg;
             try {
-                this.placeable.document.updateSource({ direction: newAngleDeg, angle: newAngleDeg });
+                this.placeable.document.updateSource({ direction: newAngleDeg });
             } catch (e) {}
         }
         this.placeable.direction = newAngleDeg;

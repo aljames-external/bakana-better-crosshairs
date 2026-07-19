@@ -1120,3 +1120,33 @@ test('REGRESSION: BaseCrosshairShape.rotate in detached mode updates Region prev
     assert.equal(shape.direction, 45);
     assert.equal(mockDocument.shapes[0].rotation, 45, 'rotate() in detached mode must update Region shape rotation on preview document');
 });
+
+test('REGRESSION: BaseCrosshairShape.rotate preserves cone document interior angle property', () => {
+    const mockDocument = {
+        documentName: 'MeasuredTemplate',
+        t: 'cone',
+        direction: 0,
+        angle: 53.13,
+        updateSource(data) { Object.assign(this, data); }
+    };
+    const mockPlaceable = {
+        document: mockDocument,
+        direction: 0,
+        x: 100,
+        y: 100
+    };
+
+    const config = {
+        type: 'cone',
+        stickToToken: false,
+        distance: 15,
+        angle: 53.13
+    };
+
+    const shape = new BaseCrosshairShape(mockPlaceable, config);
+    shape.rotate(180);
+
+    assert.equal(shape.direction, 180);
+    assert.equal(mockDocument.direction, 180, 'direction must update to 180');
+    assert.equal(mockDocument.angle, 53.13, 'interior cone angle must remain 53.13 and not be overwritten with rotation direction');
+});
