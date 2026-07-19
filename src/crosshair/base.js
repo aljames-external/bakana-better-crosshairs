@@ -480,6 +480,11 @@ export class BaseCrosshairShape {
     }
 
     refreshTemplateHighlights() {
+        log.error("BBC ROTATION DIAG 2 | BaseCrosshairShape.refreshTemplateHighlights:", {
+            direction: this.direction,
+            docName: this.placeable?.document?.documentName,
+            shapes: this.placeable?.document?.shapes
+        });
         if (this.placeable?.document) {
             const dims = this.placeable._bbcDimensions ?? this.placeable.document._bbcDimensions ?? globalThis._activeBBCDimensions;
             const docProps = crosshairAdapter.detectProperties(this.placeable.document);

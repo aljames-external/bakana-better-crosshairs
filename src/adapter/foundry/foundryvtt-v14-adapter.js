@@ -250,6 +250,12 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             const orig = typeof shapesList[0]?.toObject === "function" ? shapesList[0].toObject() : shapesList[0];
             const updatedShape = this._formatRegionShapeUpdate(orig, coords);
             delete updatedShape._id;
+            log.error("BBC ROTATION DIAG 3 | V14 updatePreviewShape:", {
+                coordsDirection: coords.direction,
+                coordsRotation: coords.rotation,
+                updatedShapeRotation: updatedShape.rotation,
+                updatedShape
+            });
             try {
                 previewDoc.updateSource({ shapes: [updatedShape] }); 
             } catch (e) {
@@ -564,6 +570,12 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         const isRegion = doc.documentName === "Region";
 
         if (isRegion) {
+            log.error("BBC ROTATION DIAG 4 | V14 refreshTemplateHighlights (Region):", {
+                direction,
+                docShapes: doc.shapes,
+                renderFlags: tmpl.renderFlags ? Object.keys(tmpl.renderFlags) : null,
+                tmplMethods: Object.getOwnPropertyNames(Object.getPrototypeOf(tmpl)).filter(m => m.includes("refresh") || m.includes("Grid") || m.includes("Shape"))
+            });
             if (tmpl.renderFlags) {
                 tmpl.renderFlags.set({ refreshState: true, refresh: true });
             }

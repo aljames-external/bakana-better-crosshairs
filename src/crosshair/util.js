@@ -244,6 +244,12 @@ export function attachWheelRotation(shape, config = {}) {
             const delta = event.deltaY < 0 ? -step : step;
             config.currentDirection = (config.currentDirection + delta + 360) % 360;
 
+            log.error("BBC ROTATION DIAG 1 | Wheel step:", {
+                currentDirection: config.currentDirection,
+                shapeType,
+                isShapeInstance
+            });
+
             if (isShapeInstance) {
                 shape.rotate(config.currentDirection);
             } else {
