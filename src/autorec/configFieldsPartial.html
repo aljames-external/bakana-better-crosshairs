@@ -164,34 +164,6 @@
                         </div>
                     </td>
                 </tr>
-                <tr class="{{#if (and (not showOverrides) (not hasCustomStyling))}}edit-only{{/if}}" data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
-                    <th>{{labels.borderStyling}}</th>
-                    <td>
-                        <span class="view-only">
-                            <span class="bbc-color-swatch" data-color="{{borderColor}}"></span>
-                            <code>{{borderColor}}</code> ({{labels.alphaLabel}} {{borderAlpha}})
-                        </span>
-                        <div class="bbc-edit-color-row edit-only">
-                            <input type="color" class="bbc-edit-color" data-color-target="bbc-item-bordercolor" data-field="borderColor" value="{{borderColorPicker}}" />
-                            <input type="text" id="bbc-item-bordercolor" class="bbc-edit-input" name="borderColor" data-field="borderColor" value="{{borderColor}}" placeholder="#ffffff" />
-                            <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="borderAlpha" data-field="borderAlpha" value="{{borderAlpha}}" /></label>
-                        </div>
-                    </td>
-                </tr>
-                <tr class="{{#if (and (not showOverrides) (not hasCustomStyling))}}edit-only{{/if}}" data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
-                    <th>{{labels.fillStyling}}</th>
-                    <td>
-                        <span class="view-only">
-                            <span class="bbc-color-swatch" data-color="{{fillColor}}"></span>
-                            <code>{{fillColor}}</code> ({{labels.alphaLabel}} {{fillAlpha}})
-                        </span>
-                        <div class="bbc-edit-color-row edit-only">
-                            <input type="color" class="bbc-edit-color" data-color-target="bbc-item-fillcolor" data-field="fillColor" value="{{fillColorPicker}}" />
-                            <input type="text" id="bbc-item-fillcolor" class="bbc-edit-input" name="fillColor" data-field="fillColor" value="{{fillColor}}" placeholder="#000000" />
-                            <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="fillAlpha" data-field="fillAlpha" value="{{fillAlpha}}" /></label>
-                        </div>
-                    </td>
-                </tr>
                 <tr class="{{#if (and (not showOverrides) (not icon))}}edit-only{{/if}}" data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
                     <th>{{labels.customIcon}}</th>
                     <td>
@@ -199,82 +171,6 @@
                         <input type="text" class="bbc-edit-input edit-only" name="icon" data-field="icon" value="{{icon}}" placeholder="eskie.crosshair.reticle.generic_02.white" />
                     </td>
                 </tr>
-            </tbody>
-        </table>
-    </div>
-</section>
-
-<!-- Section 3: Template / Region Placement Configuration -->
-<section class="bbc-section-card">
-    <div class="bbc-section-header">
-        <div class="bbc-section-title">
-            <i class="fa-solid fa-chevron-down bbc-chevron"></i>
-            <i class="fa-solid fa-shapes bbc-section-icon"></i>
-            <h3>{{placementSectionTitle}}</h3>
-        </div>
-    </div>
-    <div class="bbc-section-body">
-        <p class="bbc-section-desc">{{labels.placedSectionDesc}}</p>
-        <table class="bbc-config-table">
-            <tbody>
-                {{#if showOverrides}}
-                <tr>
-                    <th>{{labels.overridePlacedStyling}}</th>
-                    <td>
-                        <span class="view-only"><span class="bbc-type-badge" data-override-badge="enablePlacedStyling">{{#if enablePlacedStyling}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span></span>
-                        <div class="bbc-edit-row edit-only">
-                            <label class="bbc-edit-checkbox-label">
-                                <input type="checkbox" name="enablePlacedStyling" data-field="enablePlacedStyling" {{#if enablePlacedStyling}}checked{{/if}} />
-                                <span class="bbc-type-badge" data-override-badge="enablePlacedStyling">{{#if enablePlacedStyling}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
-                            </label>
-                        </div>
-                    </td>
-                </tr>
-                {{#if (and isEditMode (not enablePlacedStyling))}}
-                <tr class="edit-only">
-                    <td colspan="2" style="text-align: center; color: #64748b; font-style: italic;">
-                        {{labels.defaultPlacementNote}}
-                    </td>
-                </tr>
-                {{/if}}
-                {{/if}}
-
-                <tr class="{{#if (and (not showOverrides) (not hasPlacedStyling))}}edit-only{{/if}}" data-override-child="enablePlacedStyling" {{#if (and showOverrides (not enablePlacedStyling))}}style="display: none;"{{/if}}>
-                    <th>{{labels.placedFill}}</th>
-                    <td>
-                        <span class="view-only">
-                            <span class="bbc-color-swatch" data-color="{{placedFillColor}}"></span>
-                            <code>{{placedFillColor}}</code> ({{labels.alphaLabel}} {{placedFillAlpha}})
-                        </span>
-                        <div class="bbc-edit-color-row edit-only">
-                            <input type="color" class="bbc-edit-color" data-color-target="bbc-item-placedfill" data-field="placedFillColor" value="{{placedFillColorPicker}}" />
-                            <input type="text" id="bbc-item-placedfill" class="bbc-edit-input" name="placedFillColor" data-field="placedFillColor" value="{{placedFillColor}}" placeholder="#000000" />
-                            <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="placedFillAlpha" data-field="placedFillAlpha" value="{{placedFillAlpha}}" /></label>
-                        </div>
-                    </td>
-                </tr>
-                <tr class="{{#if (and (not showOverrides) (not hasPlacedStyling))}}edit-only{{/if}}" data-override-child="enablePlacedStyling" {{#if (and showOverrides (not enablePlacedStyling))}}style="display: none;"{{/if}}>
-                    <th>{{labels.placedBorder}}</th>
-                    <td>
-                        <span class="view-only">
-                            <span class="bbc-color-swatch" data-color="{{placedBorderColor}}"></span>
-                            <code>{{placedBorderColor}}</code> ({{labels.alphaLabel}} {{placedBorderAlpha}})
-                        </span>
-                        <div class="bbc-edit-color-row edit-only">
-                            <input type="color" class="bbc-edit-color" data-color-target="bbc-item-placedborder" data-field="placedBorderColor" value="{{placedBorderColorPicker}}" />
-                            <input type="text" id="bbc-item-placedborder" class="bbc-edit-input" name="placedBorderColor" data-field="placedBorderColor" value="{{placedBorderColor}}" placeholder="#ffffff" />
-                            <label>{{labels.alphaLabel}} <input type="number" step="0.05" min="0" max="1" class="bbc-edit-input small" name="placedBorderAlpha" data-field="placedBorderAlpha" value="{{placedBorderAlpha}}" /></label>
-                        </div>
-                    </td>
-                </tr>
-
-                {{#if (and (not showOverrides) (not hasPlacedStyling))}}
-                <tr class="view-only">
-                    <td colspan="2" style="text-align: center; color: #64748b; font-style: italic;">
-                        {{labels.defaultPlacementNote}}
-                    </td>
-                </tr>
-                {{/if}}
             </tbody>
         </table>
     </div>
