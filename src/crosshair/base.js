@@ -464,12 +464,11 @@ export class BaseCrosshairShape {
 
         this.refreshTemplateHighlights();
 
-        const isRayOrCone = this.type === "ray" || this.type === "cone";
-        if (!isRayOrCone && this.sequencerCrosshair) {
-            if (this.sequencerCrosshair.refresh) {
+        if (this.sequencerCrosshair) {
+            if (typeof this.sequencerCrosshair.refresh === "function") {
                 this.sequencerCrosshair.refresh();
             }
-            if (this.sequencerCrosshair._onMouseMove && canvas?.mousePosition) {
+            if (typeof this.sequencerCrosshair._onMouseMove === "function" && canvas?.mousePosition) {
                 this.sequencerCrosshair._onMouseMove({
                     data: { getLocalPosition: () => canvas.mousePosition },
                     clientX: canvas.mousePosition.x,
