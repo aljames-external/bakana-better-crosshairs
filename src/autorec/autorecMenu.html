@@ -1,0 +1,132 @@
+<div class="bbc-autorec-container">
+    <header class="bbc-autorec-topbar">
+        <div class="bbc-search-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="bbc-autorec-search" class="bbc-search-input" placeholder="{{labels.searchPlaceholder}}" autocomplete="off" />
+        </div>
+        <div class="bbc-topbar-actions">
+            {{#if isGM}}
+            <label class="bbc-edit-slider-label" title="{{labels.editMode}}">
+                <span>{{labels.editMode}}</span>
+                <input type="checkbox" id="bbc-edit-mode-toggle" class="bbc-edit-toggle-input" />
+                <span class="bbc-edit-slider-track"></span>
+            </label>
+            {{/if}}
+            <div class="bbc-count-badge">
+                <i class="fa-solid fa-list-check"></i>
+                <span>{{count}} {{labels.registeredWorkflows}}</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="bbc-autorec-layout">
+        <!-- Left Sidebar: Registered Item Names -->
+        <aside class="bbc-sidebar">
+            <div class="bbc-sidebar-actions edit-only">
+                <button type="button" class="bbc-add-workflow-btn" title="{{labels.addBtn}}">
+                    <i class="fa-solid fa-plus"></i> {{labels.addBtn}}
+                </button>
+                <button type="button" class="bbc-remove-selected-btn" title="{{labels.removeBtn}}">
+                    <i class="fa-solid fa-trash-can"></i> {{labels.removeBtn}}
+                </button>
+            </div>
+
+            {{#if isEmpty}}
+            <div class="bbc-sidebar-empty">
+                <i class="fa-solid fa-folder-open"></i>
+                <p>{{labels.emptySidebar}}</p>
+            </div>
+            {{else}}
+            <div class="bbc-items-list">
+                {{#each entries}}
+                <div class="bbc-item-card" data-item-name="{{regKey}}">
+                    {{#unless isDefault}}
+                    <input type="checkbox" class="bbc-item-select-checkbox edit-only" data-item-name="{{regKey}}" title="{{../labels.selectToRemoveHint}}" />
+                    {{/unless}}
+                    <div class="bbc-card-main">
+                        <i class="fa-solid fa-crosshairs bbc-item-icon"></i>
+                        <span class="bbc-item-name">{{itemName}}</span>
+                        {{#if isDefault}}
+                        <span class="bbc-type-badge default" title="{{../labels.globalFallbackHint}}">{{../labels.defaultBadge}}</span>
+                        {{/if}}
+                        {{#if (and ../supportsActivities hasActivity)}}
+                        <span class="bbc-activity-pill" title="{{../labels.activityHintPrefix}}{{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
+                        {{/if}}
+                    </div>
+                    {{#if isLocal}}
+                    <div class="bbc-card-meta">
+                        <span class="bbc-type-badge local" title="{{../labels.localOnlyHint}}">{{../labels.localBadge}}</span>
+                    </div>
+                    {{/if}}
+                </div>
+                {{/each}}
+            </div>
+            {{/if}}
+        </aside>
+
+        <!-- Right Inspector: Comprehensive Configuration Sections -->
+        <main class="bbc-inspector">
+            <!-- Empty state when no item is selected -->
+            <div class="bbc-inspector-empty">
+                <div class="bbc-empty-card">
+                    <i class="fa-solid fa-wand-magic-sparkles bbc-empty-icon"></i>
+                    <h3>{{labels.selectWorkflowTitle}}</h3>
+                    <p>{{labels.selectWorkflowDesc}}</p>
+                </div>
+            </div>
+
+            <!-- Inspector detail panes for each item -->
+            {{#each entries}}
+            <div class="bbc-inspector-detail" data-item-name="{{regKey}}" style="display: none;">
+                <header class="bbc-detail-header">
+                    <div class="bbc-title-left">
+                        <i class="fa-solid fa-crosshairs bbc-detail-icon"></i>
+                        <h2>{{itemName}}</h2>
+                        {{#if (and ../supportsActivities hasActivity)}}
+                        <span class="bbc-activity-pill" title="{{../labels.activityHintPrefix}}{{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
+                        {{/if}}
+                    </div>
+                    <div class="bbc-detail-actions edit-only">
+                        <button type="button" class="bbc-save-single-btn" data-item-name="{{regKey}}" title="Save changes to this workflow">
+                            <i class="fa-solid fa-floppy-disk"></i> {{../labels.saveBtn}}
+                        </button>
+                    </div>
+                </header>
+
+                <div class="bbc-sections-scroll">
+                    <!-- Top Section: Workflow Status -->
+                    <section class="bbc-section-card">
+                        <div class="bbc-section-header">
+                            <div class="bbc-section-title">
+                                <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+                                <i class="fa-solid fa-power-off bbc-section-icon"></i>
+                                <h3>Workflow Status</h3>
+                            </div>
+                        </div>
+                        <div class="bbc-section-body">
+                            <table class="bbc-config-table">
+                                <tbody>
+                                    <tr>
+                                        <th>{{../labels.workflowEnabled}}</th>
+                                        <td>
+                                            <span class="view-only">
+                                                <span class="bbc-pill">{{#if enabled}}{{../labels.enabledPill}}{{else}}{{../labels.disabledPill}}{{/if}}</span>
+                                            </span>
+                                            <label class="bbc-toggle-label edit-only">
+                                                <input type="checkbox" class="bbc-edit-input" data-field="enabled" {{#if enabled}}checked{{/if}} />
+                                                <span>{{../labels.enabledPill}}</span>
+                                            </label>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    {{> "modules/bakana-better-crosshairs/src/autorec/configFieldsPartial.html" labels=../labels prePlacementTitle=../prePlacementTitle placementSectionTitle=../placementSectionTitle postPlacementTitle=../postPlacementTitle showOverrides=false showActivityIdentification=true isEditMode=../isEditMode supportsActivities=../supportsActivities}}
+                </div>
+            </div>
+            {{/each}}
+        </main>
+    </div>
+</div>

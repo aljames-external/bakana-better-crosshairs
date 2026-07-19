@@ -1,0 +1,222 @@
+<!-- Section 1: Pre-Template / Pre-Region Placement & Workflow Identification -->
+<section class="bbc-section-card">
+    <div class="bbc-section-header">
+        <div class="bbc-section-title">
+            <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+            <i class="fa-solid fa-code bbc-section-icon"></i>
+            <h3>{{prePlacementTitle}}</h3>
+        </div>
+    </div>
+    <div class="bbc-section-body">
+        <p class="bbc-section-desc">{{labels.preSectionDesc}}</p>
+        <table class="bbc-config-table" style="margin-bottom: 10px;">
+            <tbody>
+                {{#if showActivityIdentification}}
+                <tr>
+                    <th>{{labels.callingItemName}}</th>
+                    <td>
+                        {{#if isDefault}}
+                        <span><code>DEFAULT</code> <span class="bbc-type-badge default" style="margin-left:6px;">{{labels.globalFallbackBadge}}</span></span>
+                        {{else}}
+                        <span class="view-only"><code>{{itemName}}</code></span>
+                        <input type="text" class="bbc-edit-input edit-only" name="itemName" data-field="itemName" value="{{itemName}}" placeholder="e.g. Longbow" />
+                        {{/if}}
+                    </td>
+                </tr>
+                {{#if supportsActivities}}
+                {{#unless isDefault}}
+                <tr>
+                    <th>{{labels.callingActivity}}</th>
+                    <td>
+                        <span class="view-only">
+                            {{#if activityDisplay}}<code>{{activityDisplay}}</code>{{else}}<span class="bbc-pill">{{labels.allActivitiesPill}}</span>{{/if}}
+                        </span>
+                        <input type="text" class="bbc-edit-input edit-only" name="activityId" data-field="activityId" value="{{activityId}}" placeholder="e.g. Attack or Activity ID" />
+                    </td>
+                </tr>
+                {{/unless}}
+                {{/if}}
+                <tr>
+                    <th>{{labels.registrationScope}}</th>
+                    <td>
+                        <span class="view-only">{{#if isLocal}}<span class="bbc-pill">{{labels.localOnlyPill}}</span>{{else}}<span class="bbc-pill">{{labels.worldSyncedPill}}</span>{{/if}}</span>
+                        <label class="bbc-edit-checkbox-label edit-only">
+                            <input type="checkbox" class="bbc-edit-checkbox" name="local" data-field="local" {{#if isLocal}}checked{{/if}} />
+                            <span>{{labels.localOnlyPill}}</span>
+                        </label>
+                    </td>
+                </tr>
+                {{/if}}
+
+                {{#if showOverrides}}
+                <tr>
+                    <th>{{labels.overridePrePlacement}}</th>
+                    <td>
+                        <span class="view-only"><span class="bbc-type-badge" data-override-badge="enablePrePlacement">{{#if enablePrePlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span></span>
+                        <div class="bbc-edit-row edit-only">
+                            <label class="bbc-edit-checkbox-label">
+                                <input type="checkbox" name="enablePrePlacement" data-field="enablePrePlacement" {{#if enablePrePlacement}}checked{{/if}} />
+                                <span class="bbc-type-badge" data-override-badge="enablePrePlacement">{{#if enablePrePlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+                {{/if}}
+            </tbody>
+        </table>
+        <div class="bbc-code-container" data-override-child="enablePrePlacement" {{#if (and showOverrides (not enablePrePlacement))}}style="display: none;"{{/if}}>
+            <div class="view-only">
+                {{#if concurrentCode}}
+                <pre class="bbc-code-preview"><code>{{concurrentCode}}</code></pre>
+                {{else}}
+                <span class="bbc-pill">{{labels.noPreScript}}</span>
+                {{/if}}
+            </div>
+
+            <div class="edit-only">
+                <textarea class="bbc-edit-textarea bbc-code-editor" name="concurrentCode" data-field="concurrentCode" rows="4" spellcheck="false" placeholder="// Enter Javascript code executed before template placement selection...">{{concurrentCode}}</textarea>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section 2: Animation Configuration -->
+<section class="bbc-section-card">
+    <div class="bbc-section-header">
+        <div class="bbc-section-title">
+            <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+            <i class="fa-solid fa-film bbc-section-icon"></i>
+            <h3>{{labels.animationTitle}}</h3>
+        </div>
+    </div>
+    <div class="bbc-section-body">
+        <p class="bbc-section-desc">{{labels.animationDesc}}</p>
+        <table class="bbc-config-table">
+            <tbody>
+                {{#if showOverrides}}
+                <tr>
+                    <th>{{labels.overrideAnimation}}</th>
+                    <td>
+                        <span class="view-only"><span class="bbc-type-badge" data-override-badge="enableAnimation">{{#if enableAnimation}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span></span>
+                        <div class="bbc-edit-row edit-only">
+                            <label class="bbc-edit-checkbox-label">
+                                <input type="checkbox" name="enableAnimation" data-field="enableAnimation" {{#if enableAnimation}}checked{{/if}} />
+                                <span class="bbc-type-badge" data-override-badge="enableAnimation">{{#if enableAnimation}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+                {{/if}}
+
+                <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
+                    <th>{{labels.lockToToken}}</th>
+                    <td>
+                        <span class="view-only">
+                            {{#if isStickOn}}<span class="bbc-pill">{{labels.stickOn}}</span>{{/if}}
+                            {{#if isStickOff}}<span class="bbc-pill">{{labels.stickOff}}</span>{{/if}}
+                            {{#if isStickDefault}}<span class="bbc-pill">{{labels.stickDefault}}</span>{{/if}}
+                        </span>
+                        <select class="bbc-edit-select edit-only" name="stickToToken" data-field="stickToToken">
+                            <option value="default" {{#if isStickDefault}}selected{{/if}}>{{labels.stickDefault}}</option>
+                            <option value="true" {{#if isStickOn}}selected{{/if}}>{{labels.stickOn}}</option>
+                            <option value="false" {{#if isStickOff}}selected{{/if}}>{{labels.stickOff}}</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
+                    <th>{{labels.circleFile}}</th>
+                    <td>
+                        <code class="bbc-code-pill view-only">{{circleFile}}</code>
+                        <input type="text" class="bbc-edit-input edit-only" name="circleFile" data-field="circleFile" value="{{circleFile}}" placeholder="eskie.crosshair.circle.fantasy_01.white.full" />
+                    </td>
+                </tr>
+                <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
+                    <th>{{labels.coneFile}}</th>
+                    <td>
+                        <code class="bbc-code-pill view-only">{{coneFile}}</code>
+                        <input type="text" class="bbc-edit-input edit-only" name="coneFile" data-field="coneFile" value="{{coneFile}}" placeholder="eskie.crosshair.cone.thin.fantasy_01.white.full" />
+                    </td>
+                </tr>
+                <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
+                    <th>{{labels.rayFile}}</th>
+                    <td>
+                        <code class="bbc-code-pill view-only">{{rayFile}}</code>
+                        <input type="text" class="bbc-edit-input edit-only" name="rayFile" data-field="rayFile" value="{{rayFile}}" placeholder="eskie.crosshair.ray.fantasy_01.white" />
+                    </td>
+                </tr>
+                <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
+                    <th>{{labels.squareFile}}</th>
+                    <td>
+                        <code class="bbc-code-pill view-only">{{squareFile}}</code>
+                        <input type="text" class="bbc-edit-input edit-only" name="squareFile" data-field="squareFile" value="{{squareFile}}" placeholder="eskie.crosshair.square.fantasy_01.white" />
+                    </td>
+                </tr>
+                <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
+                    <th>{{labels.originLine}}</th>
+                    <td>
+                        <span class="view-only bbc-inline-flex-row">{{#if showLine}}<span class="bbc-pill">{{labels.enabledPill}}</span><code class="bbc-code-pill">{{lineFile}}</code>{{else}}<span class="bbc-pill">{{labels.disabledPill}}</span>{{/if}}</span>
+                        <div class="bbc-edit-row edit-only">
+                            <label class="bbc-edit-checkbox-label">
+                                <input type="checkbox" class="bbc-edit-checkbox" name="showLine" data-field="showLine" {{#if showLine}}checked{{/if}} />
+                                <span>{{labels.showLineLabel}}</span>
+                            </label>
+                            <input type="text" class="bbc-edit-input" name="lineFile" data-field="lineFile" value="{{lineFile}}" placeholder="eskie.crosshair.line.generic_01.white" />
+                        </div>
+                    </td>
+                </tr>
+                <tr class="{{#if (and (not showOverrides) (not icon))}}edit-only{{/if}}" data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
+                    <th>{{labels.customIcon}}</th>
+                    <td>
+                        <span class="view-only"><code class="bbc-code-pill">{{icon}}</code></span>
+                        <input type="text" class="bbc-edit-input edit-only" name="icon" data-field="icon" value="{{icon}}" placeholder="eskie.crosshair.reticle.generic_02.white" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- Section 4: Post-Template / Post-Region Placement -->
+<section class="bbc-section-card">
+    <div class="bbc-section-header">
+        <div class="bbc-section-title">
+            <i class="fa-solid fa-chevron-down bbc-chevron"></i>
+            <i class="fa-solid fa-flag-checkered bbc-section-icon"></i>
+            <h3>{{postPlacementTitle}}</h3>
+        </div>
+    </div>
+    <div class="bbc-section-body">
+        <p class="bbc-section-desc">{{labels.postSectionDesc}}</p>
+        {{#if showOverrides}}
+        <table class="bbc-config-table" style="margin-bottom: 10px;">
+            <tbody>
+                <tr>
+                    <th>{{labels.overridePostPlacement}}</th>
+                    <td>
+                        <span class="view-only"><span class="bbc-type-badge" data-override-badge="enablePostPlacement">{{#if enablePostPlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span></span>
+                        <div class="bbc-edit-row edit-only">
+                            <label class="bbc-edit-checkbox-label">
+                                <input type="checkbox" name="enablePostPlacement" data-field="enablePostPlacement" {{#if enablePostPlacement}}checked{{/if}} />
+                                <span class="bbc-type-badge" data-override-badge="enablePostPlacement">{{#if enablePostPlacement}}{{labels.badgeCustomOverride}}{{else}}{{labels.badgeInherited}}{{/if}}</span>
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        {{/if}}
+        <div class="bbc-code-container" data-override-child="enablePostPlacement" {{#if (and showOverrides (not enablePostPlacement))}}style="display: none;"{{/if}}>
+            <div class="view-only">
+                {{#if postPlacementCode}}
+                <pre class="bbc-code-preview"><code>{{postPlacementCode}}</code></pre>
+                {{else}}
+                <span class="bbc-pill">{{labels.noPostScript}}</span>
+                {{/if}}
+            </div>
+
+            <div class="edit-only">
+                <textarea class="bbc-edit-textarea bbc-code-editor" name="postPlacementCode" data-field="postPlacementCode" rows="4" spellcheck="false" placeholder="// Enter Javascript code executed after document creation...">{{postPlacementCode}}</textarea>
+            </div>
+        </div>
+    </div>
+</section>
