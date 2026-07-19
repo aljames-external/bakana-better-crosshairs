@@ -77,6 +77,7 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
         const isGridUnits = dims?.gridUnits ?? true;
 
         const cfg = tmpl._bbcConfig ?? tmpl.document._bbcConfig ?? {};
+        const shapeType = cfg.type ?? cfg.originalType ?? cfg.t ?? tmpl.document?.t ?? docProps.type ?? "circle";
         const isSticky = Boolean(tmpl.document.flags?.bakana?.token ?? tmpl.document.flags?.bbc?.token ?? tmpl._bbcSticky ?? cfg.token);
         let targetX = 0, targetY = 0;
 
@@ -105,7 +106,10 @@ function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
             radius: initialDist,
             width: initialWidth,
             sticky: isSticky,
-            gridUnits: isGridUnits
+            gridUnits: isGridUnits,
+            type: shapeType,
+            originalType: cfg.originalType,
+            t: shapeType === "square" ? "rect" : shapeType
         });
 
         tmpl.x = tmpl.document.x;

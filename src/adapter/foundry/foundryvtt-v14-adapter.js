@@ -453,7 +453,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         else if (coords.direction !== undefined) shape.rotation = coords.direction;
 
         if (shape.type === "rectangle") {
-            const isSquare = coords.type === "square" || coords.originalType === "square" || coords.t === "rect";
+            const isSquare = coords.type === "square" || coords.originalType === "square" || coords.t === "rect" || (originalShape.type === "rectangle" && originalShape.width > 0 && (originalShape.height === originalShape.width || !originalShape.height));
             const origW = originalShape.width ?? 400;
             const origH = originalShape.height ?? origW;
 
