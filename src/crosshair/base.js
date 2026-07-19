@@ -479,10 +479,30 @@ export class BaseCrosshairShape {
         }
     }
 
-    /**
-     * Re-render and refresh grid highlights of the preview template/region.
-     */
     refreshTemplateHighlights() {
+        if (this.placeable?.document) {
+            const dims = this.placeable._bbcDimensions ?? this.placeable.document._bbcDimensions ?? globalThis._activeBBCDimensions;
+            const docProps = crosshairAdapter.detectProperties(this.placeable.document);
+            const initialDist = dims?.distance ?? docProps.distance;
+            const initialWidth = dims?.width ?? docProps.width;
+            const isGridUnits = dims?.gridUnits ?? true;
+            const shapeType = this.type ?? this.config?.type ?? this.config?.t ?? "circle";
+
+            crosshairAdapter.updatePreviewShape(this.placeable.document, {
+                x: this.x,
+                y: this.y,
+                direction: this.direction,
+                rotation: this.direction,
+                distance: initialDist,
+                radius: initialDist,
+                width: initialWidth,
+                sticky: this.stickToToken,
+                gridUnits: isGridUnits,
+                type: shapeType,
+                originalType: this.config?.originalType,
+                t: shapeType === "square" ? "rect" : shapeType
+            });
+        }
         if (crosshairAdapter?.refreshTemplateHighlights && this.placeable) {
             crosshairAdapter.refreshTemplateHighlights(this.placeable, this.direction);
         }

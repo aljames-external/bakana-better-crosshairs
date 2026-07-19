@@ -1092,3 +1092,31 @@ test('REGRESSION: FoundryVTTV14Adapter._formatRegionShapeUpdate converts diagona
     assert.equal(formatted.height, 400, 'square height must match side length 400px');
     assert.equal(formatted._source, undefined);
 });
+
+test('REGRESSION: BaseCrosshairShape.rotate in detached mode updates Region preview shape rotation', () => {
+    const mockDocument = {
+        documentName: 'Region',
+        shapes: [{ type: 'rectangle', x: 100, y: 100, width: 400, height: 400, rotation: 0 }],
+        direction: 0,
+        updateSource(data) { Object.assign(this, data); }
+    };
+    const mockPlaceable = {
+        document: mockDocument,
+        direction: 0,
+        x: 100,
+        y: 100
+    };
+
+    const config = {
+        type: 'square',
+        stickToToken: false,
+        distance: 20,
+        width: 20
+    };
+
+    const shape = new BaseCrosshairShape(mockPlaceable, config);
+    shape.rotate(45);
+
+    assert.equal(shape.direction, 45);
+    assert.equal(mockDocument.shapes[0].rotation, 45, 'rotate() in detached mode must update Region shape rotation on preview document');
+});
