@@ -109,6 +109,21 @@
                 {{/if}}
 
                 <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
+                    <th>{{labels.lockToToken}}</th>
+                    <td>
+                        <span class="view-only">
+                            {{#if isStickOn}}<span class="bbc-pill">{{labels.stickOn}}</span>{{/if}}
+                            {{#if isStickOff}}<span class="bbc-pill">{{labels.stickOff}}</span>{{/if}}
+                            {{#if isStickDefault}}<span class="bbc-pill">{{labels.stickDefault}}</span>{{/if}}
+                        </span>
+                        <select class="bbc-edit-select edit-only" name="stickToToken" data-field="stickToToken">
+                            <option value="default" {{#if isStickDefault}}selected{{/if}}>{{labels.stickDefault}}</option>
+                            <option value="true" {{#if isStickOn}}selected{{/if}}>{{labels.stickOn}}</option>
+                            <option value="false" {{#if isStickOff}}selected{{/if}}>{{labels.stickOff}}</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
                     <th>{{labels.circleFile}}</th>
                     <td>
                         <code class="bbc-code-pill view-only">{{circleFile}}</code>
@@ -134,21 +149,6 @@
                     <td>
                         <code class="bbc-code-pill view-only">{{squareFile}}</code>
                         <input type="text" class="bbc-edit-input edit-only" name="squareFile" data-field="squareFile" value="{{squareFile}}" placeholder="eskie.crosshair.square.fantasy_01.white" />
-                    </td>
-                </tr>
-                <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
-                    <th>{{labels.lockToToken}}</th>
-                    <td>
-                        <span class="view-only">
-                            {{#if isStickOn}}<span class="bbc-pill">{{labels.stickOn}}</span>{{/if}}
-                            {{#if isStickOff}}<span class="bbc-pill">{{labels.stickOff}}</span>{{/if}}
-                            {{#if isStickDefault}}<span class="bbc-pill">{{labels.stickDefault}}</span>{{/if}}
-                        </span>
-                        <select class="bbc-edit-select edit-only" name="stickToToken" data-field="stickToToken">
-                            <option value="default" {{#if isStickDefault}}selected{{/if}}>{{labels.stickDefault}}</option>
-                            <option value="true" {{#if isStickOn}}selected{{/if}}>{{labels.stickOn}}</option>
-                            <option value="false" {{#if isStickOff}}selected{{/if}}>{{labels.stickOff}}</option>
-                        </select>
                     </td>
                 </tr>
                 <tr data-override-child="enableAnimation" {{#if (and showOverrides (not enableAnimation))}}style="display: none;"{{/if}}>
