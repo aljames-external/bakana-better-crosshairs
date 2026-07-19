@@ -441,8 +441,11 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
      * @private
      */
     _formatRegionShapeUpdate(originalShape, coords) {
-        // Deep clone shape payload to prevent mutating caller or document source references
-        const shape = foundry.utils.deepClone(originalShape);
+        // Deep clone shape payload as a plain object to prevent mutating caller or carrying stale _source references
+        const raw = typeof originalShape?.toObject === "function" ? originalShape.toObject() : (originalShape ?? {});
+        const shape = foundry.utils.deepClone(raw);
+        delete shape._source;
+
         const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);
         const isGridUnits = Boolean(coords.gridUnits ?? true);
 
@@ -503,6 +506,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
                 shape.width = isGridUnits ? Math.round(coords.width * pxPerFoot) : coords.width;
             }
         }
+        delete shape._source;
         log.debug("FoundryVTTV14Adapter._formatRegionShapeUpdate | [Square Lifecycle 4/5] Region shape modified for Foundry after left click:", {
             originalShape,
             inputCoords: coords,
