@@ -328,13 +328,6 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
 
                 const targetColor = styling.placedFillColor ?? styling.placedBorderColor;
                 if (targetColor) updateData.color = targetColor;
-                if (styling.placedFillColor) updateData.fillColor = styling.placedFillColor;
-                if (styling.placedBorderColor) updateData.borderColor = styling.placedBorderColor;
-
-                const targetAlpha = styling.placedFillAlpha ?? styling.placedBorderAlpha;
-                if (targetAlpha !== undefined) updateData.alpha = targetAlpha;
-                if (styling.placedFillAlpha !== undefined) updateData.fillAlpha = styling.placedFillAlpha;
-                if (styling.placedBorderAlpha !== undefined) updateData.borderAlpha = styling.placedBorderAlpha;
 
                 if (config.hidden || config.hideTemplate) updateData.hidden = true;
 
@@ -460,23 +453,30 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
         else if (coords.direction !== undefined) shape.rotation = coords.direction;
 
         if (shape.type === "rectangle") {
-            let distFoot = coords.distance ?? coords.radius ?? coords.width;
-            let widthFoot = coords.width ?? coords.distance ?? coords.radius;
-            const isSquare = coords.type === "square" || coords.originalType === "square" || coords.t === "rect" || (distFoot > 0 && distFoot === widthFoot);
-            if (isSquare) {
-                const sideLength = widthFoot ?? distFoot ?? 20;
-                distFoot = sideLength;
-                widthFoot = sideLength;
-            } else if (widthFoot > 0 && distFoot > widthFoot) {
-                const isSquareDiagonal = distFoot <= widthFoot * 1.6;
-                distFoot = isSquareDiagonal ? widthFoot : Math.round(Math.sqrt(Math.max(0, distFoot * distFoot - widthFoot * widthFoot)));
+            const isSquare = coords.type === "square" || coords.originalType === "square" || coords.t === "rect";
+            const origW = originalShape.width ?? 400;
+            const origH = originalShape.height ?? origW;
+
+            let targetW = origW;
+            let targetH = origH;
+
+            if (coords.width !== undefined && coords.width > 0) {
+                targetW = isGridUnits ? Math.round(coords.width * pxPerFoot) : coords.width;
+                targetH = isSquare ? targetW : (coords.distance !== undefined && coords.distance > 0 ? (isGridUnits ? Math.round(coords.distance * pxPerFoot) : coords.distance) : targetW);
+            } else if (coords.distance !== undefined && coords.distance > 0) {
+                let distPx = isGridUnits ? Math.round(coords.distance * pxPerFoot) : coords.distance;
+                if (isSquare) {
+                    const sidePx = (distPx > origW * 1.1) ? Math.round(distPx / Math.SQRT2) : distPx;
+                    targetW = sidePx;
+                    targetH = sidePx;
+                } else {
+                    targetW = distPx;
+                    targetH = distPx;
+                }
             }
-            if (distFoot !== undefined) {
-                shape.width = isGridUnits ? Math.round(distFoot * pxPerFoot) : distFoot;
-            }
-            if (widthFoot !== undefined) {
-                shape.height = isGridUnits ? Math.round(widthFoot * pxPerFoot) : widthFoot;
-            }
+
+            shape.width = targetW;
+            shape.height = targetH;
 
             if (coords.x !== undefined && coords.y !== undefined) {
                 const wPx = shape.width ?? 200;

@@ -321,11 +321,13 @@ test('FoundryVTTV14Adapter applyDocumentPlacement and updatePreviewShape handle 
     assert.equal(regionUpdate.shapes[0].y, 200);
     assert.equal(regionUpdate.shapes[0].radius, 20);
     assert.equal(regionUpdate.color, '#ffffff');
-    assert.equal(regionUpdate.borderColor, '#00ff00');
-    assert.equal(regionUpdate.fillColor, '#ffffff');
-    assert.equal(regionUpdate.alpha, 0.4);
-    assert.equal(regionUpdate.fillAlpha, 0.4);
-    assert.equal(regionUpdate.borderAlpha, 0.8);
+    assert.equal(regionUpdate.borderColor, undefined);
+    assert.equal(regionUpdate.fillColor, undefined);
+    assert.equal(regionUpdate.alpha, undefined);
+    assert.equal(regionUpdate.flags.bbc.placedBorderColor, '#00ff00');
+    assert.equal(regionUpdate.flags.bbc.placedFillColor, '#ffffff');
+    assert.equal(regionUpdate.flags.bbc.placedFillAlpha, 0.4);
+    assert.equal(regionUpdate.flags.bbc.placedBorderAlpha, 0.8);
 
     // 2. Test MeasuredTemplate placement
     let templateUpdate = null;
