@@ -124,11 +124,50 @@ flowchart TD
     Mode -- No (Detached) --> ExactDir[Preserve Mousewheel Direction & Coordinate]
     Mode -- Yes (Attached) --> Anchor[resolveAnchorPlacement token, shape, dir, dist]
     Anchor --> SnapEdge[Snap Origin x, y to Token Perimeter Corner/Edge]
-    ExactDir --> SetFlags[Set Temp Document Flags with Final Placement Data]
+    ExactDir --> SetFlags[Set Temp Document Flags & Native Schema Properties]
     SnapEdge --> SetFlags
-    SetFlags --> PreCreate[Hook: preCreateMeasuredTemplate]
-    PreCreate --> UpdateSource[doc.updateSource x, y, direction, distance]
+    SetFlags --> PreCreate[Hook: preCreateMeasuredTemplate / preCreateRegion]
+    PreCreate --> UpdateSource[doc.updateSource x, y, direction, colors, flags.bbc]
+    UpdateSource --> Create[Hook: createMeasuredTemplate / createRegion]
+    Create --> PostExec[handleCreateDocument: Evaluate postPlacementCode Script]
 ```
+
+---
+
+## Document Flags & Schema Contracts (`extractPlacedStylingFlags`)
+
+When coordinates and placement data are written to a document (`applyDocumentPlacement`), properties are divided between **Native Document Schema Fields** and **Document Flags (`doc.flags.bbc`)**:
+
+### Native Document Schema Fields (Direct Database Persistence)
+Foundry VTT `MeasuredTemplate` documents natively store color and dimension fields in their schema data. When `applyDocumentPlacement` updates the document source, top-level schema fields are updated directly:
+- `fillColor`, `borderColor`, `fillAlpha`, `borderAlpha` (on `MeasuredTemplate` documents)
+- `color`, `alpha` (on `Region` documents)
+
+Because these are top-level properties defined on Foundry document models, Foundry saves them natively to scene collection data in the database.
+
+### Document Flags (`doc.flags.bbc`) (Metadata & Hook Bridge)
+In addition to native properties, `extractPlacedStylingFlags` injects a metadata dictionary onto `doc.flags.bbc`:
+
+```javascript
+flags: {
+    bbc: {
+        itemName: config.itemName ?? "",
+        activityName: config.activityName ?? "",
+        activityId: config.activityId ?? "",
+        postPlacementCode: config.postPlacementCode ?? "",
+        placedFillColor: config.placedFillColor,
+        placedFillAlpha: config.placedFillAlpha,
+        placedBorderColor: config.placedBorderColor,
+        placedBorderAlpha: config.placedBorderAlpha
+    }
+}
+```
+
+#### Why are Document Flags Necessary?
+1. **Asynchronous Post-Placement Script Execution ([`handleCreateDocument`](file:///usr/local/google/home/aljames/github/bakana-better-crosshairs/src/adapter/foundry/base-foundryvtt-adapter.js#L1070-L1108))**: When Foundry emits `createMeasuredTemplate` or `createRegion`, the caller's transient memory scope is lost. Placing `postPlacementCode` in `doc.flags.bbc` allows the creation handler to extract and execute custom macros reliably without global variable leaks.
+   - **Exposed Script Context**: `(doc, token, actor, item, scope, config, canvas, game)` where `doc` is the created template/region and `token` is the source caster token.
+2. **Dual Fill/Border Support on V14 Regions**: Foundry V14 Region objects only provide a single unified `color` property. Storing distinct `placedFillColor` and `placedBorderColor` in `flags.bbc` preserves split inner/outer color data.
+3. **PIXI Render Interception ([`handleMeasuredTemplateRefresh`](file:///usr/local/google/home/aljames/github/bakana-better-crosshairs/src/adapter/foundry/base-foundryvtt-adapter.js#L463-L525))**: When system templates override PIXI rendering instructions, `handleMeasuredTemplateRefresh` reads `doc.flags.bbc` to guarantee BBC visual color profiles override default system graphic drawing.
 
 ---
 

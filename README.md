@@ -56,7 +56,28 @@ The **Autorec Configuration Hub** allows you to define custom crosshair rules th
 - **Built-in `DEFAULT` Fallback Entry**: Includes a permanent, non-deletable `DEFAULT` workflow entry. Any template placeable drawn that lacks a specific item entry automatically adopts the animated crosshair configuration of `DEFAULT` (unless explicitly disabled via *Workflow Enabled: Disabled*).
 - **Multi-Activity Hierarchy & Priority Matching**: Define independent entries for each activity on an item (`e.g. Longbow > Line Fire`, `Longbow > Rapid Fire`, and `Longbow > <no activity named>`). Activity-specific workflows automatically take precedence over general item fallback workflows (`<no activity named>`), with stable front-to-back tiebreaking (`first registered matching rule wins`).
 - **Shape & Animation Override**: Force an item to spawn a specific crosshair shape (`Circle`, `Cone`, `Ray`, `Square`) and select specific Sequencer database animations (`circleFile`, `coneFile`, `rayFile`, `squareFile`, `lineFile`).
-- **Color & Border Themes**: Set custom fill colors, border colors, and opacity alphas per spell or weapon.
+- **Color & Border Themes**: Set custom fill colors, border colors, and opacity alphas per spell or weapon (`placedFillColor`, `placedBorderColor`, etc.). When a template is placed, native schema fields (`fillColor`, `borderColor`, etc.) are written directly to the database so standard canvas colors persist across scene reloads.
+- **Pre & Post Placement Scripting (`concurrentCode` & `postPlacementCode`)**: Run custom asynchronous JavaScript snippets immediately before targeting (`concurrentCode`) or asynchronously right after document creation in the database (`postPlacementCode`).
+
+---
+
+## Custom Placement Macros & Document Flags
+
+Bakana's Better Crosshairs provides two custom JavaScript execution points per workflow:
+
+### 1. Pre-Placement Concurrent Script (`concurrentCode`)
+Runs right before the Sequencer targeting crosshair is spawned. Exposes:
+- `token`, `actor`, `item`, `scope`, `config`, `crosshair`, `canvas`, `game`
+
+### 2. Post-Placement Macro (`postPlacementCode`)
+Executed automatically inside the `createMeasuredTemplate` or `createRegion` hook after document database creation ([`BaseFoundryVTTAdapter.handleCreateDocument`](file:///usr/local/google/home/aljames/github/bakana-better-crosshairs/src/adapter/foundry/base-foundryvtt-adapter.js#L1070-L1108)). Exposes:
+- `doc`: The created `MeasuredTemplate` or `Region` document.
+- `token`: The source/caster token originating the placement.
+- `actor`, `item`, `scope` (`{ doc, token, actor, item, config }`), `config`, `canvas`, `game`.
+
+> [!NOTE]
+> **Why `doc.flags.bbc` are stored on placed documents:**  
+> Foundry's `createMeasuredTemplate`/`createRegion` hooks only provide `(doc, options, userId)`. To bridge configuration to the database creation event without memory leaks, `BBC` stores metadata on `doc.flags.bbc` (`postPlacementCode`, `itemName`, `activityId`, `token` reference, and V14 Region dual-color parameters). Standard template colors (`fillColor`, `borderColor`) are saved directly to native schema properties.
 
 ---
 

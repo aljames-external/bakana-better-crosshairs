@@ -155,8 +155,8 @@ Fires when Foundry attempts to write the new document to the database.
    - **Expected Output**: `Promise<void>`. Executes user-configured post-placement Javascript if defined.
    - **Internal Methods & Debug Breakpoints**:
      - Checks `doc.flags?.bbc?.postPlacementCode`.
-     - [`this.extractCallingContext(doc)`](file:///usr/local/google/home/aljames/github/bakana-better-crosshairs/src/adapter/foundry/base-foundryvtt-adapter.js#L59) + [`this.toToken(rawToken)`](file:///usr/local/google/home/aljames/github/bakana-better-crosshairs/src/adapter/foundry/base-foundryvtt-adapter.js#L686): Builds execution variables (`doc, token, actor, item, scope, config, canvas, game`).
-     - `new AsyncFunction(...)(...)`: Runs the user script inside a `try/catch` block. Add debug point inside the `catch (e)` block ([`base-foundryvtt-adapter.js#L1015`](file:///usr/local/google/home/aljames/github/bakana-better-crosshairs/src/adapter/foundry/base-foundryvtt-adapter.js#L1015)) when debugging user script syntax errors.
+     - [`this.extractCallingContext(doc)`](file:///usr/local/google/home/aljames/github/bakana-better-crosshairs/src/adapter/foundry/base-foundryvtt-adapter.js#L59) + [`this.toToken(rawToken)`](file:///usr/local/google/home/aljames/github/bakana-better-crosshairs/src/adapter/foundry/base-foundryvtt-adapter.js#L686): Builds script scope variables (`doc, token, actor, item, scope, config, canvas, game`), where `doc` is the placed template/region document and `token` is the source/caster token (not covered target tokens).
+     - `new AsyncFunction(...)(...)`: Runs the user script inside a `try/catch` block. Add debug point inside the `catch (e)` block ([`base-foundryvtt-adapter.js#L1106`](file:///usr/local/google/home/aljames/github/bakana-better-crosshairs/src/adapter/foundry/base-foundryvtt-adapter.js#L1106)) when debugging user script syntax errors.
 
 ---
 
