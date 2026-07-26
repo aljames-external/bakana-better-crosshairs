@@ -972,8 +972,39 @@ export class AutorecManager {
     }
 }
 
+const rawAutorecManager = new AutorecManager();
+
 /**
- * Singleton instance of AutorecManager for managing template and region autorec registrations.
- * @type {AutorecManager}
+ * Make AutorecManager callable directly as a function `autorecManager("module-id")`
+ * to instantiate a ModuleAutorecManager for that module ID, while preserving all singleton properties and methods.
+ * @param {AutorecManager} managerInstance - Raw AutorecManager instance
+ * @returns {Function & AutorecManager} Callable proxy wrapping AutorecManager
  */
-export const autorecManager = new AutorecManager();
+export function makeCallableManager(managerInstance) {
+    const callableFn = function (moduleId) {
+        return managerInstance.forModule(moduleId);
+    };
+    return new Proxy(callableFn, {
+        get(target, prop) {
+            const val = managerInstance[prop];
+            if (typeof val === "function") {
+                return val.bind(managerInstance);
+            }
+            return val;
+        },
+        set(target, prop, value) {
+            managerInstance[prop] = value;
+            return true;
+        },
+        has(target, prop) {
+            return prop in managerInstance;
+        }
+    });
+}
+
+/**
+ * Callable singleton instance of AutorecManager.
+ * Can be called as a function `autorecManager("module-id")` or used as a standard manager object.
+ * @type {Function & AutorecManager}
+ */
+export const autorecManager = makeCallableManager(rawAutorecManager);

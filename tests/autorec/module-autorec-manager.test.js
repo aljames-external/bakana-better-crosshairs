@@ -7,8 +7,11 @@ import { AUTOREC_EXCHANGE_VERSION } from '../../src/autorec/autorecExchange.js';
 
 test('ModuleAutorecManager registers macros tagged with module-id', () => {
     const packManager = autorecManager.forModule('eskie-macro-pack');
+    const callableManager = autorecManager('eskie-macro-pack');
     assert.ok(packManager instanceof ModuleAutorecManager);
+    assert.ok(callableManager instanceof ModuleAutorecManager);
     assert.equal(packManager.moduleId, 'eskie-macro-pack');
+    assert.equal(callableManager.moduleId, 'eskie-macro-pack');
 
     packManager.register('tiger-attunement', {
         circleFile: 'jb2a.tiger.orange',
