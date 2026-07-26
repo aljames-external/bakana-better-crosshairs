@@ -32,26 +32,24 @@ const packManager = new bbcApi.ModuleAutorecManager("eskie-content-pack");
 
 ## 3. Registering Item & Activity Autorec Animations
 
-When using your module's manager, pass the **`itemName`** (the Item, Spell, or Activity name matching game items, e.g. `"Fireball"`, `"Longbow"`, `"Magic Missile"`). BBC automatically tags each entry with your specified module name (`sourceModule: "eskie-content-pack"`).
+When using your module's manager, register crosshair workflows using `.register(...)`. You **must pass an Array of elements** (single item objects are not accepted). Each element specifies an `itemName` matching an item, spell, or activity in Foundry VTT (e.g. `"Fireball"`, `"Longbow"`, `"Magic Missile"`). BBC automatically tags every entry with your specified module name (`sourceModule: "eskie-content-pack"`).
 
-### Single Item Registration (`.register`)
-
-```javascript
-packManager.register("Fireball", {
-    circleFile: "modules/eskie-content-pack/assets/fireball.webp",
-    borderColor: "#ff0000",
-    borderAlpha: 0.85,
-    stickToToken: false,
-    showLine: true,
-    showRange: true,
-    enabled: true
-});
-```
-
-### Batch Item Registration (`.registerMany`)
+### Registering an Array of Items (`.register`)
 
 ```javascript
-await packManager.registerMany([
+await packManager.register([
+    {
+        itemName: "Fireball",
+        config: {
+            circleFile: "modules/eskie-content-pack/assets/fireball.webp",
+            borderColor: "#ff0000",
+            borderAlpha: 0.85,
+            stickToToken: false,
+            showLine: true,
+            showRange: true,
+            enabled: true
+        }
+    },
     {
         itemName: "Tiger Attunement",
         config: {
@@ -71,6 +69,8 @@ await packManager.registerMany([
     }
 ]);
 ```
+
+> **Note:** `.register(...)` strictly requires an Array argument (`Array<Object>`). Passing a single object throws a contract error.
 
 ---
 
@@ -97,14 +97,13 @@ const myItemNames = packManager.list();
 const myEntries = packManager.getAllEntries();
 ```
 
-### Unregistering Entries
+### Unregistering Entries (`.unregister`)
+
+Like `.register(...)`, `.unregister(...)` **strictly requires an Array** of item name strings:
 
 ```javascript
-// Remove single item sequence
-packManager.unregister("Fireball");
-
-// Batch remove multiple sequences
-await packManager.unregisterMany(["Tiger Attunement", "Chromatic Orb"]);
+// Unregister an array of item sequences by name
+await packManager.unregister(["Fireball", "Tiger Attunement", "Chromatic Orb"]);
 ```
 
 ---
@@ -187,12 +186,10 @@ Hooks.once("ready", async () => {
 | Method | Signature | Description |
 | :--- | :--- | :--- |
 | `autorecManager(moduleId)` | `(moduleId: string) => ModuleAutorecManager` | Callable function proxy to instantiate a module-scoped manager. |
-| `register` | `(itemName, handlerOrConfig, options?) => void` | Register a single crosshair animation tagged with `sourceModule: moduleId`. |
-| `registerMany` | `(entries, options?) => Promise<void>` | Batch register entries tagged with `sourceModule: moduleId`. |
-| `unregister` | `(itemName, options?) => boolean` | Remove single item autorec registration. |
-| `unregisterMany` | `(itemNames, options?) => Promise<void>` | Batch remove item autorec registrations. |
-| `get` | `(itemName) => Object \| null` | Get active configuration for an item name. |
-| `has` | `(itemName) => boolean` | Check if item autorec registration exists. |
+| `register` | `(entries: Array<Object>, options?) => Promise<void>` | Register an array of item/activity animations tagged with `sourceModule: moduleId`. **Requires an array.** |
+| `unregister` | `(itemNames: Array<string>, options?) => Promise<void>` | Remove item autorec registrations by array of names. **Requires an array.** |
+| `get` | `(itemName: string) => Object \| null` | Get active configuration for an item name. |
+| `has` | `(itemName: string) => boolean` | Check if item autorec registration exists. |
 | `list` | `() => string[]` | List all item names registered under this module. |
 | `getAllEntries` | `() => Object[]` | Get UI formatted entry dictionaries for this module. |
 | `exportAutorecs` | `(options?) => Object` | Export JSON exchange package containing this module's registrations. |

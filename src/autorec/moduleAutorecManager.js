@@ -3,7 +3,7 @@ import { log } from "../lib/logger.js";
 
 /**
  * Module-scoped manager wrapper for automatic recognition (autorec) registrations on items and activities.
- * Allows external content and pack modules to register their crosshair sequences by passing item names
+ * Allows external content and pack modules to register their crosshair sequences by passing arrays of items
  * without needing to manually specify module attribution on every single registration.
  */
 export class ModuleAutorecManager {
@@ -24,9 +24,7 @@ export class ModuleAutorecManager {
         this._parent = parentManager;
 
         this.register = this.register.bind(this);
-        this.registerMany = this.registerMany.bind(this);
         this.unregister = this.unregister.bind(this);
-        this.unregisterMany = this.unregisterMany.bind(this);
         this.get = this.get.bind(this);
         this.has = this.has.bind(this);
         this.list = this.list.bind(this);
@@ -37,54 +35,24 @@ export class ModuleAutorecManager {
     }
 
     /**
-     * Register a crosshair placement animation sequence for an item or activity.
-     * Automatically tags the entry configuration with this module's identifier as sourceModule.
-     * @param {string} itemName - Item/spell/activity name (e.g. "Fireball" or "Longbow")
-     * @param {Object|Function} [handlerOrConfig={}] - Declarative configuration object or callback handler
-     * @param {Object} [options={}] - Registration persistence and scope options
-     * @param {boolean} [options.persist=true] - Whether to persist registration to world settings
-     * @param {boolean} [options.local=false] - Whether this registration exists in local session scope only
-     * @returns {void}
-     */
-    register(itemName, handlerOrConfig = {}, { persist = true, local = false } = {}) {
-        const cleanItemName = String(itemName ?? "").trim();
-        if (!cleanItemName) {
-            log.warn(`ModuleAutorecManager[${this.moduleId}].register | Invalid empty itemName passed.`);
-            return;
-        }
-
-        let configPayload = handlerOrConfig;
-        if (typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
-            configPayload = {
-                ...handlerOrConfig,
-                itemName: handlerOrConfig.itemName ?? cleanItemName,
-                sourceModule: this.moduleId
-            };
-        }
-
-        log.debug(`ModuleAutorecManager[${this.moduleId}].register | Registering item "${cleanItemName}" tagged with module "${this.moduleId}".`);
-        this._parent.register(cleanItemName, configPayload, {
-            persist,
-            local,
-            sourceModule: this.moduleId
-        });
-    }
-
-    /**
-     * Batch register multiple item/activity crosshair definitions tagged with this module's ID.
-     * Entry boundary array normalized before batch execution (Rule 5).
-     * @param {Array<{itemName?: string, macroId?: string, config?: Object, local?: boolean}>} entries - Candidate registrations
-     * @param {Object} [options={}] - Batch options (`{ persist: boolean }`)
+     * Register multiple item/activity crosshair definitions tagged with this module's ID.
+     * Strictly requires an Array of entry objects (Rule 5). Single item object form is rejected.
+     * @param {Array<{itemName: string, config?: Object, local?: boolean}>} entries - Array of registration entries
+     * @param {Object} [options={}] - Registration options (`{ persist: boolean }`)
      * @returns {Promise<void>}
+     * @throws {Error} If entries parameter is not an Array
      */
-    async registerMany(entries, { persist = true } = {}) {
-        const list = Array.isArray(entries) ? entries : [];
-        if (list.length === 0) return;
+    async register(entries, { persist = true } = {}) {
+        if (!Array.isArray(entries)) {
+            log.error(`ModuleAutorecManager[${this.moduleId}].register | Argument 'entries' must be an Array.`);
+            throw new Error("ModuleAutorecManager.register requires an array of registration entries.");
+        }
+        if (entries.length === 0) return;
 
         const prepared = [];
-        for (const item of list) {
+        for (const item of entries) {
             if (!item || typeof item !== "object") continue;
-            const itemName = String(item.itemName ?? item.macroId ?? "").trim();
+            const itemName = String(item.itemName ?? "").trim();
             if (!itemName) continue;
 
             const rawConfig = item.config ?? item;
@@ -99,32 +67,25 @@ export class ModuleAutorecManager {
             });
         }
 
-        log.debug(`ModuleAutorecManager[${this.moduleId}].registerMany | Batch registering ${prepared.length} items.`);
+        log.debug(`ModuleAutorecManager[${this.moduleId}].register | Registering ${prepared.length} items.`);
         await this._parent.registerMany(prepared, { persist });
     }
 
     /**
-     * Unregister an item/activity autorec workflow.
-     * @param {string} itemName - Target item/spell name
-     * @param {Object} [options={}] - Unregistration scope options
-     * @returns {boolean} True if handler existed and was unregistered
-     */
-    unregister(itemName, options = {}) {
-        const cleanItemName = String(itemName ?? "").trim();
-        log.debug(`ModuleAutorecManager[${this.moduleId}].unregister | Unregistering item "${cleanItemName}".`);
-        return this._parent.unregister(cleanItemName, options);
-    }
-
-    /**
-     * Batch unregister multiple item/activity autorec workflows.
-     * @param {Array<string>} itemNames - List of item/spell names to unregister
+     * Unregister multiple item/activity autorec workflows by item name.
+     * Strictly requires an Array of item name strings.
+     * @param {Array<string>} itemNames - Array of item/spell names to unregister
      * @param {Object} [options={}] - Scope options
      * @returns {Promise<void>}
+     * @throws {Error} If itemNames parameter is not an Array
      */
-    async unregisterMany(itemNames, options = {}) {
-        const list = Array.isArray(itemNames) ? itemNames : [];
-        log.debug(`ModuleAutorecManager[${this.moduleId}].unregisterMany | Batch unregistering ${list.length} items.`);
-        await this._parent.unregisterMany(list, options);
+    async unregister(itemNames, options = {}) {
+        if (!Array.isArray(itemNames)) {
+            log.error(`ModuleAutorecManager[${this.moduleId}].unregister | Argument 'itemNames' must be an Array.`);
+            throw new Error("ModuleAutorecManager.unregister requires an array of item names.");
+        }
+        log.debug(`ModuleAutorecManager[${this.moduleId}].unregister | Unregistering ${itemNames.length} items.`);
+        await this._parent.unregisterMany(itemNames, options);
     }
 
     /**

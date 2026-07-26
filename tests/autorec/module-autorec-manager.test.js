@@ -5,20 +5,32 @@ import { autorecManager } from '../../src/autorec/autorecManager.js';
 import { ModuleAutorecManager } from '../../src/autorec/moduleAutorecManager.js';
 import { AUTOREC_EXCHANGE_VERSION } from '../../src/autorec/autorecExchange.js';
 
-test('ModuleAutorecManager registers item autorecs tagged with module-id', () => {
-    const packManager = autorecManager.forModule('eskie-content-pack');
-    const callableManager = autorecManager('eskie-content-pack');
+test('ModuleAutorecManager.register and .unregister require arrays of elements', async () => {
+    const packManager = autorecManager('eskie-content-pack');
     assert.ok(packManager instanceof ModuleAutorecManager);
-    assert.ok(callableManager instanceof ModuleAutorecManager);
     assert.equal(packManager.moduleId, 'eskie-content-pack');
-    assert.equal(callableManager.moduleId, 'eskie-content-pack');
 
-    packManager.register('Tiger Attunement', {
-        circleFile: 'jb2a.tiger.orange',
-        enabled: true
-    }, { local: true });
+    // Passing non-array to register must throw
+    await assert.rejects(
+        async () => packManager.register({ itemName: 'Single Item' }),
+        /requires an array of registration entries/
+    );
+
+    // Passing array of entries succeeds
+    await packManager.register([
+        {
+            itemName: 'Tiger Attunement',
+            config: { circleFile: 'jb2a.tiger.orange', enabled: true }
+        },
+        {
+            itemName: 'SAO Death Burst',
+            config: { circleFile: 'sao.red.circle' }
+        }
+    ], { persist: false });
 
     assert.equal(autorecManager.has('Tiger Attunement'), true);
+    assert.equal(autorecManager.has('SAO Death Burst'), true);
+
     const entry = autorecManager.getEntryByName('Tiger Attunement');
     assert.ok(entry);
     assert.equal(entry.sourceModule, 'eskie-content-pack');
@@ -26,34 +38,21 @@ test('ModuleAutorecManager registers item autorecs tagged with module-id', () =>
 
     const packList = packManager.list();
     assert.ok(packList.includes('Tiger Attunement'));
+    assert.ok(packList.includes('SAO Death Burst'));
 
     const packEntries = packManager.getAllEntries();
-    assert.equal(packEntries.length, 1);
-    assert.equal(packEntries[0].itemName, 'Tiger Attunement');
+    assert.equal(packEntries.length, 2);
 
-    packManager.unregister('Tiger Attunement', { local: true });
+    // Passing non-array to unregister must throw
+    await assert.rejects(
+        async () => packManager.unregister('Tiger Attunement'),
+        /requires an array of item names/
+    );
+
+    // Passing array of string keys succeeds
+    await packManager.unregister(['Tiger Attunement', 'SAO Death Burst'], { local: true });
     assert.equal(autorecManager.has('Tiger Attunement'), false);
-});
-
-test('ModuleAutorecManager batch registerMany and unregisterMany tag entries with module-id', async () => {
-    const packManager = autorecManager('sao-effect-pack');
-
-    await packManager.registerMany([
-        { itemName: 'SAO Death Burst', config: { circleFile: 'sao.red.circle' }, local: true },
-        { itemName: 'SAO Resurrection', config: { circleFile: 'sao.gold.circle' }, local: true }
-    ], { persist: false });
-
-    const death = autorecManager.getEntryByName('SAO Death Burst');
-    const res = autorecManager.getEntryByName('SAO Resurrection');
-
-    assert.ok(death);
-    assert.equal(death.sourceModule, 'sao-effect-pack');
-    assert.ok(res);
-    assert.equal(res.sourceModule, 'sao-effect-pack');
-
-    await packManager.unregisterMany(['SAO Death Burst', 'SAO Resurrection'], { local: true });
     assert.equal(autorecManager.has('SAO Death Burst'), false);
-    assert.equal(autorecManager.has('SAO Resurrection'), false);
 });
 
 test('ModuleAutorecManager.importAutorecs updates module tag on all imported elements to module-id', async () => {
