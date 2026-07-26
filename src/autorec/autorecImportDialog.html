@@ -73,8 +73,11 @@
                         <span class="bbc-badge bbc-badge-module">{{this.sourceModule}}</span>
                     </label>
                     {{#if this.differences.length}}
-                    <div class="bbc-diff-preview-box">
-                        <span class="bbc-diff-title">{{../labels.diffPreviewTitle}}:</span>
+                    <details class="bbc-diff-preview-box">
+                        <summary class="bbc-diff-title">
+                            <i class="fa-solid fa-caret-right bbc-diff-chevron"></i>
+                            <span>{{../labels.diffPreviewTitle}} ({{this.differences.length}})</span>
+                        </summary>
                         <ul class="bbc-diff-list">
                             {{#each this.differences}}
                             <li class="bbc-diff-item">
@@ -85,7 +88,7 @@
                             </li>
                             {{/each}}
                         </ul>
-                    </div>
+                    </details>
                     {{/if}}
                 </div>
                 {{/each}}

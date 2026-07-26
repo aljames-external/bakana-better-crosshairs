@@ -1287,12 +1287,35 @@
     border-radius: 6px;
 }
 
-.bbc-diff-title {
-    display: block;
-    margin-bottom: 4px;
+details.bbc-diff-preview-box summary.bbc-diff-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 0;
     font-size: 0.72rem;
     font-weight: 600;
     color: #fca5a5;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+}
+
+details.bbc-diff-preview-box summary.bbc-diff-title::-webkit-details-marker {
+    display: none;
+}
+
+details.bbc-diff-preview-box[open] summary.bbc-diff-title {
+    margin-bottom: 6px;
+}
+
+details.bbc-diff-preview-box .bbc-diff-chevron {
+    font-size: 0.72rem;
+    color: #fca5a5;
+    transition: transform 0.18s ease;
+}
+
+details.bbc-diff-preview-box[open] .bbc-diff-chevron {
+    transform: rotate(90deg);
 }
 
 .bbc-diff-list {
