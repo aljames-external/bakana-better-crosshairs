@@ -129,3 +129,21 @@ test('importAutorecs in silent mode merges selected workflows into manager', asy
 
     autorecManager.unregister('Ice Storm', { local: true });
 });
+
+test('REGRESSION: export then immediate import of Faerie Fire produces zero spurious conflicts for stickToToken and limitRange', () => {
+    autorecManager.register('Faerie Fire', {
+        itemName: 'Faerie Fire',
+        stickToToken: 'default',
+        limitRange: false,
+        sourceModule: 'world'
+    }, { local: true });
+
+    const exportedPkg = autorecManager.exportAutorecs({ sourceModule: 'world' });
+    const validated = validateImportPackage(exportedPkg);
+    const diff = autorecManager.analyzeImportDiff(validated);
+
+    assert.equal(diff.conflictEntries.length, 0, 'Should have 0 conflict overwrites on exact round-trip');
+    assert.equal(diff.identicalEntries.length, 1, 'Should classify exact exported item as identical');
+
+    autorecManager.unregister('Faerie Fire', { local: true });
+});

@@ -760,8 +760,17 @@ export class AutorecManager {
      * @returns {Object} Exchange package object conforming to AUTOREC_EXCHANGE_VERSION
      */
     exportAutorecs({ sourceModule = "world", includeDefault = false, description = "" } = {}) {
-        const entries = this.getAllEntries();
-        return buildExportPackage(entries, { sourceModule, includeDefault, description });
+        const rawEntries = [];
+        for (const [regKey, handler] of this.registeredHandlers.entries()) {
+            if (!handler || typeof handler === "function") continue;
+            const config = handler.config ?? handler;
+            rawEntries.push({
+                ...config,
+                regKey,
+                itemName: config.itemName ?? regKey.split(" | ")[0].trim()
+            });
+        }
+        return buildExportPackage(rawEntries, { sourceModule, includeDefault, description });
     }
 
     /**

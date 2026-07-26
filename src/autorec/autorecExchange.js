@@ -51,11 +51,12 @@ export function sanitizeEntryForExchange(entry) {
         return {};
     }
 
-    const itemName = String(entry.itemName ?? entry.regKey ?? "").trim();
-    const activityId = String(entry.activityId ?? "").trim();
-    const activityName = String(entry.activityName ?? "").trim();
-    const sourceModule = String(entry.sourceModule ?? MODULE_ID).trim();
-    const enabled = entry.enabled !== false;
+    const raw = entry.config ?? entry;
+    const itemName = String(raw.itemName ?? raw.regKey ?? "").trim();
+    const activityId = String(raw.activityId ?? "").trim();
+    const activityName = String(raw.activityName ?? "").trim();
+    const sourceModule = String(raw.sourceModule ?? MODULE_ID).trim();
+    const enabled = raw.enabled !== false;
 
     const sanitized = {
         itemName,
@@ -63,40 +64,40 @@ export function sanitizeEntryForExchange(entry) {
         activityName,
         sourceModule,
         enabled,
-        stickToToken: entry.stickToToken ?? DEFAULT_AUTOREC_ENTRY.stickToToken,
-        showLine: entry.showLine !== false,
-        showRange: entry.showRange !== false,
-        limitRange: entry.limitRange !== false,
-        borderColor: entry.borderColor ?? DEFAULT_AUTOREC_ENTRY.borderColor,
-        borderAlpha: entry.borderAlpha ?? DEFAULT_AUTOREC_ENTRY.borderAlpha,
-        fillColor: entry.fillColor ?? DEFAULT_AUTOREC_ENTRY.fillColor,
-        fillAlpha: entry.fillAlpha ?? DEFAULT_AUTOREC_ENTRY.fillAlpha,
-        circleFile: entry.circleFile ?? DEFAULT_AUTOREC_ENTRY.circleFile,
-        coneFile: entry.coneFile ?? DEFAULT_AUTOREC_ENTRY.coneFile,
-        rayFile: entry.rayFile ?? DEFAULT_AUTOREC_ENTRY.rayFile,
-        squareFile: entry.squareFile ?? DEFAULT_AUTOREC_ENTRY.squareFile,
-        lineFile: entry.lineFile ?? DEFAULT_AUTOREC_ENTRY.lineFile,
-        placedFillColor: entry.placedFillColor ?? DEFAULT_AUTOREC_ENTRY.placedFillColor,
-        placedFillAlpha: entry.placedFillAlpha ?? DEFAULT_AUTOREC_ENTRY.placedFillAlpha,
-        placedBorderColor: entry.placedBorderColor ?? DEFAULT_AUTOREC_ENTRY.placedBorderColor,
-        placedBorderAlpha: entry.placedBorderAlpha ?? DEFAULT_AUTOREC_ENTRY.placedBorderAlpha,
-        enablePrePlacement: Boolean(entry.enablePrePlacement),
-        enableAnimation: Boolean(entry.enableAnimation),
-        enablePlacedStyling: Boolean(entry.enablePlacedStyling),
-        enablePostPlacement: Boolean(entry.enablePostPlacement),
-        concurrentCode: String(entry.concurrentCode ?? "").trim(),
-        postPlacementCode: String(entry.postPlacementCode ?? "").trim(),
-        icon: entry.icon ?? DEFAULT_AUTOREC_ENTRY.icon
+        stickToToken: raw.stickToToken ?? DEFAULT_AUTOREC_ENTRY.stickToToken,
+        showLine: raw.showLine ?? DEFAULT_AUTOREC_ENTRY.showLine,
+        showRange: raw.showRange ?? DEFAULT_AUTOREC_ENTRY.showRange,
+        limitRange: raw.limitRange ?? DEFAULT_AUTOREC_ENTRY.limitRange,
+        borderColor: raw.borderColor ?? DEFAULT_AUTOREC_ENTRY.borderColor,
+        borderAlpha: raw.borderAlpha ?? DEFAULT_AUTOREC_ENTRY.borderAlpha,
+        fillColor: raw.fillColor ?? DEFAULT_AUTOREC_ENTRY.fillColor,
+        fillAlpha: raw.fillAlpha ?? DEFAULT_AUTOREC_ENTRY.fillAlpha,
+        circleFile: raw.circleFile ?? DEFAULT_AUTOREC_ENTRY.circleFile,
+        coneFile: raw.coneFile ?? DEFAULT_AUTOREC_ENTRY.coneFile,
+        rayFile: raw.rayFile ?? DEFAULT_AUTOREC_ENTRY.rayFile,
+        squareFile: raw.squareFile ?? DEFAULT_AUTOREC_ENTRY.squareFile,
+        lineFile: raw.lineFile ?? DEFAULT_AUTOREC_ENTRY.lineFile,
+        placedFillColor: raw.placedFillColor ?? DEFAULT_AUTOREC_ENTRY.placedFillColor,
+        placedFillAlpha: raw.placedFillAlpha ?? DEFAULT_AUTOREC_ENTRY.placedFillAlpha,
+        placedBorderColor: raw.placedBorderColor ?? DEFAULT_AUTOREC_ENTRY.placedBorderColor,
+        placedBorderAlpha: raw.placedBorderAlpha ?? DEFAULT_AUTOREC_ENTRY.placedBorderAlpha,
+        enablePrePlacement: Boolean(raw.enablePrePlacement),
+        enableAnimation: Boolean(raw.enableAnimation),
+        enablePlacedStyling: Boolean(raw.enablePlacedStyling),
+        enablePostPlacement: Boolean(raw.enablePostPlacement),
+        concurrentCode: String(raw.concurrentCode ?? "").trim(),
+        postPlacementCode: String(raw.postPlacementCode ?? "").trim(),
+        icon: raw.icon ?? DEFAULT_AUTOREC_ENTRY.icon
     };
 
-    if (entry.distance !== undefined && entry.distance !== null) {
-        sanitized.distance = Number(entry.distance);
+    if (raw.distance !== undefined && raw.distance !== null) {
+        sanitized.distance = Number(raw.distance);
     }
-    if (entry.width !== undefined && entry.width !== null) {
-        sanitized.width = Number(entry.width);
+    if (raw.width !== undefined && raw.width !== null) {
+        sanitized.width = Number(raw.width);
     }
-    if (entry.angle !== undefined && entry.angle !== null) {
-        sanitized.angle = Number(entry.angle);
+    if (raw.angle !== undefined && raw.angle !== null) {
+        sanitized.angle = Number(raw.angle);
     }
 
     return sanitized;
