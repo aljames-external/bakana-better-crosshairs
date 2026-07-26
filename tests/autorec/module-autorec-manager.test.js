@@ -43,6 +43,20 @@ test('ModuleAutorecManager.register and .unregister require arrays of elements',
     const packEntries = packManager.getAllEntries();
     assert.equal(packEntries.length, 2);
 
+    // Test activityName filter registration
+    await packManager.register([
+        {
+            itemName: 'Longbow',
+            activityName: 'Ranged Attack',
+            config: { rayFile: 'jb2a.arrow.white' }
+        }
+    ], { persist: false });
+
+    const longbowEntries = packManager.getAllEntries().filter(e => e.itemName === 'Longbow');
+    assert.equal(longbowEntries.length, 1);
+    assert.equal(longbowEntries[0].activityName, 'Ranged Attack');
+    assert.equal(longbowEntries[0].sourceModule, 'eskie-content-pack');
+
     // Passing non-array to unregister must throw
     await assert.rejects(
         async () => packManager.unregister('Tiger Attunement'),
@@ -50,7 +64,7 @@ test('ModuleAutorecManager.register and .unregister require arrays of elements',
     );
 
     // Passing array of string keys succeeds
-    await packManager.unregister(['Tiger Attunement', 'SAO Death Burst'], { local: true });
+    await packManager.unregister(['Tiger Attunement', 'SAO Death Burst', 'Longbow | Ranged Attack'], { local: true });
     assert.equal(autorecManager.has('Tiger Attunement'), false);
     assert.equal(autorecManager.has('SAO Death Burst'), false);
 });

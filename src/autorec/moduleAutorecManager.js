@@ -57,7 +57,13 @@ export class ModuleAutorecManager {
 
             const rawConfig = item.config ?? item;
             const config = typeof rawConfig === "object" && rawConfig !== null
-                ? { ...rawConfig, itemName: rawConfig.itemName ?? itemName, sourceModule: this.moduleId }
+                ? {
+                    ...rawConfig,
+                    itemName: rawConfig.itemName ?? itemName,
+                    activityName: item.activityName ?? rawConfig.activityName,
+                    activityId: item.activityId ?? rawConfig.activityId,
+                    sourceModule: this.moduleId
+                }
                 : rawConfig;
 
             prepared.push({

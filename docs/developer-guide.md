@@ -51,9 +51,10 @@ await packManager.register([
         }
     },
     {
-        itemName: "Tiger Attunement",
+        itemName: "Longbow",
+        activityName: "Ranged Attack",
         config: {
-            circleFile: "jb2a.tiger.orange",
+            rayFile: "jb2a.arrow.white",
             showLine: true,
             showRange: true,
             limitRange: true
@@ -69,6 +70,13 @@ await packManager.register([
     }
 ]);
 ```
+
+### Filtering by System Activity (`activityName` & `activityId`)
+
+In activity-based game systems (such as **DnD5e v4**), an item can have multiple activities (e.g. an item with `"Ranged Attack"`, `"Cast"`, `"Save"`, etc.). You can specify optional **`activityName`** or **`activityId`** fields on an entry:
+
+- **`activityName`** (e.g. `"Ranged Attack"`, `"Cast"`): Specifies a sub-activity name filter. Activity-filtered entries take priority over generic item-wide entries.
+- **`activityId`** (e.g. `"act_12345"`): Specifies an exact system activity ID filter.
 
 > **Note:** `.register(...)` strictly requires an Array argument (`Array<Object>`). Passing a single object throws a contract error.
 
