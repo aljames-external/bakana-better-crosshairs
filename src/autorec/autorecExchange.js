@@ -64,6 +64,7 @@ export function sanitizeEntryForExchange(entry) {
         activityName,
         sourceModule,
         enabled,
+        local: Boolean(raw.local),
         stickToToken: raw.stickToToken ?? DEFAULT_AUTOREC_ENTRY.stickToToken,
         showLine: raw.showLine ?? DEFAULT_AUTOREC_ENTRY.showLine,
         showRange: raw.showRange ?? DEFAULT_AUTOREC_ENTRY.showRange,

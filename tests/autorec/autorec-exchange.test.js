@@ -147,3 +147,32 @@ test('REGRESSION: export then immediate import of Faerie Fire produces zero spur
 
     autorecManager.unregister('Faerie Fire', { local: true });
 });
+
+test('REGRESSION: modifying local scope property triggers conflict difference during import diff analysis', () => {
+    autorecManager.register('Bless', {
+        itemName: 'Bless',
+        borderColor: '#ffff00',
+        local: true
+    }, { local: true });
+
+    const importPkg = {
+        version: AUTOREC_EXCHANGE_VERSION,
+        sourceModule: 'BBC',
+        entries: [
+            {
+                itemName: 'Bless',
+                borderColor: '#ffff00',
+                local: false
+            }
+        ]
+    };
+
+    const validated = validateImportPackage(importPkg);
+    const diff = autorecManager.analyzeImportDiff(validated);
+
+    assert.equal(diff.conflictEntries.length, 1);
+    assert.equal(diff.conflictEntries[0].itemName, 'Bless');
+    assert.ok(diff.conflictEntries[0].differences.some(d => d.field === 'local'));
+
+    autorecManager.unregister('Bless', { local: true });
+});

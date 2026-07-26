@@ -17,6 +17,7 @@ export const DEFAULT_AUTOREC_ENTRY = {
     isDefault: true,
     enabled: true,
     sourceModule: "BBC",
+    local: false,
     stickToToken: "default",
     showLine: true,
     showRange: true,
