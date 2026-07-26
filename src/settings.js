@@ -2,6 +2,7 @@ import { MODULE_ID, MODULE_NAME } from './lib/constants.js';
 import { log } from './lib/logger.js';
 import { autorecManager } from './autorec/autorecManager.js';
 import { AutorecMenuApplication } from './autorec/autorecMenu.js';
+import { AutorecExchangeMenuApplication } from './autorec/autorecExchangeMenu.js';
 
 /**
  * Registers module settings and menus during Foundry VTT initialization.
@@ -20,6 +21,15 @@ export function registerModuleSettings() {
         icon: 'fa-solid fa-wand-magic-sparkles',
         type: AutorecMenuApplication,
         restricted: false
+    });
+
+    game.settings.registerMenu(MODULE_ID, 'autorecExchangeMenu', {
+        name: 'BBC.settings.autorecExchangeMenu.name',
+        label: 'BBC.settings.autorecExchangeMenu.label',
+        hint: 'BBC.settings.autorecExchangeMenu.hint',
+        icon: 'fa-solid fa-file-import',
+        type: AutorecExchangeMenuApplication,
+        restricted: true
     });
 
     game.settings.register(MODULE_ID, 'registeredTemplates', {

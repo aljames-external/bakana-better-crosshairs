@@ -6,6 +6,17 @@
                 "label": "View Autorecognition",
                 "hint": "Inspect and explore all registered crosshair animation workflows."
             },
+            "autorecExchangeMenu": {
+                "name": "Import / Export Autorecs",
+                "label": "Import / Export JSON",
+                "hint": "Export or import crosshair autorecognition configurations as JSON packages.",
+                "title": "Bakana's Better Crosshairs — Import / Export JSON",
+                "heading": "Global Autorec Import / Export",
+                "desc": "Backup or share crosshair automatic recognition (autorec) configurations as portable JSON files.",
+                "exportBtn": "Export Autorecs to JSON",
+                "importBtn": "Import Autorecs from JSON",
+                "countMsg": "{count} global autorec configuration(s) active."
+            },
             "registeredTemplates": {
                 "name": "Registered Templates"
             },

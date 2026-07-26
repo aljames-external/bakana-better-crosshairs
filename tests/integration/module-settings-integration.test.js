@@ -50,16 +50,15 @@ test('setupApiCalls safely merges API functions into game.modules.get(MODULE_ID)
 });
 
 test('registerModuleSettings registers menus and settings with safe onChange handlers', () => {
-    let registeredMenu = false;
+    const registeredMenus = [];
     let registeredSettings = [];
 
     const origRegisterMenu = game.settings.registerMenu;
     const origRegister = game.settings.register;
 
     game.settings.registerMenu = (mod, key, config) => {
-        registeredMenu = true;
+        registeredMenus.push({ mod, key, config });
         assert.strictEqual(mod, MODULE_ID);
-        assert.strictEqual(key, 'autorecMenu');
     };
 
     game.settings.register = (mod, key, config) => {
@@ -67,7 +66,9 @@ test('registerModuleSettings registers menus and settings with safe onChange han
     };
 
     registerModuleSettings();
-    assert.strictEqual(registeredMenu, true);
+    assert.strictEqual(registeredMenus.length, 2);
+    assert.ok(registeredMenus.some(m => m.key === 'autorecMenu'));
+    assert.ok(registeredMenus.some(m => m.key === 'autorecExchangeMenu'));
     assert.strictEqual(registeredSettings.length, 2);
 
     // Test onChange callback nullish resiliency
