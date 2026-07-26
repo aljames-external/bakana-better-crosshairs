@@ -54,7 +54,23 @@ export function clearHighlightLayer(id) {
  * @returns {boolean} True if native Foundry save helper handled the request
  */
 export function saveDataToFile(data, type, filename) {
-    const saveFn = foundry?.utils?.saveDataToFile ?? saveDataToFile;
-    return saveFn(data, type, filename);
+    try {
+        const utilsFn = foundry?.utils?.saveDataToFile;
+        if (typeof utilsFn === "function") {
+            utilsFn(data, type, filename);
+            return true;
+        }
+    } catch {
+        // Continue to fallback
+    }
+    try {
+        const globalFn = globalThis.saveDataToFile;
+        if (typeof globalFn === "function") {
+            globalFn(data, type, filename);
+            return true;
+        }
+    } catch {
+        // Continue to fallback
+    }
+    return false;
 }
-

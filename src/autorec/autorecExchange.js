@@ -381,19 +381,23 @@ export function analyzeImportDiff(validatedPackage, currentRegistrations, { defa
  * @returns {void}
  */
 export function triggerFileDownload(jsonString, filename = "bbc-autorec-export.json") {
-    const saved = saveDataToFile(jsonString, "text/json", filename);
-    if (saved) {
-        log.info(`AutorecExchange.triggerFileDownload | Export file "${filename}" saved via Foundry saveDataToFile.`);
-        return;
+    try {
+        const saved = saveDataToFile(jsonString, "text/json", filename);
+        if (saved) {
+            log.info(`AutorecExchange.triggerFileDownload | Export file "${filename}" saved via Foundry saveDataToFile.`);
+            return;
+        }
+    } catch (err) {
+        log.warn("AutorecExchange.triggerFileDownload | Native saveDataToFile failed, falling back to data URI:", err);
     }
-    const blob = new Blob([jsonString], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
+
+    const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(jsonString);
     const anchor = document.createElement("a");
-    anchor.href = url;
+    anchor.href = dataUri;
     anchor.download = filename;
+    anchor.style.display = "none";
     document.body.appendChild(anchor);
     anchor.click();
     document.body.removeChild(anchor);
-    URL.revokeObjectURL(url);
-    log.info(`AutorecExchange.triggerFileDownload | Export file "${filename}" triggered for user download.`);
+    log.info(`AutorecExchange.triggerFileDownload | Export file "${filename}" saved via Data-URI download.`);
 }
