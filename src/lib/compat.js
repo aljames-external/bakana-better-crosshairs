@@ -45,3 +45,16 @@ export function clearHighlightLayer(id) {
     return canvas.interface.grid.clearHighlightLayer(id);
 }
 
+/**
+ * Safely saves text or JSON string data to a file across Foundry VTT API versions.
+ * Checks namespaced foundry.utils.saveDataToFile first to prevent global accessor deprecation warnings.
+ * @param {string} data - String payload to save
+ * @param {string} type - MIME type (e.g. "text/json")
+ * @param {string} filename - Output filename
+ * @returns {boolean} True if native Foundry save helper handled the request
+ */
+export function saveDataToFile(data, type, filename) {
+    const saveFn = foundry?.utils?.saveDataToFile ?? saveDataToFile;
+    return saveFn(data, type, filename);
+}
+

@@ -1,5 +1,6 @@
 import { MODULE_ID } from "../lib/constants.js";
 import { log } from "../lib/logger.js";
+import { saveDataToFile } from "../lib/compat.js";
 import { DEFAULT_AUTOREC_ENTRY } from "./autorecManager.js";
 
 /**
@@ -380,14 +381,9 @@ export function analyzeImportDiff(validatedPackage, currentRegistrations, { defa
  * @returns {void}
  */
 export function triggerFileDownload(jsonString, filename = "bbc-autorec-export.json") {
-    if (typeof saveDataToFile === "function") {
-        saveDataToFile(jsonString, "text/json", filename);
+    const saved = saveDataToFile(jsonString, "text/json", filename);
+    if (saved) {
         log.info(`AutorecExchange.triggerFileDownload | Export file "${filename}" saved via Foundry saveDataToFile.`);
-        return;
-    }
-    if (typeof foundry?.utils?.saveDataToFile === "function") {
-        foundry.utils.saveDataToFile(jsonString, "text/json", filename);
-        log.info(`AutorecExchange.triggerFileDownload | Export file "${filename}" saved via foundry.utils.saveDataToFile.`);
         return;
     }
     const blob = new Blob([jsonString], { type: "application/json" });
