@@ -1,6 +1,6 @@
 # Bakana's Better Crosshairs (BBC) — Third-Party Module Developer Guide
 
-This guide describes how third-party Foundry VTT modules (such as macro packs, spell collections, or class feature libraries) can register, export, and import crosshair animations using the BBC Module API.
+This guide describes how third-party Foundry VTT modules (such as content modules, spell collections, or class feature packs) can register, export, and import crosshair animations for items and activities using the BBC Module API.
 
 ---
 
@@ -19,28 +19,26 @@ const bbcApi = game.modules.get("bakana-better-crosshairs")?.api;
 Rather than passing your module ID manually on every single registration call, invoke `autorecManager` directly as a function supplying your unique `module-id`:
 
 ```javascript
-const macroPackManager = bbcApi.autorecManager("eskie-macro-pack");
+const packManager = bbcApi.autorecManager("eskie-content-pack");
 ```
 
 Optionally, you can also instantiate the class directly:
 
 ```javascript
-const macroPackManager = new bbcApi.ModuleAutorecManager("eskie-macro-pack");
+const packManager = new bbcApi.ModuleAutorecManager("eskie-content-pack");
 ```
 
 ---
 
-## 3. Registering Macro Crosshair Animations
+## 3. Registering Item & Activity Autorec Animations
 
-When using your module's manager, pass your **`macroId`** (or **`itemName`**)—this is the Item, Spell, or Macro name matching game items/macros (e.g. `"Fireball"`, `"sao-death"`, `"Magic Missile"`).
+When using your module's manager, pass the **`itemName`** (the Item, Spell, or Activity name matching game items, e.g. `"Fireball"`, `"Longbow"`, `"Magic Missile"`). BBC automatically tags each entry with your specified module name (`sourceModule: "eskie-content-pack"`).
 
-> **Note on `macroId` vs `itemName`:** Under the hood, BBC indexes workflows by `itemName`. In `ModuleAutorecManager`, `macroId` and `itemName` are interchangeable—when you pass a `macroId`, it is passed along as the item's registration name (`itemName`) and automatically tagged with your `sourceModule`.
-
-### Single Macro Registration (`.register`)
+### Single Item Registration (`.register`)
 
 ```javascript
-macroPackManager.register("sao-death", {
-    circleFile: "modules/eskie-macro-pack/assets/death.webp",
+packManager.register("Fireball", {
+    circleFile: "modules/eskie-content-pack/assets/fireball.webp",
     borderColor: "#ff0000",
     borderAlpha: 0.85,
     stickToToken: false,
@@ -50,12 +48,12 @@ macroPackManager.register("sao-death", {
 });
 ```
 
-### Batch Macro Registration (`.registerMany`)
+### Batch Item Registration (`.registerMany`)
 
 ```javascript
-await macroPackManager.registerMany([
+await packManager.registerMany([
     {
-        macroId: "tiger-attunement",
+        itemName: "Tiger Attunement",
         config: {
             circleFile: "jb2a.tiger.orange",
             showLine: true,
@@ -64,7 +62,7 @@ await macroPackManager.registerMany([
         }
     },
     {
-        macroId: "chromatic-orb",
+        itemName: "Chromatic Orb",
         config: {
             circleFile: "jb2a.chromatic_orb.blue",
             placedFillColor: "#0099ff",
@@ -81,32 +79,32 @@ await macroPackManager.registerMany([
 ### Check or Retrieve Active Registration
 
 ```javascript
-// Check whether a macro-id is registered
-const isRegistered = macroPackManager.has("sao-death");
+// Check whether an item/spell is registered
+const isRegistered = packManager.has("Fireball");
 
 // Retrieve configuration object
-const config = macroPackManager.get("sao-death");
+const config = packManager.get("Fireball");
 ```
 
 ### List Belonging Keys & UI Entries
 
 ```javascript
-// Get list of macro-id string keys registered under your module-id
-const myMacroIds = macroPackManager.list();
-// ["sao-death", "tiger-attunement", "chromatic-orb"]
+// Get list of item name string keys registered under your module-id
+const myItemNames = packManager.list();
+// ["Fireball", "Tiger Attunement", "Chromatic Orb"]
 
 // Get full UI-formatted entries belonging to your module
-const myEntries = macroPackManager.getAllEntries();
+const myEntries = packManager.getAllEntries();
 ```
 
 ### Unregistering Entries
 
 ```javascript
-// Remove single macro sequence
-macroPackManager.unregister("sao-death");
+// Remove single item sequence
+packManager.unregister("Fireball");
 
 // Batch remove multiple sequences
-await macroPackManager.unregisterMany(["tiger-attunement", "chromatic-orb"]);
+await packManager.unregisterMany(["Tiger Attunement", "Chromatic Orb"]);
 ```
 
 ---
@@ -123,13 +121,13 @@ BBC supports importing and exporting crosshair presets via standardized JSON str
 ```json
 {
   "version": "1.0.0",
-  "sourceModule": "eskie-macro-pack",
-  "description": "Eskie Macro Pack Crosshairs v1.0",
+  "sourceModule": "eskie-content-pack",
+  "description": "Eskie Content Pack Crosshairs v1.0",
   "entries": [
     {
-      "itemName": "sao-death",
-      "circleFile": "modules/eskie-macro-pack/assets/death.webp",
-      "sourceModule": "eskie-macro-pack"
+      "itemName": "Fireball",
+      "circleFile": "modules/eskie-content-pack/assets/fireball.webp",
+      "sourceModule": "eskie-content-pack"
     }
   ]
 }
@@ -141,11 +139,11 @@ You can also pass a simple raw JSON array string or array of objects without sch
 ```json
 [
   {
-    "itemName": "sao-death",
-    "circleFile": "modules/eskie-macro-pack/assets/death.webp"
+    "itemName": "Fireball",
+    "circleFile": "modules/eskie-content-pack/assets/fireball.webp"
   },
   {
-    "itemName": "tiger-attunement",
+    "itemName": "Tiger Attunement",
     "circleFile": "jb2a.tiger.orange"
   }
 ]
@@ -153,31 +151,31 @@ You can also pass a simple raw JSON array string or array of objects without sch
 
 ### Module Tag Updating Behavior
 
-- **Importing via `ModuleAutorecManager`**: Every element inside the imported JSON has its `sourceModule` tag automatically updated to your `module-id` (e.g. `"eskie-macro-pack"`). This ensures presets bundled from external editors appear in the Autorec UI grouped under your module name.
+- **Importing via `ModuleAutorecManager`**: Every element inside the imported JSON has its `sourceModule` tag automatically updated to your `module-id` (e.g. `"eskie-content-pack"`). This ensures presets bundled from external editors appear in the Autorec UI grouped under your module name.
 - **Importing via Game Settings / Autorec Menu**: Global UI import preserves existing `sourceModule` tags in the JSON file as-is without overriding.
 
 ### Loading Included JSON Bundles on Module Startup
 
-A common pattern for macro modules is shipping a JSON preset file inside the module directory and auto-loading it during Foundry's `ready` hook:
+A common pattern for modules is shipping a JSON preset file inside the module directory and auto-loading it during Foundry's `ready` hook:
 
 ```javascript
 Hooks.once("ready", async () => {
-    const macroPackManager = game.modules.get("bakana-better-crosshairs")?.api?.autorecManager("eskie-macro-pack");
-    if (!macroPackManager) return;
+    const packManager = game.modules.get("bakana-better-crosshairs")?.api?.autorecManager("eskie-content-pack");
+    if (!packManager) return;
 
     try {
-        const response = await fetch("modules/eskie-macro-pack/packs/crosshairs.json");
+        const response = await fetch("modules/eskie-content-pack/packs/crosshairs.json");
         if (!response.ok) return;
 
         const jsonContent = await response.text();
-        await macroPackManager.importAutorecs(jsonContent, {
+        await packManager.importAutorecs(jsonContent, {
             interactive: false,
             overwrite: true
         });
 
-        console.log("Eskie Macro Pack | Loaded crosshair autorec presets.");
+        console.log("Eskie Content Pack | Loaded crosshair autorec presets.");
     } catch (err) {
-        console.error("Eskie Macro Pack | Failed to load crosshair presets:", err);
+        console.error("Eskie Content Pack | Failed to load crosshair presets:", err);
     }
 });
 ```
@@ -189,13 +187,13 @@ Hooks.once("ready", async () => {
 | Method | Signature | Description |
 | :--- | :--- | :--- |
 | `autorecManager(moduleId)` | `(moduleId: string) => ModuleAutorecManager` | Callable function proxy to instantiate a module-scoped manager. |
-| `register` | `(macroId, handlerOrConfig, options?) => void` | Register a single macro animation tagged with `sourceModule: moduleId`. |
+| `register` | `(itemName, handlerOrConfig, options?) => void` | Register a single crosshair animation tagged with `sourceModule: moduleId`. |
 | `registerMany` | `(entries, options?) => Promise<void>` | Batch register entries tagged with `sourceModule: moduleId`. |
-| `unregister` | `(macroId, options?) => boolean` | Remove single macro sequence registration. |
-| `unregisterMany` | `(macroIds, options?) => Promise<void>` | Batch remove macro sequence registrations. |
-| `get` | `(macroId) => Object \| null` | Get active configuration for a macro ID. |
-| `has` | `(macroId) => boolean` | Check if macro sequence registration exists. |
-| `list` | `() => string[]` | List all macro IDs registered under this module. |
+| `unregister` | `(itemName, options?) => boolean` | Remove single item autorec registration. |
+| `unregisterMany` | `(itemNames, options?) => Promise<void>` | Batch remove item autorec registrations. |
+| `get` | `(itemName) => Object \| null` | Get active configuration for an item name. |
+| `has` | `(itemName) => boolean` | Check if item autorec registration exists. |
+| `list` | `() => string[]` | List all item names registered under this module. |
 | `getAllEntries` | `() => Object[]` | Get UI formatted entry dictionaries for this module. |
 | `exportAutorecs` | `(options?) => Object` | Export JSON exchange package containing this module's registrations. |
 | `exportToFile` | `(options?) => void` | Download exported JSON bundle as a file. |

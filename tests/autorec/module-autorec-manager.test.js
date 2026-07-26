@@ -5,59 +5,59 @@ import { autorecManager } from '../../src/autorec/autorecManager.js';
 import { ModuleAutorecManager } from '../../src/autorec/moduleAutorecManager.js';
 import { AUTOREC_EXCHANGE_VERSION } from '../../src/autorec/autorecExchange.js';
 
-test('ModuleAutorecManager registers macros tagged with module-id', () => {
-    const packManager = autorecManager.forModule('eskie-macro-pack');
-    const callableManager = autorecManager('eskie-macro-pack');
+test('ModuleAutorecManager registers item autorecs tagged with module-id', () => {
+    const packManager = autorecManager.forModule('eskie-content-pack');
+    const callableManager = autorecManager('eskie-content-pack');
     assert.ok(packManager instanceof ModuleAutorecManager);
     assert.ok(callableManager instanceof ModuleAutorecManager);
-    assert.equal(packManager.moduleId, 'eskie-macro-pack');
-    assert.equal(callableManager.moduleId, 'eskie-macro-pack');
+    assert.equal(packManager.moduleId, 'eskie-content-pack');
+    assert.equal(callableManager.moduleId, 'eskie-content-pack');
 
-    packManager.register('tiger-attunement', {
+    packManager.register('Tiger Attunement', {
         circleFile: 'jb2a.tiger.orange',
         enabled: true
     }, { local: true });
 
-    assert.equal(autorecManager.has('tiger-attunement'), true);
-    const entry = autorecManager.getEntryByName('tiger-attunement');
+    assert.equal(autorecManager.has('Tiger Attunement'), true);
+    const entry = autorecManager.getEntryByName('Tiger Attunement');
     assert.ok(entry);
-    assert.equal(entry.sourceModule, 'eskie-macro-pack');
+    assert.equal(entry.sourceModule, 'eskie-content-pack');
     assert.equal(entry.circleFile, 'jb2a.tiger.orange');
 
     const packList = packManager.list();
-    assert.ok(packList.includes('tiger-attunement'));
+    assert.ok(packList.includes('Tiger Attunement'));
 
     const packEntries = packManager.getAllEntries();
     assert.equal(packEntries.length, 1);
-    assert.equal(packEntries[0].itemName, 'tiger-attunement');
+    assert.equal(packEntries[0].itemName, 'Tiger Attunement');
 
-    packManager.unregister('tiger-attunement', { local: true });
-    assert.equal(autorecManager.has('tiger-attunement'), false);
+    packManager.unregister('Tiger Attunement', { local: true });
+    assert.equal(autorecManager.has('Tiger Attunement'), false);
 });
 
 test('ModuleAutorecManager batch registerMany and unregisterMany tag entries with module-id', async () => {
-    const packManager = new ModuleAutorecManager('sao-effect-pack');
+    const packManager = autorecManager('sao-effect-pack');
 
     await packManager.registerMany([
-        { macroId: 'sao-death', config: { circleFile: 'sao.red.circle' }, local: true },
-        { macroId: 'sao-resurrection', config: { circleFile: 'sao.gold.circle' }, local: true }
+        { itemName: 'SAO Death Burst', config: { circleFile: 'sao.red.circle' }, local: true },
+        { itemName: 'SAO Resurrection', config: { circleFile: 'sao.gold.circle' }, local: true }
     ], { persist: false });
 
-    const death = autorecManager.getEntryByName('sao-death');
-    const res = autorecManager.getEntryByName('sao-resurrection');
+    const death = autorecManager.getEntryByName('SAO Death Burst');
+    const res = autorecManager.getEntryByName('SAO Resurrection');
 
     assert.ok(death);
     assert.equal(death.sourceModule, 'sao-effect-pack');
     assert.ok(res);
     assert.equal(res.sourceModule, 'sao-effect-pack');
 
-    await packManager.unregisterMany(['sao-death', 'sao-resurrection'], { local: true });
-    assert.equal(autorecManager.has('sao-death'), false);
-    assert.equal(autorecManager.has('sao-resurrection'), false);
+    await packManager.unregisterMany(['SAO Death Burst', 'SAO Resurrection'], { local: true });
+    assert.equal(autorecManager.has('SAO Death Burst'), false);
+    assert.equal(autorecManager.has('SAO Resurrection'), false);
 });
 
 test('ModuleAutorecManager.importAutorecs updates module tag on all imported elements to module-id', async () => {
-    const packManager = autorecManager.forModule('custom-spells-pack');
+    const packManager = autorecManager('custom-spells-pack');
 
     const jsonPayload = JSON.stringify({
         version: AUTOREC_EXCHANGE_VERSION,
@@ -100,7 +100,7 @@ test('Game settings import (overrideSourceModule: null) preserves existing modul
             {
                 itemName: 'Grapple Effect',
                 lineFile: 'grapple.png',
-                sourceModule: 'eskie-macro-pack'
+                sourceModule: 'eskie-content-pack'
             },
             {
                 itemName: 'Rage Aura',
@@ -122,7 +122,7 @@ test('Game settings import (overrideSourceModule: null) preserves existing modul
     const rage = autorecManager.getEntryByName('Rage Aura');
 
     assert.ok(grapple);
-    assert.equal(grapple.sourceModule, 'eskie-macro-pack', 'Game settings import must preserve existing module-id as-is');
+    assert.equal(grapple.sourceModule, 'eskie-content-pack', 'Game settings import must preserve existing module-id as-is');
 
     assert.ok(rage);
     assert.equal(rage.sourceModule, 'barbarian-mod', 'Game settings import must preserve existing module-id as-is');
@@ -140,8 +140,8 @@ test('ModuleAutorecManager.importAutorecs can accept raw array JSON strings or a
             circleFile: 'tiger-slash.png'
         },
         {
-            itemName: 'SAO Death Burst',
-            circleFile: 'sao-burst.png'
+            itemName: 'SAO Death Wave',
+            circleFile: 'sao-wave.png'
         }
     ]);
 
@@ -149,7 +149,7 @@ test('ModuleAutorecManager.importAutorecs can accept raw array JSON strings or a
     assert.equal(result.mergedCount, 2);
 
     const slash = autorecManager.getEntryByName('Totemic Tiger Slash');
-    const burst = autorecManager.getEntryByName('SAO Death Burst');
+    const burst = autorecManager.getEntryByName('SAO Death Wave');
 
     assert.ok(slash);
     assert.equal(slash.sourceModule, 'raw-array-pack');
@@ -157,5 +157,5 @@ test('ModuleAutorecManager.importAutorecs can accept raw array JSON strings or a
     assert.equal(burst.sourceModule, 'raw-array-pack');
 
     autorecManager.unregister('Totemic Tiger Slash', { local: true });
-    autorecManager.unregister('SAO Death Burst', { local: true });
+    autorecManager.unregister('SAO Death Wave', { local: true });
 });
