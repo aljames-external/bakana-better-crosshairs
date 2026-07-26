@@ -120,9 +120,18 @@ await packManager.unregister(["Fireball", "Tiger Attunement", "Chromatic Orb"]);
 
 BBC supports importing and exporting crosshair presets via standardized JSON structures.
 
-### Supported JSON Payloads
+### Exporting Configurations (`.export`)
 
-`importAutorecs(...)` accepts strings or objects in either format:
+Generate a versioned JSON exchange package container for all registrations belonging to your module:
+
+```javascript
+const bundle = packManager.export({ description: "Eskie Content Pack v1.0 Presets" });
+console.log("Package Container:", bundle);
+```
+
+### Supported JSON Import Payloads (`.import`)
+
+`.import(...)` accepts strings or objects in either format:
 
 #### Standard Exchange Bundle Structure
 ```json
@@ -150,15 +159,16 @@ You can also pass a simple raw JSON array string or array of objects without sch
     "circleFile": "modules/eskie-content-pack/assets/fireball.webp"
   },
   {
-    "itemName": "Tiger Attunement",
-    "circleFile": "jb2a.tiger.orange"
+    "itemName": "Longbow",
+    "activityName": "Ranged Attack",
+    "rayFile": "jb2a.arrow.white"
   }
 ]
 ```
 
 ### Module Tag Updating Behavior
 
-- **Importing via `ModuleAutorecManager`**: Every element inside the imported JSON has its `sourceModule` tag automatically updated to your `module-id` (e.g. `"eskie-content-pack"`). This ensures presets bundled from external editors appear in the Autorec UI grouped under your module name.
+- **Importing via `ModuleAutorecManager` (`.import`)**: Every element inside the imported JSON has its `sourceModule` tag automatically updated to your `module-id` (e.g. `"eskie-content-pack"`). This ensures presets bundled from external editors appear in the Autorec UI grouped under your module name.
 - **Importing via Game Settings / Autorec Menu**: Global UI import preserves existing `sourceModule` tags in the JSON file as-is without overriding.
 
 ### Loading Included JSON Bundles on Module Startup
@@ -175,7 +185,7 @@ Hooks.once("ready", async () => {
         if (!response.ok) return;
 
         const jsonContent = await response.text();
-        await packManager.importAutorecs(jsonContent, {
+        await packManager.import(jsonContent, {
             interactive: false,
             overwrite: true
         });
@@ -200,6 +210,5 @@ Hooks.once("ready", async () => {
 | `has` | `(itemName: string) => boolean` | Check if item autorec registration exists. |
 | `list` | `() => string[]` | List all item names registered under this module. |
 | `getAllEntries` | `() => Object[]` | Get UI formatted entry dictionaries for this module. |
-| `exportAutorecs` | `(options?) => Object` | Export JSON exchange package containing this module's registrations. |
-| `exportToFile` | `(options?) => void` | Download exported JSON bundle as a file. |
-| `importAutorecs` | `(jsonOrString, options?) => Promise<Object>` | Import package or JSON array and update elements with this module's `module-id`. |
+| `export` | `(options?) => Object` | Export JSON exchange package containing this module's registrations. |
+| `import` | `(jsonOrString, options?) => Promise<Object>` | Import package or JSON array and update elements with this module's `module-id`. |

@@ -29,9 +29,8 @@ export class ModuleAutorecManager {
         this.has = this.has.bind(this);
         this.list = this.list.bind(this);
         this.getAllEntries = this.getAllEntries.bind(this);
-        this.exportAutorecs = this.exportAutorecs.bind(this);
-        this.exportToFile = this.exportToFile.bind(this);
-        this.importAutorecs = this.importAutorecs.bind(this);
+        this.export = this.export.bind(this);
+        this.import = this.import.bind(this);
     }
 
     /**
@@ -142,28 +141,13 @@ export class ModuleAutorecManager {
      * @param {Object} [options={}] - Export options
      * @returns {Object} Exchange package object
      */
-    exportAutorecs({ includeDefault = false, description = "" } = {}) {
+    export({ includeDefault = false, description = "" } = {}) {
         const moduleEntries = this.getAllEntries().map(e => e.config ?? e);
         return this._parent.exportAutorecs({
             sourceModule: this.moduleId,
             includeDefault,
             description,
             entriesInput: moduleEntries
-        });
-    }
-
-    /**
-     * Export this module's registered autorec definitions to a downloadable JSON file.
-     * @param {Object} [options={}] - Export file configuration options
-     * @returns {void}
-     */
-    exportToFile({ filename = null, includeDefault = false, description = "" } = {}) {
-        const defaultName = `${this.moduleId}-autorec-export-${new Date().toISOString().slice(0, 10)}.json`;
-        this._parent.exportToFile({
-            filename: filename ?? defaultName,
-            sourceModule: this.moduleId,
-            includeDefault,
-            description
         });
     }
 
@@ -176,8 +160,8 @@ export class ModuleAutorecManager {
      * @param {boolean} [options.overwrite=true] - Default conflict strategy when non-interactive
      * @returns {Promise<{mergedCount: number, importedEntries: Array<Object>}|null>} Result summary or null if cancelled
      */
-    async importAutorecs(jsonOrString, { interactive = true, overwrite = true } = {}) {
-        log.info(`ModuleAutorecManager[${this.moduleId}].importAutorecs | Importing bundle with module-id tag set to "${this.moduleId}".`);
+    async import(jsonOrString, { interactive = true, overwrite = true } = {}) {
+        log.info(`ModuleAutorecManager[${this.moduleId}].import | Importing bundle with module-id tag set to "${this.moduleId}".`);
         return this._parent.importAutorecs(jsonOrString, {
             sourceModule: this.moduleId,
             overrideSourceModule: this.moduleId,

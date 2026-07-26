@@ -69,7 +69,7 @@ test('ModuleAutorecManager.register and .unregister require arrays of elements',
     assert.equal(autorecManager.has('SAO Death Burst'), false);
 });
 
-test('ModuleAutorecManager.importAutorecs updates module tag on all imported elements to module-id', async () => {
+test('ModuleAutorecManager.import updates module tag on all imported elements to module-id', async () => {
     const packManager = autorecManager('custom-spells-pack');
 
     const jsonPayload = JSON.stringify({
@@ -89,7 +89,7 @@ test('ModuleAutorecManager.importAutorecs updates module tag on all imported ele
         ]
     });
 
-    const result = await packManager.importAutorecs(jsonPayload, { interactive: false });
+    const result = await packManager.import(jsonPayload, { interactive: false });
     assert.equal(result.mergedCount, 2);
 
     const orb = autorecManager.getEntryByName('Chromatic Orb');
@@ -144,7 +144,7 @@ test('Game settings import (overrideSourceModule: null) preserves existing modul
     autorecManager.unregister('Rage Aura', { local: true });
 });
 
-test('ModuleAutorecManager.importAutorecs can accept raw array JSON strings or arrays directly', async () => {
+test('ModuleAutorecManager.import and .export work cleanly', async () => {
     const packManager = autorecManager('raw-array-pack');
 
     const rawArrayJson = JSON.stringify([
@@ -158,7 +158,7 @@ test('ModuleAutorecManager.importAutorecs can accept raw array JSON strings or a
         }
     ]);
 
-    const result = await packManager.importAutorecs(rawArrayJson, { interactive: false });
+    const result = await packManager.import(rawArrayJson, { interactive: false });
     assert.equal(result.mergedCount, 2);
 
     const slash = autorecManager.getEntryByName('Totemic Tiger Slash');
@@ -168,6 +168,10 @@ test('ModuleAutorecManager.importAutorecs can accept raw array JSON strings or a
     assert.equal(slash.sourceModule, 'raw-array-pack');
     assert.ok(burst);
     assert.equal(burst.sourceModule, 'raw-array-pack');
+
+    const exported = packManager.export({ description: 'Export test' });
+    assert.equal(exported.sourceModule, 'raw-array-pack');
+    assert.equal(exported.entries.length, 2);
 
     autorecManager.unregister('Totemic Tiger Slash', { local: true });
     autorecManager.unregister('SAO Death Wave', { local: true });

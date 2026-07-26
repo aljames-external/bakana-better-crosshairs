@@ -897,6 +897,20 @@ export class AutorecManager {
     }
 
     /**
+     * Alias for exportAutorecs.
+     */
+    export(options = {}) {
+        return this.exportAutorecs(options);
+    }
+
+    /**
+     * Alias for importAutorecs.
+     */
+    async import(jsonOrString, options = {}) {
+        return this.importAutorecs(jsonOrString, options);
+    }
+
+    /**
      * Apply an array of selected exchange entries into active registration store and persist to world settings.
      * Overwrites existing entries sharing identical item name and activity name.
      * @param {Array<Object>} selectedEntries - Array of entries chosen for application
