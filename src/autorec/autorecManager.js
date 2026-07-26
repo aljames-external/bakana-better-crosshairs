@@ -659,6 +659,15 @@ export class AutorecManager {
             const stickToTokenMode = isStickOn ? "true" : (isStickOff ? "false" : "default");
             const stickToToken = isStickOn;
             const showLine = config.showLine !== false;
+            const showRange = config.showRange !== false;
+            const limitRange = config.limitRange !== false;
+            const enablePrePlacement = Boolean(config.enablePrePlacement);
+            const enableAnimation = Boolean(config.enableAnimation);
+            const enablePlacedStyling = Boolean(config.enablePlacedStyling);
+            const enablePostPlacement = Boolean(config.enablePostPlacement);
+            const distance = config.distance ?? "";
+            const width = config.width ?? "";
+            const angle = config.angle ?? "";
             const lineFile = config.lineFile ?? DEFAULT_AUTOREC_ENTRY.lineFile;
             const borderColor = config.borderColor ?? DEFAULT_AUTOREC_ENTRY.borderColor;
             const borderAlpha = config.borderAlpha ?? DEFAULT_AUTOREC_ENTRY.borderAlpha;
@@ -711,6 +720,9 @@ export class AutorecManager {
                 isCustomFunction,
                 isLocal,
                 config,
+                distance,
+                width,
+                angle,
                 distanceDisplay,
                 widthDisplay,
                 angleDisplay,
@@ -720,6 +732,12 @@ export class AutorecManager {
                 isStickOn,
                 isStickOff,
                 showLine,
+                showRange,
+                limitRange,
+                enablePrePlacement,
+                enableAnimation,
+                enablePlacedStyling,
+                enablePostPlacement,
                 lineFile,
                 borderColor,
                 borderAlpha,
