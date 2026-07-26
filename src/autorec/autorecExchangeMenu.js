@@ -38,12 +38,13 @@ export class AutorecExchangeMenuApplication extends ApplicationV2 {
      * @returns {Promise<string>} HTML string representation
      */
     async _renderHTML(options) {
-        const count = autorecManager.list().length;
+        const count = autorecManager.list().filter(k => k !== "DEFAULT").length;
         const titleStr = localize("BBC.settings.autorecExchangeMenu.heading", "Global Autorec Import / Export");
         const descStr = localize("BBC.settings.autorecExchangeMenu.desc", "Backup or share crosshair automatic recognition (autorec) configurations as portable JSON files.");
         const exportLabel = localize("BBC.settings.autorecExchangeMenu.exportBtn", "Export Autorecs to JSON");
         const importLabel = localize("BBC.settings.autorecExchangeMenu.importBtn", "Import Autorecs from JSON");
-        const countMsg = localize("BBC.settings.autorecExchangeMenu.countMsg", `${count} global autorec configuration(s) active.`);
+        const rawCountMsg = localize("BBC.settings.autorecExchangeMenu.countMsg", "{count} global autorec configuration(s) active.");
+        const countMsg = game?.i18n?.format?.("BBC.settings.autorecExchangeMenu.countMsg", { count }) ?? rawCountMsg.replace("{count}", String(count));
 
         return `
             <div style="padding: 16px; display: flex; flex-direction: column; gap: 14px; background: linear-gradient(135deg, #11141d 0%, #171a26 100%); color: #e2e8f0; font-family: sans-serif;">
@@ -74,16 +75,22 @@ export class AutorecExchangeMenuApplication extends ApplicationV2 {
     }
 
     /**
-     * Attach click event handlers for settings exchange window.
+     * Official ApplicationV2 post-render lifecycle hook.
+     * Attaches click event handlers for settings exchange window.
      * @protected
+     * @param {object} context - Prepared context data
+     * @param {object} options - Options
+     * @returns {void}
      */
-    _attachCustomEventListeners(root, context, options) {
-        const rootEl = root instanceof HTMLElement ? root : (root?.element ?? null);
+    _onRender(context, options) {
+        super._onRender?.(context, options);
+        const rootEl = this.element;
         if (!rootEl) return;
 
         const exportBtn = rootEl.querySelector(".bbc-setting-export-btn");
         if (exportBtn) {
             exportBtn.addEventListener("click", () => {
+                log.info("AutorecExchangeMenuApplication | Triggering global autorec file export.");
                 autorecManager.exportToFile({ sourceModule: "world" });
             });
         }
@@ -91,28 +98,38 @@ export class AutorecExchangeMenuApplication extends ApplicationV2 {
         const importBtn = rootEl.querySelector(".bbc-setting-import-btn");
         if (importBtn) {
             importBtn.addEventListener("click", () => {
+                log.info("AutorecExchangeMenuApplication | Opening file browser picker for JSON import.");
                 const input = document.createElement("input");
                 input.type = "file";
                 input.accept = ".json,application/json";
+                input.style.display = "none";
+                document.body.appendChild(input);
+
                 input.addEventListener("change", async (ev) => {
                     const file = ev.target?.files?.[0];
-                    if (!file) return;
-                    const reader = new FileReader();
-                    reader.onload = async (e) => {
-                        const text = e.target?.result;
-                        if (typeof text !== "string") return;
-                        try {
-                            const res = await autorecManager.importAutorecs(text, { sourceModule: "world", interactive: true });
-                            if (res) {
-                                this.render(false);
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = async (e) => {
+                            const text = e.target?.result;
+                            if (typeof text === "string") {
+                                try {
+                                    const res = await autorecManager.importAutorecs(text, { sourceModule: "world", interactive: true });
+                                    if (res) {
+                                        this.render(false);
+                                    }
+                                } catch (err) {
+                                    log.error("AutorecExchangeMenuApplication | Import error:", err);
+                                    notify.error(localize("BBC.autorecExchange.notify.importError", `Import failed: ${err.message}`));
+                                }
                             }
-                        } catch (err) {
-                            log.error("AutorecExchangeMenuApplication | Import error:", err);
-                            notify.error(localize("BBC.autorecExchange.notify.importError", `Import failed: ${err.message}`));
-                        }
-                    };
-                    reader.readAsText(file);
+                        };
+                        reader.readAsText(file);
+                    }
+                    if (input.parentNode) {
+                        input.parentNode.removeChild(input);
+                    }
                 });
+
                 input.click();
             });
         }

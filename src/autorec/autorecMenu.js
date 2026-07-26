@@ -278,25 +278,32 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
                 const fileInput = document.createElement("input");
                 fileInput.type = "file";
                 fileInput.accept = ".json,application/json";
+                fileInput.style.display = "none";
+                document.body.appendChild(fileInput);
+
                 fileInput.addEventListener("change", async (ev) => {
                     const selectedFile = ev.target?.files?.[0];
-                    if (!selectedFile) return;
-
-                    const reader = new FileReader();
-                    reader.onload = async (event) => {
-                        const content = event.target?.result;
-                        if (typeof content !== "string") return;
-                        try {
-                            const res = await autorecManager.importAutorecs(content, { sourceModule: "world", interactive: true });
-                            if (res) {
-                                this.render(false);
+                    if (selectedFile) {
+                        const reader = new FileReader();
+                        reader.onload = async (event) => {
+                            const content = event.target?.result;
+                            if (typeof content === "string") {
+                                try {
+                                    const res = await autorecManager.importAutorecs(content, { sourceModule: "world", interactive: true });
+                                    if (res) {
+                                        this.render(false);
+                                    }
+                                } catch (err) {
+                                    log.error("AutorecMenuApplication | Import JSON failed:", err);
+                                    notify.error(localize("BBC.autorecExchange.notify.importError", `Import failed: ${err.message}`));
+                                }
                             }
-                        } catch (err) {
-                            log.error("AutorecMenuApplication | Import JSON failed:", err);
-                            notify.error(localize("BBC.autorecExchange.notify.importError", `Import failed: ${err.message}`));
-                        }
-                    };
-                    reader.readAsText(selectedFile);
+                        };
+                        reader.readAsText(selectedFile);
+                    }
+                    if (fileInput.parentNode) {
+                        fileInput.parentNode.removeChild(fileInput);
+                    }
                 });
                 fileInput.click();
             });
