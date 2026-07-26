@@ -51,12 +51,14 @@
                     {{/unless}}
                     <div class="bbc-card-main">
                         <i class="fa-solid fa-crosshairs bbc-item-icon"></i>
-                        <span class="bbc-item-name">{{itemName}}</span>
+                        <div class="bbc-item-name-stack">
+                            <span class="bbc-item-name">{{itemName}}</span>
+                            {{#if (and ../supportsActivities hasActivity)}}
+                            <span class="bbc-item-activity-sub" title="{{../labels.activityHintPrefix}}{{activityDisplay}}">{{activityDisplay}}</span>
+                            {{/if}}
+                        </div>
                         {{#if isDefault}}
                         <span class="bbc-type-badge default" title="{{../labels.globalFallbackHint}}">{{../labels.defaultBadge}}</span>
-                        {{/if}}
-                        {{#if (and ../supportsActivities hasActivity)}}
-                        <span class="bbc-activity-pill" title="{{../labels.activityHintPrefix}}{{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
                         {{/if}}
                     </div>
                     <div class="bbc-card-meta">
@@ -90,10 +92,12 @@
                 <header class="bbc-detail-header">
                     <div class="bbc-title-left">
                         <i class="fa-solid fa-crosshairs bbc-detail-icon"></i>
-                        <h2>{{itemName}}</h2>
-                        {{#if (and ../supportsActivities hasActivity)}}
-                        <span class="bbc-activity-pill" title="{{../labels.activityHintPrefix}}{{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
-                        {{/if}}
+                        <div class="bbc-detail-title-stack">
+                            <h2>{{itemName}}</h2>
+                            {{#if (and ../supportsActivities hasActivity)}}
+                            <span class="bbc-detail-activity-sub" title="{{../labels.activityHintPrefix}}{{activityDisplay}}">{{activityDisplay}}</span>
+                            {{/if}}
+                        </div>
                         {{#unless isDefault}}
                         <span class="bbc-type-badge source-module" title="Source Module: {{sourceModule}}"><i class="fa-solid fa-box-archive"></i> {{sourceModule}}</span>
                         {{/unless}}
