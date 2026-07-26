@@ -227,7 +227,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
                 const regKey = activity !== "" ? `${itemName} | ${activity}` : itemName;
 
                 if (!autorecManager.has(regKey)) {
-                    const config = activity !== "" ? { itemName, activityId: activity, activityName: activity } : { itemName };
+                    const config = activity !== "" ? { itemName, activityId: activity, activityName: activity, sourceModule: "BBC" } : { itemName, sourceModule: "BBC" };
                     autorecManager.register(regKey, config, { persist: true });
                     autorecManager.broadcastSync();
                     notify.info(localize("BBC.autorecMenu.notify.added", `Added workflow: "${regKey}".`));
@@ -267,7 +267,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
         const exportJsonBtn = rootEl.querySelector(".bbc-export-json-btn");
         if (exportJsonBtn) {
             exportJsonBtn.addEventListener("click", () => {
-                autorecManager.exportToFile({ sourceModule: "world" });
+                autorecManager.exportToFile({ sourceModule: "BBC" });
             });
         }
 
@@ -289,7 +289,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
                             const content = event.target?.result;
                             if (typeof content === "string") {
                                 try {
-                                    const res = await autorecManager.importAutorecs(content, { sourceModule: "world", interactive: true });
+                                    const res = await autorecManager.importAutorecs(content, { sourceModule: "BBC", interactive: true });
                                     if (res) {
                                         this.render(false);
                                     }

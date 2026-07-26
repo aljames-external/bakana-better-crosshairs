@@ -91,7 +91,7 @@ export class AutorecExchangeMenuApplication extends ApplicationV2 {
         if (exportBtn) {
             exportBtn.addEventListener("click", () => {
                 log.info("AutorecExchangeMenuApplication | Triggering global autorec file export.");
-                autorecManager.exportToFile({ sourceModule: "world" });
+                autorecManager.exportToFile({ sourceModule: "BBC" });
             });
         }
 
@@ -113,7 +113,7 @@ export class AutorecExchangeMenuApplication extends ApplicationV2 {
                             const text = e.target?.result;
                             if (typeof text === "string") {
                                 try {
-                                    const res = await autorecManager.importAutorecs(text, { sourceModule: "world", interactive: true });
+                                    const res = await autorecManager.importAutorecs(text, { sourceModule: "BBC", interactive: true });
                                     if (res) {
                                         this.render(false);
                                     }

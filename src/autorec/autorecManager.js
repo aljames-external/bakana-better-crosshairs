@@ -16,7 +16,7 @@ export const DEFAULT_AUTOREC_ENTRY = {
     itemName: "DEFAULT",
     isDefault: true,
     enabled: true,
-    sourceModule: "world",
+    sourceModule: "BBC",
     stickToToken: "default",
     showLine: true,
     showRange: true,
@@ -177,7 +177,7 @@ export class AutorecManager {
         const activityName = isDefault ? "" : (handler?.activityName ?? "").trim();
         const hasActivity = Boolean(activityId) || Boolean(activityName);
         const enabled = handler?.enabled !== false;
-        const sourceModule = String(handler?.sourceModule ?? MODULE_ID).trim();
+        const sourceModule = String(handler?.sourceModule ?? "BBC").trim();
         const baseConfig = typeof handler === "function" ? { handler } : (handler ?? {});
         const entry = {
             ...DEFAULT_AUTOREC_ENTRY,
@@ -687,7 +687,7 @@ export class AutorecManager {
             const hasActivity = Boolean(activityId) || Boolean(activityName);
             const activityDisplay = activityName !== "" ? activityName : activityId;
             const enabled = config.enabled !== false;
-            const sourceModule = String(config.sourceModule ?? "world");
+            const sourceModule = String(config.sourceModule ?? "BBC");
 
             results.push({
                 regKey: itemName,
@@ -759,7 +759,7 @@ export class AutorecManager {
      * @param {string} [options.description=""] - Optional description metadata
      * @returns {Object} Exchange package object conforming to AUTOREC_EXCHANGE_VERSION
      */
-    exportAutorecs({ sourceModule = "world", includeDefault = false, description = "" } = {}) {
+    exportAutorecs({ sourceModule = "BBC", includeDefault = false, description = "" } = {}) {
         const rawEntries = [];
         for (const [regKey, handler] of this.registeredHandlers.entries()) {
             if (!handler || typeof handler === "function") continue;
@@ -777,12 +777,12 @@ export class AutorecManager {
      * Export all current autorec registrations to a downloaded JSON file.
      * @param {Object} [options={}] - File export options
      * @param {string} [options.filename] - Custom output filename
-     * @param {string} [options.sourceModule="world"] - Attribution module identifier
+     * @param {string} [options.sourceModule="BBC"] - Attribution module identifier
      * @param {boolean} [options.includeDefault=false] - Whether to include DEFAULT fallback
      * @param {string} [options.description=""] - Optional description metadata
      * @returns {void}
      */
-    exportToFile({ filename = null, sourceModule = "world", includeDefault = false, description = "" } = {}) {
+    exportToFile({ filename = null, sourceModule = "BBC", includeDefault = false, description = "" } = {}) {
         const pkg = this.exportAutorecs({ sourceModule, includeDefault, description });
         const jsonStr = JSON.stringify(pkg, null, 2);
         const defaultName = `bbc-autorec-export-${new Date().toISOString().slice(0, 10)}.json`;
@@ -807,7 +807,7 @@ export class AutorecManager {
      * @param {string} [options.defaultSourceModule="world"] - Module fallback
      * @returns {Object} Diff analysis view contract
      */
-    analyzeImportDiff(validatedPackage, { defaultSourceModule = "world" } = {}) {
+    analyzeImportDiff(validatedPackage, { defaultSourceModule = "BBC" } = {}) {
         return analyzeImportDiff(validatedPackage, this.registeredHandlers, { defaultSourceModule });
     }
 
@@ -816,12 +816,12 @@ export class AutorecManager {
      * prompting user confirmation via modal if interactive, and applying selected items.
      * @param {string|Object} jsonOrString - Raw JSON payload string or parsed package object
      * @param {Object} [options={}] - Import flow configuration
-     * @param {string} [options.sourceModule="world"] - Caller attribution ID
+     * @param {string} [options.sourceModule="BBC"] - Caller attribution ID
      * @param {boolean} [options.interactive=true] - Whether to display interactive merge selection prompt UI
      * @param {boolean} [options.overwrite=true] - Default behavior when interactive is false
      * @returns {Promise<{mergedCount: number, importedEntries: Array<Object>}|null>} Merge summary object or null if cancelled
      */
-    async importAutorecs(jsonOrString, { sourceModule = "world", interactive = true, overwrite = true } = {}) {
+    async importAutorecs(jsonOrString, { sourceModule = "BBC", interactive = true, overwrite = true } = {}) {
         const validatedPkg = this.validateImportPackage(jsonOrString);
         const diffAnalysis = this.analyzeImportDiff(validatedPkg, { defaultSourceModule: sourceModule });
 
@@ -865,7 +865,7 @@ export class AutorecManager {
      * @param {string} [options.fallbackSourceModule="world"] - Module ID fallback if missing in entry
      * @returns {Promise<number>} Number of successfully merged registration entries
      */
-    async mergeImportedEntries(selectedEntries, { persist = true, fallbackSourceModule = "world" } = {}) {
+    async mergeImportedEntries(selectedEntries, { persist = true, fallbackSourceModule = "BBC" } = {}) {
         if (!Array.isArray(selectedEntries) || selectedEntries.length === 0) {
             return 0;
         }
@@ -880,7 +880,7 @@ export class AutorecManager {
             const actId = String(entry.activityId ?? "").trim();
             const actName = String(entry.activityName ?? "").trim();
             const regKey = actName !== "" ? `${itemName} | ${actName}` : (actId !== "" ? `${itemName} | ${actId}` : itemName);
-            const sourceModule = String(entry.sourceModule ?? fallbackSourceModule ?? "world").trim();
+            const sourceModule = String(entry.sourceModule ?? fallbackSourceModule ?? "BBC").trim();
 
             const config = {
                 ...entry,

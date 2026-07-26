@@ -11,9 +11,9 @@ test('buildExportPackage creates a valid versioned export structure with sourceM
         sourceModule: 'eskie-macro-pack'
     }, { local: true });
 
-    const pkg = autorecManager.exportAutorecs({ sourceModule: 'world', description: 'Test Export' });
+    const pkg = autorecManager.exportAutorecs({ sourceModule: 'BBC', description: 'Test Export' });
     assert.equal(pkg.version, AUTOREC_EXCHANGE_VERSION);
-    assert.equal(pkg.sourceModule, 'world');
+    assert.equal(pkg.sourceModule, 'BBC');
     assert.ok(Array.isArray(pkg.entries));
 
     const fireballEntry = pkg.entries.find(e => e.itemName === 'Fireball');

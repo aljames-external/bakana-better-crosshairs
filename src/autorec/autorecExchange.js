@@ -55,7 +55,7 @@ export function sanitizeEntryForExchange(entry) {
     const itemName = String(raw.itemName ?? raw.regKey ?? "").trim();
     const activityId = String(raw.activityId ?? "").trim();
     const activityName = String(raw.activityName ?? "").trim();
-    const sourceModule = String(raw.sourceModule ?? MODULE_ID).trim();
+    const sourceModule = String(raw.sourceModule ?? "BBC").trim();
     const enabled = raw.enabled !== false;
 
     const sanitized = {
@@ -113,7 +113,7 @@ export function sanitizeEntryForExchange(entry) {
  * @param {string} [options.description=""] - Optional human readable tag or description
  * @returns {Object} Explicit schema structure of the full exported package
  */
-export function buildExportPackage(entriesInput, { sourceModule = "world", includeDefault = false, description = "" } = {}) {
+export function buildExportPackage(entriesInput, { sourceModule = "BBC", includeDefault = false, description = "" } = {}) {
     const list = Array.isArray(entriesInput)
         ? entriesInput
         : (entriesInput instanceof Map ? Array.from(entriesInput.values()) : []);
@@ -132,21 +132,19 @@ export function buildExportPackage(entriesInput, { sourceModule = "world", inclu
         if (!sanitized.itemName) {
             continue;
         }
-        sanitized.sourceModule = String(rawEntry.sourceModule ?? sourceModule).trim();
+        sanitized.sourceModule = String(rawEntry.sourceModule ?? sourceModule ?? "BBC").trim();
         exportedEntries.push(sanitized);
     }
 
-    const activeSystem = String(game?.system?.id ?? "unknown");
     const foundryVersion = String(game?.version ?? "unknown");
     const exportedAt = new Date().toISOString();
 
     return {
         version: AUTOREC_EXCHANGE_VERSION,
         exportedAt,
-        system: activeSystem,
         foundryVersion,
         description: String(description ?? "").trim(),
-        sourceModule: String(sourceModule ?? "world").trim(),
+        sourceModule: String(sourceModule ?? "BBC").trim(),
         entries: exportedEntries
     };
 }
@@ -208,7 +206,7 @@ export function validateImportPackage(rawInput) {
         }
 
         const sanitized = sanitizeEntryForExchange(item);
-        const entrySourceModule = String(item.sourceModule ?? parsed.sourceModule ?? "world").trim();
+        const entrySourceModule = String(item.sourceModule ?? parsed.sourceModule ?? "BBC").trim();
         sanitized.sourceModule = entrySourceModule;
         validatedEntries.push(sanitized);
     }
@@ -218,10 +216,9 @@ export function validateImportPackage(rawInput) {
     return {
         version: packageVersion,
         exportedAt: parsed.exportedAt ?? null,
-        system: parsed.system ?? null,
         foundryVersion: parsed.foundryVersion ?? null,
         description: parsed.description ?? "",
-        sourceModule: String(parsed.sourceModule ?? "world").trim(),
+        sourceModule: String(parsed.sourceModule ?? "BBC").trim(),
         entries: validatedEntries
     };
 }
@@ -288,7 +285,7 @@ export function computeFieldDifferences(importedEntry, existingEntry) {
  * @param {string} [options.defaultSourceModule="world"] - Default source module override if omitted in file
  * @returns {Object} Structured diff analysis contract
  */
-export function analyzeImportDiff(validatedPackage, currentRegistrations, { defaultSourceModule = "world" } = {}) {
+export function analyzeImportDiff(validatedPackage, currentRegistrations, { defaultSourceModule = "BBC" } = {}) {
     const existingTokenMap = new Map();
     for (const [regKey, handler] of currentRegistrations.entries()) {
         if (!handler || typeof handler === "function") {
@@ -363,7 +360,6 @@ export function analyzeImportDiff(validatedPackage, currentRegistrations, { defa
         version: validatedPackage.version,
         metadata: {
             exportedAt: validatedPackage.exportedAt,
-            system: validatedPackage.system,
             foundryVersion: validatedPackage.foundryVersion,
             description: validatedPackage.description,
             sourceModule: validatedPackage.sourceModule

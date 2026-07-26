@@ -59,11 +59,14 @@
                         <span class="bbc-activity-pill" title="{{../labels.activityHintPrefix}}{{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
                         {{/if}}
                     </div>
-                    {{#if isLocal}}
                     <div class="bbc-card-meta">
+                        {{#unless isDefault}}
+                        <span class="bbc-type-badge source-module" title="Source Module: {{sourceModule}}">{{sourceModule}}</span>
+                        {{/unless}}
+                        {{#if isLocal}}
                         <span class="bbc-type-badge local" title="{{../labels.localOnlyHint}}">{{../labels.localBadge}}</span>
+                        {{/if}}
                     </div>
-                    {{/if}}
                 </div>
                 {{/each}}
             </div>
@@ -91,6 +94,9 @@
                         {{#if (and ../supportsActivities hasActivity)}}
                         <span class="bbc-activity-pill" title="{{../labels.activityHintPrefix}}{{activityDisplay}}"><i class="fa-solid fa-bolt"></i> {{activityDisplay}}</span>
                         {{/if}}
+                        {{#unless isDefault}}
+                        <span class="bbc-type-badge source-module" title="Source Module: {{sourceModule}}"><i class="fa-solid fa-box-archive"></i> {{sourceModule}}</span>
+                        {{/unless}}
                     </div>
                     <div class="bbc-detail-actions edit-only">
                         <button type="button" class="bbc-save-single-btn" data-item-name="{{regKey}}" title="Save changes to this workflow">
@@ -124,6 +130,14 @@
                                             </label>
                                         </td>
                                     </tr>
+                                    {{#unless isDefault}}
+                                    <tr>
+                                        <th>Source Module</th>
+                                        <td>
+                                            <span class="bbc-badge bbc-badge-module">{{sourceModule}}</span>
+                                        </td>
+                                    </tr>
+                                    {{/unless}}
                                 </tbody>
                             </table>
                         </div>
