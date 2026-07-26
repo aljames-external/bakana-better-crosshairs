@@ -77,6 +77,8 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
             removeBtn: localize("BBC.autorecMenu.labels.removeBtn", "Remove"),
             deleteBtn: localize("BBC.autorecMenu.labels.deleteBtn", "Delete"),
             saveBtn: localize("BBC.autorecMenu.labels.saveBtn", "Save"),
+            importJsonBtn: localize("BBC.autorecMenu.labels.importJsonBtn", "Import JSON"),
+            exportJsonBtn: localize("BBC.autorecMenu.labels.exportJsonBtn", "Export JSON"),
 
             emptySidebar: localize("BBC.autorecMenu.labels.emptySidebar", "No crosshair animations registered yet."),
 
@@ -258,6 +260,45 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
                 await autorecManager.unregisterMany(names, { persist: true });
                 notify.info(localize("BBC.autorecMenu.notify.removedMany", `Removed ${names.length} workflow(s).`));
                 this.render(false);
+            });
+        }
+
+        // Export JSON Package
+        const exportJsonBtn = rootEl.querySelector(".bbc-export-json-btn");
+        if (exportJsonBtn) {
+            exportJsonBtn.addEventListener("click", () => {
+                autorecManager.exportToFile({ sourceModule: "world" });
+            });
+        }
+
+        // Import JSON Package
+        const importJsonBtn = rootEl.querySelector(".bbc-import-json-btn");
+        if (importJsonBtn) {
+            importJsonBtn.addEventListener("click", () => {
+                const fileInput = document.createElement("input");
+                fileInput.type = "file";
+                fileInput.accept = ".json,application/json";
+                fileInput.addEventListener("change", async (ev) => {
+                    const selectedFile = ev.target?.files?.[0];
+                    if (!selectedFile) return;
+
+                    const reader = new FileReader();
+                    reader.onload = async (event) => {
+                        const content = event.target?.result;
+                        if (typeof content !== "string") return;
+                        try {
+                            const res = await autorecManager.importAutorecs(content, { sourceModule: "world", interactive: true });
+                            if (res) {
+                                this.render(false);
+                            }
+                        } catch (err) {
+                            log.error("AutorecMenuApplication | Import JSON failed:", err);
+                            notify.error(localize("BBC.autorecExchange.notify.importError", `Import failed: ${err.message}`));
+                        }
+                    };
+                    reader.readAsText(selectedFile);
+                });
+                fileInput.click();
             });
         }
 

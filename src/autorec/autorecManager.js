@@ -3,7 +3,9 @@ import { log } from '../lib/logger.js';
 import { systemAdapter } from '../adapter/system/index.js';
 import { crosshairAdapter } from '../adapter/foundry/index.js';
 import { socketlib } from '../integration/index.js';
-import { localize } from '../lib/utils.js';
+import { localize, notify } from '../lib/utils.js';
+import { buildExportPackage, validateImportPackage, analyzeImportDiff, triggerFileDownload } from './autorecExchange.js';
+import { AutorecImportDialog } from './autorecImportDialog.js';
 
 /**
  * Canonical default configuration schema for an automatic recognition (autorec) registration entry.
@@ -14,6 +16,7 @@ export const DEFAULT_AUTOREC_ENTRY = {
     itemName: "DEFAULT",
     isDefault: true,
     enabled: true,
+    sourceModule: "world",
     stickToToken: "default",
     showLine: true,
     showRange: true,
@@ -85,6 +88,12 @@ export class AutorecManager {
         this.getDefault = this.getDefaultConfig;
         this.customize = this.customize.bind(this);
         this.broadcastSync = this.broadcastSync.bind(this);
+        this.exportAutorecs = this.exportAutorecs.bind(this);
+        this.exportToFile = this.exportToFile.bind(this);
+        this.validateImportPackage = this.validateImportPackage.bind(this);
+        this.analyzeImportDiff = this.analyzeImportDiff.bind(this);
+        this.importAutorecs = this.importAutorecs.bind(this);
+        this.mergeImportedEntries = this.mergeImportedEntries.bind(this);
 
         this.indexRegistration("DEFAULT", DEFAULT_AUTOREC_ENTRY);
     }
@@ -168,6 +177,7 @@ export class AutorecManager {
         const activityName = isDefault ? "" : (handler?.activityName ?? "").trim();
         const hasActivity = Boolean(activityId) || Boolean(activityName);
         const enabled = handler?.enabled !== false;
+        const sourceModule = String(handler?.sourceModule ?? MODULE_ID).trim();
         const baseConfig = typeof handler === "function" ? { handler } : (handler ?? {});
         const entry = {
             ...DEFAULT_AUTOREC_ENTRY,
@@ -179,7 +189,8 @@ export class AutorecManager {
             activityName,
             hasActivity,
             isDefault,
-            enabled
+            enabled,
+            sourceModule
         };
 
         this.fastLookupMap.set(registeredKey.toLowerCase(), entry);
@@ -409,11 +420,14 @@ export class AutorecManager {
      * @param {boolean} [options.local=false] - Whether this registration should only exist locally on this client and not persist or sync
      * @returns {void}
      */
-    register(itemName, handlerOrConfig = {}, { persist = true, local = false } = {}) {
+    register(itemName, handlerOrConfig = {}, { persist = true, local = false, sourceModule = null } = {}) {
         if (this._onRegisterCallback) {
             this._onRegisterCallback();
         }
         const isLocal = Boolean(local || handlerOrConfig?.local);
+        if (sourceModule && typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
+            handlerOrConfig.sourceModule = sourceModule;
+        }
 
         if (itemName === "DEFAULT" && typeof handlerOrConfig !== "function") {
             handlerOrConfig = {
@@ -673,12 +687,14 @@ export class AutorecManager {
             const hasActivity = Boolean(activityId) || Boolean(activityName);
             const activityDisplay = activityName !== "" ? activityName : activityId;
             const enabled = config.enabled !== false;
+            const sourceModule = String(config.sourceModule ?? "world");
 
             results.push({
                 regKey: itemName,
                 itemName: isDefault ? "DEFAULT" : cleanItemName,
                 isDefault,
                 enabled,
+                sourceModule,
                 activityId,
                 activityName,
                 hasActivity,
@@ -733,6 +749,171 @@ export class AutorecManager {
      */
     broadcastSync() {
         socketlib.emit({ type: "SYNC_AUTORECS" });
+    }
+
+    /**
+     * Export all current autorec registrations into a standardized JSON exchange package.
+     * @param {Object} [options={}] - Export configuration options
+     * @param {string} [options.sourceModule="world"] - Attribution module identifier
+     * @param {boolean} [options.includeDefault=false] - Whether to include DEFAULT fallback
+     * @param {string} [options.description=""] - Optional description metadata
+     * @returns {Object} Exchange package object conforming to AUTOREC_EXCHANGE_VERSION
+     */
+    exportAutorecs({ sourceModule = "world", includeDefault = false, description = "" } = {}) {
+        const entries = this.getAllEntries();
+        return buildExportPackage(entries, { sourceModule, includeDefault, description });
+    }
+
+    /**
+     * Export all current autorec registrations to a downloaded JSON file.
+     * @param {Object} [options={}] - File export options
+     * @param {string} [options.filename] - Custom output filename
+     * @param {string} [options.sourceModule="world"] - Attribution module identifier
+     * @param {boolean} [options.includeDefault=false] - Whether to include DEFAULT fallback
+     * @param {string} [options.description=""] - Optional description metadata
+     * @returns {void}
+     */
+    exportToFile({ filename = null, sourceModule = "world", includeDefault = false, description = "" } = {}) {
+        const pkg = this.exportAutorecs({ sourceModule, includeDefault, description });
+        const jsonStr = JSON.stringify(pkg, null, 2);
+        const defaultName = `bbc-autorec-export-${new Date().toISOString().slice(0, 10)}.json`;
+        const outName = filename ?? defaultName;
+        triggerFileDownload(jsonStr, outName);
+    }
+
+    /**
+     * Validate an incoming JSON package string or raw object against schema requirements.
+     * Throws concrete validation errors for incompatible versions or invalid entries.
+     * @param {string|Object} rawInput - Incoming raw JSON content
+     * @returns {Object} Validated package container object
+     */
+    validateImportPackage(rawInput) {
+        return validateImportPackage(rawInput);
+    }
+
+    /**
+     * Compute visual diff classification (new vs conflict overwrites vs identical) between import package and current system state.
+     * @param {Object} validatedPackage - Validated exchange package object
+     * @param {Object} [options={}] - Options
+     * @param {string} [options.defaultSourceModule="world"] - Module fallback
+     * @returns {Object} Diff analysis view contract
+     */
+    analyzeImportDiff(validatedPackage, { defaultSourceModule = "world" } = {}) {
+        return analyzeImportDiff(validatedPackage, this.registeredHandlers, { defaultSourceModule });
+    }
+
+    /**
+     * Import a JSON package string or structure, running validation, analyzing conflicts,
+     * prompting user confirmation via modal if interactive, and applying selected items.
+     * @param {string|Object} jsonOrString - Raw JSON payload string or parsed package object
+     * @param {Object} [options={}] - Import flow configuration
+     * @param {string} [options.sourceModule="world"] - Caller attribution ID
+     * @param {boolean} [options.interactive=true] - Whether to display interactive merge selection prompt UI
+     * @param {boolean} [options.overwrite=true] - Default behavior when interactive is false
+     * @returns {Promise<{mergedCount: number, importedEntries: Array<Object>}|null>} Merge summary object or null if cancelled
+     */
+    async importAutorecs(jsonOrString, { sourceModule = "world", interactive = true, overwrite = true } = {}) {
+        const validatedPkg = this.validateImportPackage(jsonOrString);
+        const diffAnalysis = this.analyzeImportDiff(validatedPkg, { defaultSourceModule: sourceModule });
+
+        let selectedEntries = null;
+
+        const canShowDialog = Boolean(interactive && game?.user?.isGM);
+        if (canShowDialog) {
+            selectedEntries = await AutorecImportDialog.promptMerge(diffAnalysis);
+            if (!selectedEntries) {
+                log.info("AutorecManager.importAutorecs | Import sequence cancelled by user.");
+                return null;
+            }
+        } else {
+            const list = [];
+            for (const item of diffAnalysis.newEntries) {
+                list.push(item);
+            }
+            if (overwrite) {
+                for (const item of diffAnalysis.conflictEntries) {
+                    list.push(item);
+                }
+            }
+            selectedEntries = list;
+        }
+
+        const mergedCount = await this.mergeImportedEntries(selectedEntries, {
+            persist: true,
+            fallbackSourceModule: sourceModule
+        });
+
+        notify.info(localize("BBC.autorecExchange.notify.imported", `Successfully imported ${mergedCount} autorec workflow(s).`));
+        return { mergedCount, importedEntries: selectedEntries };
+    }
+
+    /**
+     * Apply an array of selected exchange entries into active registration store and persist to world settings.
+     * Overwrites existing entries sharing identical item name and activity name.
+     * @param {Array<Object>} selectedEntries - Array of entries chosen for application
+     * @param {Object} [options={}] - Options
+     * @param {boolean} [options.persist=true] - Whether to write updates to world settings
+     * @param {string} [options.fallbackSourceModule="world"] - Module ID fallback if missing in entry
+     * @returns {Promise<number>} Number of successfully merged registration entries
+     */
+    async mergeImportedEntries(selectedEntries, { persist = true, fallbackSourceModule = "world" } = {}) {
+        if (!Array.isArray(selectedEntries) || selectedEntries.length === 0) {
+            return 0;
+        }
+
+        const toPersist = {};
+        let count = 0;
+
+        for (const entry of selectedEntries) {
+            const itemName = String(entry.itemName ?? "").trim();
+            if (!itemName) continue;
+
+            const actId = String(entry.activityId ?? "").trim();
+            const actName = String(entry.activityName ?? "").trim();
+            const regKey = actName !== "" ? `${itemName} | ${actName}` : (actId !== "" ? `${itemName} | ${actId}` : itemName);
+            const sourceModule = String(entry.sourceModule ?? fallbackSourceModule ?? "world").trim();
+
+            const config = {
+                ...entry,
+                itemName,
+                activityId: actId,
+                activityName: actName,
+                sourceModule
+            };
+
+            delete config.importIndex;
+            delete config.isNew;
+            delete config.isConflict;
+            delete config.isIdentical;
+            delete config.selectedByDefault;
+            delete config.targetRegKey;
+            delete config.differences;
+
+            this.register(regKey, config, { persist: false, local: Boolean(config.local) });
+            const registered = this.registeredHandlers.get(regKey);
+            if (persist && !config.local && typeof registered !== "function") {
+                toPersist[regKey] = registered;
+                this.persistedItemNames.add(regKey);
+            }
+            count++;
+        }
+
+        if (persist && Object.keys(toPersist).length > 0) {
+            const isGM = Boolean(game?.user?.isGM);
+            if (isGM) {
+                try {
+                    const saved = foundry.utils.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") ?? {});
+                    Object.assign(saved, toPersist);
+                    await game.settings.set(MODULE_ID, "registeredTemplates", saved);
+                    this.broadcastSync();
+                } catch (e) {
+                    log.error("AutorecManager.mergeImportedEntries | Failed to persist imported registrations to world setting:", e);
+                }
+            }
+        }
+
+        log.info(`AutorecManager.mergeImportedEntries | Merged ${count} autorec workflows into global state.`);
+        return count;
     }
 }
 

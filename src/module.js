@@ -33,7 +33,8 @@ export function setupModule() {
     initializeFoundryAdapter();
     initializeHooks();
     loadTemplates([
-        `modules/${MODULE_ID}/src/autorec/configFieldsPartial.html`
+        `modules/${MODULE_ID}/src/autorec/configFieldsPartial.html`,
+        `modules/${MODULE_ID}/src/autorec/autorecImportDialog.html`
     ]);
 
     const manager = autorecManager;

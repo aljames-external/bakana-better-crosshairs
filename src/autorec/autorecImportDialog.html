@@ -1,0 +1,147 @@
+<div class="bbc-import-dialog-wrapper">
+    <header class="bbc-import-dialog-header">
+        <div class="bbc-import-package-banner">
+            <div class="bbc-package-meta-item">
+                <span class="bbc-meta-label">{{labels.packageVersion}}:</span>
+                <span class="bbc-meta-value bbc-badge-version">{{metadata.version}}</span>
+            </div>
+            <div class="bbc-package-meta-item">
+                <span class="bbc-meta-label">{{labels.sourceModule}}:</span>
+                <span class="bbc-meta-value">{{metadata.sourceModule}}</span>
+            </div>
+            {{#if metadata.system}}
+            <div class="bbc-package-meta-item">
+                <span class="bbc-meta-label">{{labels.system}}:</span>
+                <span class="bbc-meta-value">{{metadata.system}}</span>
+            </div>
+            {{/if}}
+            {{#if metadata.exportedAt}}
+            <div class="bbc-package-meta-item">
+                <span class="bbc-meta-label">{{labels.exportedAt}}:</span>
+                <span class="bbc-meta-value">{{metadata.exportedAt}}</span>
+            </div>
+            {{/if}}
+        </div>
+        {{#if metadata.description}}
+        <p class="bbc-package-description">{{metadata.description}}</p>
+        {{/if}}
+        <p class="bbc-import-instruction">{{labels.instructionText}}</p>
+    </header>
+
+    <div class="bbc-import-toolbar">
+        <div class="bbc-quick-select-group">
+            <button type="button" class="bbc-btn-secondary bbc-select-all-btn">
+                <i class="fa-solid fa-check-double"></i> {{labels.selectAll}}
+            </button>
+            <button type="button" class="bbc-btn-secondary bbc-select-new-btn">
+                <i class="fa-solid fa-sparkles"></i> {{labels.selectNewOnly}}
+            </button>
+            <button type="button" class="bbc-btn-secondary bbc-deselect-all-btn">
+                <i class="fa-solid fa-xmark"></i> {{labels.deselectAll}}
+            </button>
+        </div>
+        <div class="bbc-import-summary-pill">
+            <span class="bbc-summary-count"><strong class="bbc-selected-count">{{summary.selectedCount}}</strong> / {{summary.totalImportable}} {{labels.selectedSuffix}}</span>
+        </div>
+    </div>
+
+    <div class="bbc-import-groups-container">
+        {{#if hasConflicts}}
+        <section class="bbc-import-section bbc-section-conflicts">
+            <div class="bbc-section-bar bbc-bar-conflict">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <h3>{{labels.conflictsTitle}}</h3>
+                <span class="bbc-badge bbc-badge-conflict">{{conflictEntries.length}} {{labels.willOverwriteBadge}}</span>
+            </div>
+            <p class="bbc-section-subtext">{{labels.conflictsSubtext}}</p>
+            <div class="bbc-import-entry-list">
+                {{#each conflictEntries}}
+                <div class="bbc-import-entry-card bbc-entry-conflict" data-import-index="{{this.importIndex}}">
+                    <label class="bbc-entry-label">
+                        <input type="checkbox" class="bbc-entry-checkbox" data-import-index="{{this.importIndex}}" {{#if this.selectedByDefault}}checked{{/if}} />
+                        <span class="bbc-entry-identity">
+                            <strong class="bbc-entry-item-name">{{this.itemName}}</strong>
+                            {{#if this.activityName}}
+                            <span class="bbc-entry-activity-tag">({{this.activityName}})</span>
+                            {{else}}
+                                {{#if this.activityId}}
+                                <span class="bbc-entry-activity-tag">({{this.activityId}})</span>
+                                {{/if}}
+                            {{/if}}
+                        </span>
+                        <span class="bbc-badge bbc-badge-overwrite-warn">{{../labels.willOverwriteTag}}</span>
+                        <span class="bbc-badge bbc-badge-module">{{this.sourceModule}}</span>
+                    </label>
+                    {{#if this.differences.length}}
+                    <div class="bbc-diff-preview-box">
+                        <span class="bbc-diff-title">{{../labels.diffPreviewTitle}}:</span>
+                        <ul class="bbc-diff-list">
+                            {{#each this.differences}}
+                            <li class="bbc-diff-item">
+                                <code class="bbc-diff-field">{{this.field}}</code>:
+                                <span class="bbc-diff-old">{{this.existingValue}}</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                                <span class="bbc-diff-new">{{this.importedValue}}</span>
+                            </li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                    {{/if}}
+                </div>
+                {{/each}}
+            </div>
+        </section>
+        {{/if}}
+
+        {{#if hasNew}}
+        <section class="bbc-import-section bbc-section-new">
+            <div class="bbc-section-bar bbc-bar-new">
+                <i class="fa-solid fa-circle-plus"></i>
+                <h3>{{labels.newEntriesTitle}}</h3>
+                <span class="bbc-badge bbc-badge-new-count">{{newEntries.length}} {{labels.newBadge}}</span>
+            </div>
+            <p class="bbc-section-subtext">{{labels.newSubtext}}</p>
+            <div class="bbc-import-entry-list">
+                {{#each newEntries}}
+                <div class="bbc-import-entry-card bbc-entry-new" data-import-index="{{this.importIndex}}">
+                    <label class="bbc-entry-label">
+                        <input type="checkbox" class="bbc-entry-checkbox" data-import-index="{{this.importIndex}}" {{#if this.selectedByDefault}}checked{{/if}} />
+                        <span class="bbc-entry-identity">
+                            <strong class="bbc-entry-item-name">{{this.itemName}}</strong>
+                            {{#if this.activityName}}
+                            <span class="bbc-entry-activity-tag">({{this.activityName}})</span>
+                            {{else}}
+                                {{#if this.activityId}}
+                                <span class="bbc-entry-activity-tag">({{this.activityId}})</span>
+                                {{/if}}
+                            {{/if}}
+                        </span>
+                        <span class="bbc-badge bbc-badge-new-item">{{../labels.newTag}}</span>
+                        <span class="bbc-badge bbc-badge-module">{{this.sourceModule}}</span>
+                    </label>
+                </div>
+                {{/each}}
+            </div>
+        </section>
+        {{/if}}
+
+        {{#if hasIdentical}}
+        <section class="bbc-import-section bbc-section-identical">
+            <div class="bbc-section-bar bbc-bar-identical">
+                <i class="fa-solid fa-circle-check"></i>
+                <h3>{{labels.identicalTitle}} ({{identicalEntries.length}})</h3>
+            </div>
+            <p class="bbc-section-subtext">{{labels.identicalSubtext}}</p>
+        </section>
+        {{/if}}
+    </div>
+
+    <footer class="bbc-import-dialog-footer">
+        <button type="button" class="bbc-btn-secondary bbc-cancel-import-btn">
+            <i class="fa-solid fa-xmark"></i> {{labels.cancelBtn}}
+        </button>
+        <button type="button" class="bbc-btn-primary bbc-confirm-merge-btn">
+            <i class="fa-solid fa-file-import"></i> {{labels.mergeBtn}} (<span class="bbc-merge-count">{{summary.selectedCount}}</span>)
+        </button>
+    </footer>
+</div>
