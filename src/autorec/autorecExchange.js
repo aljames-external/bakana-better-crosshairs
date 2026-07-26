@@ -115,7 +115,7 @@ export function sanitizeEntryForExchange(entry) {
  * @param {string} [options.description=""] - Optional human readable tag or description
  * @returns {Object} Explicit schema structure of the full exported package
  */
-export function buildExportPackage(entriesInput, { sourceModule = "BBC", includeDefault = false, description = "" } = {}) {
+export function buildExportPackage(entriesInput, { sourceModule = "world", includeDefault = false, description = "" } = {}) {
     const list = Array.isArray(entriesInput)
         ? entriesInput
         : (entriesInput instanceof Map ? Array.from(entriesInput.values()) : []);
@@ -134,7 +134,7 @@ export function buildExportPackage(entriesInput, { sourceModule = "BBC", include
         if (!sanitized.itemName) {
             continue;
         }
-        sanitized.sourceModule = String(rawEntry.sourceModule ?? sourceModule ?? "BBC").trim();
+        sanitized.sourceModule = String(rawEntry.sourceModule ?? sourceModule ?? "world").trim();
         exportedEntries.push(sanitized);
     }
 
@@ -146,7 +146,7 @@ export function buildExportPackage(entriesInput, { sourceModule = "BBC", include
         exportedAt,
         foundryVersion,
         description: String(description ?? "").trim(),
-        sourceModule: String(sourceModule ?? "BBC").trim(),
+        sourceModule: String(sourceModule ?? "world").trim(),
         entries: exportedEntries
     };
 }
@@ -159,7 +159,7 @@ export function buildExportPackage(entriesInput, { sourceModule = "BBC", include
  * @returns {Object} Validated and parsed package object
  * @throws {Error} If package format or any individual entry fails validation
  */
-export function validateImportPackage(rawInput) {
+export function validateImportPackage(rawInput, { overrideSourceModule = null } = {}) {
     let parsed = rawInput;
     if (typeof rawInput === "string") {
         try {
@@ -193,6 +193,10 @@ export function validateImportPackage(rawInput) {
         throw new Error("Invalid autorec package: 'entries' must be an array.");
     }
 
+    const cleanOverride = overrideSourceModule !== null && overrideSourceModule !== undefined
+        ? String(overrideSourceModule).trim()
+        : null;
+
     const validatedEntries = [];
     for (let i = 0; i < parsed.entries.length; i++) {
         const item = parsed.entries[i];
@@ -208,10 +212,16 @@ export function validateImportPackage(rawInput) {
         }
 
         const sanitized = sanitizeEntryForExchange(item);
-        const entrySourceModule = String(item.sourceModule ?? parsed.sourceModule ?? "BBC").trim();
+        const entrySourceModule = cleanOverride !== null
+            ? cleanOverride
+            : String(item.sourceModule ?? parsed.sourceModule ?? "world").trim();
         sanitized.sourceModule = entrySourceModule;
         validatedEntries.push(sanitized);
     }
+
+    const packageSourceModule = cleanOverride !== null
+        ? cleanOverride
+        : String(parsed.sourceModule ?? "world").trim();
 
     log.debug(`AutorecExchange.validateImportPackage | Package version "${packageVersion}" validated successfully (${validatedEntries.length} entries).`);
 
@@ -220,7 +230,7 @@ export function validateImportPackage(rawInput) {
         exportedAt: parsed.exportedAt ?? null,
         foundryVersion: parsed.foundryVersion ?? null,
         description: parsed.description ?? "",
-        sourceModule: String(parsed.sourceModule ?? "BBC").trim(),
+        sourceModule: packageSourceModule,
         entries: validatedEntries
     };
 }
@@ -285,9 +295,10 @@ export function computeFieldDifferences(importedEntry, existingEntry) {
  * @param {Map<string, Object>} currentRegistrations - Active registeredHandlers map from AutorecManager
  * @param {Object} [options={}] - Diff calculation options
  * @param {string} [options.defaultSourceModule="world"] - Default source module override if omitted in file
+ * @param {string|null} [options.overrideSourceModule=null] - Mandatory explicit source module override if specified
  * @returns {Object} Structured diff analysis contract
  */
-export function analyzeImportDiff(validatedPackage, currentRegistrations, { defaultSourceModule = "BBC" } = {}) {
+export function analyzeImportDiff(validatedPackage, currentRegistrations, { defaultSourceModule = "world", overrideSourceModule = null } = {}) {
     const existingTokenMap = new Map();
     for (const [regKey, handler] of currentRegistrations.entries()) {
         if (!handler || typeof handler === "function") {
@@ -307,11 +318,17 @@ export function analyzeImportDiff(validatedPackage, currentRegistrations, { defa
     const conflictEntries = [];
     const identicalEntries = [];
 
+    const cleanOverride = overrideSourceModule !== null && overrideSourceModule !== undefined
+        ? String(overrideSourceModule).trim()
+        : null;
+
     for (let index = 0; index < validatedPackage.entries.length; index++) {
         const item = validatedPackage.entries[index];
         const token = getEntryLookupToken(item.itemName, item.activityId, item.activityName);
         const match = existingTokenMap.get(token);
-        const entrySourceModule = item.sourceModule ?? validatedPackage.sourceModule ?? defaultSourceModule;
+        const entrySourceModule = cleanOverride !== null
+            ? cleanOverride
+            : (item.sourceModule ?? validatedPackage.sourceModule ?? defaultSourceModule);
         const entryWithSource = {
             ...item,
             sourceModule: entrySourceModule,

@@ -2,6 +2,7 @@ import { crosshair } from './crosshair/index.js';
 import { file, closest, absolutePath } from './lib/filemanager.js';
 import { log } from './lib/logger.js';
 import { autorecManager } from './autorec/autorecManager.js';
+import { ModuleAutorecManager } from './autorec/moduleAutorecManager.js';
 import { systemAdapter, initializeSystemAdapter, crosshairAdapter, initializeFoundryAdapter, initializeHooks } from './adapter/index.js';
 import { attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement, getTokenEdgePoint, snapCoordinates } from './crosshair/util.js';
 import { localize } from './lib/utils.js';
@@ -56,6 +57,7 @@ export function setupModule() {
         util,
         manager,
         autorecManager,
+        ModuleAutorecManager,
         systemAdapter,
         crosshairAdapter,
         log,
