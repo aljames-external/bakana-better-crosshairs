@@ -127,6 +127,21 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
     }
 
     /**
+     * Official ApplicationV2 post-render lifecycle hook.
+     * Executes custom DOM listener attachments.
+     * @protected
+     * @param {object} context - Prepared context data
+     * @param {object} options - Rendering options
+     * @returns {void}
+     */
+    _onRender(context, options) {
+        super._onRender?.(context, options);
+        const rootEl = this.element;
+        if (!rootEl) return;
+        this._attachCustomEventListeners(rootEl, context, options);
+    }
+
+    /**
      * Bind application UI click and checkbox change event handlers.
      * @protected
      * @param {HTMLElement} root - Root HTML element of application
