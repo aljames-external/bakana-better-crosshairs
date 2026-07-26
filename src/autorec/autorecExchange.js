@@ -170,9 +170,16 @@ export function validateImportPackage(rawInput, { overrideSourceModule = null } 
         }
     }
 
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-        log.error("AutorecExchange.validateImportPackage | Payload is not a top-level object.");
-        throw new Error("Invalid autorec import payload: top-level object container expected.");
+    if (Array.isArray(parsed)) {
+        parsed = {
+            version: AUTOREC_EXCHANGE_VERSION,
+            entries: parsed
+        };
+    }
+
+    if (!parsed || typeof parsed !== "object") {
+        log.error("AutorecExchange.validateImportPackage | Payload is not a top-level object or array container.");
+        throw new Error("Invalid autorec import payload: top-level package object or array required.");
     }
 
     const packageVersion = String(parsed.version ?? "").trim();

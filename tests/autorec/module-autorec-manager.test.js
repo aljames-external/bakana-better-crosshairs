@@ -130,3 +130,32 @@ test('Game settings import (overrideSourceModule: null) preserves existing modul
     autorecManager.unregister('Grapple Effect', { local: true });
     autorecManager.unregister('Rage Aura', { local: true });
 });
+
+test('ModuleAutorecManager.importAutorecs can accept raw array JSON strings or arrays directly', async () => {
+    const packManager = autorecManager('raw-array-pack');
+
+    const rawArrayJson = JSON.stringify([
+        {
+            itemName: 'Totemic Tiger Slash',
+            circleFile: 'tiger-slash.png'
+        },
+        {
+            itemName: 'SAO Death Burst',
+            circleFile: 'sao-burst.png'
+        }
+    ]);
+
+    const result = await packManager.importAutorecs(rawArrayJson, { interactive: false });
+    assert.equal(result.mergedCount, 2);
+
+    const slash = autorecManager.getEntryByName('Totemic Tiger Slash');
+    const burst = autorecManager.getEntryByName('SAO Death Burst');
+
+    assert.ok(slash);
+    assert.equal(slash.sourceModule, 'raw-array-pack');
+    assert.ok(burst);
+    assert.equal(burst.sourceModule, 'raw-array-pack');
+
+    autorecManager.unregister('Totemic Tiger Slash', { local: true });
+    autorecManager.unregister('SAO Death Burst', { local: true });
+});
