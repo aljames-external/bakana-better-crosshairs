@@ -16,21 +16,14 @@ const bbcApi = game.modules.get("bakana-better-crosshairs")?.api;
 
 ## 2. Instantiating a Module-Scoped Autorec Manager
 
-Rather than passing your module ID manually on every single registration call, construct a scoped `ModuleAutorecManager` by supplying your unique `module-id`.
-
-### Option A: Callable Function Invocation (Recommended)
-You can invoke `autorecManager` directly as a function, passing your module ID string:
+Rather than passing your module ID manually on every single registration call, invoke `autorecManager` directly as a function supplying your unique `module-id`:
 
 ```javascript
 const macroPackManager = bbcApi.autorecManager("eskie-macro-pack");
 ```
 
-### Option B: `.forModule(...)` Helper
-```javascript
-const macroPackManager = bbcApi.autorecManager.forModule("eskie-macro-pack");
-```
+Optionally, you can also instantiate the class directly:
 
-### Option C: Direct Class Constructor
 ```javascript
 const macroPackManager = new bbcApi.ModuleAutorecManager("eskie-macro-pack");
 ```
@@ -194,7 +187,6 @@ Hooks.once("ready", async () => {
 | Method | Signature | Description |
 | :--- | :--- | :--- |
 | `autorecManager(moduleId)` | `(moduleId: string) => ModuleAutorecManager` | Callable function proxy to instantiate a module-scoped manager. |
-| `forModule(moduleId)` | `(moduleId: string) => ModuleAutorecManager` | Helper method on `autorecManager` producing a scoped module manager. |
 | `register` | `(macroId, handlerOrConfig, options?) => void` | Register a single macro animation tagged with `sourceModule: moduleId`. |
 | `registerMany` | `(entries, options?) => Promise<void>` | Batch register entries tagged with `sourceModule: moduleId`. |
 | `unregister` | `(macroId, options?) => boolean` | Remove single macro sequence registration. |
