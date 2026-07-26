@@ -32,7 +32,9 @@ const macroPackManager = new bbcApi.ModuleAutorecManager("eskie-macro-pack");
 
 ## 3. Registering Macro Crosshair Animations
 
-When using your module's manager, pass your **macro-id** (the item or spell name matching system items or macros). BBC automatically tags each entry with your specified module name (`sourceModule: "eskie-macro-pack"`).
+When using your module's manager, pass your **`macroId`** (or **`itemName`**)—this is the Item, Spell, or Macro name matching game items/macros (e.g. `"Fireball"`, `"sao-death"`, `"Magic Missile"`).
+
+> **Note on `macroId` vs `itemName`:** Under the hood, BBC indexes workflows by `itemName`. In `ModuleAutorecManager`, `macroId` and `itemName` are interchangeable—when you pass a `macroId`, it is passed along as the item's registration name (`itemName`) and automatically tagged with your `sourceModule`.
 
 ### Single Macro Registration (`.register`)
 
