@@ -76,8 +76,8 @@ export class ConeCrosshairShape extends BaseCrosshairShape {
      * @returns {string} Resolved file path or key
      */
     _getGraphicFile() {
-        const rawFile = this.config.coneFile ?? this.config.file;
-        if (rawFile != null && rawFile !== "") {
+        const rawFile = String(this.config.file ?? "").trim();
+        if (Boolean(rawFile)) {
             return closest(rawFile);
         }
         const coneSize = this.config.coneSize ?? "thin";

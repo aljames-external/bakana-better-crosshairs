@@ -75,8 +75,8 @@ export class RayCrosshairShape extends BaseCrosshairShape {
      * @returns {string} Resolved file path or key
      */
     _getGraphicFile() {
-        const rawFile = this.config.rayFile ?? this.config.file;
-        if (rawFile != null && rawFile !== "") {
+        const rawFile = String(this.config.file ?? "").trim();
+        if (Boolean(rawFile)) {
             return closest(rawFile);
         }
         return closest("eskie.crosshair.ray.straight.thin.white.01");

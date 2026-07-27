@@ -56,28 +56,26 @@ export class ModuleAutorecManager {
         const prepared = [];
         for (const item of entries) {
             if (!item || typeof item !== "object") continue;
-            const itemName = String(item.itemName ?? "").trim();
+            const baseConfig = (item.config && typeof item.config === "object") ? item.config : item;
+            const itemName = String(item.itemName ?? baseConfig.itemName ?? "").trim();
             if (!itemName) continue;
 
-            const rawConfig = item.config ?? item;
-            const actName = String(item.activityName ?? rawConfig.activityName ?? "").trim();
-            const actId = String(item.activityId ?? rawConfig.activityId ?? "").trim();
+            const actName = String(item.activityName ?? baseConfig.activityName ?? "").trim();
+            const actId = String(item.activityId ?? baseConfig.activityId ?? "").trim();
             const regKey = computeRegistrationKey(itemName, actName, actId);
 
-            const config = typeof rawConfig === "object" && rawConfig !== null
-                ? {
-                    ...rawConfig,
-                    itemName: rawConfig.itemName ?? itemName,
-                    activityName: actName !== "" ? actName : undefined,
-                    activityId: actId !== "" ? actId : undefined,
-                    sourceModule: this.moduleId
-                }
-                : rawConfig;
+            const preparedConfig = {
+                ...baseConfig,
+                itemName,
+                activityName: actName !== "" ? actName : undefined,
+                activityId: actId !== "" ? actId : undefined,
+                sourceModule: this.moduleId
+            };
 
             prepared.push({
                 itemName: regKey,
-                config,
-                local: Boolean(item.local)
+                config: preparedConfig,
+                local: item.local ?? false
             });
         }
 
@@ -156,7 +154,7 @@ export class ModuleAutorecManager {
         const matching = [];
         for (const entry of all) {
             if (entry.sourceModule === this.moduleId) {
-                matching.push(entry.regKey ?? entry.itemName);
+                matching.push(entry.regKey);
             }
         }
         return matching;
@@ -176,7 +174,7 @@ export class ModuleAutorecManager {
      * @returns {Object} Exchange package object
      */
     export({ includeDefault = false, description = "" } = {}) {
-        const moduleEntries = this.getAllEntries().map(e => e.config ?? e);
+        const moduleEntries = this.getAllEntries().map(e => e.config);
         return this._parent.exportAutorecs({
             sourceModule: this.moduleId,
             includeDefault,
@@ -195,7 +193,7 @@ export class ModuleAutorecManager {
      * @returns {Promise<{mergedCount: number, importedEntries: Array<Object>}|null>} Result summary or null if cancelled
      */
     async import(jsonOrString, { interactive = true, overwrite = true } = {}) {
-        log.info(`ModuleAutorecManager[${this.moduleId}].import | Importing bundle with module-id tag set to "${this.moduleId}".`);
+        log.debug(`ModuleAutorecManager[${this.moduleId}].import | Importing bundle with module-id tag set to "${this.moduleId}".`);
         return this._parent.importAutorecs(jsonOrString, {
             sourceModule: this.moduleId,
             overrideSourceModule: this.moduleId,

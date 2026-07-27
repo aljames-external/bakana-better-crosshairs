@@ -67,7 +67,7 @@ export class Pf2eSystemAdapter extends BaseSystemAdapter {
                     itemObj = uuidResolver(originRef.uuid);
                 }
             } catch (e) {
-                log.debug("Pf2eSystemAdapter.extractCallingContext | Could not resolve item from UUID origin:", originRef, e);
+                log.warn("Pf2eSystemAdapter.extractCallingContext | Could not resolve item from UUID origin:", originRef, e);
             }
         }
 

@@ -11,16 +11,16 @@ import { BaseCrosshairShape } from "./base.js";
  * @returns {string} The resolved file path or asset key for the circle crosshair.
  */
 export function resolveCircleAsset(pathOrKey, size = 10) {
-    if (!pathOrKey) pathOrKey = "eskie.crosshair.circle.fantasy_01.white";
-    if (pathOrKey.startsWith('eskie.crosshair.circle.fantasy_01')) {
-        const [eskie, crosshair, shape, genre, COLOR, style, radius] = pathOrKey.split('.');
+    const key = String(pathOrKey ?? "eskie.crosshair.circle.fantasy_01.white").trim() || "eskie.crosshair.circle.fantasy_01.white";
+    if (key.startsWith('eskie.crosshair.circle.fantasy_01')) {
+        const [eskie, crosshair, shape, genre, COLOR] = key.split('.');
         const color = COLOR ?? "white";
         if (size <= 10) return closest(`eskie.crosshair.circle.fantasy_01.${color}.no_base.radius_10ft`);
         if (size <= 20) return closest(`eskie.crosshair.circle.fantasy_01.${color}.no_base.radius_20ft`);
         if (size <= 30) return closest(`eskie.crosshair.circle.fantasy_01.${color}.no_base.radius_30ft`);
         return closest(`eskie.crosshair.circle.fantasy_01.${color}.no_base.radius_60ft`);
     }
-    return closest(pathOrKey);
+    return closest(key);
 }
 
 /**
@@ -92,7 +92,7 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
      * @returns {string} Resolved file path or key
      */
     _getGraphicFile() {
-        const rawFile = this.config.circleFile ?? this.config.file;
+        const rawFile = String(this.config.file ?? "").trim();
         const radius = Math.round(this.config.radius ?? 20);
         return resolveCircleAsset(rawFile, radius);
     }

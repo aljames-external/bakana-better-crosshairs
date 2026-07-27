@@ -56,7 +56,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      */
     _configureCrosshairShape(crosshairSeq) {
         const distance = Math.round(this.config.distance ?? 30);
-        const width = Math.round(this.config.width ?? distance);
+        const width = Math.round(this.config.width ?? 30);
         log.debug("SquareCrosshairShape._configureCrosshairShape | Configuring square distance and width.", { distance, width });
         crosshairSeq.distance(distance).width(width);
     }
@@ -68,7 +68,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      */
     _getGraphicDimensions() {
         const rawDistance = Math.round(this.config.distance ?? 30);
-        const rawWidth = Math.round(this.config.width ?? rawDistance);
+        const rawWidth = Math.round(this.config.width ?? 30);
         let distance = rawDistance;
         if (rawWidth > 0 && rawDistance > rawWidth) {
             const isSquareDiagonal = rawDistance <= rawWidth * 1.6;
@@ -91,8 +91,8 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * @returns {string} Resolved file path or key
      */
     _getGraphicFile() {
-        const rawFile = this.config.squareFile ?? this.config.file;
-        if (rawFile != null && rawFile !== "") {
+        const rawFile = String(this.config.file ?? "").trim();
+        if (Boolean(rawFile)) {
             return closest(rawFile);
         }
         const defaultKey = "eskie.crosshair.square.thin.white.full";

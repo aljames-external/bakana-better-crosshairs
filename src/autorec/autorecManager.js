@@ -839,10 +839,10 @@ export class AutorecManager {
                 || (config.fillAlpha !== undefined && config.fillAlpha !== 0);
             const icon = config.icon ?? null;
 
-            const placedFillColor = config.placedFillColor ?? "#0099ff";
-            const placedFillAlpha = config.placedFillAlpha ?? 0.25;
-            const placedBorderColor = config.placedBorderColor ?? "#000000";
-            const placedBorderAlpha = config.placedBorderAlpha ?? 0.25;
+            const placedFillColor = config.placedFillColor ?? DEFAULT_AUTOREC_ENTRY.placedFillColor;
+            const placedFillAlpha = config.placedFillAlpha ?? DEFAULT_AUTOREC_ENTRY.placedFillAlpha;
+            const placedBorderColor = config.placedBorderColor ?? DEFAULT_AUTOREC_ENTRY.placedBorderColor;
+            const placedBorderAlpha = config.placedBorderAlpha ?? DEFAULT_AUTOREC_ENTRY.placedBorderAlpha;
             const hasPlacedStyling = Boolean(config.placedFillColor)
                 || (config.placedFillAlpha !== undefined && config.placedFillAlpha !== 0.25)
                 || Boolean(config.placedBorderColor)

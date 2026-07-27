@@ -54,8 +54,10 @@ export function sanitizeEntryForExchange(entry) {
 
     const raw = entry.config ?? entry;
     const itemName = String(raw.itemName ?? raw.regKey ?? "").trim();
-    const activityId = String(raw.activityId ?? "").trim() || undefined;
-    const activityName = String(raw.activityName ?? "").trim() || undefined;
+    const cleanActId = String(raw.activityId ?? "").trim();
+    const activityId = cleanActId.length > 0 ? cleanActId : undefined;
+    const cleanActName = String(raw.activityName ?? "").trim();
+    const activityName = cleanActName.length > 0 ? cleanActName : undefined;
     const module = String(raw.module ?? raw.sourceModule ?? "world").trim();
     const enabled = raw.enabled !== false;
 
@@ -224,7 +226,7 @@ export function validateImportPackage(rawInput, { overrideSourceModule = null } 
     const [majorSupported] = AUTOREC_EXCHANGE_VERSION.split(".");
     const [majorPackage] = packageVersion.split(".");
     if (majorPackage !== majorSupported) {
-        log.warn(`AutorecExchange.validateImportPackage | Schema version mismatch: package="${packageVersion}", supported="${AUTOREC_EXCHANGE_VERSION}".`);
+        log.error(`AutorecExchange.validateImportPackage | Schema version mismatch: package="${packageVersion}", supported="${AUTOREC_EXCHANGE_VERSION}".`);
         throw new Error(`Incompatible package version "${packageVersion}". Expected compatible major version "${majorSupported}.x".`);
     }
 
@@ -448,7 +450,7 @@ export function triggerFileDownload(jsonString, filename = "bbc-autorec-export.j
     try {
         const saved = saveDataToFile(jsonString, "text/json", filename);
         if (saved) {
-            log.info(`AutorecExchange.triggerFileDownload | Export file "${filename}" saved via Foundry saveDataToFile.`);
+            log.debug(`AutorecExchange.triggerFileDownload | Export file "${filename}" saved via Foundry saveDataToFile.`);
             return;
         }
     } catch (err) {
@@ -463,5 +465,5 @@ export function triggerFileDownload(jsonString, filename = "bbc-autorec-export.j
     document.body.appendChild(anchor);
     anchor.click();
     document.body.removeChild(anchor);
-    log.info(`AutorecExchange.triggerFileDownload | Export file "${filename}" saved via Data-URI download.`);
+    log.debug(`AutorecExchange.triggerFileDownload | Export file "${filename}" saved via Data-URI download.`);
 }

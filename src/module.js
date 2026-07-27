@@ -55,7 +55,6 @@ export function setupModule() {
     const moduleApi = {
         crosshair,
         util,
-        manager,
         autorecManager,
         ModuleAutorecManager,
         systemAdapter,
@@ -64,9 +63,6 @@ export function setupModule() {
     };
 
     setupApiCalls(moduleApi);
-
-    const mod = game.modules.get(MODULE_ID);
-    if (mod) mod.api = moduleApi;
 }
 
 /**
@@ -76,7 +72,7 @@ export function setupModule() {
  */
 Hooks.once('init', () => {
     setupModule();
-    log.info(`${MODULE_NAME} module ready`);
+    log.info(`Initializing ${MODULE_NAME} module`);
 });
 
 /**
@@ -86,5 +82,6 @@ Hooks.once('init', () => {
  */
 Hooks.once('ready', () => {
     autorecManager.initializeReadySync();
+    log.info(`${MODULE_NAME} module ready`);
 });
 
