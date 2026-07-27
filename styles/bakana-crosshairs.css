@@ -1375,3 +1375,86 @@ details.bbc-diff-preview-box[open] .bbc-diff-chevron {
     background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
     box-shadow: 0 6px 18px rgba(99, 102, 241, 0.5);
 }
+
+/* --- Autorec Exchange Menu --- */
+.bbc-exchange-modal {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+    color: #e2e8f0;
+    background: linear-gradient(135deg, #11141d 0%, #171a26 100%);
+}
+
+.bbc-exchange-header {
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.bbc-exchange-title {
+    margin: 0 0 6px 0;
+    font-size: 1.05rem;
+    color: #ffffff;
+}
+
+.bbc-exchange-title i {
+    margin-right: 8px;
+    color: #818cf8;
+}
+
+.bbc-exchange-desc {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #94a3b8;
+}
+
+.bbc-exchange-badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 2px 8px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #a5b4fc;
+    background: rgba(99, 102, 241, 0.15);
+    border-radius: 12px;
+}
+
+.bbc-exchange-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bbc-exchange-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.bbc-exchange-btn-export {
+    color: #ffffff;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    border: 1px solid rgba(99, 102, 241, 0.5);
+}
+
+.bbc-exchange-btn-export:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+}
+
+.bbc-exchange-btn-import {
+    color: #e2e8f0;
+    background: rgba(30, 41, 59, 0.85);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.bbc-exchange-btn-import:hover {
+    background: rgba(51, 65, 85, 0.95);
+    border-color: rgba(148, 163, 184, 0.5);
+}
