@@ -126,10 +126,7 @@ export function migrateV1ToV2Entry(legacyEntry) {
  * @returns {Object|Array<Object>} Upgraded package or entries
  */
 export function migrateV1ToV2(payload) {
-    log.warn(
-        "AutorecMigration | Legacy v1.0.0 schema detected and automatically upgraded to v2.0.0. " +
-        "WARNING: Automatic v1.0.0 schema translation is deprecated and will be removed in a future release."
-    );
+    log.warn("AutorecMigration | Legacy v1.0.0 schema detected and automatically upgraded to v2.0.0.");
 
     if (Array.isArray(payload)) {
         return payload.map(e => migrateV1ToV2Entry(e));
