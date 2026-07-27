@@ -8,7 +8,7 @@ import { DEFAULT_AUTOREC_ENTRY } from "./autorecManager.js";
  * Used for compatibility check on import.
  * @type {string}
  */
-export const AUTOREC_EXCHANGE_VERSION = "1.0.0";
+export const AUTOREC_EXCHANGE_VERSION = "2.0.0";
 
 /**
  * List of non-configuration metadata keys stripped when comparing configurations for conflict detection.
@@ -54,55 +54,84 @@ export function sanitizeEntryForExchange(entry) {
 
     const raw = entry.config ?? entry;
     const itemName = String(raw.itemName ?? raw.regKey ?? "").trim();
-    const activityId = String(raw.activityId ?? "").trim();
-    const activityName = String(raw.activityName ?? "").trim();
-    const sourceModule = String(raw.sourceModule ?? "BBC").trim();
+    const activityId = String(raw.activityId ?? "").trim() || undefined;
+    const activityName = String(raw.activityName ?? "").trim() || undefined;
+    const module = String(raw.module ?? raw.sourceModule ?? "world").trim();
     const enabled = raw.enabled !== false;
+
+    const optionsRaw = raw.options ?? {};
+    const fileRaw = raw.file ?? {};
+    const previewRaw = raw.preview ?? {};
+    const previewFill = previewRaw.fill ?? {};
+    const previewBorder = previewRaw.border ?? {};
+    const placedRaw = raw.placed ?? {};
+    const placedFill = placedRaw.fill ?? {};
+    const placedBorder = placedRaw.border ?? {};
+    const macroRaw = raw.macro ?? {};
+
+    const attachMode = String(optionsRaw.attachMode ?? raw.stickToToken ?? DEFAULT_AUTOREC_ENTRY.stickToToken);
+    const showLine = optionsRaw.showLine !== undefined ? Boolean(optionsRaw.showLine) : Boolean(raw.showLine ?? DEFAULT_AUTOREC_ENTRY.showLine);
+    const showRange = optionsRaw.showRange !== undefined ? Boolean(optionsRaw.showRange) : Boolean(raw.showRange ?? DEFAULT_AUTOREC_ENTRY.showRange);
+    const limitRange = optionsRaw.limitRange !== undefined ? Boolean(optionsRaw.limitRange) : Boolean(raw.limitRange ?? DEFAULT_AUTOREC_ENTRY.limitRange);
+    const enablePrePlacement = Boolean(optionsRaw.enablePrePlacement ?? raw.enablePrePlacement);
+    const enableAnimation = Boolean(optionsRaw.enableAnimation ?? raw.enableAnimation);
+    const enablePlacedStyling = Boolean(optionsRaw.enablePlacedStyling ?? raw.enablePlacedStyling);
+    const enablePostPlacement = Boolean(optionsRaw.enablePostPlacement ?? raw.enablePostPlacement);
 
     const sanitized = {
         itemName,
         activityId,
         activityName,
-        sourceModule,
+        module,
         enabled,
-        stickToToken: raw.stickToToken ?? DEFAULT_AUTOREC_ENTRY.stickToToken,
-        showLine: raw.showLine ?? DEFAULT_AUTOREC_ENTRY.showLine,
-        showRange: raw.showRange ?? DEFAULT_AUTOREC_ENTRY.showRange,
-        limitRange: raw.limitRange ?? DEFAULT_AUTOREC_ENTRY.limitRange,
-        borderColor: raw.borderColor ?? DEFAULT_AUTOREC_ENTRY.borderColor,
-        borderAlpha: raw.borderAlpha ?? DEFAULT_AUTOREC_ENTRY.borderAlpha,
-        fillColor: raw.fillColor ?? DEFAULT_AUTOREC_ENTRY.fillColor,
-        fillAlpha: raw.fillAlpha ?? DEFAULT_AUTOREC_ENTRY.fillAlpha,
-        circleFile: raw.circleFile ?? DEFAULT_AUTOREC_ENTRY.circleFile,
-        coneFile: raw.coneFile ?? DEFAULT_AUTOREC_ENTRY.coneFile,
-        rayFile: raw.rayFile ?? DEFAULT_AUTOREC_ENTRY.rayFile,
-        squareFile: raw.squareFile ?? DEFAULT_AUTOREC_ENTRY.squareFile,
-        lineFile: raw.lineFile ?? DEFAULT_AUTOREC_ENTRY.lineFile,
-        placedFillColor: raw.placedFillColor ?? DEFAULT_AUTOREC_ENTRY.placedFillColor,
-        placedFillAlpha: raw.placedFillAlpha ?? DEFAULT_AUTOREC_ENTRY.placedFillAlpha,
-        placedBorderColor: raw.placedBorderColor ?? DEFAULT_AUTOREC_ENTRY.placedBorderColor,
-        placedBorderAlpha: raw.placedBorderAlpha ?? DEFAULT_AUTOREC_ENTRY.placedBorderAlpha,
-        enablePrePlacement: Boolean(raw.enablePrePlacement),
-        enableAnimation: Boolean(raw.enableAnimation),
-        enablePlacedStyling: Boolean(raw.enablePlacedStyling),
-        enablePostPlacement: Boolean(raw.enablePostPlacement),
-        concurrentCode: String(raw.concurrentCode ?? "").trim(),
-        postPlacementCode: String(raw.postPlacementCode ?? "").trim(),
-        icon: raw.icon ?? DEFAULT_AUTOREC_ENTRY.icon
+        options: {
+            attachMode,
+            showLine,
+            showRange,
+            limitRange,
+            enablePrePlacement,
+            enableAnimation,
+            enablePlacedStyling,
+            enablePostPlacement
+        },
+        file: {
+            circle: String(fileRaw.circle ?? raw.circleFile ?? DEFAULT_AUTOREC_ENTRY.circleFile),
+            cone: String(fileRaw.cone ?? raw.coneFile ?? DEFAULT_AUTOREC_ENTRY.coneFile),
+            ray: String(fileRaw.ray ?? raw.rayFile ?? DEFAULT_AUTOREC_ENTRY.rayFile),
+            square: String(fileRaw.square ?? raw.squareFile ?? DEFAULT_AUTOREC_ENTRY.squareFile),
+            line: String(fileRaw.line ?? raw.lineFile ?? DEFAULT_AUTOREC_ENTRY.lineFile),
+            reticle: String(fileRaw.reticle ?? raw.icon ?? DEFAULT_AUTOREC_ENTRY.icon)
+        },
+        preview: {
+            fill: {
+                color: String(previewFill.color ?? raw.fillColor ?? DEFAULT_AUTOREC_ENTRY.fillColor),
+                alpha: Number(previewFill.alpha ?? raw.fillAlpha ?? DEFAULT_AUTOREC_ENTRY.fillAlpha)
+            },
+            border: {
+                color: String(previewBorder.color ?? raw.borderColor ?? DEFAULT_AUTOREC_ENTRY.borderColor),
+                alpha: Number(previewBorder.alpha ?? raw.borderAlpha ?? DEFAULT_AUTOREC_ENTRY.borderAlpha)
+            }
+        },
+        placed: {
+            fill: {
+                color: String(placedFill.color ?? raw.placedFillColor ?? DEFAULT_AUTOREC_ENTRY.placedFillColor),
+                alpha: Number(placedFill.alpha ?? raw.placedFillAlpha ?? DEFAULT_AUTOREC_ENTRY.placedFillAlpha)
+            },
+            border: {
+                color: String(placedBorder.color ?? raw.placedBorderColor ?? DEFAULT_AUTOREC_ENTRY.placedBorderColor),
+                alpha: Number(placedBorder.alpha ?? raw.placedBorderAlpha ?? DEFAULT_AUTOREC_ENTRY.placedBorderAlpha)
+            }
+        },
+        macro: {
+            pre: String(macroRaw.pre ?? raw.concurrentCode ?? "").trim(),
+            post: String(macroRaw.post ?? raw.postPlacementCode ?? "").trim()
+        }
     };
 
-    if (raw.distance !== undefined && raw.distance !== null) {
-        sanitized.distance = Number(raw.distance);
-    }
-    if (raw.width !== undefined && raw.width !== null) {
-        sanitized.width = Number(raw.width);
-    }
-    if (raw.angle !== undefined && raw.angle !== null) {
-        sanitized.angle = Number(raw.angle);
-    }
-    if (raw.local !== undefined && raw.local !== null) {
-        sanitized.local = Boolean(raw.local);
-    }
+    if (raw.distance !== undefined && raw.distance !== null) sanitized.distance = Number(raw.distance);
+    if (raw.width !== undefined && raw.width !== null) sanitized.width = Number(raw.width);
+    if (raw.angle !== undefined && raw.angle !== null) sanitized.angle = Number(raw.angle);
+    if (raw.local !== undefined && raw.local !== null) sanitized.local = Boolean(raw.local);
 
     return sanitized;
 }
@@ -136,19 +165,21 @@ export function buildExportPackage(entriesInput, { sourceModule = "world", inclu
         if (!sanitized.itemName) {
             continue;
         }
-        sanitized.sourceModule = String(rawEntry.sourceModule ?? sourceModule ?? "world").trim();
+        sanitized.module = String(rawEntry.module ?? rawEntry.sourceModule ?? sourceModule ?? "world").trim();
         exportedEntries.push(sanitized);
     }
 
-    const foundryVersion = String(game?.version ?? "unknown");
-    const exportedAt = new Date().toISOString();
+    const foundry = String(game?.version ?? "unknown");
+    const system = String(game?.system?.id ?? "generic");
+    const timestamp = new Date().toISOString();
 
     return {
         version: AUTOREC_EXCHANGE_VERSION,
-        exportedAt,
-        foundryVersion,
+        timestamp,
+        foundry,
+        system,
         description: String(description ?? "").trim(),
-        sourceModule: String(sourceModule ?? "world").trim(),
+        module: String(sourceModule ?? "world").trim(),
         entries: exportedEntries
     };
 }
@@ -223,23 +254,24 @@ export function validateImportPackage(rawInput, { overrideSourceModule = null } 
         const sanitized = sanitizeEntryForExchange(item);
         const entrySourceModule = cleanOverride !== null
             ? cleanOverride
-            : String(item.sourceModule ?? parsed.sourceModule ?? "world").trim();
-        sanitized.sourceModule = entrySourceModule;
+            : String(item.module ?? item.sourceModule ?? parsed.module ?? parsed.sourceModule ?? "world").trim();
+        sanitized.module = entrySourceModule;
         validatedEntries.push(sanitized);
     }
 
     const packageSourceModule = cleanOverride !== null
         ? cleanOverride
-        : String(parsed.sourceModule ?? "world").trim();
+        : String(parsed.module ?? parsed.sourceModule ?? "world").trim();
 
     log.debug(`AutorecExchange.validateImportPackage | Package version "${packageVersion}" validated successfully (${validatedEntries.length} entries).`);
 
     return {
         version: packageVersion,
-        exportedAt: parsed.exportedAt ?? null,
-        foundryVersion: parsed.foundryVersion ?? null,
+        timestamp: parsed.timestamp ?? null,
+        foundry: parsed.foundry ?? null,
+        system: parsed.system ?? null,
         description: parsed.description ?? "",
-        sourceModule: packageSourceModule,
+        module: packageSourceModule,
         entries: validatedEntries
     };
 }
@@ -280,7 +312,7 @@ export function computeFieldDifferences(importedEntry, existingEntry) {
     ]);
 
     for (const key of checkedKeys) {
-        if (STRIPPED_COMPARE_KEYS.has(key) || key === "sourceModule" || key === "itemName" || key === "activityId" || key === "activityName") {
+        if (STRIPPED_COMPARE_KEYS.has(key) || key === "module" || key === "sourceModule" || key === "itemName" || key === "activityId" || key === "activityName") {
             continue;
         }
         if (key === "local" && importedEntry.local === undefined) {
@@ -289,7 +321,10 @@ export function computeFieldDifferences(importedEntry, existingEntry) {
         const valImported = importedEntry[key];
         const valExisting = sanitizedExisting[key];
 
-        if (valImported !== valExisting) {
+        const jsonImported = typeof valImported === "object" && valImported !== null ? JSON.stringify(valImported) : valImported;
+        const jsonExisting = typeof valExisting === "object" && valExisting !== null ? JSON.stringify(valExisting) : valExisting;
+
+        if (jsonImported !== jsonExisting) {
             differences.push({
                 field: key,
                 importedValue: valImported,

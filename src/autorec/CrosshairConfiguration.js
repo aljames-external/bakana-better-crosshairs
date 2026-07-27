@@ -18,49 +18,60 @@ export class CrosshairConfiguration {
         this.isCustom = Boolean(source.isCustom);
         this.enabled = Boolean(source.enabled ?? defaults.enabled);
 
+        const options = source.options ?? {};
+        const file = source.file ?? {};
+        const preview = source.preview ?? {};
+        const previewFill = preview.fill ?? {};
+        const previewBorder = preview.border ?? {};
+        const placed = source.placed ?? {};
+        const placedFill = placed.fill ?? {};
+        const placedBorder = placed.border ?? {};
+        const macro = source.macro ?? {};
+
         // Animation shape filepaths
-        this.circleFile = String(source.circleFile ?? defaults.circleFile).trim();
-        this.coneFile = String(source.coneFile ?? defaults.coneFile).trim();
-        this.rayFile = String(source.rayFile ?? defaults.rayFile).trim();
-        this.squareFile = String(source.squareFile ?? defaults.squareFile).trim();
-        this.lineFile = String(source.lineFile ?? defaults.lineFile).trim();
+        this.circleFile = String(source.circleFile ?? file.circle ?? defaults.circleFile).trim();
+        this.coneFile = String(source.coneFile ?? file.cone ?? defaults.coneFile).trim();
+        this.rayFile = String(source.rayFile ?? file.ray ?? defaults.rayFile).trim();
+        this.squareFile = String(source.squareFile ?? file.square ?? defaults.squareFile).trim();
+        this.lineFile = String(source.lineFile ?? file.line ?? defaults.lineFile).trim();
 
         // Lock to Token option ("true" | "false" | "default")
-        this.stickToToken = String(source.stickToToken ?? defaults.stickToToken);
+        this.stickToToken = String(source.stickToToken ?? options.attachMode ?? defaults.stickToToken);
 
         // Core animation rendering options
-        this.showLine = Boolean(source.showLine ?? defaults.showLine);
-        this.showRange = Boolean(source.showRange ?? defaults.showRange);
-        this.limitRange = Boolean(source.limitRange ?? defaults.limitRange);
-        this.borderColor = String(source.borderColor ?? defaults.borderColor).trim();
-        const borderAlphaVal = Number(source.borderAlpha ?? defaults.borderAlpha);
+        this.showLine = Boolean(source.showLine ?? options.showLine ?? defaults.showLine);
+        this.showRange = Boolean(source.showRange ?? options.showRange ?? defaults.showRange);
+        this.limitRange = Boolean(source.limitRange ?? options.limitRange ?? defaults.limitRange);
+        this.borderColor = String(source.borderColor ?? previewBorder.color ?? defaults.borderColor).trim();
+        const borderAlphaVal = Number(source.borderAlpha ?? previewBorder.alpha ?? defaults.borderAlpha);
         this.borderAlpha = Number.isFinite(borderAlphaVal) ? borderAlphaVal : defaults.borderAlpha;
-        this.fillColor = String(source.fillColor ?? defaults.fillColor).trim();
-        const fillAlphaVal = Number(source.fillAlpha ?? defaults.fillAlpha);
+        this.fillColor = String(source.fillColor ?? previewFill.color ?? defaults.fillColor).trim();
+        const fillAlphaVal = Number(source.fillAlpha ?? previewFill.alpha ?? defaults.fillAlpha);
         this.fillAlpha = Number.isFinite(fillAlphaVal) ? fillAlphaVal : defaults.fillAlpha;
-        this.icon = String(source.icon ?? defaults.icon).trim();
+        this.icon = String(source.icon ?? file.reticle ?? defaults.icon).trim();
 
         // Placed document styling options
-        this.placedFillColor = String(source.placedFillColor ?? defaults.placedFillColor).trim();
-        const placedFillAlphaVal = Number(source.placedFillAlpha ?? defaults.placedFillAlpha);
+        this.placedFillColor = String(source.placedFillColor ?? placedFill.color ?? defaults.placedFillColor).trim();
+        const placedFillAlphaVal = Number(source.placedFillAlpha ?? placedFill.alpha ?? defaults.placedFillAlpha);
         this.placedFillAlpha = Number.isFinite(placedFillAlphaVal) ? placedFillAlphaVal : defaults.placedFillAlpha;
-        this.placedBorderColor = String(source.placedBorderColor ?? defaults.placedBorderColor).trim();
-        const placedBorderAlphaVal = Number(source.placedBorderAlpha ?? defaults.placedBorderAlpha);
+        this.placedBorderColor = String(source.placedBorderColor ?? placedBorder.color ?? defaults.placedBorderColor).trim();
+        const placedBorderAlphaVal = Number(source.placedBorderAlpha ?? placedBorder.alpha ?? defaults.placedBorderAlpha);
         this.placedBorderAlpha = Number.isFinite(placedBorderAlphaVal) ? placedBorderAlphaVal : defaults.placedBorderAlpha;
 
         // Custom script hooks
-        this.concurrentCode = String(source.concurrentCode ?? "").trim();
-        this.postPlacementCode = String(source.postPlacementCode ?? "").trim();
+        this.concurrentCode = String(source.concurrentCode ?? macro.pre ?? "").trim();
+        this.postPlacementCode = String(source.postPlacementCode ?? macro.post ?? "").trim();
 
         // Granular section override enablement toggles
-        this.enablePrePlacement = Boolean(source.enablePrePlacement);
-        this.enableAnimation = Boolean(source.enableAnimation);
-        this.enablePlacedStyling = Boolean(source.enablePlacedStyling);
-        this.enablePostPlacement = Boolean(source.enablePostPlacement);
+        this.enablePrePlacement = Boolean(source.enablePrePlacement ?? options.enablePrePlacement);
+        this.enableAnimation = Boolean(source.enableAnimation ?? options.enableAnimation);
+        this.enablePlacedStyling = Boolean(source.enablePlacedStyling ?? options.enablePlacedStyling);
+        this.enablePostPlacement = Boolean(source.enablePostPlacement ?? options.enablePostPlacement);
 
         // Context associations
         this.item = source.item ?? null;
         this.activity = source.activity ?? null;
+        this.sourceModule = String(source.sourceModule ?? source.module ?? "world").trim();
     }
 
     /**

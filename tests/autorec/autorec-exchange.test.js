@@ -13,13 +13,13 @@ test('buildExportPackage creates a valid versioned export structure with sourceM
 
     const pkg = autorecManager.exportAutorecs({ sourceModule: 'BBC', description: 'Test Export' });
     assert.equal(pkg.version, AUTOREC_EXCHANGE_VERSION);
-    assert.equal(pkg.sourceModule, 'BBC');
+    assert.equal(pkg.module, 'BBC');
     assert.ok(Array.isArray(pkg.entries));
 
     const fireballEntry = pkg.entries.find(e => e.itemName === 'Fireball');
     assert.ok(fireballEntry);
-    assert.equal(fireballEntry.sourceModule, 'eskie-macro-pack');
-    assert.equal(fireballEntry.circleFile, 'test.fireball.file');
+    assert.equal(fireballEntry.module, 'eskie-macro-pack');
+    assert.equal(fireballEntry.file.circle, 'test.fireball.file');
 
     autorecManager.unregister('Fireball', { local: true });
 });
@@ -57,28 +57,25 @@ test('analyzeImportDiff classifies new workflows, conflict overwrites, and ident
 
     const testPkg = {
         version: AUTOREC_EXCHANGE_VERSION,
-        sourceModule: 'import-source',
+        module: 'import-source',
         entries: [
             // Conflict (will cause overwrite): Lightning Bolt has different border color
             {
                 itemName: 'Lightning Bolt',
-                borderColor: '#0000ff',
-                borderAlpha: 0.8,
-                sourceModule: 'imported-pack'
+                preview: { border: { color: '#0000ff', alpha: 0.8 } },
+                module: 'imported-pack'
             },
             // Identical: Shield matches current parameters
             {
                 itemName: 'Shield',
-                borderColor: '#00ff00',
-                borderAlpha: 0.5,
-                sourceModule: 'imported-pack'
+                preview: { border: { color: '#00ff00', alpha: 0.5 } },
+                module: 'imported-pack'
             },
             // Brand new workflow
             {
                 itemName: 'Cure Wounds',
-                borderColor: '#ffffff',
-                borderAlpha: 1.0,
-                sourceModule: 'imported-pack'
+                preview: { border: { color: '#ffffff', alpha: 1.0 } },
+                module: 'imported-pack'
             }
         ]
     };
@@ -93,7 +90,7 @@ test('analyzeImportDiff classifies new workflows, conflict overwrites, and ident
     assert.equal(diff.conflictEntries.length, 1);
     assert.equal(diff.conflictEntries[0].itemName, 'Lightning Bolt');
     assert.equal(diff.conflictEntries[0].isConflict, true);
-    assert.ok(diff.conflictEntries[0].differences.some(d => d.field === 'borderColor'));
+    assert.ok(diff.conflictEntries[0].differences.some(d => d.field === 'preview'));
 
     assert.equal(diff.identicalEntries.length, 1);
     assert.equal(diff.identicalEntries[0].itemName, 'Shield');
@@ -105,12 +102,12 @@ test('analyzeImportDiff classifies new workflows, conflict overwrites, and ident
 test('importAutorecs in silent mode merges selected workflows into manager', async () => {
     const importPayload = JSON.stringify({
         version: AUTOREC_EXCHANGE_VERSION,
-        sourceModule: 'eskie-macro-pack',
+        module: 'eskie-macro-pack',
         entries: [
             {
                 itemName: 'Ice Storm',
-                borderColor: '#00ffff',
-                sourceModule: 'eskie-macro-pack'
+                preview: { border: { color: '#00ffff' } },
+                module: 'eskie-macro-pack'
             }
         ]
     });
@@ -157,11 +154,11 @@ test('REGRESSION: modifying local scope property triggers conflict difference du
 
     const importPkg = {
         version: AUTOREC_EXCHANGE_VERSION,
-        sourceModule: 'BBC',
+        module: 'BBC',
         entries: [
             {
                 itemName: 'Bless',
-                borderColor: '#ffff00',
+                preview: { border: { color: '#ffff00' } },
                 local: false
             }
         ]

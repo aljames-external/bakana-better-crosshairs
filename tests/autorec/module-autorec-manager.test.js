@@ -159,11 +159,11 @@ test('ModuleAutorecManager.import and .export work cleanly', async () => {
     const rawArrayJson = JSON.stringify([
         {
             itemName: 'Totemic Tiger Slash',
-            circleFile: 'tiger-slash.png'
+            file: { circle: 'tiger-slash.png' }
         },
         {
             itemName: 'SAO Death Wave',
-            circleFile: 'sao-wave.png'
+            file: { circle: 'sao-wave.png' }
         }
     ]);
 
@@ -179,7 +179,7 @@ test('ModuleAutorecManager.import and .export work cleanly', async () => {
     assert.equal(burst.sourceModule, 'raw-array-pack');
 
     const exported = packManager.export({ description: 'Export test' });
-    assert.equal(exported.sourceModule, 'raw-array-pack');
+    assert.equal(exported.module, 'raw-array-pack');
     assert.equal(exported.entries.length, 2);
 
     autorecManager.unregister('Totemic Tiger Slash', { local: true });

@@ -211,14 +211,55 @@ export class AutorecManager {
      * @returns {void}
      */
     indexRegistration(registeredKey, handler) {
-        const itemName = String(handler?.itemName ?? registeredKey).trim();
-        const isDefault = Boolean(handler?.isDefault ?? (registeredKey === "DEFAULT"));
-        const activityId = isDefault ? "" : String(handler?.activityId ?? "").trim();
-        const activityName = isDefault ? "" : String(handler?.activityName ?? "").trim();
-        const hasActivity = Boolean(activityId) || Boolean(activityName);
-        const enabled = handler?.enabled !== false;
-        const sourceModule = String(handler?.sourceModule ?? "world").trim();
         const baseConfig = typeof handler === "function" ? { handler } : (handler ?? {});
+        const optionsRaw = baseConfig.options ?? {};
+        const fileRaw = baseConfig.file ?? {};
+        const previewRaw = baseConfig.preview ?? {};
+        const previewFill = previewRaw.fill ?? {};
+        const previewBorder = previewRaw.border ?? {};
+        const placedRaw = baseConfig.placed ?? {};
+        const placedFill = placedRaw.fill ?? {};
+        const placedBorder = placedRaw.border ?? {};
+        const macroRaw = baseConfig.macro ?? {};
+
+        const itemName = String(baseConfig.itemName ?? registeredKey).trim();
+        const isDefault = Boolean(baseConfig.isDefault ?? (registeredKey === "DEFAULT"));
+        const activityId = isDefault ? "" : String(baseConfig.activityId ?? "").trim();
+        const activityName = isDefault ? "" : String(baseConfig.activityName ?? "").trim();
+        const hasActivity = Boolean(activityId) || Boolean(activityName);
+        const enabled = baseConfig.enabled !== false;
+        const sourceModule = String(baseConfig.sourceModule ?? baseConfig.module ?? "world").trim();
+
+        const circleFile = String(baseConfig.circleFile ?? fileRaw.circle ?? DEFAULT_AUTOREC_ENTRY.circleFile).trim();
+        const coneFile = String(baseConfig.coneFile ?? fileRaw.cone ?? DEFAULT_AUTOREC_ENTRY.coneFile).trim();
+        const rayFile = String(baseConfig.rayFile ?? fileRaw.ray ?? DEFAULT_AUTOREC_ENTRY.rayFile).trim();
+        const squareFile = String(baseConfig.squareFile ?? fileRaw.square ?? DEFAULT_AUTOREC_ENTRY.squareFile).trim();
+        const lineFile = String(baseConfig.lineFile ?? fileRaw.line ?? DEFAULT_AUTOREC_ENTRY.lineFile).trim();
+        const icon = String(baseConfig.icon ?? fileRaw.reticle ?? DEFAULT_AUTOREC_ENTRY.icon).trim();
+
+        const stickToToken = String(baseConfig.stickToToken ?? optionsRaw.attachMode ?? DEFAULT_AUTOREC_ENTRY.stickToToken);
+        const showLine = Boolean(baseConfig.showLine ?? optionsRaw.showLine ?? DEFAULT_AUTOREC_ENTRY.showLine);
+        const showRange = Boolean(baseConfig.showRange ?? optionsRaw.showRange ?? DEFAULT_AUTOREC_ENTRY.showRange);
+        const limitRange = Boolean(baseConfig.limitRange ?? optionsRaw.limitRange ?? DEFAULT_AUTOREC_ENTRY.limitRange);
+
+        const borderColor = String(baseConfig.borderColor ?? previewBorder.color ?? DEFAULT_AUTOREC_ENTRY.borderColor).trim();
+        const borderAlpha = Number(baseConfig.borderAlpha ?? previewBorder.alpha ?? DEFAULT_AUTOREC_ENTRY.borderAlpha);
+        const fillColor = String(baseConfig.fillColor ?? previewFill.color ?? DEFAULT_AUTOREC_ENTRY.fillColor).trim();
+        const fillAlpha = Number(baseConfig.fillAlpha ?? previewFill.alpha ?? DEFAULT_AUTOREC_ENTRY.fillAlpha);
+
+        const placedFillColor = String(baseConfig.placedFillColor ?? placedFill.color ?? DEFAULT_AUTOREC_ENTRY.placedFillColor).trim();
+        const placedFillAlpha = Number(baseConfig.placedFillAlpha ?? placedFill.alpha ?? DEFAULT_AUTOREC_ENTRY.placedFillAlpha);
+        const placedBorderColor = String(baseConfig.placedBorderColor ?? placedBorder.color ?? DEFAULT_AUTOREC_ENTRY.placedBorderColor).trim();
+        const placedBorderAlpha = Number(baseConfig.placedBorderAlpha ?? placedBorder.alpha ?? DEFAULT_AUTOREC_ENTRY.placedBorderAlpha);
+
+        const concurrentCode = String(baseConfig.concurrentCode ?? macroRaw.pre ?? "").trim();
+        const postPlacementCode = String(baseConfig.postPlacementCode ?? macroRaw.post ?? "").trim();
+
+        const enablePrePlacement = Boolean(baseConfig.enablePrePlacement ?? optionsRaw.enablePrePlacement);
+        const enableAnimation = Boolean(baseConfig.enableAnimation ?? optionsRaw.enableAnimation);
+        const enablePlacedStyling = Boolean(baseConfig.enablePlacedStyling ?? optionsRaw.enablePlacedStyling);
+        const enablePostPlacement = Boolean(baseConfig.enablePostPlacement ?? optionsRaw.enablePostPlacement);
+
         const entry = {
             ...DEFAULT_AUTOREC_ENTRY,
             ...baseConfig,
@@ -230,7 +271,32 @@ export class AutorecManager {
             hasActivity,
             isDefault,
             enabled,
-            sourceModule
+            sourceModule,
+            module: sourceModule,
+            circleFile,
+            coneFile,
+            rayFile,
+            squareFile,
+            lineFile,
+            icon,
+            stickToToken,
+            showLine,
+            showRange,
+            limitRange,
+            borderColor,
+            borderAlpha,
+            fillColor,
+            fillAlpha,
+            placedFillColor,
+            placedFillAlpha,
+            placedBorderColor,
+            placedBorderAlpha,
+            concurrentCode,
+            postPlacementCode,
+            enablePrePlacement,
+            enableAnimation,
+            enablePlacedStyling,
+            enablePostPlacement
         };
 
         this.fastLookupMap.set(registeredKey.toLowerCase(), entry);
@@ -1021,14 +1087,15 @@ export class AutorecManager {
             const regKey = computeRegistrationKey(itemName, actName, actId);
             const sourceModule = cleanOverride !== null
                 ? cleanOverride
-                : String(entry.sourceModule ?? fallbackSourceModule ?? "world").trim();
+                : String(entry.module ?? entry.sourceModule ?? fallbackSourceModule ?? "world").trim();
 
             const config = {
                 ...entry,
                 itemName,
                 activityId: actId,
                 activityName: actName,
-                sourceModule
+                sourceModule,
+                module: sourceModule
             };
 
             delete config.importIndex;
