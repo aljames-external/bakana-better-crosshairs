@@ -65,7 +65,6 @@ export function sanitizeEntryForExchange(entry) {
         activityName,
         sourceModule,
         enabled,
-        local: Boolean(raw.local),
         stickToToken: raw.stickToToken ?? DEFAULT_AUTOREC_ENTRY.stickToToken,
         showLine: raw.showLine ?? DEFAULT_AUTOREC_ENTRY.showLine,
         showRange: raw.showRange ?? DEFAULT_AUTOREC_ENTRY.showRange,
@@ -100,6 +99,9 @@ export function sanitizeEntryForExchange(entry) {
     }
     if (raw.angle !== undefined && raw.angle !== null) {
         sanitized.angle = Number(raw.angle);
+    }
+    if (raw.local !== undefined && raw.local !== null) {
+        sanitized.local = Boolean(raw.local);
     }
 
     return sanitized;
@@ -279,6 +281,9 @@ export function computeFieldDifferences(importedEntry, existingEntry) {
 
     for (const key of checkedKeys) {
         if (STRIPPED_COMPARE_KEYS.has(key) || key === "sourceModule" || key === "itemName" || key === "activityId" || key === "activityName") {
+            continue;
+        }
+        if (key === "local" && importedEntry.local === undefined) {
             continue;
         }
         const valImported = importedEntry[key];

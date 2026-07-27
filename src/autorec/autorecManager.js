@@ -413,13 +413,13 @@ export class AutorecManager {
             const current = this.registeredHandlers.get(itemName);
             const isCurrentLocal = Boolean(current?.local);
             if (!isCurrentLocal) {
-                this.register(itemName, config, { persist: false });
+                this.register(itemName, config, { persist: false, isHydration: true });
                 this.persistedItemNames.add(itemName);
             }
         }
 
         const currentDefault = this.registeredHandlers.get("DEFAULT") ?? {};
-        this.register("DEFAULT", currentDefault, { persist: false });
+        this.register("DEFAULT", currentDefault, { persist: false, isHydration: true });
     }
 
     /**
@@ -433,11 +433,14 @@ export class AutorecManager {
      * @param {boolean} [options.local=false] - Whether this registration should only exist locally on this client and not persist or sync
      * @returns {void}
      */
-    register(itemName, handlerOrConfig = {}, { persist = true, local = false, sourceModule = null } = {}) {
+    register(itemName, handlerOrConfig = {}, { persist = true, local = false, sourceModule = null, isHydration = false } = {}) {
         if (this._onRegisterCallback) {
             this._onRegisterCallback();
         }
-        const isLocal = Boolean(local || handlerOrConfig?.local);
+        const isLocal = Boolean(local || handlerOrConfig?.local || (!persist && !isHydration));
+        if (isLocal && typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
+            handlerOrConfig.local = true;
+        }
         if (sourceModule && typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
             handlerOrConfig.sourceModule = sourceModule;
         }
@@ -543,9 +546,10 @@ export class AutorecManager {
         if (!Array.isArray(entries)) return;
         const toPersist = {};
         for (const { itemName, config, local } of entries) {
-            this.register(itemName, config, { persist: false, local });
+            const isEntryLocal = Boolean(local || !persist);
+            this.register(itemName, config, { persist: false, local: isEntryLocal, isHydration: true });
             const registered = this.registeredHandlers.get(itemName);
-            if (persist && !local && typeof registered !== "function") {
+            if (persist && !isEntryLocal && typeof registered !== "function") {
                 toPersist[itemName] = registered;
                 this.persistedItemNames.add(itemName);
             }
@@ -958,7 +962,8 @@ export class AutorecManager {
             delete config.targetRegKey;
             delete config.differences;
 
-            this.register(regKey, config, { persist: false, local: Boolean(config.local) });
+            const isEntryLocal = Boolean(config.local || (!persist && !config.local));
+            this.register(regKey, config, { persist: false, local: Boolean(config.local), isHydration: true });
             const registered = this.registeredHandlers.get(regKey);
             if (persist && !config.local && typeof registered !== "function") {
                 toPersist[regKey] = registered;

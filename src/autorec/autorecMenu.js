@@ -440,7 +440,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
         });
 
         if (modified) {
-            autorecManager.register(regKey, config, { persist: false, local: Boolean(config.local) });
+            autorecManager.register(regKey, config, { persist: false, local: Boolean(config.local), isHydration: true });
         }
 
         const persistedDict = {};
