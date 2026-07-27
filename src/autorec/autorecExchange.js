@@ -55,10 +55,8 @@ export function sanitizeEntryForExchange(entry) {
 
     const raw = entry.config ?? entry;
     const itemName = String(raw.itemName ?? raw.regKey ?? "").trim();
-    const cleanActId = String(raw.activityId ?? "").trim();
-    const activityId = cleanActId.length > 0 ? cleanActId : undefined;
-    const cleanActName = String(raw.activityName ?? "").trim();
-    const activityName = cleanActName.length > 0 ? cleanActName : undefined;
+    const activityId = String(raw.activityId ?? "").trim() || undefined;
+    const activityName = String(raw.activityName ?? "").trim() || undefined;
     const module = String(raw.module ?? raw.sourceModule ?? "world").trim();
     const enabled = raw.enabled !== false;
 

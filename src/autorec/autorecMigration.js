@@ -18,10 +18,8 @@ export function migrateV1ToV2Entry(legacyEntry) {
     }
 
     const itemName = String(legacyEntry.itemName ?? legacyEntry.regKey ?? "").trim();
-    const actIdStr = String(legacyEntry.activityId ?? "").trim();
-    const activityId = actIdStr ? actIdStr : undefined;
-    const actNameStr = String(legacyEntry.activityName ?? "").trim();
-    const activityName = actNameStr ? actNameStr : undefined;
+    const activityId = String(legacyEntry.activityId ?? "").trim() || undefined;
+    const activityName = String(legacyEntry.activityName ?? "").trim() || undefined;
     const sourceMod = String(legacyEntry.module ?? legacyEntry.sourceModule ?? "world").trim();
     const enabled = legacyEntry.enabled !== false;
 
