@@ -109,11 +109,8 @@ export function shouldStickToToken(config, shapeType = "circle", sysAdapter = sy
         return Boolean(sysAdapter?.getDefaultStickToToken?.(shapeType, config));
     }
     const val = config.stickToToken;
-    if (val !== undefined && val !== null && val !== "" && val !== "default") {
-        if (val === false || val === "false" || val === "off" || val === "no" || val === 0 || val === "0") return false;
-        if (val === true || val === "true" || val === "on" || val === "yes" || val === 1 || val === "1") return true;
-        return Boolean(val);
-    }
+    if (val === "true" || val === true || val === 1) return true;
+    if (val === "false" || val === false || val === 0) return false;
     if (typeof shapeType === "boolean") return shapeType;
     return Boolean(sysAdapter?.getDefaultStickToToken?.(shapeType, config));
 }

@@ -193,7 +193,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
             placedFillColorPicker: normalizeHexColor(source.placedFillColor, "#000000"),
             placedBorderColorPicker: normalizeHexColor(source.placedBorderColor, "#000000"),
 
-            isStickDefault: stickToTokenValue === "default" || !stickToTokenValue,
+            isStickDefault: stickToTokenValue === "default",
             isStickOn: stickToTokenValue === "true",
             isStickOff: stickToTokenValue === "false",
             hasCustomStyling: Boolean(

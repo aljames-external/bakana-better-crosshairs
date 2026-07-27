@@ -11,7 +11,8 @@ import { BaseCrosshairShape } from "./base.js";
  * @returns {string} The resolved file path or asset key for the circle crosshair.
  */
 export function resolveCircleAsset(pathOrKey, size = 10) {
-    const key = String(pathOrKey ?? "eskie.crosshair.circle.fantasy_01.white").trim() || "eskie.crosshair.circle.fantasy_01.white";
+    const rawKey = String(pathOrKey ?? "").trim();
+    const key = rawKey.length > 0 ? rawKey : "eskie.crosshair.circle.fantasy_01.white";
     if (key.startsWith('eskie.crosshair.circle.fantasy_01')) {
         const [eskie, crosshair, shape, genre, COLOR] = key.split('.');
         const color = COLOR ?? "white";

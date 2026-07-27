@@ -72,8 +72,10 @@ export function clearHighlightLayer(id) {
  * @returns {boolean} True if native Foundry save helper handled the request
  */
 export function saveDataToFile(data, type, filename) {
-    const cleanFilename = String(filename ?? "export.json").replace(/[/\\]/g, "_").trim() || "export.json";
-    const cleanType = String(type ?? "application/json").trim() || "application/json";
+    const nameStr = String(filename ?? "").replace(/[/\\]/g, "_").trim();
+    const cleanFilename = nameStr.length > 0 ? nameStr : "export.json";
+    const typeStr = String(type ?? "").trim();
+    const cleanType = typeStr.length > 0 ? typeStr : "application/json";
     const cleanData = typeof data === "string" ? data : JSON.stringify(data ?? {});
 
     try {

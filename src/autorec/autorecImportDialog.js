@@ -217,7 +217,7 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
         if (confirmBtn) {
             confirmBtn.addEventListener("click", () => {
                 const selectedList = this._gatherSelectedEntries();
-                log.info(`AutorecImportDialog | Confirmed merge for ${selectedList.length} selected entries.`);
+                log.debug(`AutorecImportDialog | Confirmed merge for ${selectedList.length} selected entries.`);
                 this._finish(selectedList);
             });
         }

@@ -159,7 +159,7 @@ export function buildExportPackage(entriesInput, { sourceModule = "world", inclu
         if (!rawEntry || typeof rawEntry === "function") {
             continue;
         }
-        const isDefaultEntry = Boolean(rawEntry.isDefault || rawEntry.itemName === "DEFAULT");
+        const isDefaultEntry = Boolean(rawEntry.isDefault);
         if (isDefaultEntry && !includeDefault) {
             continue;
         }
@@ -356,7 +356,7 @@ export function analyzeImportDiff(validatedPackage, currentRegistrations, { defa
         if (!handler || typeof handler === "function") {
             continue;
         }
-        if (Boolean(handler.isDefault || regKey === "DEFAULT")) {
+        if (Boolean(handler.isDefault)) {
             continue;
         }
         const itemName = handler.itemName ?? regKey.split(" | ")[0].trim();

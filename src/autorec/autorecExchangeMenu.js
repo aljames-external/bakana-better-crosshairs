@@ -38,7 +38,7 @@ export class AutorecExchangeMenuApplication extends ApplicationV2 {
      * @returns {Promise<string>} HTML string representation
      */
     async _renderHTML(options) {
-        const count = autorecManager.list().filter(k => k !== "DEFAULT").length;
+        const count = autorecManager.getAllEntries().filter(entry => !entry.isDefault).length;
         const titleStr = localize("BBC.settings.autorecExchangeMenu.heading", "Global Autorec Import / Export");
         const descStr = localize("BBC.settings.autorecExchangeMenu.desc", "Backup or share crosshair automatic recognition (autorec) configurations as portable JSON files.");
         const exportLabel = localize("BBC.settings.autorecExchangeMenu.exportBtn", "Export Autorecs to JSON");
@@ -90,7 +90,7 @@ export class AutorecExchangeMenuApplication extends ApplicationV2 {
         const exportBtn = rootEl.querySelector(".bbc-setting-export-btn");
         if (exportBtn) {
             exportBtn.addEventListener("click", () => {
-                log.info("AutorecExchangeMenuApplication | Triggering global autorec file export.");
+                log.debug("AutorecExchangeMenuApplication | Triggering global autorec file export.");
                 autorecManager.exportToFile({ sourceModule: "world" });
             });
         }
@@ -98,7 +98,7 @@ export class AutorecExchangeMenuApplication extends ApplicationV2 {
         const importBtn = rootEl.querySelector(".bbc-setting-import-btn");
         if (importBtn) {
             importBtn.addEventListener("click", () => {
-                log.info("AutorecExchangeMenuApplication | Opening file browser picker for JSON import.");
+                log.debug("AutorecExchangeMenuApplication | Opening file browser picker for JSON import.");
                 const input = document.createElement("input");
                 input.type = "file";
                 input.accept = ".json,application/json";

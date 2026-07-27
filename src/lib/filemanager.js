@@ -136,7 +136,10 @@ export function absolutePath(configPath) {
     if (!resolvedConfig || typeof Sequencer === 'undefined' || !Sequencer?.Database) return resolvedConfig;
     try {
         const entry = Sequencer.Database.getEntry(resolvedConfig, { softFail: true });
-        return typeof entry === 'string' ? entry : (entry?.file ?? entry?.files?.[0] ?? resolvedConfig);
+        if (typeof entry === "string") return entry;
+        if (entry?.file) return entry.file;
+        if (entry?.files?.[0]) return entry.files[0];
+        return resolvedConfig;
     } catch (e) {
         log.debug(`filemanager | Failed to resolve Sequencer entry for: ${resolvedConfig}`, e);
         return resolvedConfig;
