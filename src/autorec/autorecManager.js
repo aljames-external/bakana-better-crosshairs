@@ -7,6 +7,7 @@ import { localize, notify } from '../lib/utils.js';
 import { buildExportPackage, validateImportPackage as exchangeValidateImportPackage, analyzeImportDiff as exchangeAnalyzeImportDiff, triggerFileDownload } from './autorecExchange.js';
 import { AutorecImportDialog } from './autorecImportDialog.js';
 import { ModuleAutorecManager } from './moduleAutorecManager.js';
+import { autorecCompatibilityUpdate } from './autorecMigration.js';
 
 /**
  * Canonical default configuration schema for an automatic recognition (autorec) registration entry.
@@ -517,7 +518,8 @@ export class AutorecManager {
         }
 
         for (const [itemName, rawConfig] of Object.entries(savedRegistrations)) {
-            const config = rawConfig?.handler ?? rawConfig;
+            const baseConfig = rawConfig?.handler ?? rawConfig;
+            const config = autorecCompatibilityUpdate(baseConfig);
             const current = this.registeredHandlers.get(itemName);
             const isCurrentLocal = Boolean(current?.local);
             if (!isCurrentLocal) {

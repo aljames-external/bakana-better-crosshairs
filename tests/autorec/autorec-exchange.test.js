@@ -3,6 +3,41 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { autorecManager } from '../../src/autorec/autorecManager.js';
 import { AUTOREC_EXCHANGE_VERSION, validateImportPackage, analyzeImportDiff, buildExportPackage } from '../../src/autorec/autorecExchange.js';
+import { autorecCompatibilityUpdate } from '../../src/autorec/autorecMigration.js';
+
+test('autorecCompatibilityUpdate and validateImportPackage translate v1.0.0 packages into v2.0.0', () => {
+    const v1Package = {
+        version: "1.0.0",
+        exportedAt: "2024-01-01T00:00:00Z",
+        foundryVersion: "12.331",
+        sourceModule: "legacy-mod",
+        entries: [
+            {
+                itemName: "Fire Bolt",
+                circleFile: "fire-bolt.png",
+                borderColor: "#ff0000",
+                borderAlpha: 0.8,
+                fillColor: "#000000",
+                fillAlpha: 0.2,
+                stickToToken: "true",
+                concurrentCode: "console.log('aiming');"
+            }
+        ]
+    };
+
+    const validated = validateImportPackage(v1Package);
+    assert.equal(validated.version, AUTOREC_EXCHANGE_VERSION);
+    assert.equal(validated.module, "legacy-mod");
+    assert.equal(validated.entries.length, 1);
+
+    const entry = validated.entries[0];
+    assert.equal(entry.itemName, "Fire Bolt");
+    assert.equal(entry.file.circle, "fire-bolt.png");
+    assert.equal(entry.preview.border.color, "#ff0000");
+    assert.equal(entry.preview.border.alpha, 0.8);
+    assert.equal(entry.options.attachMode, "true");
+    assert.equal(entry.macro.pre, "console.log('aiming');");
+});
 
 test('buildExportPackage creates a valid versioned export structure with sourceModule', () => {
     autorecManager.register('Fireball', {

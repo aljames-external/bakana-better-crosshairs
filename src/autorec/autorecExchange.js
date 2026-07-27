@@ -2,6 +2,7 @@ import { MODULE_ID } from "../lib/constants.js";
 import { log } from "../lib/logger.js";
 import { saveDataToFile } from "../lib/compat.js";
 import { DEFAULT_AUTOREC_ENTRY } from "./autorecManager.js";
+import { autorecCompatibilityUpdate } from "./autorecMigration.js";
 
 /**
  * Current supported schema version for exported autorec JSON exchange bundles.
@@ -211,6 +212,8 @@ export function validateImportPackage(rawInput, { overrideSourceModule = null } 
             entries: parsed
         };
     }
+
+    parsed = autorecCompatibilityUpdate(parsed);
 
     if (!parsed || typeof parsed !== "object") {
         log.error("AutorecExchange.validateImportPackage | Payload is not a top-level object or array container.");
