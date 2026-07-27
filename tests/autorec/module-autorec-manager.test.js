@@ -6,6 +6,15 @@ import { ModuleAutorecManager } from '../../src/autorec/moduleAutorecManager.js'
 import { AUTOREC_EXCHANGE_VERSION } from '../../src/autorec/autorecExchange.js';
 
 test('ModuleAutorecManager.register and .unregister require arrays of elements', async () => {
+    assert.throws(
+        () => autorecManager('world'),
+        /cannot use reserved module-id 'world'/
+    );
+    assert.throws(
+        () => new ModuleAutorecManager('WORLD'),
+        /cannot use reserved module-id 'world'/
+    );
+
     const packManager = autorecManager('eskie-content-pack');
     assert.ok(packManager instanceof ModuleAutorecManager);
     assert.equal(packManager.moduleId, 'eskie-content-pack');

@@ -20,6 +20,10 @@ export class ModuleAutorecManager {
             log.error("ModuleAutorecManager.constructor | Missing required 'moduleId' string.");
             throw new Error("ModuleAutorecManager requires a non-empty module-id string.");
         }
+        if (cleanId.toLowerCase() === "world") {
+            log.error("ModuleAutorecManager.constructor | Reserved module-id 'world' is not permitted.");
+            throw new Error("ModuleAutorecManager cannot use reserved module-id 'world'. Scope attribution 'world' is restricted to game settings.");
+        }
         this.moduleId = cleanId;
         this._parent = parentManager;
 
