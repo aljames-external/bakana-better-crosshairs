@@ -298,3 +298,47 @@ test('Cross-module overwrite attempts on items/activities are rejected with noti
     await moduleAlpha.unregister(['Fireball | Cast Spell'], { local: true });
     delete globalThis.ui;
 });
+
+test('Package import (.import) does NOT throw overwrite warning notification when user reviews/modifies entries', async () => {
+    const ownerModule = autorecManager('pack-a');
+    await ownerModule.register([
+        {
+            itemName: 'Shield of Faith',
+            config: { circleFile: 'shield-v1.png', enabled: true }
+        }
+    ], { persist: false });
+
+    let capturedWarnMessage = null;
+    globalThis.ui = {
+        notifications: {
+            warn(msg) {
+                capturedWarnMessage = msg;
+            }
+        }
+    };
+
+    const importerModule = autorecManager('pack-b');
+    const jsonPayload = JSON.stringify({
+        version: AUTOREC_EXCHANGE_VERSION,
+        sourceModule: 'pack-b',
+        entries: [
+            {
+                itemName: 'Shield of Faith',
+                circleFile: 'shield-v2-imported.png',
+                enabled: true
+            }
+        ]
+    });
+
+    const importResult = await importerModule.import(jsonPayload, { interactive: false, overwrite: true });
+    assert.ok(importResult);
+    assert.equal(importResult.mergedCount, 1);
+    assert.equal(capturedWarnMessage, null, 'No ui.notifications.warn should appear during package import');
+
+    const imported = autorecManager.getEntryByName('Shield of Faith');
+    assert.equal(imported.circleFile, 'shield-v2-imported.png');
+    assert.equal(imported.sourceModule, 'pack-b');
+
+    await importerModule.unregister(['Shield of Faith'], { local: true });
+    delete globalThis.ui;
+});

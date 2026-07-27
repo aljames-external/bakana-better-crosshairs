@@ -543,7 +543,7 @@ export class AutorecManager {
      * @param {boolean} [options.local=false] - Whether this registration should only exist locally on this client and not persist or sync
      * @returns {void}
      */
-    register(itemName, handlerOrConfig = {}, { persist = true, local = false, sourceModule = null, isHydration = false } = {}) {
+    register(itemName, handlerOrConfig = {}, { persist = true, local = false, sourceModule = null, isHydration = false, isImport = false, suppressWarn = false } = {}) {
         if (this._onRegisterCallback) {
             this._onRegisterCallback();
         }
@@ -561,6 +561,8 @@ export class AutorecManager {
 
         if (
             !isHydration &&
+            !isImport &&
+            !suppressWarn &&
             existing &&
             !existing.isDefault &&
             existingModule !== "world" &&
@@ -1149,7 +1151,7 @@ export class AutorecManager {
             delete config.differences;
 
             const isEntryLocal = Boolean(config.local || (!persist && !config.local));
-            this.register(regKey, config, { persist: false, local: Boolean(config.local), isHydration: true });
+            this.register(regKey, config, { persist: false, local: Boolean(config.local), isHydration: true, isImport: true, suppressWarn: true });
             const registered = this.registeredHandlers.get(regKey);
             if (persist && !config.local && typeof registered !== "function") {
                 toPersist[regKey] = registered;

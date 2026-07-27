@@ -46,7 +46,7 @@ export class ModuleAutorecManager {
      * @returns {Promise<void>}
      * @throws {Error} If entries parameter is not an Array
      */
-    async register(entries, { persist = true } = {}) {
+    async register(entries, { persist = true, isHydration = false, isImport = false, suppressWarn = false } = {}) {
         if (!Array.isArray(entries)) {
             log.error(`ModuleAutorecManager[${this.moduleId}].register | Argument 'entries' must be an Array.`);
             throw new Error("ModuleAutorecManager.register requires an array of registration entries.");
@@ -77,6 +77,9 @@ export class ModuleAutorecManager {
             const existingModule = String(existing?.sourceModule ?? existing?.module ?? "world").trim();
 
             const isConflict = Boolean(
+                !isHydration &&
+                !isImport &&
+                !suppressWarn &&
                 existing &&
                 !existing.isDefault &&
                 existingModule !== "world" &&
