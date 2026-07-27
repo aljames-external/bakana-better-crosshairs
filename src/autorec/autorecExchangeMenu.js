@@ -1,5 +1,6 @@
 import { MODULE_ID } from "../lib/constants.js";
 import { autorecManager } from "./autorecManager.js";
+import { promptJsonFileImport } from "./autorecExchange.js";
 import { localize, notify } from "../lib/utils.js";
 import { log } from "../lib/logger.js";
 
@@ -81,38 +82,17 @@ export class AutorecExchangeMenuApplication extends HandlebarsApplicationMixin(A
         if (importBtn) {
             importBtn.addEventListener("click", () => {
                 log.debug("AutorecExchangeMenuApplication | Opening file browser picker for JSON import.");
-                const input = document.createElement("input");
-                input.type = "file";
-                input.accept = ".json,application/json";
-                input.style.display = "none";
-                document.body.appendChild(input);
-
-                input.addEventListener("change", async (ev) => {
-                    const file = ev.target?.files?.[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = async (e) => {
-                            const text = e.target?.result;
-                            if (typeof text === "string") {
-                                try {
-                                    const res = await autorecManager.importAutorecs(text, { sourceModule: "world", overrideSourceModule: null, interactive: true });
-                                    if (res) {
-                                        this.render(false);
-                                    }
-                                } catch (err) {
-                                    log.error("AutorecExchangeMenuApplication | Import error:", err);
-                                    notify.error(localize("BBC.autorecExchange.notify.importError", `Import failed: ${err.message}`));
-                                }
-                            }
-                        };
-                        reader.readAsText(file);
-                    }
-                    if (input.parentNode) {
-                        input.parentNode.removeChild(input);
+                promptJsonFileImport(async (text) => {
+                    try {
+                        const res = await autorecManager.importAutorecs(text, { sourceModule: "world", overrideSourceModule: null, interactive: true });
+                        if (res) {
+                            this.render(false);
+                        }
+                    } catch (err) {
+                        log.error("AutorecExchangeMenuApplication | Import error:", err);
+                        notify.error(localize("BBC.autorecExchange.notify.importError", `Import failed: ${err.message}`));
                     }
                 });
-
-                input.click();
             });
         }
     }

@@ -165,6 +165,22 @@ export class BaseCrosshairMenuApplication extends HandlebarsApplicationMixin(App
                 }
             });
         });
+
+        // 6. Live-toggle child configuration fields marked with data-override-child when enabling checkboxes toggle
+        root.querySelectorAll("input[type='checkbox'][name^='enable']").forEach(chk => {
+            chk.addEventListener("change", (ev) => {
+                const fieldName = ev.currentTarget.name;
+                const isChecked = Boolean(ev.currentTarget.checked);
+                root.querySelectorAll(`[data-override-child='${fieldName}']`).forEach(el => {
+                    el.style.display = isChecked ? "" : "none";
+                });
+                root.querySelectorAll(`[data-override-badge='${fieldName}']`).forEach(el => {
+                    el.textContent = isChecked
+                        ? localize("BBC.itemConfigMenu.badgeCustomOverride", "CUSTOM OVERRIDE")
+                        : localize("BBC.itemConfigMenu.badgeInherited", "INHERITED");
+                });
+            });
+        });
     }
 
     /**

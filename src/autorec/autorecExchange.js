@@ -468,3 +468,41 @@ export function triggerFileDownload(jsonString, filename = "bbc-autorec-export.j
     document.body.removeChild(anchor);
     log.debug(`AutorecExchange.triggerFileDownload | Export file "${filename}" saved via Data-URI download.`);
 }
+
+/**
+ * Prompts the user with a browser file picker to select a JSON package file.
+ * Single concrete Callback input contract (Rule 5).
+ * @param {function(string): (void|Promise<void>)} onFileLoaded - Callback executed with loaded text string.
+ * @returns {void}
+ */
+export function promptJsonFileImport(onFileLoaded) {
+    if (typeof onFileLoaded !== "function") {
+        log.error("AutorecExchange.promptJsonFileImport | Argument 'onFileLoaded' must be a function.");
+        return;
+    }
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json,application/json";
+    input.style.display = "none";
+    document.body.appendChild(input);
+
+    input.addEventListener("change", (ev) => {
+        const file = ev.target?.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = e.target?.result;
+                if (typeof text === "string") {
+                    onFileLoaded(text);
+                }
+            };
+            reader.readAsText(file);
+        }
+        if (input.parentNode) {
+            input.parentNode.removeChild(input);
+        }
+    });
+
+    input.click();
+}
