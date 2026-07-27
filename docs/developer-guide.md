@@ -36,36 +36,45 @@ When using your module's manager, register crosshair workflows using `.register(
 
 ### Registering an Array of Items (`.register`)
 
+> [!IMPORTANT]
+> **Integration Best Practice: Use `.import(...)` over `.register(...)` for Shipped Content Modules**  
+> When shipping automated crosshair presets in third-party content modules, spell collections, or system additions, **always use the [`.import(...)` method](#5-exporting--importing-json-exchange-bundles)** (e.g. `packManager.import(jsonContent, { interactive: false, overwrite: true })`) during your module's `ready` hook.
+>
+> - **Use `.import(...)` for distributed modules**: Package imports automatically validate structure, upgrade legacy `v1.0.0` preset schemas to `v2.0.0`, assign your module ownership tag (`sourceModule`), and safely merge entries without throwing noisy UI warning toasts.
+> - **Use `.register(...)` for development & niche workflows**: `.register(...)` is intended strictly for **local development environments** (your own sandboxed testing workspace where you can guarantee zero name collisions), rapid prototyping, or dynamic runtime registration.
+> - **Cross-Module Overwrite Protection**: If another active module already registered an item or activity name, calling `.register(...)` rejects assignment, throws a visual warning toast notification (`ui.notifications.warn`), and returns a failure status object:
+>   ```javascript
+>   {
+>       success: false,
+>       code: "ERR_MODULE_OVERWRITE_REJECTED",
+>       rejectedCount: 1,
+>       rejected: [{ itemName: "Fireball", activityName: "Cast Spell", existingModule: "other-module", code: "ERR_MODULE_OVERWRITE_REJECTED" }]
+>   }
+>   ```
+
 ```javascript
 await packManager.register([
     {
         itemName: "Fireball",
         config: {
-            circleFile: "modules/eskie-content-pack/assets/fireball.webp",
-            borderColor: "#ff0000",
-            borderAlpha: 0.85,
-            stickToToken: false,
-            showLine: true,
-            showRange: true,
-            enabled: true
+            file: { circle: "modules/eskie-content-pack/assets/fireball.webp" },
+            preview: { border: { color: "#ff0000", alpha: 0.85 } },
+            options: { stickToToken: false, showLine: true, showRange: true, enabled: true }
         }
     },
     {
         itemName: "Longbow",
         activityName: "Ranged Attack",
         config: {
-            rayFile: "jb2a.arrow.white",
-            showLine: true,
-            showRange: true,
-            limitRange: true
+            file: { ray: "jb2a.arrow.white" },
+            options: { showLine: true, showRange: true, limitRange: true }
         }
     },
     {
         itemName: "Chromatic Orb",
         config: {
-            circleFile: "jb2a.chromatic_orb.blue",
-            placedFillColor: "#0099ff",
-            placedFillAlpha: 0.3
+            file: { circle: "jb2a.chromatic_orb.blue" },
+            placed: { fill: { color: "#0099ff", alpha: 0.3 } }
         }
     }
 ]);
@@ -78,7 +87,7 @@ In activity-based game systems (such as **DnD5e v4**), an item can have multiple
 - **`activityName`** (e.g. `"Ranged Attack"`, `"Cast"`): Specifies a sub-activity name filter. Activity-filtered entries take priority over generic item-wide entries.
 - **`activityId`** (e.g. `"act_12345"`): Specifies an exact system activity ID filter.
 
-> **Note:** `.register(...)` strictly requires an Array argument (`Array<Object>`). Passing a single object throws a contract error.
+> **Note:** `.register(...)` strictly requires an Array argument (`Array<Object>`). Passing a single object throws a contract error. Note that reserved module ID `'world'` is restricted to game settings and cannot be passed to `autorecManager("world")`.
 
 ---
 
@@ -133,21 +142,38 @@ console.log("Package Container:", bundle);
 
 `.import(...)` accepts strings or objects in either format:
 
-#### Standard Exchange Bundle Structure
+#### Standard V2.0.0 Exchange Bundle Structure
 ```json
 {
-  "version": "1.0.0",
-  "sourceModule": "eskie-content-pack",
-  "description": "Eskie Content Pack Crosshairs v1.0",
+  "version": "2.0.0",
+  "module": "eskie-content-pack",
+  "timestamp": "2026-07-27T01:00:00.000Z",
+  "foundry": "13.338",
+  "system": "dnd5e",
+  "description": "Eskie Content Pack Crosshairs v2.0",
   "entries": [
     {
       "itemName": "Fireball",
-      "circleFile": "modules/eskie-content-pack/assets/fireball.webp",
-      "sourceModule": "eskie-content-pack"
+      "module": "eskie-content-pack",
+      "file": {
+        "circle": "modules/eskie-content-pack/assets/fireball.webp"
+      },
+      "preview": {
+        "border": { "color": "#ff0000", "alpha": 0.85 }
+      },
+      "options": {
+        "stickToToken": false,
+        "showLine": true,
+        "showRange": true,
+        "enabled": true
+      }
     }
   ]
 }
 ```
+
+#### Legacy v1.0.0 Schema Automatic Upgrade
+If your module previously created flat `v1.0.0` exchange files (using top-level properties `circleFile`, `coneFile`, `borderColor`, `concurrentCode`, etc.), **BBC automatically converts them to `v2.0.0` hierarchical objects on startup or import**. No manual user intervention is required.
 
 #### Plain JSON Array Payload
 You can also pass a simple raw JSON array string or array of objects without schema wrappers—BBC automatically normalizes it into a valid package structure:
@@ -156,12 +182,16 @@ You can also pass a simple raw JSON array string or array of objects without sch
 [
   {
     "itemName": "Fireball",
-    "circleFile": "modules/eskie-content-pack/assets/fireball.webp"
+    "file": {
+      "circle": "modules/eskie-content-pack/assets/fireball.webp"
+    }
   },
   {
     "itemName": "Longbow",
     "activityName": "Ranged Attack",
-    "rayFile": "jb2a.arrow.white"
+    "file": {
+      "ray": "jb2a.arrow.white"
+    }
   }
 ]
 ```

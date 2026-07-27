@@ -188,3 +188,139 @@ export function getSystemAdapter() {
     return new BaseSystemAdapter();
 }
 ```
+
+---
+
+## Deterministic Registration Identity Hashing (`computeRegistrationKey`)
+
+Historically, multi-activity items were distinguished using fragile composite string manipulation (`itemName + " | " + activityName`). This approach suffered from string ambiguity when item titles themselves contained pipe delimiters, and required fragile split-and-trim operations across lookups and indexes.
+
+BBC replaces string splitting with deterministic **32-bit Fowler-Noll-Vo-1a (FNV-1a) hashing** ([`computeRegistrationKey`](file:///usr/local/google/home/aljames/github/bakana-better-crosshairs/src/autorec/autorecManager.js#L60-L76)):
+
+```javascript
+export function computeRegistrationKey(itemName, activityName = "", activityId = "") {
+    const cleanItem = String(itemName ?? "").trim();
+    const cleanActName = String(activityName ?? "").trim();
+    const cleanActId = String(activityId ?? "").trim();
+    const actToken = cleanActId !== "" ? cleanActId : cleanActName;
+    if (actToken === "") {
+        return cleanItem;
+    }
+    const rawToken = `${cleanItem.toLowerCase()}::${actToken.toLowerCase()}`;
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < rawToken.length; i++) {
+        hash ^= rawToken.charCodeAt(i);
+        hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+    }
+    const hexHash = (hash >>> 0).toString(16).padStart(8, "0");
+    return `${cleanItem}#${hexHash}`;
+}
+```
+
+### Key Token Resolution Semantics
+1. **General Item Workflow (`actToken === ""`)**: Returns raw `cleanItem` string key (`"Fireball"`).
+2. **Activity-Scoped Workflow (`actToken !== ""`)**: Hashes lowercased `${cleanItem}::${actToken}` into an 8-character hex token appended to the clean item base: `"Longbow#9f2a0b1c"`.
+3. **Lookup Indexing**: Both exact identity tokens (`"Longbow#9f2a0b1c"`) and raw item name fallbacks (`"Longbow"`) are registered into `fastLookupMap` (O(1) direct evaluation) alongside legacy `"Item | Activity"` aliases for backward lookup.
+
+---
+
+## Cross-Module Overwrite Protection & Failure Return Codes
+
+To prevent third-party content modules or spell packs from silently overwriting crosshair definitions installed by another active module, `ModuleAutorecManager` and `AutorecManager` implement strict multi-module namespace protection.
+
+### Ownership Attribution Contract
+Every registration stored in `registeredHandlers` is stamped with an explicit `sourceModule` attribution tag:
+- **World & GM Overrides (`sourceModule: "world"`)**: Scope attribution `"world"` is restricted to game settings and manual GM customizations. Modules are strictly forbidden from registering under module-id `"world"` (`ModuleAutorecManager.constructor` throws if `"world"` or `"WORLD"` is passed).
+- **Module Attribution (`sourceModule: "eskie-content-pack"`)**: Tagged with the unique identifier of the module registering the workflow.
+
+### Collision Detection Pipeline
+When `.register(entries)` is invoked by module $B$ (`callingModule = "module-beta"`), every entry's registration key identity (`regKey`) is cross-referenced against `registeredHandlers`:
+
+$$\text{isConflict} = \text{Boolean}\left(\text{existing} \land \neg \text{existing.isDefault} \land \text{existingModule} \neq \text{"world"} \land \text{existingModule} \neq \text{callingModule}\right)$$
+
+```mermaid
+flowchart TD
+    Reg[Module B calls register entry] --> Check[Lookup key in registeredHandlers]
+    Check --> Found{Existing entry found?}
+    Found -- No --> Accept[Store entry & Persist]
+    Found -- Yes --> Owner{existingModule == "world" or callingModule?}
+    Owner -- Yes (Same Module or World Override) --> Accept
+    Owner -- No (Different Module Ownership) --> Reject[Abort Assignment]
+    Reject --> Toast[Emit ui.notifications.warn Toast Alert]
+    Reject --> ReturnFail[Return Status Object with ERR_MODULE_OVERWRITE_REJECTED]
+```
+
+### Return Code Contract (`ERR_MODULE_OVERWRITE_REJECTED`)
+Unlike standard `void` methods, `.register(...)` returns an operation contract object:
+
+```javascript
+{
+    success: false,
+    code: "ERR_MODULE_OVERWRITE_REJECTED",
+    registeredCount: 0,
+    rejectedCount: 1,
+    rejected: [
+        {
+            itemName: "Fireball",
+            activityName: "Cast Spell",
+            regKey: "Fireball#a1b2c3d4",
+            existingModule: "module-alpha",
+            callingModule: "module-beta",
+            reason: "MODULE_OVERWRITE_FORBIDDEN",
+            code: "ERR_MODULE_OVERWRITE_REJECTED"
+        }
+    ]
+}
+```
+
+### Import Flow Exemption (`isImport: true`, `suppressWarn: true`)
+When presets are loaded via `.import(...)` (or `mergeImportedEntries`), `isImport: true` and `suppressWarn: true` parameters bypass individual toast alerts. Because the import subsystem renders an interactive visual diff modal ([`AutorecImportDialog`](file:///usr/local/google/home/aljames/github/bakana-better-crosshairs/src/autorec/autorecImportDialog.js)) showing item modifications and conflict status flags (`isConflict`), duplicate toast popups are suppressed during import review.
+
+---
+
+## Isolated Chainable Schema Migration Pipeline (`src/autorec/autorecMigration.js`)
+
+To maintain complete version decoupling and zero-fallback data contracts (Universal Engineering Guardrail 1), schema translations from legacy `v1.0.0` packages to hierarchical `v2.0.0` presets are isolated strictly inside [`src/autorec/autorecMigration.js`](file:///usr/local/google/home/aljames/github/bakana-better-crosshairs/src/autorec/autorecMigration.js).
+
+### Hierarchical V2.0.0 Namespace Contracts
+Legacy flat key structures are mapped strictly to nested object namespaces:
+
+| Legacy `v1.0.0` Flat Key | Canonical `v2.0.0` Hierarchical Namespace |
+| :--- | :--- |
+| `circleFile`, `coneFile`, `rayFile`, `squareFile`, `lineFile` | `file.circle`, `file.cone`, `file.ray`, `file.square`, `file.line` |
+| `borderColor`, `borderAlpha`, `fillColor`, `fillAlpha` | `preview.border.color`, `preview.border.alpha`, `preview.fill.color`, `preview.fill.alpha` |
+| `placedBorderColor`, `placedBorderAlpha`, `placedFillColor`, `placedFillAlpha` | `placed.border.color`, `placed.border.alpha`, `placed.fill.color`, `placed.fill.alpha` |
+| `concurrentCode`, `postPlacementCode` | `macro.pre`, `macro.post` |
+| `stickToToken`, `showLine`, `showRange`, `limitRange` | `options.stickToToken`, `options.showLine`, `options.showRange`, `options.limitRange` |
+
+### Chainable Pipeline Architecture (`autorecCompatibilityUpdate`)
+When loading world settings on startup (`loadSavedRegistrations`) or validating imported JSON bundles (`validateImportPackage`), the payload passes through chainable transformer functions:
+
+$$\text{Raw Package/Entries} \xrightarrow{\text{isV1Schema}} \text{migrateV1ToV2} \xrightarrow{\text{future: migrateV2ToV3}} \text{v2.0.0 Normalized Contract}$$
+
+```javascript
+export function autorecCompatibilityUpdate(packageOrEntries) {
+    if (isV1Package(packageOrEntries) || isV1Array(packageOrEntries)) {
+        log.warn("AutorecMigration | Legacy v1.0.0 schema detected and automatically upgraded to v2.0.0.");
+        return migrateV1ToV2(packageOrEntries);
+    }
+    return packageOrEntries;
+}
+```
+
+By isolating compatibility transformers in a dedicated file, legacy upgrade logic can be removed cleanly when historical versions are sunset without spreading legacy fallbacks throughout active canvas rendering or registration loops.
+
+---
+
+## Universal Architectural & Engineering Guardrails
+
+All modules in `bakana-better-crosshairs` strictly enforce eight engineering guardrails:
+
+1. **Strict Data Structure Contracts & Zero-Fallback Schema Adapters**: Domain adapters never use ambiguous property coalescing chains (`propA ?? propB ?? default`). Adapter contracts declare explicit known properties.
+2. **Complete Version & System Decoupling (Legacy NOP Isolation)**: Tabletop version differences exist strictly within version subclass adapters (`FoundryVTTV14Adapter`). Legacy subclasses (`FoundryVTTV13Adapter`) implement exact legacy defaults (`{ factor: 1, gridUnits: false }`) with zero behavioral drift.
+3. **Clean Feature-Grouped Commit Discipline**: Work is organized into single-responsibility feature commits without debugging churn.
+4. **Strict Nullish Coalescing (`??`) vs. Logical OR (`||`) Separation**: Property and value fallbacks use nullish coalescing (`??`). Logical OR (`||`) is reserved strictly for boolean conditions (`if (isBroken || isMissing)`).
+5. **Strict Function Input Contracts & Single-Responsibility Normalization**: Internal helper methods accept a single concrete input type. Polymorphic caller inputs are normalized once at public API entry boundaries.
+6. **Strict Logging Hierarchy**: `log.error` (fatal/unrecoverable), `log.warn` (non-fatal degradation/conflict rejection), `log.info` (high-level lifecycle events only, no internal payloads), `log.debug` (execution tracing and data structures).
+7. **Canonical Boolean Flag Inspection**: Inspect canonical flags directly (`if (entry.isDefault)` / `if (!entry.enabled)`), zero string equality aliases (`=== "true"`).
+8. **Thorough Audit Discipline**: Modules undergo systematic top-to-bottom cross-examination against all active guardrails.

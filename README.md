@@ -118,9 +118,17 @@ Bakana's Better Crosshairs uses a decoupled **System Adapter & Foundry Adapter**
 
 ## Developer Documentation
 
-For developers looking to inspect the codebase, write custom system/module adapters, or trace execution flow, consult our deep-dive documentation:
+Bakana's Better Crosshairs provides a dedicated **Module Autorec Manager API** (`game.modules.get("bakana-better-crosshairs").api.autorecManager("your-module-id")`) for content packs, spell books, and subclass modules to load animated crosshairs automatically.
 
-* **[Architecture Guide (`docs/architecture_guide.md`)](docs/architecture_guide.md)**: Explains the adapter design pattern, directory structure, preview interception hooks, and guide to implementing new game system adapters.
+### Integration Best Practice: `.import(...)` vs `.register(...)`
+* **Use `.import(...)` for Shipped Content Modules (Recommended)**: When your module auto-loads crosshair presets on startup (`ready` hook), fetch your JSON file and call `packManager.import(jsonContent, { interactive: false, overwrite: true })`. This validates package structure, auto-upgrades legacy `v1.0.0` preset schemas to `v2.0.0`, attributes your `module-id`, and merges items without throwing cross-module warning notices.
+* **Use `.register(...)` for Local Testing & Niche Workflows**: `.register(...)` is intended strictly for local development environments (where you control all loaded modules) or dynamic programmatic registration. Calling `.register(...)` on an item or activity name already owned by another active module rejects assignment, alerts the GM with a visual warning notification (`ui.notifications.warn`), and returns a failure status object (`code: "ERR_MODULE_OVERWRITE_REJECTED"`).
+* **Reserved Module ID `'world'`**: The scope attribution `'world'` is restricted to game settings and cannot be used as a module ID.
+
+For deep technical diagrams and full API reference, consult our documentation:
+
+* **[Third-Party Module Developer Guide (`docs/developer-guide.md`)](docs/developer-guide.md)**: Practical integration tutorial, `.import` code snippets, activity filtering, and JSON exchange structures.
+* **[Architecture Guide (`docs/architecture_guide.md`)](docs/architecture_guide.md)**: Explains adapter decoupling, deterministic identity key hashing, strict cross-module ownership rules, and adding custom game system adapters.
 * **[Function Call Tree & Developer API Reference (`docs/function_tree.md`)](docs/function_tree.md)**: Comprehensive sequence diagrams, module call trees, and API method signatures (`resolveCrosshairPlacement`, `resolveAnchorPlacement`, `getCrosshairOriginTarget`).
 
 ---
