@@ -176,3 +176,49 @@ test('ModuleAutorecManager.import and .export work cleanly', async () => {
     autorecManager.unregister('Totemic Tiger Slash', { local: true });
     autorecManager.unregister('SAO Death Wave', { local: true });
 });
+
+test('ModuleAutorecManager preserves distinct composite keys for multiple activities on same item name', async () => {
+    const packManager = autorecManager('multi-activity-pack');
+
+    await packManager.register([
+        {
+            itemName: 'Longbow',
+            activityName: 'Ranged Attack',
+            config: { rayFile: 'jb2a.arrow.white', enabled: true }
+        },
+        {
+            itemName: 'Longbow',
+            activityName: 'Melee Strike',
+            config: { circleFile: 'jb2a.club.white', enabled: true }
+        },
+        {
+            itemName: 'Longbow',
+            config: { circleFile: 'jb2a.bow.fallback', enabled: true }
+        }
+    ], { persist: false });
+
+    assert.equal(packManager.has('Longbow'), true);
+    assert.equal(packManager.has('Longbow', 'Ranged Attack'), true);
+    assert.equal(packManager.has('Longbow', 'Melee Strike'), true);
+
+    const rangedEntry = packManager.get('Longbow', 'Ranged Attack');
+    const meleeEntry = packManager.get('Longbow', 'Melee Strike');
+    const fallbackEntry = packManager.get('Longbow');
+
+    assert.ok(rangedEntry);
+    assert.ok(meleeEntry);
+    assert.ok(fallbackEntry);
+    assert.equal(rangedEntry.rayFile, 'jb2a.arrow.white');
+    assert.equal(meleeEntry.circleFile, 'jb2a.club.white');
+    assert.equal(fallbackEntry.circleFile, 'jb2a.bow.fallback');
+
+    const allLongbowCandidates = packManager.getEntriesForItem('Longbow');
+    assert.equal(allLongbowCandidates.length, 3);
+    assert.equal(allLongbowCandidates[0].activityName, 'Ranged Attack');
+    assert.equal(allLongbowCandidates[1].activityName, 'Melee Strike');
+    assert.equal(Boolean(allLongbowCandidates[2].hasActivity), false);
+
+    await packManager.unregister(['Longbow']);
+    assert.equal(packManager.has('Longbow'), false);
+    assert.equal(packManager.has('Longbow', 'Ranged Attack'), false);
+});

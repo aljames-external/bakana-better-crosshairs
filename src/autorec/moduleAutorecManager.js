@@ -26,6 +26,7 @@ export class ModuleAutorecManager {
         this.register = this.register.bind(this);
         this.unregister = this.unregister.bind(this);
         this.get = this.get.bind(this);
+        this.getEntriesForItem = this.getEntriesForItem.bind(this);
         this.has = this.has.bind(this);
         this.list = this.list.bind(this);
         this.getAllEntries = this.getAllEntries.bind(this);
@@ -55,18 +56,24 @@ export class ModuleAutorecManager {
             if (!itemName) continue;
 
             const rawConfig = item.config ?? item;
+            const actName = String(item.activityName ?? rawConfig.activityName ?? "").trim();
+            const actId = String(item.activityId ?? rawConfig.activityId ?? "").trim();
+            const regKey = actName !== ""
+                ? `${itemName} | ${actName}`
+                : (actId !== "" ? `${itemName} | ${actId}` : itemName);
+
             const config = typeof rawConfig === "object" && rawConfig !== null
                 ? {
                     ...rawConfig,
                     itemName: rawConfig.itemName ?? itemName,
-                    activityName: item.activityName ?? rawConfig.activityName,
-                    activityId: item.activityId ?? rawConfig.activityId,
+                    activityName: actName !== "" ? actName : undefined,
+                    activityId: actId !== "" ? actId : undefined,
                     sourceModule: this.moduleId
                 }
                 : rawConfig;
 
             prepared.push({
-                itemName,
+                itemName: regKey,
                 config,
                 local: Boolean(item.local)
             });
@@ -94,23 +101,48 @@ export class ModuleAutorecManager {
     }
 
     /**
-     * Retrieve active autorec configuration for a given item or spell name.
+     * Retrieve active autorec configuration for a given item or spell name (optional activity scope).
      * @param {string} itemName - Target item/spell name
+     * @param {string|null} [activityNameOrId=null] - Optional sub-activity name or activity ID filter
      * @returns {Object|null} Active autorec entry configuration or null
      */
-    get(itemName) {
+    get(itemName, activityNameOrId = null) {
         const cleanItemName = String(itemName ?? "").trim();
-        return this._parent.get(cleanItemName);
+        if (!cleanItemName) return null;
+        const cleanActivity = String(activityNameOrId ?? "").trim();
+        const targetKey = cleanActivity !== "" && !cleanItemName.includes(" | ")
+            ? `${cleanItemName} | ${cleanActivity}`
+            : cleanItemName;
+        return this._parent.get(targetKey);
     }
 
     /**
-     * Check if an active registration exists for a given item or spell name.
+     * Retrieve all candidate active configurations registered under this module for a given item name.
+     * Activity-filtered entries come first, general fallback entries come last.
      * @param {string} itemName - Target item/spell name
+     * @returns {Array<Object>} Ordered array of candidate configurations belonging to this module
+     */
+    getEntriesForItem(itemName) {
+        const cleanItemName = String(itemName ?? "").trim();
+        if (!cleanItemName) return [];
+        return this._parent.getEntriesForItem(cleanItemName)
+            .filter(entry => entry.sourceModule === this.moduleId);
+    }
+
+    /**
+     * Check if an active registration exists for a given item/spell name and optional activity filter.
+     * @param {string} itemName - Target item/spell name
+     * @param {string|null} [activityNameOrId=null] - Optional sub-activity name or activity ID filter
      * @returns {boolean} True if registration exists
      */
-    has(itemName) {
+    has(itemName, activityNameOrId = null) {
         const cleanItemName = String(itemName ?? "").trim();
-        return this._parent.has(cleanItemName);
+        if (!cleanItemName) return false;
+        const cleanActivity = String(activityNameOrId ?? "").trim();
+        const targetKey = cleanActivity !== "" && !cleanItemName.includes(" | ")
+            ? `${cleanItemName} | ${cleanActivity}`
+            : cleanItemName;
+        return this._parent.has(targetKey);
     }
 
     /**

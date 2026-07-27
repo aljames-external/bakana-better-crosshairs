@@ -486,21 +486,34 @@ export class AutorecManager {
      * @returns {boolean} True if the item registration was successfully deleted, false otherwise
      */
     unregister(itemName, { persist = true, local = false } = {}) {
-        const existing = this.registeredHandlers.get(itemName);
-        if (existing?.isDefault) {
-            log.warn("AutorecManager.unregister | Cannot delete canonical default fallback entry (isDefault: true). You may disable it by setting enabled: false.");
-            return false;
+        const cleanName = String(itemName ?? "").trim();
+        if (!cleanName) return false;
+        const lowerClean = cleanName.toLowerCase();
+        const matchingKeys = [];
+        for (const key of this.registeredHandlers.keys()) {
+            const lowerKey = key.toLowerCase();
+            if (lowerKey === lowerClean || lowerKey.startsWith(`${lowerClean} | `)) {
+                matchingKeys.push(key);
+            }
         }
-        const deleted = this.registeredHandlers.delete(itemName);
-        const wasPersisted = this.persistedItemNames.has(itemName);
-        if (deleted) {
+        let anyDeleted = false;
+        for (const key of matchingKeys) {
+            const existing = this.registeredHandlers.get(key);
+            if (existing?.isDefault) continue;
+            const deleted = this.registeredHandlers.delete(key);
+            const wasPersisted = this.persistedItemNames.has(key);
+            if (deleted) {
+                anyDeleted = true;
+                if (persist && !local && wasPersisted) {
+                    this.persistUnregistration(key);
+                }
+            }
+        }
+        if (anyDeleted) {
             this.rebuildFastLookupMap();
-            log.debug(`AutorecManager.unregister | Unregistered template sequence for item: ${itemName}`);
+            log.debug(`AutorecManager.unregister | Unregistered template sequence(s) for item: ${cleanName}`);
         }
-        if (persist && !local && wasPersisted && typeof itemName === "string") {
-            this.persistUnregistration(itemName);
-        }
-        return deleted;
+        return anyDeleted;
     }
 
     /**
@@ -513,12 +526,24 @@ export class AutorecManager {
      */
     async unregisterMany(itemNames, { persist = true, local = false } = {}) {
         if (!Array.isArray(itemNames)) return;
-        for (const itemName of itemNames) {
-            const existing = this.registeredHandlers.get(itemName);
+        const matchingKeys = new Set();
+        for (const rawName of itemNames) {
+            const cleanName = String(rawName ?? "").trim();
+            if (!cleanName) continue;
+            const lowerClean = cleanName.toLowerCase();
+            for (const key of this.registeredHandlers.keys()) {
+                const lowerKey = key.toLowerCase();
+                if (lowerKey === lowerClean || lowerKey.startsWith(`${lowerClean} | `)) {
+                    matchingKeys.add(key);
+                }
+            }
+        }
+        for (const key of matchingKeys) {
+            const existing = this.registeredHandlers.get(key);
             if (existing?.isDefault) continue;
-            this.registeredHandlers.delete(itemName);
-            this.persistedItemNames.delete(itemName);
-            log.debug(`AutorecManager.unregisterMany | Unregistered template sequence for item: ${itemName}`);
+            this.registeredHandlers.delete(key);
+            this.persistedItemNames.delete(key);
+            log.debug(`AutorecManager.unregisterMany | Unregistered template sequence for key: ${key}`);
         }
         this.rebuildFastLookupMap();
 
