@@ -231,3 +231,70 @@ test('ModuleAutorecManager preserves distinct composite keys for multiple activi
     assert.equal(packManager.has('Longbow'), false);
     assert.equal(packManager.has('Longbow', 'Ranged Attack'), false);
 });
+
+test('Cross-module overwrite attempts on items/activities are rejected with notification warn and failure code', async () => {
+    const moduleAlpha = autorecManager('module-alpha');
+    const moduleBeta = autorecManager('module-beta');
+
+    let capturedWarnMessage = null;
+    globalThis.ui = {
+        notifications: {
+            warn(msg) {
+                capturedWarnMessage = msg;
+            }
+        }
+    };
+
+    const alphaResult = await moduleAlpha.register([
+        {
+            itemName: 'Fireball',
+            activityName: 'Cast Spell',
+            config: { circleFile: 'fireball-alpha.png', enabled: true }
+        }
+    ], { persist: false });
+
+    assert.equal(alphaResult.success, true);
+    assert.equal(alphaResult.code, 'OK');
+
+    const existingAlpha = autorecManager.getEntryByName('Fireball | Cast Spell');
+    assert.ok(existingAlpha);
+    assert.equal(existingAlpha.sourceModule, 'module-alpha');
+    assert.equal(existingAlpha.circleFile, 'fireball-alpha.png');
+
+    // Module Beta attempts to overwrite Fireball | Cast Spell owned by Module Alpha
+    const betaResult = await moduleBeta.register([
+        {
+            itemName: 'Fireball',
+            activityName: 'Cast Spell',
+            config: { circleFile: 'fireball-beta-intruder.png', enabled: true }
+        }
+    ], { persist: false });
+
+    assert.equal(betaResult.success, false);
+    assert.equal(betaResult.code, 'ERR_MODULE_OVERWRITE_REJECTED');
+    assert.equal(betaResult.rejectedCount, 1);
+    assert.ok(capturedWarnMessage);
+    assert.match(capturedWarnMessage, /overwrite attempt on \(Fireball \/ Cast Spell \/ module-alpha\) was attempted by module-beta/i);
+
+    // Existing registration from module-alpha must NOT be modified
+    const untouchedEntry = autorecManager.getEntryByName('Fireball | Cast Spell');
+    assert.equal(untouchedEntry.sourceModule, 'module-alpha');
+    assert.equal(untouchedEntry.circleFile, 'fireball-alpha.png');
+
+    // Module Alpha re-registering its own item succeeds
+    const alphaUpdateResult = await moduleAlpha.register([
+        {
+            itemName: 'Fireball',
+            activityName: 'Cast Spell',
+            config: { circleFile: 'fireball-alpha-v2.png', enabled: true }
+        }
+    ], { persist: false });
+
+    assert.equal(alphaUpdateResult.success, true);
+    const updatedAlpha = autorecManager.getEntryByName('Fireball | Cast Spell');
+    assert.equal(updatedAlpha.circleFile, 'fireball-alpha-v2.png');
+
+    // Clean up
+    await moduleAlpha.unregister(['Fireball | Cast Spell'], { local: true });
+    delete globalThis.ui;
+});

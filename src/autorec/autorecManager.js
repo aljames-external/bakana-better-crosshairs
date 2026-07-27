@@ -555,6 +555,33 @@ export class AutorecManager {
             handlerOrConfig.sourceModule = sourceModule;
         }
 
+        const callingModule = String(sourceModule ?? handlerOrConfig?.sourceModule ?? handlerOrConfig?.module ?? "world").trim();
+        const existing = itemName !== "DEFAULT" ? this.registeredHandlers.get(itemName) : null;
+        const existingModule = String(existing?.sourceModule ?? existing?.module ?? "world").trim();
+
+        if (
+            !isHydration &&
+            existing &&
+            !existing.isDefault &&
+            existingModule !== "world" &&
+            callingModule !== "world" &&
+            existingModule.toLowerCase() !== callingModule.toLowerCase()
+        ) {
+            const displayAct = String(existing.activityName ?? existing.activityId ?? "").trim() || "default";
+            const warnMsg = `An overwrite attempt on (${itemName} / ${displayAct} / ${existingModule}) was attempted by ${callingModule}.`;
+            if (typeof ui !== "undefined" && ui?.notifications?.warn) {
+                ui.notifications.warn(warnMsg);
+            }
+            log.warn(`AutorecManager.register | Overwrite attempt rejected: item "${itemName}" is owned by module "${existingModule}".`);
+            return {
+                success: false,
+                code: "ERR_MODULE_OVERWRITE_REJECTED",
+                reason: warnMsg,
+                existingModule,
+                callingModule
+            };
+        }
+
         if (itemName === "DEFAULT" && typeof handlerOrConfig !== "function") {
             handlerOrConfig = {
                 ...DEFAULT_AUTOREC_ENTRY,
@@ -584,6 +611,11 @@ export class AutorecManager {
         } else if (persist && typeof registered !== "function") {
             this.persistRegistration(itemName, registered);
         }
+
+        return {
+            success: true,
+            code: "OK"
+        };
     }
 
     /**
@@ -599,6 +631,9 @@ export class AutorecManager {
         const cleanName = String(itemName ?? "").trim();
         if (!cleanName) return false;
         const lowerClean = cleanName.toLowerCase();
+        const targetHash = cleanName.includes(" | ")
+            ? computeRegistrationKey(cleanName.split(" | ")[0].trim(), cleanName.split(" | ").slice(1).join(" | ").trim()).toLowerCase()
+            : null;
         const matchingKeys = [];
         for (const [key, handler] of this.registeredHandlers.entries()) {
             const lowerKey = key.toLowerCase();
@@ -607,7 +642,8 @@ export class AutorecManager {
             const isItemNameMatch = handlerItemName === lowerClean;
             const isHashedSubMatch = lowerKey.startsWith(`${lowerClean}#`);
             const isLegacySubMatch = lowerKey.startsWith(`${lowerClean} | `);
-            if (isExactMatch || isItemNameMatch || isHashedSubMatch || isLegacySubMatch) {
+            const isHashExactMatch = Boolean(targetHash && lowerKey === targetHash);
+            if (isExactMatch || isItemNameMatch || isHashedSubMatch || isLegacySubMatch || isHashExactMatch) {
                 matchingKeys.push(key);
             }
         }
@@ -646,6 +682,9 @@ export class AutorecManager {
             const cleanName = String(rawName ?? "").trim();
             if (!cleanName) continue;
             const lowerClean = cleanName.toLowerCase();
+            const targetHash = cleanName.includes(" | ")
+                ? computeRegistrationKey(cleanName.split(" | ")[0].trim(), cleanName.split(" | ").slice(1).join(" | ").trim()).toLowerCase()
+                : null;
             for (const [key, handler] of this.registeredHandlers.entries()) {
                 const lowerKey = key.toLowerCase();
                 const handlerItemName = String(handler?.itemName ?? key).trim().toLowerCase();
@@ -653,7 +692,8 @@ export class AutorecManager {
                 const isItemNameMatch = handlerItemName === lowerClean;
                 const isHashedSubMatch = lowerKey.startsWith(`${lowerClean}#`);
                 const isLegacySubMatch = lowerKey.startsWith(`${lowerClean} | `);
-                if (isExactMatch || isItemNameMatch || isHashedSubMatch || isLegacySubMatch) {
+                const isHashExactMatch = Boolean(targetHash && lowerKey === targetHash);
+                if (isExactMatch || isItemNameMatch || isHashedSubMatch || isLegacySubMatch || isHashExactMatch) {
                     matchingKeys.add(key);
                 }
             }

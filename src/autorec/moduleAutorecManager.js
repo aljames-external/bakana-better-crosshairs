@@ -51,9 +51,18 @@ export class ModuleAutorecManager {
             log.error(`ModuleAutorecManager[${this.moduleId}].register | Argument 'entries' must be an Array.`);
             throw new Error("ModuleAutorecManager.register requires an array of registration entries.");
         }
-        if (entries.length === 0) return;
+        if (entries.length === 0) {
+            return {
+                success: true,
+                code: "OK",
+                registeredCount: 0,
+                rejectedCount: 0,
+                rejected: []
+            };
+        }
 
         const prepared = [];
+        const rejected = [];
         for (const item of entries) {
             if (!item || typeof item !== "object") continue;
             const baseConfig = (item.config && typeof item.config === "object") ? item.config : item;
@@ -63,6 +72,36 @@ export class ModuleAutorecManager {
             const actName = String(item.activityName ?? baseConfig.activityName ?? "").trim();
             const actId = String(item.activityId ?? baseConfig.activityId ?? "").trim();
             const regKey = computeRegistrationKey(itemName, actName, actId);
+
+            const existing = this._parent.registeredHandlers?.get(regKey);
+            const existingModule = String(existing?.sourceModule ?? existing?.module ?? "world").trim();
+
+            const isConflict = Boolean(
+                existing &&
+                !existing.isDefault &&
+                existingModule !== "world" &&
+                existingModule.toLowerCase() !== this.moduleId.toLowerCase()
+            );
+
+            if (isConflict) {
+                const actLabel = actName !== "" ? actName : (actId !== "" ? actId : "default");
+                const warnMsg = `An overwrite attempt on (${itemName} / ${actLabel} / ${existingModule}) was attempted by ${this.moduleId}.`;
+                if (typeof ui !== "undefined" && ui?.notifications?.warn) {
+                    ui.notifications.warn(warnMsg);
+                }
+                log.warn(`ModuleAutorecManager[${this.moduleId}].register | ${warnMsg}`);
+                rejected.push({
+                    itemName,
+                    activityName: actName,
+                    activityId: actId,
+                    regKey,
+                    existingModule,
+                    callingModule: this.moduleId,
+                    reason: "MODULE_OVERWRITE_FORBIDDEN",
+                    code: "ERR_MODULE_OVERWRITE_REJECTED"
+                });
+                continue;
+            }
 
             const preparedConfig = {
                 ...baseConfig,
@@ -79,8 +118,19 @@ export class ModuleAutorecManager {
             });
         }
 
-        log.debug(`ModuleAutorecManager[${this.moduleId}].register | Registering ${prepared.length} items.`);
-        await this._parent.registerMany(prepared, { persist });
+        if (prepared.length > 0) {
+            log.debug(`ModuleAutorecManager[${this.moduleId}].register | Registering ${prepared.length} items.`);
+            await this._parent.registerMany(prepared, { persist, isHydration: false });
+        }
+
+        const isSuccess = rejected.length === 0;
+        return {
+            success: isSuccess,
+            code: isSuccess ? "OK" : "ERR_MODULE_OVERWRITE_REJECTED",
+            registeredCount: prepared.length,
+            rejectedCount: rejected.length,
+            rejected
+        };
     }
 
     /**

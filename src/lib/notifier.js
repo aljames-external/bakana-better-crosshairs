@@ -33,7 +33,7 @@ function _scheduleFlush() {
  * @returns {void}
  */
 function _flushQueues() {
-    if (!ui?.notifications) {
+    if (typeof ui === "undefined" || !ui?.notifications) {
         queues.info.length = 0;
         queues.warn.length = 0;
         queues.error.length = 0;
