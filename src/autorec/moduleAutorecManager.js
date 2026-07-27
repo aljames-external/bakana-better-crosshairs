@@ -1,4 +1,4 @@
-import { autorecManager } from "./autorecManager.js";
+import { autorecManager, computeRegistrationKey } from "./autorecManager.js";
 import { log } from "../lib/logger.js";
 
 /**
@@ -58,9 +58,7 @@ export class ModuleAutorecManager {
             const rawConfig = item.config ?? item;
             const actName = String(item.activityName ?? rawConfig.activityName ?? "").trim();
             const actId = String(item.activityId ?? rawConfig.activityId ?? "").trim();
-            const regKey = actName !== ""
-                ? `${itemName} | ${actName}`
-                : (actId !== "" ? `${itemName} | ${actId}` : itemName);
+            const regKey = computeRegistrationKey(itemName, actName, actId);
 
             const config = typeof rawConfig === "object" && rawConfig !== null
                 ? {
@@ -110,8 +108,8 @@ export class ModuleAutorecManager {
         const cleanItemName = String(itemName ?? "").trim();
         if (!cleanItemName) return null;
         const cleanActivity = String(activityNameOrId ?? "").trim();
-        const targetKey = cleanActivity !== "" && !cleanItemName.includes(" | ")
-            ? `${cleanItemName} | ${cleanActivity}`
+        const targetKey = cleanActivity !== "" && !cleanItemName.includes(" | ") && !cleanItemName.includes("#")
+            ? computeRegistrationKey(cleanItemName, cleanActivity)
             : cleanItemName;
         return this._parent.get(targetKey);
     }
@@ -139,8 +137,8 @@ export class ModuleAutorecManager {
         const cleanItemName = String(itemName ?? "").trim();
         if (!cleanItemName) return false;
         const cleanActivity = String(activityNameOrId ?? "").trim();
-        const targetKey = cleanActivity !== "" && !cleanItemName.includes(" | ")
-            ? `${cleanItemName} | ${cleanActivity}`
+        const targetKey = cleanActivity !== "" && !cleanItemName.includes(" | ") && !cleanItemName.includes("#")
+            ? computeRegistrationKey(cleanItemName, cleanActivity)
             : cleanItemName;
         return this._parent.has(targetKey);
     }

@@ -1,5 +1,5 @@
 import { MODULE_ID } from "../lib/constants.js";
-import { DEFAULT_AUTOREC_ENTRY, autorecManager } from "./autorecManager.js";
+import { DEFAULT_AUTOREC_ENTRY, autorecManager, computeRegistrationKey } from "./autorecManager.js";
 import { systemAdapter } from "../adapter/system/index.js";
 import { localize, notify } from "../lib/utils.js";
 import { log } from "../lib/logger.js";
@@ -224,7 +224,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
 
                 if (!result?.itemName) return;
                 const { itemName, activity } = result;
-                const regKey = activity !== "" ? `${itemName} | ${activity}` : itemName;
+                const regKey = computeRegistrationKey(itemName, activity, activity);
 
                 if (!autorecManager.has(regKey)) {
                     const config = activity !== "" ? { itemName, activityId: activity, activityName: activity, sourceModule: "world" } : { itemName, sourceModule: "world" };

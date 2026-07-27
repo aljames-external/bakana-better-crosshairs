@@ -48,6 +48,33 @@ export const DEFAULT_AUTOREC_ENTRY = {
 };
 
 /**
+ * Generate a deterministic non-colliding identity registration key for an item and activity combination.
+ * Uses FNV-1a non-cryptographic hashing when an activity scope is attached to eliminate delimiter collision risks.
+ * Single concrete inputs with nullish coalescing defaults (Rule 1 & Rule 4).
+ * @param {string} itemName - Target item or spell name
+ * @param {string} [activityName=""] - Optional activity title
+ * @param {string} [activityId=""] - Optional system activity ID
+ * @returns {string} Deterministic registration identity key
+ */
+export function computeRegistrationKey(itemName, activityName = "", activityId = "") {
+    const cleanItem = String(itemName ?? "").trim();
+    const cleanActName = String(activityName ?? "").trim();
+    const cleanActId = String(activityId ?? "").trim();
+    const actToken = cleanActId !== "" ? cleanActId : cleanActName;
+    if (actToken === "") {
+        return cleanItem;
+    }
+    const rawToken = `${cleanItem.toLowerCase()}::${actToken.toLowerCase()}`;
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < rawToken.length; i++) {
+        hash ^= rawToken.charCodeAt(i);
+        hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+    }
+    const hexHash = (hash >>> 0).toString(16).padStart(8, "0");
+    return `${cleanItem}#${hexHash}`;
+}
+
+/**
  * AutorecManager manages automatic recognition (autorec) registrations for template/region items.
  * Encapsulated as a class instead of free-floating module-level functions.
  */
@@ -184,10 +211,10 @@ export class AutorecManager {
      * @returns {void}
      */
     indexRegistration(registeredKey, handler) {
-        const itemName = handler?.itemName ?? registeredKey.split(" | ")[0].trim();
+        const itemName = String(handler?.itemName ?? registeredKey).trim();
         const isDefault = Boolean(handler?.isDefault ?? (registeredKey === "DEFAULT"));
-        const activityId = isDefault ? "" : (handler?.activityId ?? "").trim();
-        const activityName = isDefault ? "" : (handler?.activityName ?? "").trim();
+        const activityId = isDefault ? "" : String(handler?.activityId ?? "").trim();
+        const activityName = isDefault ? "" : String(handler?.activityName ?? "").trim();
         const hasActivity = Boolean(activityId) || Boolean(activityName);
         const enabled = handler?.enabled !== false;
         const sourceModule = String(handler?.sourceModule ?? "world").trim();
@@ -207,6 +234,8 @@ export class AutorecManager {
         };
 
         this.fastLookupMap.set(registeredKey.toLowerCase(), entry);
+        const computedKey = computeRegistrationKey(itemName, activityName, activityId);
+        this.fastLookupMap.set(computedKey.toLowerCase(), entry);
 
         if (itemName && !hasActivity) {
             this.fastLookupMap.set(itemName.toLowerCase(), entry);
@@ -214,6 +243,7 @@ export class AutorecManager {
         if (hasActivity) {
             const act = activityId !== "" ? activityId : activityName;
             this.fastLookupMap.set(`${itemName.toLowerCase()}|${act.toLowerCase()}`, entry);
+            this.fastLookupMap.set(`${itemName.toLowerCase()} | ${act.toLowerCase()}`, entry);
         }
     }
 
@@ -261,7 +291,19 @@ export class AutorecManager {
      */
     getEntryByName(itemName) {
         if (!itemName) return null;
-        return this.fastLookupMap.get(itemName.toLowerCase()) ?? null;
+        const cleanName = String(itemName).trim();
+        const lowerClean = cleanName.toLowerCase();
+        const directMatch = this.fastLookupMap.get(lowerClean);
+        if (directMatch) return directMatch;
+
+        if (cleanName.includes(" | ")) {
+            const parts = cleanName.split(" | ");
+            const baseItem = parts[0].trim();
+            const actPart = parts.slice(1).join(" | ").trim();
+            const hashedKey = computeRegistrationKey(baseItem, actPart).toLowerCase();
+            return this.fastLookupMap.get(hashedKey) ?? null;
+        }
+        return null;
     }
 
     /**
@@ -490,9 +532,14 @@ export class AutorecManager {
         if (!cleanName) return false;
         const lowerClean = cleanName.toLowerCase();
         const matchingKeys = [];
-        for (const key of this.registeredHandlers.keys()) {
+        for (const [key, handler] of this.registeredHandlers.entries()) {
             const lowerKey = key.toLowerCase();
-            if (lowerKey === lowerClean || lowerKey.startsWith(`${lowerClean} | `)) {
+            const handlerItemName = String(handler?.itemName ?? key).trim().toLowerCase();
+            const isExactMatch = lowerKey === lowerClean;
+            const isItemNameMatch = handlerItemName === lowerClean;
+            const isHashedSubMatch = lowerKey.startsWith(`${lowerClean}#`);
+            const isLegacySubMatch = lowerKey.startsWith(`${lowerClean} | `);
+            if (isExactMatch || isItemNameMatch || isHashedSubMatch || isLegacySubMatch) {
                 matchingKeys.push(key);
             }
         }
@@ -531,9 +578,14 @@ export class AutorecManager {
             const cleanName = String(rawName ?? "").trim();
             if (!cleanName) continue;
             const lowerClean = cleanName.toLowerCase();
-            for (const key of this.registeredHandlers.keys()) {
+            for (const [key, handler] of this.registeredHandlers.entries()) {
                 const lowerKey = key.toLowerCase();
-                if (lowerKey === lowerClean || lowerKey.startsWith(`${lowerClean} | `)) {
+                const handlerItemName = String(handler?.itemName ?? key).trim().toLowerCase();
+                const isExactMatch = lowerKey === lowerClean;
+                const isItemNameMatch = handlerItemName === lowerClean;
+                const isHashedSubMatch = lowerKey.startsWith(`${lowerClean}#`);
+                const isLegacySubMatch = lowerKey.startsWith(`${lowerClean} | `);
+                if (isExactMatch || isItemNameMatch || isHashedSubMatch || isLegacySubMatch) {
                     matchingKeys.add(key);
                 }
             }
@@ -830,7 +882,7 @@ export class AutorecManager {
                 rawEntries.push({
                     ...config,
                     regKey,
-                    itemName: config.itemName ?? regKey.split(" | ")[0].trim()
+                    itemName: String(config.itemName ?? regKey).trim()
                 });
             }
         }
@@ -966,7 +1018,7 @@ export class AutorecManager {
 
             const actId = String(entry.activityId ?? "").trim();
             const actName = String(entry.activityName ?? "").trim();
-            const regKey = actName !== "" ? `${itemName} | ${actName}` : (actId !== "" ? `${itemName} | ${actId}` : itemName);
+            const regKey = computeRegistrationKey(itemName, actName, actId);
             const sourceModule = cleanOverride !== null
                 ? cleanOverride
                 : String(entry.sourceModule ?? fallbackSourceModule ?? "world").trim();
