@@ -210,9 +210,8 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
                                 const formEl = button.form ?? html;
                                 const itemInput = typeof formEl?.querySelector === "function" ? formEl.querySelector("input[name='workflowName']") : null;
                                 const actInput = supportsActivities && typeof formEl?.querySelector === "function" ? formEl.querySelector("input[name='activityName']") : null;
-                                const trimmedName = (itemInput?.value ?? "").trim();
-                                const itemName = trimmedName !== "" ? trimmedName : null;
-                                const activity = (actInput?.value ?? "").trim();
+                                const itemName = (itemInput?.value ?? "").trim() || null;
+                                const activity = (actInput?.value ?? "").trim() || undefined;
                                 return itemName ? { itemName, activity } : null;
                             }
                         }

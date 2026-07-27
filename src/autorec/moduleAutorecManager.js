@@ -109,8 +109,8 @@ export class ModuleAutorecManager {
             const preparedConfig = {
                 ...baseConfig,
                 itemName,
-                activityName: actName !== "" ? actName : undefined,
-                activityId: actId !== "" ? actId : undefined,
+                activityName: actName || undefined,
+                activityId: actId || undefined,
                 sourceModule: this.moduleId
             };
 
