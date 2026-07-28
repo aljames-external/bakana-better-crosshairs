@@ -39,16 +39,19 @@ export function createRemoteShapeInstance(shapeType, config = {}) {
 
 /**
  * Retrieve active peer player canvas cursor position from Foundry controls layer or user activity state.
+ * Strictly matches user ID (Rule 7 & user prompt directive).
  * @param {string} userId - User ID of the peer player
  * @returns {{x: number, y: number}|null} Canvas coordinates or null
  */
 export function getPeerCursorPosition(userId) {
     if (!userId) return null;
 
-    // 1. Inspect canvas.controls.cursors PIXI children or dictionary lookup
+    // 1. Inspect canvas.controls.cursors PIXI children or dictionary lookup strictly by user ID
     if (canvas?.controls?.cursors) {
         if (Array.isArray(canvas.controls.cursors.children)) {
-            const cursor = canvas.controls.cursors.children.find(c => c?.user?.id === userId || c?.userId === userId || c?.id === userId);
+            const cursor = canvas.controls.cursors.children.find(c =>
+                c?.user?.id === userId || c?.userId === userId || c?.id === userId
+            );
             if (cursor) {
                 const px = cursor.target?.x ?? cursor.position?.x ?? cursor.x;
                 const py = cursor.target?.y ?? cursor.position?.y ?? cursor.y;
@@ -67,16 +70,57 @@ export function getPeerCursorPosition(userId) {
         }
     }
 
-    // 2. Inspect game.users activity state
+    // 2. Inspect game.users activity state strictly by user ID
     const user = game?.users?.get?.(userId);
     if (user) {
-        const c = user.activity?.cursor ?? user._cursor ?? user.cursor;
+        const c = user.activity?.cursor ?? user._activity?.cursor ?? user._cursor ?? user.cursor;
         if (c && Number.isFinite(c.x) && Number.isFinite(c.y)) {
             return { x: c.x, y: c.y };
         }
     }
 
     return null;
+}
+
+/**
+ * Diagnostic helper to inspect active Foundry cursors and user activity state for a given user ID.
+ * @param {string} userId - User ID to inspect
+ * @returns {Object} Diagnostic summary object
+ */
+export function diagnoseUserCursor(userId) {
+    const user = game?.users?.get?.(userId);
+    const cursorsContainer = canvas?.controls?.cursors;
+    const childrenInfo = cursorsContainer?.children?.map(c => ({
+        cClass: c?.constructor?.name,
+        cId: c?.id,
+        cUserId: c?.userId,
+        cUser_id: c?.user?.id,
+        cUserName: c?.user?.name,
+        cTarget: c?.target,
+        cPosition: c?.position,
+        cX: c?.x,
+        cY: c?.y
+    }));
+
+    const userInfo = user ? {
+        id: user.id,
+        name: user.name,
+        activity: user.activity,
+        _activity: user._activity,
+        _cursor: user._cursor,
+        cursor: user.cursor
+    } : "User not found in game.users";
+
+    const diag = {
+        userId,
+        userInfo,
+        cursorsContainerClass: cursorsContainer?.constructor?.name,
+        childrenCount: cursorsContainer?.children?.length ?? 0,
+        childrenInfo
+    };
+
+    log.debug(`diagnoseUserCursor | Diagnostic for user "${userId}":`, diag);
+    return diag;
 }
 
 /**
@@ -179,10 +223,12 @@ export class RemoteCrosshairVisual {
         const now = Date.now();
         if (now - this.lastCursorLogTime >= 2000) {
             this.lastCursorLogTime = now;
+            const peerPosResolved = getPeerCursorPosition(this.senderUserId);
             log.debug(`RemoteCrosshairVisual.cursorLog | Active remote crosshair position for user "${this.senderUserId}":`, {
                 senderUserId: this.senderUserId,
                 placementId: this.placementId,
-                cursorPos: pos,
+                peerPosResolved,
+                finalPos: pos,
                 direction: dir
             });
         }
