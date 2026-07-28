@@ -33,16 +33,19 @@ export class CrosshairController {
      * @returns {Promise<void>}
      */
     async start() {
-        if (!this.shape) return;
+        if (!this.shape || this.started) return;
+        this.started = true;
 
-        // 1. Initialize Sequencer crosshair sequence
-        try {
-            const [crosshairSeq] = await this.shape.create();
-            if (crosshairSeq) {
-                await crosshairSeq.play();
+        // 1. Initialize Sequencer crosshair sequence if not already present
+        if (!this.shape.sequencerCrosshair) {
+            try {
+                const [crosshairSeq] = await this.shape.create();
+                if (crosshairSeq) {
+                    await crosshairSeq.play();
+                }
+            } catch (e) {
+                log.debug("CrosshairController.start | Exception playing shape Sequence:", e);
             }
-        } catch (e) {
-            log.debug("CrosshairController.start | Exception playing shape Sequence:", e);
         }
 
         // 2. Attach position tracking listeners according to updateTrigger
