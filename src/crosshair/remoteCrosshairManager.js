@@ -291,7 +291,7 @@ export class RemoteCrosshairVisual {
     }
 
     /**
-     * Frame ticker callback updating active Sequencer effect position at 200ms cadence (5 Hz).
+     * Frame ticker callback updating active Sequencer effect position and rotation at 200ms cadence (5 Hz).
      * @protected
      * @param {boolean} [force=false] - Force update regardless of 200ms interval throttle
      * @returns {void}
@@ -305,16 +305,41 @@ export class RemoteCrosshairVisual {
         }
         this.lastRenderTime = now;
 
-        const pos = this.resolveTargetPosition();
+        const peerPos = getPeerCursorPosition(this.senderUserId);
+        const isAttachedToToken = Boolean(this.shape?.stickToToken && this.shape?.token);
+
+        let pos;
+        let dirDeg = this.shape?.direction ?? this.rawDirection;
+        let rad = dirDeg * (Math.PI / 180);
+
+        if (isAttachedToToken) {
+            const tok = this.shape.token;
+            pos = tok.center ?? { x: (tok.x ?? 0) + (tok.w ?? 100) / 2, y: (tok.y ?? 0) + (tok.h ?? 100) / 2 };
+            if (peerPos && Number.isFinite(peerPos.x) && Number.isFinite(peerPos.y)) {
+                const dx = peerPos.x - pos.x;
+                const dy = peerPos.y - pos.y;
+                if (dx !== 0 || dy !== 0) {
+                    rad = Math.atan2(dy, dx);
+                    dirDeg = rad * (180 / Math.PI);
+                    if (dirDeg < 0) dirDeg += 360;
+                }
+            }
+        } else {
+            pos = peerPos ?? { x: this.shape?.x ?? this.rawX, y: this.shape?.y ?? this.rawY };
+        }
+
         if (!pos || !Number.isFinite(pos.x) || !Number.isFinite(pos.y)) return;
 
         if (this.shape) {
             this.shape.x = pos.x;
             this.shape.y = pos.y;
+            this.shape.direction = dirDeg;
+            if (this.shape.config) {
+                this.shape.config.currentDirection = dirDeg;
+                this.shape.config.direction = dirDeg;
+                this.shape.config.rotation = rad;
+            }
         }
-
-        const dir = this.shape?.direction ?? this.rawDirection;
-        const rad = dir * (Math.PI / 180);
 
         if (this.targetAnchorObj) {
             this.targetAnchorObj.x = pos.x;
@@ -329,13 +354,13 @@ export class RemoteCrosshairVisual {
         // Periodic 2-second cursor position debug logging
         if (now - this.lastCursorLogTime >= 2000) {
             this.lastCursorLogTime = now;
-            const peerPosResolved = getPeerCursorPosition(this.senderUserId);
             log.debug(`RemoteCrosshairVisual.cursorLog | Active remote crosshair position for user "${this.senderUserId}":`, {
                 senderUserId: this.senderUserId,
                 placementId: this.placementId,
-                peerPosResolved,
+                peerPosResolved: peerPos,
                 finalPos: pos,
-                direction: dir
+                computedDirDeg: dirDeg,
+                computedRad: rad
             });
         }
     }
