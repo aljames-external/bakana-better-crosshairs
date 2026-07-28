@@ -46,11 +46,29 @@ export function createRemoteShapeInstance(shapeType, config = {}) {
 export function getPeerCursorPosition(userId) {
     if (!userId) return null;
 
-    // 1. Inspect canvas.controls.cursors PIXI children or dictionary lookup strictly by user ID
+    // 1. Inspect canvas.controls._cursors (Foundry ControlsLayer internal cursor Map/dictionary)
+    if (canvas?.controls?._cursors) {
+        let cursor = null;
+        if (typeof canvas.controls._cursors.get === "function") {
+            cursor = canvas.controls._cursors.get(userId);
+        } else if (canvas.controls._cursors[userId]) {
+            cursor = canvas.controls._cursors[userId];
+        }
+
+        if (cursor) {
+            const px = cursor.target?.x ?? cursor.position?.x ?? cursor.x;
+            const py = cursor.target?.y ?? cursor.position?.y ?? cursor.y;
+            if (Number.isFinite(px) && Number.isFinite(py)) {
+                return { x: px, y: py };
+            }
+        }
+    }
+
+    // 2. Inspect canvas.controls.cursors PIXI children or dictionary lookup strictly by user ID
     if (canvas?.controls?.cursors) {
         if (Array.isArray(canvas.controls.cursors.children)) {
             const cursor = canvas.controls.cursors.children.find(c =>
-                c?.user?.id === userId || c?.userId === userId || c?.id === userId
+                c?.user?.id === userId || c?.userId === userId || c?.id === userId || c?._user?.id === userId
             );
             if (cursor) {
                 const px = cursor.target?.x ?? cursor.position?.x ?? cursor.x;
@@ -70,7 +88,7 @@ export function getPeerCursorPosition(userId) {
         }
     }
 
-    // 2. Inspect game.users activity state strictly by user ID
+    // 3. Inspect game.users activity state strictly by user ID
     const user = game?.users?.get?.(userId);
     if (user) {
         const c = user.activity?.cursor ?? user._activity?.cursor ?? user._cursor ?? user.cursor;
@@ -90,6 +108,22 @@ export function getPeerCursorPosition(userId) {
 export function diagnoseUserCursor(userId) {
     const user = game?.users?.get?.(userId);
     const cursorsContainer = canvas?.controls?.cursors;
+    const internalCursors = canvas?.controls?._cursors;
+
+    let internalCursorInfo = null;
+    if (internalCursors) {
+        if (typeof internalCursors.get === "function") {
+            const c = internalCursors.get(userId);
+            internalCursorInfo = c ? { class: c.constructor?.name, target: c.target, pos: c.position, x: c.x, y: c.y } : "not found in _cursors Map";
+        } else if (internalCursors[userId]) {
+            const c = internalCursors[userId];
+            internalCursorInfo = { class: c.constructor?.name, target: c.target, pos: c.position, x: c.x, y: c.y };
+        } else {
+            const keys = typeof internalCursors.keys === "function" ? Array.from(internalCursors.keys()) : Object.keys(internalCursors);
+            internalCursorInfo = `_cursors keys available: [${keys.join(", ")}]`;
+        }
+    }
+
     const childrenInfo = cursorsContainer?.children?.map(c => ({
         cClass: c?.constructor?.name,
         cId: c?.id,
@@ -114,6 +148,7 @@ export function diagnoseUserCursor(userId) {
     const diag = {
         userId,
         userInfo,
+        internalCursorInfo,
         cursorsContainerClass: cursorsContainer?.constructor?.name,
         childrenCount: cursorsContainer?.children?.length ?? 0,
         childrenInfo
