@@ -239,9 +239,11 @@ function rotateCrosshairInstance(crosshair, newDirDeg, config = {}) {
     const mergedConfig = { ...crosshair.config, ...config };
     const shapeType = mergedConfig.type ?? mergedConfig.t ?? crosshair.type ?? "circle";
     const isRect = shapeType === "rect" || shapeType === "square";
+    const isRayOrCone = shapeType === "ray" || shapeType === "cone";
     const isAttached = shouldStickToToken(mergedConfig, shapeType) && Boolean(mergedConfig.token);
+    const isRemote = String(mergedConfig.id ?? "").startsWith("remote-crosshair-");
 
-    if (!isAttached) {
+    if (!isAttached || isRayOrCone || isRemote) {
         crosshair.direction = newDirDeg;
         if (!isRect) {
             try { crosshair.rotation = rad; } catch (e) { log.debug("rotateCrosshairInstance | Exception setting crosshair.rotation:", e); }
@@ -273,8 +275,6 @@ function rotateCrosshairInstance(crosshair, newDirDeg, config = {}) {
         activePlacementTracker.crosshair = crosshair;
         refreshTemplateHighlights(tmpl, newDirDeg, rad);
     }
-
-    const isRayOrCone = shapeType === "ray" || shapeType === "cone";
 
     if (!isRayOrCone && !isAttached) {
         if (typeof crosshair.refresh === "function") {
@@ -418,7 +418,7 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
                     }
                 }
 
-                if (!isAttached || isRemote) {
+                if (!isAttached) {
                     if (eff.container && typeof eff.container.rotation !== "undefined") {
                         eff.container.rotation = rad;
                     }
