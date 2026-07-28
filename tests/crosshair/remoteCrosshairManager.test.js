@@ -55,6 +55,8 @@ test("RemoteCrosshairManager creates, updates, and destroys remote visuals for p
         senderUserId: "peer-player-1",
         shapeType: "circle",
         file: "test-circle.png",
+        x: 500,
+        y: 500,
         direction: 90
     };
 
@@ -73,6 +75,8 @@ test("RemoteCrosshairManager creates, updates, and destroys remote visuals for p
         type: "CROSSHAIR_UPDATE",
         placementId: "peer-placement-1",
         senderUserId: "peer-player-1",
+        x: 600,
+        y: 600,
         direction: 180
     };
 
@@ -131,7 +135,8 @@ test("BaseCrosshairShape startBroadcasting and stopBroadcasting emit CROSSHAIR_*
     assert.equal(emitted.length, 1);
     assert.equal(emitted[0].type, "CROSSHAIR_START");
     assert.equal(emitted[0].senderUserId, "origin-user");
-    assert.equal(emitted[0].shapeType, "circle");
+    assert.equal(emitted[0].x, 200);
+    assert.equal(emitted[0].y, 300);
 
     shape.stopBroadcasting("placed");
     assert.equal(shape.broadcastTimer, null);

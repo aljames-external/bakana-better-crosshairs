@@ -362,6 +362,16 @@ export class BaseCrosshairShape {
         this.stopBroadcasting();
 
         const getLiveState = () => {
+            let x = this.x;
+            let y = this.y;
+            if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x) && Number.isFinite(this.sequencerCrosshair.y)) {
+                x = this.sequencerCrosshair.x;
+                y = this.sequencerCrosshair.y;
+            } else if (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.x) && Number.isFinite(canvas.mousePosition.y)) {
+                x = canvas.mousePosition.x;
+                y = canvas.mousePosition.y;
+            }
+
             let direction = this.config?.currentDirection ?? this.direction ?? 0;
             if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.direction)) {
                 direction = this.sequencerCrosshair.direction;
@@ -370,6 +380,8 @@ export class BaseCrosshairShape {
             }
 
             return {
+                x,
+                y,
                 direction,
                 distance: this.distance,
                 width: this.width,
@@ -397,7 +409,9 @@ export class BaseCrosshairShape {
             direction: live.direction,
             tokenId: this.token?.id ?? null,
             stickToToken: Boolean(this.stickToToken && this.token),
-            showLine: Boolean(this.showLine)
+            showLine: Boolean(this.showLine),
+            x: live.x,
+            y: live.y
         };
 
         socketlib.emit(initialPayload);
@@ -409,6 +423,8 @@ export class BaseCrosshairShape {
                 type: "CROSSHAIR_UPDATE",
                 placementId: this.placementId,
                 senderUserId: game.user.id,
+                x: updated.x,
+                y: updated.y,
                 direction: updated.direction,
                 distance: updated.distance,
                 width: updated.width,
