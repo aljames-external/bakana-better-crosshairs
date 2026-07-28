@@ -59,7 +59,7 @@ export function getGamemasterCursorPosition(identifier = "Gamemaster") {
         if (typeof _cursors.get === "function") {
             if (userId) cursor = _cursors.get(userId);
             if (!cursor) cursor = _cursors.get(identifier);
-        } else {
+        } else if (typeof _cursors === "object") {
             if (userId && _cursors[userId]) cursor = _cursors[userId];
             if (!cursor && _cursors[identifier]) cursor = _cursors[identifier];
         }
@@ -80,7 +80,8 @@ export function getGamemasterCursorPosition(identifier = "Gamemaster") {
             (userId && c?.user?.id === userId) ||
             (userId && c?.userId === userId) ||
             (userId && c?.id === userId) ||
-            c?.id === identifier
+            c?.id === identifier ||
+            c?.name === identifier
         );
         if (cursor) {
             const px = cursor.target?.x ?? cursor.position?.x ?? cursor.x;
@@ -91,7 +92,20 @@ export function getGamemasterCursorPosition(identifier = "Gamemaster") {
         }
     }
 
-    // 4. Inspect user document activity tracking
+    // 4. Inspect canvas.controls.cursors dictionary (if cursors itself is an object mapping userId -> cursor)
+    if (canvas?.controls?.cursors && typeof canvas.controls.cursors === "object") {
+        const cursors = canvas.controls.cursors;
+        const cursor = (userId && cursors[userId]) ?? cursors[identifier];
+        if (cursor && (cursor.x || cursor.y || cursor.target || cursor.position)) {
+            const px = cursor.target?.x ?? cursor.position?.x ?? cursor.x;
+            const py = cursor.target?.y ?? cursor.position?.y ?? cursor.y;
+            if (Number.isFinite(px) && Number.isFinite(py)) {
+                return { x: px, y: py };
+            }
+        }
+    }
+
+    // 5. Inspect user document activity tracking
     if (user) {
         const c = user.activity?.cursor ?? user._activity?.cursor ?? user._cursor ?? user.cursor;
         if (c && Number.isFinite(c.x) && Number.isFinite(c.y)) {
@@ -111,116 +125,81 @@ export function getGamemasterCursorPosition(identifier = "Gamemaster") {
 export function getPeerCursorPosition(userId) {
     if (!userId) return null;
 
-    // 1. Inspect canvas.controls._cursors (Foundry ControlsLayer internal cursor Map/dictionary)
-    if (canvas?.controls?._cursors) {
-        let cursor = null;
-        if (typeof canvas.controls._cursors.get === "function") {
-            cursor = canvas.controls._cursors.get(userId);
-        } else if (canvas.controls._cursors[userId]) {
-            cursor = canvas.controls._cursors[userId];
-        }
-
-        if (cursor) {
-            const px = cursor.target?.x ?? cursor.position?.x ?? cursor.x;
-            const py = cursor.target?.y ?? cursor.position?.y ?? cursor.y;
-            if (Number.isFinite(px) && Number.isFinite(py)) {
-                return { x: px, y: py };
-            }
-        }
-    }
-
-    // 2. Inspect canvas.controls.cursors PIXI children or dictionary lookup strictly by user ID
-    if (canvas?.controls?.cursors) {
-        if (Array.isArray(canvas.controls.cursors.children)) {
-            const cursor = canvas.controls.cursors.children.find(c =>
-                c?.user?.id === userId || c?.userId === userId || c?.id === userId || c?._user?.id === userId
-            );
-            if (cursor) {
-                const px = cursor.target?.x ?? cursor.position?.x ?? cursor.x;
-                const py = cursor.target?.y ?? cursor.position?.y ?? cursor.y;
-                if (Number.isFinite(px) && Number.isFinite(py)) {
-                    return { x: px, y: py };
-                }
-            }
-        }
-        if (canvas.controls.cursors[userId]) {
-            const c = canvas.controls.cursors[userId];
-            const px = c.target?.x ?? c.position?.x ?? c.x;
-            const py = c.target?.y ?? c.position?.y ?? c.y;
-            if (Number.isFinite(px) && Number.isFinite(py)) {
-                return { x: px, y: py };
-            }
-        }
-    }
-
-    // 3. Inspect game.users activity state strictly by user ID
-    const user = game?.users?.get?.(userId);
-    if (user) {
-        const c = user.activity?.cursor ?? user._activity?.cursor ?? user._cursor ?? user.cursor;
-        if (c && Number.isFinite(c.x) && Number.isFinite(c.y)) {
-            return { x: c.x, y: c.y };
-        }
-    }
-
-    return null;
+    return getGamemasterCursorPosition(userId);
 }
 
 /**
- * Diagnostic helper to inspect active Foundry cursors and user activity state for a given user ID.
- * @param {string} userId - User ID to inspect
+ * Diagnostic helper to inspect active Foundry cursors and user activity state for a given user ID or name.
+ * @param {string} [identifier="Gamemaster"] - User name or ID to inspect
  * @returns {Object} Diagnostic summary object
  */
-export function diagnoseUserCursor(userId) {
-    const user = game?.users?.get?.(userId);
-    const cursorsContainer = canvas?.controls?.cursors;
-    const internalCursors = canvas?.controls?._cursors;
+export function diagnoseUserCursor(identifier = "Gamemaster") {
+    const user = game?.users?.getName?.(identifier)
+        ?? game?.users?.get?.(identifier)
+        ?? game?.users?.find?.(u => u?.name === identifier || u?.id === identifier);
 
-    let internalCursorInfo = null;
+    const userId = user?.id;
+
+    const controls = canvas?.controls;
+    const cursorsContainer = controls?.cursors;
+    const internalCursors = controls?._cursors;
+
+    let _cursorsKeys = [];
+    let _cursorsMatch = null;
     if (internalCursors) {
-        if (typeof internalCursors.get === "function") {
-            const c = internalCursors.get(userId);
-            internalCursorInfo = c ? { class: c.constructor?.name, target: c.target, pos: c.position, x: c.x, y: c.y } : "not found in _cursors Map";
-        } else if (internalCursors[userId]) {
-            const c = internalCursors[userId];
-            internalCursorInfo = { class: c.constructor?.name, target: c.target, pos: c.position, x: c.x, y: c.y };
-        } else {
-            const keys = typeof internalCursors.keys === "function" ? Array.from(internalCursors.keys()) : Object.keys(internalCursors);
-            internalCursorInfo = `_cursors keys available: [${keys.join(", ")}]`;
+        if (typeof internalCursors.keys === "function") {
+            _cursorsKeys = Array.from(internalCursors.keys());
+        } else if (typeof internalCursors === "object") {
+            _cursorsKeys = Object.keys(internalCursors);
         }
+
+        if (userId && internalCursors.get) _cursorsMatch = internalCursors.get(userId);
+        if (!_cursorsMatch && internalCursors.get) _cursorsMatch = internalCursors.get(identifier);
+        if (!_cursorsMatch && typeof internalCursors === "object") _cursorsMatch = internalCursors[userId] ?? internalCursors[identifier];
     }
 
-    const childrenInfo = cursorsContainer?.children?.map(c => ({
-        cClass: c?.constructor?.name,
+    const childrenDetails = cursorsContainer?.children?.map((c, idx) => ({
+        index: idx,
+        constructor: c?.constructor?.name,
         cId: c?.id,
         cUserId: c?.userId,
-        cUser_id: c?.user?.id,
-        cUserName: c?.user?.name,
-        cTarget: c?.target,
-        cPosition: c?.position,
-        cX: c?.x,
-        cY: c?.y
-    }));
+        userName: c?.user?.name,
+        userId: c?.user?.id,
+        target: c?.target ? { x: c.target.x, y: c.target.y } : null,
+        position: c?.position ? { x: c.position.x, y: c.position.y } : null,
+        x: c?.x,
+        y: c?.y,
+        visible: c?.visible
+    })) ?? [];
 
-    const userInfo = user ? {
+    const userActivity = user ? {
         id: user.id,
         name: user.name,
         activity: user.activity,
         _activity: user._activity,
         _cursor: user._cursor,
         cursor: user.cursor
-    } : "User not found in game.users";
+    } : "User not found";
 
-    const diag = {
-        userId,
-        userInfo,
-        internalCursorInfo,
+    const report = {
+        identifier,
+        resolvedUserId: userId,
+        userActivity,
+        _cursorsKeys,
+        _cursorsMatch: _cursorsMatch ? {
+            class: _cursorsMatch.constructor?.name,
+            target: _cursorsMatch.target,
+            position: _cursorsMatch.position,
+            x: _cursorsMatch.x,
+            y: _cursorsMatch.y
+        } : null,
         cursorsContainerClass: cursorsContainer?.constructor?.name,
-        childrenCount: cursorsContainer?.children?.length ?? 0,
-        childrenInfo
+        childrenCount: childrenDetails.length,
+        childrenDetails
     };
 
-    log.debug(`diagnoseUserCursor | Diagnostic for user "${userId}":`, diag);
-    return diag;
+    console.log("%c Bakana Better Crosshairs | User Cursor Diagnostic ", "background: #222; color: #bada55; font-size: 14px;", report);
+    return report;
 }
 
 /**
