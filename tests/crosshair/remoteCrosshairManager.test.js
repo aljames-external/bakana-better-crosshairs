@@ -41,14 +41,20 @@ test("RemoteCrosshairManager creates, updates, and destroys remote visuals for p
     game.settings.set(MODULE_ID, "enableCrosshairBroadcasting", true);
     game.settings.set(MODULE_ID, "showOtherPlayersCrosshairs", true);
 
+    globalThis.canvas = {
+        controls: {
+            cursors: {
+                "peer-player-1": { x: 500, y: 500 }
+            }
+        }
+    };
+
     const startPayload = {
         type: "CROSSHAIR_START",
         placementId: "peer-placement-1",
         senderUserId: "peer-player-1",
         shapeType: "circle",
         file: "test-circle.png",
-        x: 500,
-        y: 500,
         direction: 90
     };
 
@@ -60,12 +66,13 @@ test("RemoteCrosshairManager creates, updates, and destroys remote visuals for p
     assert.equal(visual.shape.y, 500);
     assert.equal(visual.shape.direction, 90);
 
+    // Update peer cursor position on canvas
+    globalThis.canvas.controls.cursors["peer-player-1"] = { x: 600, y: 600 };
+
     const updatePayload = {
         type: "CROSSHAIR_UPDATE",
         placementId: "peer-placement-1",
         senderUserId: "peer-player-1",
-        x: 600,
-        y: 600,
         direction: 180
     };
 
@@ -124,8 +131,7 @@ test("BaseCrosshairShape startBroadcasting and stopBroadcasting emit CROSSHAIR_*
     assert.equal(emitted.length, 1);
     assert.equal(emitted[0].type, "CROSSHAIR_START");
     assert.equal(emitted[0].senderUserId, "origin-user");
-    assert.equal(emitted[0].x, 200);
-    assert.equal(emitted[0].y, 300);
+    assert.equal(emitted[0].shapeType, "circle");
 
     shape.stopBroadcasting("placed");
     assert.equal(shape.broadcastTimer, null);

@@ -184,8 +184,6 @@ export class RemoteCrosshairVisual {
         if (this.isDestroyed || typeof Sequencer === "undefined") return;
 
         if (this.shape) {
-            if (typeof updatePayload.x === "number") this.shape.x = updatePayload.x;
-            if (typeof updatePayload.y === "number") this.shape.y = updatePayload.y;
             if (typeof updatePayload.direction === "number") {
                 this.shape.direction = updatePayload.direction;
                 this.shape.config.currentDirection = updatePayload.direction;
@@ -195,11 +193,14 @@ export class RemoteCrosshairVisual {
             if (typeof updatePayload.angle === "number") this.shape.angle = updatePayload.angle;
         }
 
-        if (typeof updatePayload.x === "number") this.rawX = updatePayload.x;
-        if (typeof updatePayload.y === "number") this.rawY = updatePayload.y;
         if (typeof updatePayload.direction === "number") this.rawDirection = updatePayload.direction;
 
         const pos = this.resolveTargetPosition();
+        if (this.shape) {
+            this.shape.x = pos.x;
+            this.shape.y = pos.y;
+        }
+
         const dir = this.shape?.direction ?? this.rawDirection;
         const rad = dir * (Math.PI / 180);
         const targetAnchorObj = { x: pos.x, y: pos.y, rotation: rad };
