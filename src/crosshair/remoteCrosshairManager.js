@@ -74,15 +74,22 @@ export function getGamemasterCursorPosition(identifier = "Gamemaster") {
     }
 
     // 3. Inspect canvas.controls.cursors PIXI children
-    if (canvas?.controls?.cursors?.children && Array.isArray(canvas.controls.cursors.children)) {
-        const cursor = canvas.controls.cursors.children.find(c =>
+    if (canvas?.controls?.cursors?.children && Array.isArray(canvas.controls.cursors.children) && canvas.controls.cursors.children.length > 0) {
+        const children = canvas.controls.cursors.children;
+        const cursor = children.find(c =>
             c?.user?.name === identifier ||
             (userId && c?.user?.id === userId) ||
+            c?._user?.name === identifier ||
+            (userId && c?._user?.id === userId) ||
             (userId && c?.userId === userId) ||
+            (userId && c?._userId === userId) ||
             (userId && c?.id === userId) ||
             c?.id === identifier ||
-            c?.name === identifier
-        );
+            c?.name === identifier ||
+            c?.document?.name === identifier ||
+            (userId && c?.document?.id === userId)
+        ) ?? (children.length === 1 ? children[0] : null);
+
         if (cursor) {
             const px = cursor.target?.x ?? cursor.position?.x ?? cursor.x;
             const py = cursor.target?.y ?? cursor.position?.y ?? cursor.y;
@@ -163,8 +170,14 @@ export function diagnoseUserCursor(identifier = "Gamemaster") {
         constructor: c?.constructor?.name,
         cId: c?.id,
         cUserId: c?.userId,
+        c_userId: c?._userId,
         userName: c?.user?.name,
         userId: c?.user?.id,
+        _userName: c?._user?.name,
+        _userId: c?._user?.id,
+        docName: c?.document?.name,
+        docId: c?.document?.id,
+        keys: c ? Object.keys(c) : [],
         target: c?.target ? { x: c.target.x, y: c.target.y } : null,
         position: c?.position ? { x: c.position.x, y: c.position.y } : null,
         x: c?.x,
