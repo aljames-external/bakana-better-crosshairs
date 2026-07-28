@@ -1,5 +1,6 @@
 import { MODULE_ID, BROADCAST_INTERVAL_MS } from "../lib/constants.js";
 import { log } from "../lib/logger.js";
+import { crosshairAdapter } from "../adapter/index.js";
 import { alignCrosshairAndEffects, _calculateAngleFromOrigin } from "./util.js";
 
 let shapeClasses = null;
@@ -311,20 +312,14 @@ export class RemoteCrosshairVisual {
         }
 
         if (this.shape) {
+            this.shape.move(peerPos.x, peerPos.y);
             const isAttachedToToken = Boolean(this.shape.stickToToken && this.shape.token);
             if (isAttachedToToken) {
-                const origin = this.shape.token.center ?? {
-                    x: (this.shape.token.x ?? 0) + (this.shape.token.w ?? 100) / 2,
-                    y: (this.shape.token.y ?? 0) + (this.shape.token.h ?? 100) / 2
-                };
-                const { deg } = _calculateAngleFromOrigin(origin, peerPos);
-                this.shape.rotate(deg);
-                this.shape.move(peerPos.x, peerPos.y);
-            } else {
-                this.shape.move(peerPos.x, peerPos.y);
-                if (typeof this.rawDirection === "number") {
-                    this.shape.rotate(this.rawDirection);
-                }
+                const anchored = crosshairAdapter.resolveAnchorPlacement(this.shape.token, peerPos);
+                const dir = anchored.direction ?? this.shape.direction ?? 0;
+                this.shape.rotate(dir);
+            } else if (typeof this.rawDirection === "number") {
+                this.shape.rotate(this.rawDirection);
             }
         }
 
