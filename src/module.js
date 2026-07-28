@@ -3,7 +3,7 @@ import { file, closest, absolutePath } from './lib/filemanager.js';
 import { log } from './lib/logger.js';
 import { autorecManager } from './autorec/autorecManager.js';
 import { ModuleAutorecManager } from './autorec/moduleAutorecManager.js';
-import { remoteCrosshairManager, getPeerCursorPosition, diagnoseUserCursor } from './crosshair/remoteCrosshairManager.js';
+import { remoteCrosshairManager, getPeerCursorPosition, getGamemasterCursorPosition, diagnoseUserCursor } from './crosshair/remoteCrosshairManager.js';
 import { socketlib, handleSocketMessage } from './integration/socketlib.js';
 import { systemAdapter, initializeSystemAdapter, crosshairAdapter, initializeFoundryAdapter, initializeHooks } from './adapter/index.js';
 import { attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement, getTokenEdgePoint, snapCoordinates } from './crosshair/util.js';
@@ -61,6 +61,7 @@ export function setupModule() {
         ModuleAutorecManager,
         remoteCrosshairManager,
         getPeerCursorPosition,
+        getGamemasterCursorPosition,
         diagnoseUserCursor,
         systemAdapter,
         crosshairAdapter,

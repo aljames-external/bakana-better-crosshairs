@@ -38,6 +38,71 @@ export function createRemoteShapeInstance(shapeType, config = {}) {
 }
 
 /**
+ * Resolves live canvas cursor coordinates for a given user name or ID (defaults to "Gamemaster").
+ * @param {string} [identifier="Gamemaster"] - User name or User ID to lookup
+ * @returns {{x: number, y: number}|null} Canvas coordinates or null
+ */
+export function getGamemasterCursorPosition(identifier = "Gamemaster") {
+    if (!identifier) return null;
+
+    // 1. Resolve User document by name or ID
+    const user = game?.users?.getName?.(identifier)
+        ?? game?.users?.get?.(identifier)
+        ?? game?.users?.find?.(u => u?.name === identifier || u?.id === identifier);
+
+    const userId = user?.id;
+
+    // 2. Inspect canvas.controls._cursors (Foundry ControlsLayer internal cursor Map/dictionary)
+    if (canvas?.controls?._cursors) {
+        const _cursors = canvas.controls._cursors;
+        let cursor = null;
+        if (typeof _cursors.get === "function") {
+            if (userId) cursor = _cursors.get(userId);
+            if (!cursor) cursor = _cursors.get(identifier);
+        } else {
+            if (userId && _cursors[userId]) cursor = _cursors[userId];
+            if (!cursor && _cursors[identifier]) cursor = _cursors[identifier];
+        }
+
+        if (cursor) {
+            const px = cursor.target?.x ?? cursor.position?.x ?? cursor.x;
+            const py = cursor.target?.y ?? cursor.position?.y ?? cursor.y;
+            if (Number.isFinite(px) && Number.isFinite(py)) {
+                return { x: px, y: py };
+            }
+        }
+    }
+
+    // 3. Inspect canvas.controls.cursors PIXI children
+    if (canvas?.controls?.cursors?.children && Array.isArray(canvas.controls.cursors.children)) {
+        const cursor = canvas.controls.cursors.children.find(c =>
+            c?.user?.name === identifier ||
+            (userId && c?.user?.id === userId) ||
+            (userId && c?.userId === userId) ||
+            (userId && c?.id === userId) ||
+            c?.id === identifier
+        );
+        if (cursor) {
+            const px = cursor.target?.x ?? cursor.position?.x ?? cursor.x;
+            const py = cursor.target?.y ?? cursor.position?.y ?? cursor.y;
+            if (Number.isFinite(px) && Number.isFinite(py)) {
+                return { x: px, y: py };
+            }
+        }
+    }
+
+    // 4. Inspect user document activity tracking
+    if (user) {
+        const c = user.activity?.cursor ?? user._activity?.cursor ?? user._cursor ?? user.cursor;
+        if (c && Number.isFinite(c.x) && Number.isFinite(c.y)) {
+            return { x: c.x, y: c.y };
+        }
+    }
+
+    return null;
+}
+
+/**
  * Retrieve active peer player canvas cursor position from Foundry controls layer or user activity state.
  * Strictly matches user ID (Rule 7 & user prompt directive).
  * @param {string} userId - User ID of the peer player
