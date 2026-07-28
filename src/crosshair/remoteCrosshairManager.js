@@ -261,6 +261,7 @@ export class RemoteCrosshairVisual {
         this.rawDirection = Number(payload.direction ?? 0);
         this.lastCursorLogTime = 0;
         this.lastRenderTime = 0;
+        this.targetAnchorObj = { x: this.rawX, y: this.rawY, rotation: this.rawDirection * (Math.PI / 180) };
         this.shape = createRemoteShapeInstance(this.shapeType, this.config);
         if (this.shape) {
             this.shape.x = this.rawX;
@@ -314,10 +315,15 @@ export class RemoteCrosshairVisual {
 
         const dir = this.shape?.direction ?? this.rawDirection;
         const rad = dir * (Math.PI / 180);
-        const targetAnchorObj = { x: pos.x, y: pos.y, rotation: rad };
+
+        if (this.targetAnchorObj) {
+            this.targetAnchorObj.x = pos.x;
+            this.targetAnchorObj.y = pos.y;
+            this.targetAnchorObj.rotation = rad;
+        }
 
         if (this.shape) {
-            alignCrosshairAndEffects(targetAnchorObj, this.shape.config, rad);
+            alignCrosshairAndEffects(this.targetAnchorObj ?? { x: pos.x, y: pos.y, rotation: rad }, this.shape.config, rad);
         }
 
         // Periodic 2-second cursor position debug logging
@@ -353,7 +359,7 @@ export class RemoteCrosshairVisual {
 
         const dirDeg = this.shape.direction ?? this.rawDirection;
         const rotRad = dirDeg * (Math.PI / 180);
-        const targetAnchorObj = { x: pos.x, y: pos.y, rotation: rotRad };
+        this.targetAnchorObj = { x: pos.x, y: pos.y, rotation: rotRad };
 
         log.debug(`RemoteCrosshairVisual.create | Render initialization info for user "${this.senderUserId}":`, {
             senderUserId: this.senderUserId,
@@ -377,8 +383,8 @@ export class RemoteCrosshairVisual {
             initialPos: pos
         });
 
-        await this.shape.playGraphicEffect(targetAnchorObj);
-        alignCrosshairAndEffects(targetAnchorObj, this.shape.config, rotRad);
+        await this.shape.playGraphicEffect(this.targetAnchorObj);
+        alignCrosshairAndEffects(this.targetAnchorObj, this.shape.config, rotRad);
 
         if (canvas?.app?.ticker) {
             try {
