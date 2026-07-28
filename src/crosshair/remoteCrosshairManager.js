@@ -260,6 +260,7 @@ export class RemoteCrosshairVisual {
         this.rawY = Number(payload.y ?? 0);
         this.rawDirection = Number(payload.direction ?? 0);
         this.lastCursorLogTime = 0;
+        this.lastRenderTime = 0;
         this.shape = createRemoteShapeInstance(this.shapeType, this.config);
         if (this.shape) {
             this.shape.x = this.rawX;
@@ -289,12 +290,20 @@ export class RemoteCrosshairVisual {
     }
 
     /**
-     * Frame ticker callback updating active Sequencer effect position to match peer canvas cursor.
+     * Frame ticker callback updating active Sequencer effect position at 200ms cadence (5 Hz).
      * @protected
+     * @param {boolean} [force=false] - Force update regardless of 200ms interval throttle
      * @returns {void}
      */
-    _onTick() {
+    _onTick(force = false) {
         if (this.isDestroyed || typeof Sequencer === "undefined") return;
+
+        const now = Date.now();
+        if (!force && (now - this.lastRenderTime < BROADCAST_INTERVAL_MS)) {
+            return;
+        }
+        this.lastRenderTime = now;
+
         const pos = this.resolveTargetPosition();
         if (!pos || !Number.isFinite(pos.x) || !Number.isFinite(pos.y)) return;
 
@@ -312,7 +321,6 @@ export class RemoteCrosshairVisual {
         }
 
         // Periodic 2-second cursor position debug logging
-        const now = Date.now();
         if (now - this.lastCursorLogTime >= 2000) {
             this.lastCursorLogTime = now;
             const peerPosResolved = getPeerCursorPosition(this.senderUserId);
@@ -406,7 +414,7 @@ export class RemoteCrosshairVisual {
         if (typeof updatePayload.width === "number" && this.shape) this.shape.width = updatePayload.width;
         if (typeof updatePayload.angle === "number" && this.shape) this.shape.angle = updatePayload.angle;
 
-        this._onTick();
+        this._onTick(true);
     }
 
     /**
