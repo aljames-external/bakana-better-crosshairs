@@ -294,6 +294,16 @@ export class RemoteCrosshairVisual {
                 this.controller.shape = this.shape;
             }
         }
+        if (this.shape) {
+            try {
+                const [crosshairSeq] = await this.shape.create();
+                if (crosshairSeq) {
+                    await crosshairSeq.play();
+                }
+            } catch (e) {
+                log.debug("RemoteCrosshairVisual.create | Exception playing remote shape sequence:", e);
+            }
+        }
         if (this.controller) {
             await this.controller.start();
         }

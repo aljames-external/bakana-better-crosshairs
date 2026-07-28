@@ -36,19 +36,7 @@ export class CrosshairController {
         if (!this.shape || this.started) return;
         this.started = true;
 
-        // 1. Initialize Sequencer crosshair sequence if not already present
-        if (!this.shape.sequencerCrosshair) {
-            try {
-                const [crosshairSeq] = await this.shape.create();
-                if (crosshairSeq) {
-                    await crosshairSeq.play();
-                }
-            } catch (e) {
-                log.debug("CrosshairController.start | Exception playing shape Sequence:", e);
-            }
-        }
-
-        // 2. Attach position tracking listeners according to updateTrigger
+        // Attach position tracking listeners according to updateTrigger
         if (this.updateTrigger === "ticker") {
             if (canvas?.app?.ticker) {
                 try {
