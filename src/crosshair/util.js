@@ -401,7 +401,20 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
         try {
             const effects = Sequencer.EffectManager.getEffects({ name: config.id });
             for (const eff of effects) {
-                if (!isAttached || isRemote) {
+                if (isPIXIContainer) {
+                    if (eff.container?.position?.set) {
+                        eff.container.position.set(0, 0);
+                    } else if (eff.container) {
+                        eff.container.x = 0;
+                        eff.container.y = 0;
+                    }
+                    if (eff.container && typeof eff.container.rotation !== "undefined") {
+                        eff.container.rotation = 0;
+                    }
+                    if (eff.spriteContainer && typeof eff.spriteContainer.rotation !== "undefined") {
+                        eff.spriteContainer.rotation = 0;
+                    }
+                } else {
                     if (Number.isFinite(crosshair?.x) && Number.isFinite(crosshair?.y)) {
                         if (eff.container?.position?.set) {
                             eff.container.position.set(crosshair.x, crosshair.y);
@@ -410,16 +423,6 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
                             eff.container.y = crosshair.y;
                         }
                     }
-                    if (isRect) {
-                        if (eff.container) {
-                            eff.container.pivot.set(0, 0);
-                            if (eff.sprite) eff.sprite.position.set(0, 0);
-                            if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
-                        }
-                    }
-                }
-
-                if (!isAttached || isRemote) {
                     if (eff.container && typeof eff.container.rotation !== "undefined") {
                         eff.container.rotation = rad;
                     }
@@ -434,6 +437,12 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
                             log.debug("alignCrosshairAndEffects | Exception updating Sequencer effect rotation:", e);
                         }
                     }
+                }
+
+                if (isRect && eff.container) {
+                    eff.container.pivot.set(0, 0);
+                    if (eff.sprite) eff.sprite.position.set(0, 0);
+                    if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
                 }
             }
         } catch (e) {
