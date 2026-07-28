@@ -33,6 +33,11 @@ export class BaseCrosshairShape {
         config.width = config.width ?? docProps.width ?? 5;
         config.angle = config.angle ?? docProps.angle ?? 53.13;
 
+        this.radius = Number(config.radius);
+        this.distance = Number(config.distance);
+        this.width = Number(config.width);
+        this.angle = Number(config.angle);
+
         const userId = game?.user?.id ?? "local";
         const defaultId = this.getDefaultId();
         this.id = config.id ?? `${defaultId}-${userId}`;
@@ -56,8 +61,8 @@ export class BaseCrosshairShape {
 
         // Position and direction state tracking
         const safeGet = (obj, prop) => { if (!obj) return undefined; try { return obj[prop]; } catch (e) { return undefined; } };
-        this.x = safeGet(placeable, "x") ?? doc?.x ?? 0;
-        this.y = safeGet(placeable, "y") ?? doc?.y ?? 0;
+        this.x = safeGet(placeable, "x") ?? doc?.x ?? config.x ?? 0;
+        this.y = safeGet(placeable, "y") ?? doc?.y ?? config.y ?? 0;
         this.direction = config.direction ?? 0;
 
         // Normalize boolean flags on config for clean direct boolean evaluation
@@ -356,6 +361,35 @@ export class BaseCrosshairShape {
 
         this.stopBroadcasting();
 
+        const getLiveState = () => {
+            let x = this.x;
+            let y = this.y;
+            if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x) && Number.isFinite(this.sequencerCrosshair.y)) {
+                x = this.sequencerCrosshair.x;
+                y = this.sequencerCrosshair.y;
+            } else if (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.x) && Number.isFinite(canvas.mousePosition.y)) {
+                x = canvas.mousePosition.x;
+                y = canvas.mousePosition.y;
+            }
+
+            let direction = this.config?.currentDirection ?? this.direction ?? 0;
+            if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.direction)) {
+                direction = this.sequencerCrosshair.direction;
+            } else if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.rotation)) {
+                direction = this.sequencerCrosshair.rotation * (180 / Math.PI);
+            }
+
+            return {
+                x,
+                y,
+                direction,
+                distance: this.distance,
+                width: this.width,
+                angle: this.angle
+            };
+        };
+
+        const live = getLiveState();
         this.placementId = `${game.user.id}_${this.id}_${Date.now()}`;
         const initialPayload = {
             type: "CROSSHAIR_START",
@@ -369,31 +403,32 @@ export class BaseCrosshairShape {
             fillAlpha: this.fillAlpha,
             borderColor: this.borderColor,
             borderAlpha: this.borderAlpha,
-            distance: this.distance,
-            width: this.width,
-            angle: this.angle,
-            direction: this.direction,
+            distance: live.distance,
+            width: live.width,
+            angle: live.angle,
+            direction: live.direction,
             tokenId: this.token?.id ?? null,
             stickToToken: Boolean(this.stickToToken && this.token),
             showLine: Boolean(this.showLine),
-            x: this.x,
-            y: this.y
+            x: live.x,
+            y: live.y
         };
 
         socketlib.emit(initialPayload);
 
         this.broadcastTimer = setInterval(() => {
             if (!this.placementId) return;
+            const updated = getLiveState();
             socketlib.emit({
                 type: "CROSSHAIR_UPDATE",
                 placementId: this.placementId,
                 senderUserId: game.user.id,
-                x: this.x,
-                y: this.y,
-                direction: this.direction,
-                distance: this.distance,
-                width: this.width,
-                angle: this.angle
+                x: updated.x,
+                y: updated.y,
+                direction: updated.direction,
+                distance: updated.distance,
+                width: updated.width,
+                angle: updated.angle
             });
         }, BROADCAST_INTERVAL_MS);
     }

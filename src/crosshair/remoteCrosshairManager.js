@@ -38,6 +38,48 @@ export function createRemoteShapeInstance(shapeType, config = {}) {
 }
 
 /**
+ * Retrieve active peer player canvas cursor position from Foundry controls layer or user activity state.
+ * @param {string} userId - User ID of the peer player
+ * @returns {{x: number, y: number}|null} Canvas coordinates or null
+ */
+export function getPeerCursorPosition(userId) {
+    if (!userId) return null;
+
+    // 1. Inspect canvas.controls.cursors PIXI children or dictionary lookup
+    if (canvas?.controls?.cursors) {
+        if (Array.isArray(canvas.controls.cursors.children)) {
+            const cursor = canvas.controls.cursors.children.find(c => c?.user?.id === userId || c?.userId === userId || c?.id === userId);
+            if (cursor) {
+                const px = cursor.target?.x ?? cursor.position?.x ?? cursor.x;
+                const py = cursor.target?.y ?? cursor.position?.y ?? cursor.y;
+                if (Number.isFinite(px) && Number.isFinite(py)) {
+                    return { x: px, y: py };
+                }
+            }
+        }
+        if (canvas.controls.cursors[userId]) {
+            const c = canvas.controls.cursors[userId];
+            const px = c.target?.x ?? c.position?.x ?? c.x;
+            const py = c.target?.y ?? c.position?.y ?? c.y;
+            if (Number.isFinite(px) && Number.isFinite(py)) {
+                return { x: px, y: py };
+            }
+        }
+    }
+
+    // 2. Inspect game.users activity state
+    const user = game?.users?.get?.(userId);
+    if (user) {
+        const c = user.activity?.cursor ?? user._cursor ?? user.cursor;
+        if (c && Number.isFinite(c.x) && Number.isFinite(c.y)) {
+            return { x: c.x, y: c.y };
+        }
+    }
+
+    return null;
+}
+
+/**
  * Encapsulates a non-interactive remote crosshair visual rendered on a peer client's canvas.
  * Reuses BaseCrosshairShape logic to guarantee identical origin, rotation, anchor, and graphic scaling.
  */
@@ -70,6 +112,8 @@ export class RemoteCrosshairVisual {
             width: payload.width,
             angle: payload.angle,
             direction: payload.direction,
+            x: Number(payload.x ?? 0),
+            y: Number(payload.y ?? 0),
             token,
             stickToToken: Boolean(payload.stickToToken && token),
             showLine: Boolean(payload.showLine),
@@ -98,12 +142,10 @@ export class RemoteCrosshairVisual {
             return center;
         }
 
-        // Check peer user cursor pointer on canvas (Rule 5 & user prompt spec)
-        if (canvas?.controls?.cursors && this.senderUserId) {
-            const peerCursor = canvas.controls.cursors[this.senderUserId];
-            if (peerCursor && typeof peerCursor.x === "number" && typeof peerCursor.y === "number") {
-                return { x: peerCursor.x, y: peerCursor.y };
-            }
+        // Check peer user cursor pointer on canvas or user activity (Rule 5 & user prompt spec)
+        const peerPos = getPeerCursorPosition(this.senderUserId);
+        if (peerPos) {
+            return peerPos;
         }
 
         return { x: this.shape?.x ?? this.rawX, y: this.shape?.y ?? this.rawY };
