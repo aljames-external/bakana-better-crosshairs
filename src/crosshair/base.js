@@ -1,3 +1,5 @@
+import { MODULE_ID, BROADCAST_INTERVAL_MS } from "../lib/constants.js";
+import { socketlib } from "../integration/socketlib.js";
 import { closest } from "../lib/filemanager.js";
 import { log } from "../lib/logger.js";
 import { crosshairAdapter, systemAdapter } from "../adapter/index.js";
@@ -45,6 +47,10 @@ export class BaseCrosshairShape {
 
         // Keep a reference to Sequencer visual container
         this.sequencerCrosshair = null;
+
+        // Socket broadcasting state tracking
+        this.broadcastTimer = null;
+        this.placementId = null;
 
         // Position and direction state tracking
         const safeGet = (obj, prop) => { if (!obj) return undefined; try { return obj[prop]; } catch (e) { return undefined; } };
@@ -333,6 +339,83 @@ export class BaseCrosshairShape {
         await this.playGraphicEffect(crosshair);
         alignCrosshairAndEffects(crosshair, this.config, this.direction * (Math.PI / 180));
         this._updateRangeText();
+        this.startBroadcasting();
+    }
+
+    /**
+     * Start periodic socket broadcasting of local crosshair state to peer clients.
+     * Cadence interval defined by BROADCAST_INTERVAL_MS (200ms = 5Hz).
+     * @returns {void}
+     */
+    startBroadcasting() {
+        if (!game?.user || !game?.settings) return;
+        const broadcastEnabled = game.settings.get(MODULE_ID, "enableCrosshairBroadcasting") !== false;
+        if (!broadcastEnabled) return;
+
+        this.stopBroadcasting();
+
+        this.placementId = `${game.user.id}_${this.id}_${Date.now()}`;
+        const initialPayload = {
+            type: "CROSSHAIR_START",
+            placementId: this.placementId,
+            senderUserId: game.user.id,
+            shapeType: this.type,
+            file: this.getGraphicFile(),
+            lineFile: this.lineFile,
+            icon: this.icon,
+            fillColor: this.fillColor,
+            fillAlpha: this.fillAlpha,
+            borderColor: this.borderColor,
+            borderAlpha: this.borderAlpha,
+            distance: this.distance,
+            width: this.width,
+            angle: this.angle,
+            direction: this.direction,
+            tokenId: this.token?.id ?? null,
+            stickToToken: Boolean(this.stickToToken && this.token),
+            showLine: Boolean(this.showLine),
+            x: this.x,
+            y: this.y
+        };
+
+        socketlib.emit(initialPayload);
+
+        this.broadcastTimer = setInterval(() => {
+            if (!this.placementId) return;
+            socketlib.emit({
+                type: "CROSSHAIR_UPDATE",
+                placementId: this.placementId,
+                senderUserId: game.user.id,
+                x: this.x,
+                y: this.y,
+                direction: this.direction,
+                distance: this.distance,
+                width: this.width,
+                angle: this.angle
+            });
+        }, BROADCAST_INTERVAL_MS);
+    }
+
+    /**
+     * Stop periodic socket broadcasting and emit completion payload to peer clients.
+     * @param {string} [reason="placed"] - Termination reason ("placed" or "canceled")
+     * @returns {void}
+     */
+    stopBroadcasting(reason = "placed") {
+        if (this.broadcastTimer) {
+            clearInterval(this.broadcastTimer);
+            this.broadcastTimer = null;
+        }
+
+        if (this.placementId) {
+            socketlib.emit({
+                type: "CROSSHAIR_END",
+                placementId: this.placementId,
+                senderUserId: game.user.id,
+                reason
+            });
+            this.placementId = null;
+        }
     }
 
     /**
@@ -447,6 +530,7 @@ export class BaseCrosshairShape {
      * @returns {Promise<void>}
      */
     async onPlacedCallback(crosshair, ...extraArgs) {
+        this.stopBroadcasting("placed");
         this._destroyRangeText();
         Sequencer.EffectManager.endEffects({ name: this.id });
         Sequencer.EffectManager.endEffects({ name: `${this.id}-line` });
@@ -458,6 +542,7 @@ export class BaseCrosshairShape {
      * @returns {void}
      */
     onCancelCallback() {
+        this.stopBroadcasting("canceled");
         this._destroyRangeText();
         detachWheelRotation();
         Sequencer.EffectManager.endEffects({ name: this.id });

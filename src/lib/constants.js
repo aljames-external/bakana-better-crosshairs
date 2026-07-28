@@ -15,3 +15,10 @@ export const MODULE_NAME = "Bakana's Better Crosshairs";
  * @type {string}
  */
 export const MODULE_TLA = 'BBC';
+
+/**
+ * Cadence interval in milliseconds (5 times per second = 200ms) for broadcasting live crosshair state to peer clients.
+ * @type {number}
+ */
+export const BROADCAST_INTERVAL_MS = 200;
+

@@ -4,7 +4,7 @@
   "description": "Bakana's Better Crosshairs module for Foundry VTT",
   "type": "module",
   "scripts": {
-    "test": "node --test tests/**/*.test.js"
+    "test": "node --test tests/*.test.js tests/adapter/*.test.js tests/autorec/*.test.js tests/crosshair/*.test.js tests/integration/*.test.js tests/lib/*.test.js"
   },
   "keywords": [
     "foundryvtt",

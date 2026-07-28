@@ -29,6 +29,14 @@
                     "info": "Info, Warnings & Errors",
                     "debug": "Debug (Everything)"
                 }
+            },
+            "enableCrosshairBroadcasting": {
+                "name": "Enable Crosshair Broadcasting (GM)",
+                "hint": "Allows the GM to enable real-time crosshair broadcasting to synchronize crosshair placement visuals across active player clients."
+            },
+            "showOtherPlayersCrosshairs": {
+                "name": "Show Other Players' Crosshairs",
+                "hint": "Controls whether this client renders live targeting crosshair visuals broadcast by other players."
             }
         },
         "itemConfigMenu": {
