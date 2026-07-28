@@ -32,7 +32,7 @@ function _normalizeAngleDegrees(angleDeg) {
  * @param {{x: number, y: number}} target - Target point
  * @returns {{rad: number, deg: number}} Angle in radians and degrees
  */
-function _calculateAngleFromOrigin(origin, target) {
+export function _calculateAngleFromOrigin(origin, target) {
     const dx = target.x - origin.x;
     const dy = target.y - origin.y;
     const rad = Math.atan2(dy, dx);

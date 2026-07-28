@@ -1,6 +1,6 @@
-import { MODULE_ID } from "../lib/constants.js";
+import { MODULE_ID, BROADCAST_INTERVAL_MS } from "../lib/constants.js";
 import { log } from "../lib/logger.js";
-import { alignCrosshairAndEffects } from "./util.js";
+import { alignCrosshairAndEffects, _calculateAngleFromOrigin } from "./util.js";
 
 let shapeClasses = null;
 
@@ -306,49 +306,26 @@ export class RemoteCrosshairVisual {
         this.lastRenderTime = now;
 
         const peerPos = getPeerCursorPosition(this.senderUserId);
-        const isAttachedToToken = Boolean(this.shape?.stickToToken && this.shape?.token);
+        if (!peerPos || !Number.isFinite(peerPos.x) || !Number.isFinite(peerPos.y)) {
+            return;
+        }
 
-        let pos;
-        let dirDeg = this.shape?.direction ?? this.rawDirection;
-        let rad = dirDeg * (Math.PI / 180);
-
-        if (isAttachedToToken) {
-            const tok = this.shape.token;
-            pos = tok.center ?? { x: (tok.x ?? 0) + (tok.w ?? 100) / 2, y: (tok.y ?? 0) + (tok.h ?? 100) / 2 };
-            if (peerPos && Number.isFinite(peerPos.x) && Number.isFinite(peerPos.y)) {
-                const dx = peerPos.x - pos.x;
-                const dy = peerPos.y - pos.y;
-                if (dx !== 0 || dy !== 0) {
-                    rad = Math.atan2(dy, dx);
-                    dirDeg = rad * (180 / Math.PI);
-                    if (dirDeg < 0) dirDeg += 360;
+        if (this.shape) {
+            const isAttachedToToken = Boolean(this.shape.stickToToken && this.shape.token);
+            if (isAttachedToToken) {
+                const origin = this.shape.token.center ?? {
+                    x: (this.shape.token.x ?? 0) + (this.shape.token.w ?? 100) / 2,
+                    y: (this.shape.token.y ?? 0) + (this.shape.token.h ?? 100) / 2
+                };
+                const { deg } = _calculateAngleFromOrigin(origin, peerPos);
+                this.shape.rotate(deg);
+                this.shape.move(peerPos.x, peerPos.y);
+            } else {
+                this.shape.move(peerPos.x, peerPos.y);
+                if (typeof this.rawDirection === "number") {
+                    this.shape.rotate(this.rawDirection);
                 }
             }
-        } else {
-            pos = peerPos ?? { x: this.shape?.x ?? this.rawX, y: this.shape?.y ?? this.rawY };
-        }
-
-        if (!pos || !Number.isFinite(pos.x) || !Number.isFinite(pos.y)) return;
-
-        if (this.shape) {
-            this.shape.x = pos.x;
-            this.shape.y = pos.y;
-            this.shape.direction = dirDeg;
-            if (this.shape.config) {
-                this.shape.config.currentDirection = dirDeg;
-                this.shape.config.direction = dirDeg;
-                this.shape.config.rotation = rad;
-            }
-        }
-
-        if (this.targetAnchorObj) {
-            this.targetAnchorObj.x = pos.x;
-            this.targetAnchorObj.y = pos.y;
-            this.targetAnchorObj.rotation = rad;
-        }
-
-        if (this.shape) {
-            alignCrosshairAndEffects(this.targetAnchorObj ?? { x: pos.x, y: pos.y, rotation: rad }, this.shape.config, rad);
         }
 
         // Periodic 2-second cursor position debug logging
@@ -358,9 +335,9 @@ export class RemoteCrosshairVisual {
                 senderUserId: this.senderUserId,
                 placementId: this.placementId,
                 peerPosResolved: peerPos,
-                finalPos: pos,
-                computedDirDeg: dirDeg,
-                computedRad: rad
+                shapeX: this.shape?.x,
+                shapeY: this.shape?.y,
+                direction: this.shape?.direction
             });
         }
     }
@@ -385,6 +362,7 @@ export class RemoteCrosshairVisual {
         const dirDeg = this.shape.direction ?? this.rawDirection;
         const rotRad = dirDeg * (Math.PI / 180);
         this.targetAnchorObj = { x: pos.x, y: pos.y, rotation: rotRad };
+        this.shape.sequencerCrosshair = this.targetAnchorObj;
 
         log.debug(`RemoteCrosshairVisual.create | Render initialization info for user "${this.senderUserId}":`, {
             senderUserId: this.senderUserId,
