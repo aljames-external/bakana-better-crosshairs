@@ -572,6 +572,43 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
+     * Create an unpersisted preview placeable object for template/region canvas rendering.
+     * @param {Object} [config={}] - Placement configuration
+     * @returns {PlaceableObject|null} Created placeable or null
+     */
+    createUnpersistedPreviewPlaceable(config = {}) {
+        if (!canvas?.scene) return null;
+        try {
+            const docClass = CONFIG?.MeasuredTemplate?.documentClass;
+            const objClass = CONFIG?.MeasuredTemplate?.objectClass;
+            if (!docClass || !objClass) return null;
+
+            const shapeType = config.type ?? config.t ?? "circle";
+            const isRect = shapeType === "rect" || shapeType === "square";
+            const data = {
+                t: isRect ? "rect" : (shapeType === "cone" ? "cone" : (shapeType === "ray" ? "ray" : "circle")),
+                user: game?.user?.id,
+                x: config.x ?? 0,
+                y: config.y ?? 0,
+                distance: config.distance ?? 5,
+                width: config.width ?? (isRect ? (config.distance ?? 5) : 5),
+                angle: config.angle ?? 53.13,
+                direction: config.direction ?? 0,
+                fillColor: config.fillColor ?? "#000000",
+                borderColor: config.borderColor ?? "#ffffff"
+            };
+
+            const doc = new docClass(data, { parent: canvas.scene });
+            const placeable = new objClass(doc);
+            this.hidePreview(placeable);
+            return placeable;
+        } catch (e) {
+            log.debug("createUnpersistedPreviewPlaceable | Exception creating preview placeable:", e);
+            return null;
+        }
+    }
+
+    /**
      * Mutate a live preview placeable document's shape coordinates during mouse drag.
      * @param {Document} previewDoc - Preview MeasuredTemplate or Region document
      * @param {Object} coords - Destination coordinates payload
