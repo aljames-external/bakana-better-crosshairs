@@ -684,6 +684,9 @@ export class BaseCrosshairShape {
 
         this._updateRangeText();
         this.refreshTemplateHighlights();
+        if (this.sequencerCrosshair) {
+            alignCrosshairAndEffects(this.sequencerCrosshair, this.config, this.direction * (Math.PI / 180));
+        }
     }
 
     /**
