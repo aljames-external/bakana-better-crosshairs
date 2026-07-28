@@ -356,8 +356,8 @@ export class RemoteCrosshairVisual {
 
         const dirDeg = this.shape.direction ?? this.rawDirection;
         const rotRad = dirDeg * (Math.PI / 180);
+        this.shape.config.isRemote = true;
         this.targetAnchorObj = { x: pos.x, y: pos.y, rotation: rotRad };
-        this.shape.sequencerCrosshair = this.targetAnchorObj;
 
         log.debug(`RemoteCrosshairVisual.create | Render initialization info for user "${this.senderUserId}":`, {
             senderUserId: this.senderUserId,
@@ -381,8 +381,21 @@ export class RemoteCrosshairVisual {
             initialPos: pos
         });
 
-        await this.shape.playGraphicEffect(this.targetAnchorObj);
-        alignCrosshairAndEffects(this.targetAnchorObj, this.shape.config, rotRad);
+        try {
+            const [crosshairSeq] = await this.shape.create();
+            if (crosshairSeq) {
+                await crosshairSeq.play();
+            } else {
+                this.shape.sequencerCrosshair = this.targetAnchorObj;
+                await this.shape.playGraphicEffect(this.targetAnchorObj);
+                alignCrosshairAndEffects(this.targetAnchorObj, this.shape.config, rotRad);
+            }
+        } catch (e) {
+            log.debug("RemoteCrosshairVisual.create | Exception playing shape Sequence, using fallback anchor:", e);
+            this.shape.sequencerCrosshair = this.targetAnchorObj;
+            await this.shape.playGraphicEffect(this.targetAnchorObj);
+            alignCrosshairAndEffects(this.targetAnchorObj, this.shape.config, rotRad);
+        }
 
         if (canvas?.app?.ticker) {
             try {
@@ -433,6 +446,10 @@ export class RemoteCrosshairVisual {
             try {
                 canvas.app.ticker.remove(this._onTick, this);
             } catch (e) {}
+        }
+
+        if (this.shape?.sequencerCrosshair && typeof this.shape.sequencerCrosshair.destroy === "function") {
+            try { this.shape.sequencerCrosshair.destroy({ children: true }); } catch (e) {}
         }
 
         if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {

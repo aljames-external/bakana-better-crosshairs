@@ -352,16 +352,27 @@ export class BaseCrosshairShape {
         if (crosshair) {
             this.sequencerCrosshair = crosshair;
             crosshair.shapeInstance = this;
-            activePlacementTracker.crosshair = crosshair;
+            if (!this.config?.isRemote) {
+                activePlacementTracker.crosshair = crosshair;
+            }
         }
         if ((this.type === "rect" || this.type === "square") && !this.stickToToken && !this.token && crosshair?.pivot?.set) {
             crosshair.pivot.set(0, 0);
         }
-        attachWheelRotation(this, this.config);
+        if (!this.config?.isRemote) {
+            attachWheelRotation(this, this.config);
+        } else if (crosshair) {
+            crosshair.interactive = false;
+            if (typeof crosshair.eventMode !== "undefined") crosshair.eventMode = "none";
+            try { crosshair.off?.("pointerdown"); } catch (e) {}
+            try { crosshair.off?.("click"); } catch (e) {}
+        }
         await this.playGraphicEffect(crosshair);
         alignCrosshairAndEffects(crosshair, this.config, this.direction * (Math.PI / 180));
         this._updateRangeText();
-        this.startBroadcasting();
+        if (!this.config?.isRemote) {
+            this.startBroadcasting();
+        }
     }
 
     /**
