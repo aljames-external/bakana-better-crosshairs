@@ -4,6 +4,7 @@ import { closest } from "../lib/filemanager.js";
 import { log } from "../lib/logger.js";
 import { crosshairAdapter, systemAdapter } from "../adapter/index.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, resolveCrosshairIcon, alignCrosshairAndEffects, getGridSnapMode, snapCoordinates, activePlacementTracker } from "./util.js";
+import { CrosshairController } from "./crosshairController.js";
 
 /**
  * Base class for crosshair shape instances, managing Sequencer animations, grid alignments,
@@ -370,6 +371,22 @@ export class BaseCrosshairShape {
         await this.playGraphicEffect(crosshair);
         alignCrosshairAndEffects(crosshair, this.config, this.direction * (Math.PI / 180));
         this._updateRangeText();
+
+        if (!this.controller) {
+            this.controller = new CrosshairController(
+                this,
+                this.config,
+                this.config?.isRemote
+                    ? () => getPeerCursorPosition(this.config?.senderUserId)
+                    : () => canvas.mousePosition,
+                {
+                    updateTrigger: this.config?.isRemote ? "ticker" : "event",
+                    intervalMs: BROADCAST_INTERVAL_MS
+                }
+            );
+        }
+        await this.controller.start();
+
         if (!this.config?.isRemote) {
             this.startBroadcasting();
         }
@@ -593,6 +610,7 @@ export class BaseCrosshairShape {
      * @returns {Promise<void>}
      */
     async onPlacedCallback(crosshair, ...extraArgs) {
+        if (this.controller) this.controller.stop();
         this.stopBroadcasting("placed");
         this._destroyRangeText();
         Sequencer.EffectManager.endEffects({ name: this.id });
@@ -605,6 +623,7 @@ export class BaseCrosshairShape {
      * @returns {void}
      */
     onCancelCallback() {
+        if (this.controller) this.controller.stop();
         this.stopBroadcasting("canceled");
         this._destroyRangeText();
         detachWheelRotation();
