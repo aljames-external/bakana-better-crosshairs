@@ -56,9 +56,9 @@ test("RemoteCrosshairManager creates, updates, and destroys remote visuals for p
     assert.equal(remoteCrosshairManager.remoteCrosshairs.size, 1);
     const visual = remoteCrosshairManager.remoteCrosshairs.get("peer-placement-1");
     assert.ok(visual);
-    assert.equal(visual.x, 500);
-    assert.equal(visual.y, 500);
-    assert.equal(visual.direction, 90);
+    assert.equal(visual.shape.x, 500);
+    assert.equal(visual.shape.y, 500);
+    assert.equal(visual.shape.direction, 90);
 
     const updatePayload = {
         type: "CROSSHAIR_UPDATE",
@@ -70,9 +70,9 @@ test("RemoteCrosshairManager creates, updates, and destroys remote visuals for p
     };
 
     await remoteCrosshairManager.handleSocketMessage(updatePayload);
-    assert.equal(visual.x, 600);
-    assert.equal(visual.y, 600);
-    assert.equal(visual.direction, 180);
+    assert.equal(visual.shape.x, 600);
+    assert.equal(visual.shape.y, 600);
+    assert.equal(visual.shape.direction, 180);
 
     const endPayload = {
         type: "CROSSHAIR_END",

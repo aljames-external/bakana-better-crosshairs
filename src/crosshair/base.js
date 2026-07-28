@@ -33,7 +33,9 @@ export class BaseCrosshairShape {
         config.width = config.width ?? docProps.width ?? 5;
         config.angle = config.angle ?? docProps.angle ?? 53.13;
 
-        this.id = config.id ?? this.getDefaultId();
+        const userId = game?.user?.id ?? "local";
+        const defaultId = this.getDefaultId();
+        this.id = config.id ?? `${defaultId}-${userId}`;
         this.type = this.defaultShapeType;
         this.stickToToken = shouldStickToToken(config, this.type);
         this.context = config.context ?? null;

@@ -393,8 +393,8 @@ test('BaseCrosshairShape.playGraphicEffect isolates origin stretch line under ${
     };
 
     await shape.playGraphicEffect({ x: 100, y: 100 });
-    assert.ok(effectNames.includes("Circle Crosshair-line"));
-    assert.ok(effectNames.includes("Circle Crosshair"));
+    assert.ok(effectNames.some(name => name.includes("Circle Crosshair") && name.endsWith("-line")));
+    assert.ok(effectNames.some(name => name.includes("Circle Crosshair")));
 });
 
 test('BaseCrosshairShape._updateRangeText keeps distance measurement text unrotated', async () => {

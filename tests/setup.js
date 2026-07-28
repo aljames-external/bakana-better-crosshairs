@@ -259,6 +259,7 @@ globalThis.Sequencer = {
         constructor() {
             this._steps = [];
         }
+        wait(ms) { return this; }
         effect() { return this; }
         name(n) { return this; }
         file(f) { return this; }

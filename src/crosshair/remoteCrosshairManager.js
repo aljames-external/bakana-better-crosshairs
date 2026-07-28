@@ -1,8 +1,45 @@
 import { MODULE_ID } from "../lib/constants.js";
 import { log } from "../lib/logger.js";
+import { alignCrosshairAndEffects } from "./util.js";
+
+let shapeClasses = null;
+
+/**
+ * Lazy async loader for shape subclass models to prevent circular ES module import dependency loops.
+ * @returns {Promise<Object>} Object containing loaded shape class constructors
+ */
+export async function getShapeClasses() {
+    if (!shapeClasses) {
+        const [{ CircleCrosshairShape }, { ConeCrosshairShape }, { RayCrosshairShape }, { SquareCrosshairShape }] = await Promise.all([
+            import("./circle.js"),
+            import("./cone.js"),
+            import("./ray.js"),
+            import("./square.js")
+        ]);
+        shapeClasses = { CircleCrosshairShape, ConeCrosshairShape, RayCrosshairShape, SquareCrosshairShape };
+    }
+    return shapeClasses;
+}
+
+/**
+ * Factory helper to instantiate shape model subclasses for remote crosshair rendering.
+ * @param {string} shapeType - Target shape identifier ("circle", "cone", "ray", "square", "rect")
+ * @param {Object} config - Crosshair configuration options
+ * @returns {import("./base.js").BaseCrosshairShape|null} Instantiated shape subclass instance or null
+ */
+export function createRemoteShapeInstance(shapeType, config = {}) {
+    const classes = shapeClasses ?? {};
+    const type = String(shapeType ?? "circle").toLowerCase();
+    if (type === "cone" && classes.ConeCrosshairShape) return new classes.ConeCrosshairShape(null, config);
+    if (type === "ray" && classes.RayCrosshairShape) return new classes.RayCrosshairShape(null, config);
+    if ((type === "square" || type === "rect") && classes.SquareCrosshairShape) return new classes.SquareCrosshairShape(null, config);
+    if (classes.CircleCrosshairShape) return new classes.CircleCrosshairShape(null, config);
+    return null;
+}
 
 /**
  * Encapsulates a non-interactive remote crosshair visual rendered on a peer client's canvas.
+ * Reuses BaseCrosshairShape logic to guarantee identical origin, rotation, anchor, and graphic scaling.
  */
 export class RemoteCrosshairVisual {
     /**
@@ -13,26 +50,41 @@ export class RemoteCrosshairVisual {
         this.placementId = String(payload.placementId ?? "");
         this.senderUserId = String(payload.senderUserId ?? "");
         this.shapeType = String(payload.shapeType ?? payload.type ?? "circle");
-        this.file = String(payload.file ?? "");
-        this.lineFile = String(payload.lineFile ?? "");
-        this.icon = String(payload.icon ?? "");
-        this.fillColor = String(payload.fillColor ?? "#ffffff");
-        this.fillAlpha = Number(payload.fillAlpha ?? 0.25);
-        this.borderColor = String(payload.borderColor ?? "#ffffff");
-        this.borderAlpha = Number(payload.borderAlpha ?? 0.8);
-        this.distance = Number(payload.distance ?? 0);
-        this.width = Number(payload.width ?? 0);
-        this.angle = Number(payload.angle ?? 0);
-        this.direction = Number(payload.direction ?? 0);
-        this.tokenId = payload.tokenId ? String(payload.tokenId) : null;
-        this.stickToToken = Boolean(payload.stickToToken);
-        this.showLine = Boolean(payload.showLine);
-        this.x = Number(payload.x ?? 0);
-        this.y = Number(payload.y ?? 0);
-
-        this.effectName = `remote-crosshair-${this.placementId}`;
-        this.lineEffectName = `remote-crosshair-${this.placementId}-line`;
+        this.effectName = `remote-crosshair-${this.senderUserId}-${this.placementId}`;
         this.isDestroyed = false;
+
+        const tokenId = payload.tokenId ? String(payload.tokenId) : null;
+        const token = (tokenId && canvas?.tokens?.get) ? canvas.tokens.get(tokenId) : null;
+
+        this.config = {
+            id: this.effectName,
+            type: this.shapeType,
+            file: payload.file,
+            lineFile: payload.lineFile,
+            icon: payload.icon,
+            fillColor: payload.fillColor,
+            fillAlpha: payload.fillAlpha,
+            borderColor: payload.borderColor,
+            borderAlpha: payload.borderAlpha,
+            distance: payload.distance,
+            width: payload.width,
+            angle: payload.angle,
+            direction: payload.direction,
+            token,
+            stickToToken: Boolean(payload.stickToToken && token),
+            showLine: Boolean(payload.showLine),
+            currentDirection: payload.direction
+        };
+
+        this.rawX = Number(payload.x ?? 0);
+        this.rawY = Number(payload.y ?? 0);
+        this.rawDirection = Number(payload.direction ?? 0);
+        this.shape = createRemoteShapeInstance(this.shapeType, this.config);
+        if (this.shape) {
+            this.shape.x = this.rawX;
+            this.shape.y = this.rawY;
+            this.shape.direction = this.rawDirection;
+        }
     }
 
     /**
@@ -40,12 +92,10 @@ export class RemoteCrosshairVisual {
      * @returns {{x: number, y: number}} Target canvas coordinates
      */
     resolveTargetPosition() {
-        if (this.stickToToken && this.tokenId && canvas?.tokens?.get) {
-            const tok = canvas.tokens.get(this.tokenId);
-            if (tok) {
-                const center = tok.center ?? { x: (tok.x ?? 0) + (tok.w ?? 100) / 2, y: (tok.y ?? 0) + (tok.h ?? 100) / 2 };
-                return center;
-            }
+        if (this.shape?.stickToToken && this.shape?.token) {
+            const tok = this.shape.token;
+            const center = tok.center ?? { x: (tok.x ?? 0) + (tok.w ?? 100) / 2, y: (tok.y ?? 0) + (tok.h ?? 100) / 2 };
+            return center;
         }
 
         // Check peer user cursor pointer on canvas (Rule 5 & user prompt spec)
@@ -56,48 +106,31 @@ export class RemoteCrosshairVisual {
             }
         }
 
-        return { x: this.x, y: this.y };
+        return { x: this.shape?.x ?? this.rawX, y: this.shape?.y ?? this.rawY };
     }
 
     /**
-     * Create and play the remote Sequencer visual effect.
+     * Create and play the remote Sequencer visual effect reusing BaseCrosshairShape animation logic.
      * @returns {Promise<void>}
      */
     async create() {
-        if (typeof Sequencer === "undefined" || !this.file) return;
+        if (typeof Sequencer === "undefined") return;
+
+        await getShapeClasses();
+        if (!this.shape) {
+            this.shape = createRemoteShapeInstance(this.shapeType, this.config);
+        }
+        if (!this.shape) return;
 
         const pos = this.resolveTargetPosition();
-        const rad = this.direction * (Math.PI / 180);
-        const seq = new Sequence();
+        this.shape.x = pos.x;
+        this.shape.y = pos.y;
 
-        // 1. Line connecting token to cursor if enabled
-        if (this.showLine && this.lineFile && this.tokenId && canvas?.tokens?.get) {
-            const tok = canvas.tokens.get(this.tokenId);
-            if (tok) {
-                seq.effect()
-                    .name(this.lineEffectName)
-                    .file(this.lineFile)
-                    .attachTo(tok)
-                    .stretchTo({ x: pos.x, y: pos.y })
-                    .opacity(0.8)
-                    .locally()
-                    .persist();
-            }
-        }
+        const targetAnchorObj = { x: pos.x, y: pos.y, rotation: this.shape.direction * (Math.PI / 180) };
+        await this.shape.playGraphicEffect(targetAnchorObj);
 
-        // 2. Crosshair shape graphic effect
-        seq.effect()
-            .name(this.effectName)
-            .file(this.file)
-            .atPosition({ x: pos.x, y: pos.y })
-            .rotation(rad)
-            .opacity(0.8)
-            .belowTokens()
-            .locally()
-            .persist();
-
+        alignCrosshairAndEffects(targetAnchorObj, this.shape.config, this.shape.direction * (Math.PI / 180));
         log.debug(`RemoteCrosshairVisual.create | Playing remote crosshair visual "${this.effectName}" for user "${this.senderUserId}" at:`, pos);
-        await seq.play();
     }
 
     /**
@@ -108,43 +141,29 @@ export class RemoteCrosshairVisual {
     update(updatePayload) {
         if (this.isDestroyed || typeof Sequencer === "undefined") return;
 
-        if (typeof updatePayload.x === "number") this.x = updatePayload.x;
-        if (typeof updatePayload.y === "number") this.y = updatePayload.y;
-        if (typeof updatePayload.direction === "number") this.direction = updatePayload.direction;
-        if (typeof updatePayload.distance === "number") this.distance = updatePayload.distance;
-        if (typeof updatePayload.width === "number") this.width = updatePayload.width;
-        if (typeof updatePayload.angle === "number") this.angle = updatePayload.angle;
+        if (this.shape) {
+            if (typeof updatePayload.x === "number") this.shape.x = updatePayload.x;
+            if (typeof updatePayload.y === "number") this.shape.y = updatePayload.y;
+            if (typeof updatePayload.direction === "number") {
+                this.shape.direction = updatePayload.direction;
+                this.shape.config.currentDirection = updatePayload.direction;
+            }
+            if (typeof updatePayload.distance === "number") this.shape.distance = updatePayload.distance;
+            if (typeof updatePayload.width === "number") this.shape.width = updatePayload.width;
+            if (typeof updatePayload.angle === "number") this.shape.angle = updatePayload.angle;
+        }
+
+        if (typeof updatePayload.x === "number") this.rawX = updatePayload.x;
+        if (typeof updatePayload.y === "number") this.rawY = updatePayload.y;
+        if (typeof updatePayload.direction === "number") this.rawDirection = updatePayload.direction;
 
         const pos = this.resolveTargetPosition();
-        const rad = this.direction * (Math.PI / 180);
+        const dir = this.shape?.direction ?? this.rawDirection;
+        const rad = dir * (Math.PI / 180);
+        const targetAnchorObj = { x: pos.x, y: pos.y, rotation: rad };
 
-        try {
-            const effects = Sequencer.EffectManager.getEffects({ name: this.effectName });
-            for (const eff of effects) {
-                if (eff.container) {
-                    eff.container.position.set(pos.x, pos.y);
-                    eff.container.rotation = rad;
-                }
-                if (typeof eff.rotation !== "undefined") eff.rotation = rad;
-                if (typeof eff.update === "function") {
-                    try {
-                        eff.update({ x: pos.x, y: pos.y, rotation: rad });
-                    } catch (e) {}
-                }
-            }
-
-            if (this.lineFile) {
-                const lineEffects = Sequencer.EffectManager.getEffects({ name: this.lineEffectName });
-                for (const lineEff of lineEffects) {
-                    if (typeof lineEff.stretchTo === "function") {
-                        try {
-                            lineEff.stretchTo({ x: pos.x, y: pos.y });
-                        } catch (e) {}
-                    }
-                }
-            }
-        } catch (e) {
-            log.debug("RemoteCrosshairVisual.update | Exception updating remote Sequencer effect:", e);
+        if (this.shape) {
+            alignCrosshairAndEffects(targetAnchorObj, this.shape.config, rad);
         }
     }
 
@@ -159,7 +178,7 @@ export class RemoteCrosshairVisual {
         if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
             try {
                 await Sequencer.EffectManager.endEffects({ name: this.effectName });
-                await Sequencer.EffectManager.endEffects({ name: this.lineEffectName });
+                await Sequencer.EffectManager.endEffects({ name: `${this.effectName}-line` });
             } catch (e) {
                 log.debug("RemoteCrosshairVisual.destroy | Exception terminating remote Sequencer effects:", e);
             }
