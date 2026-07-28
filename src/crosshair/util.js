@@ -418,7 +418,7 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
                     }
                 }
 
-                if (!isAttached) {
+                if (!isAttached || isRemote) {
                     if (eff.container && typeof eff.container.rotation !== "undefined") {
                         eff.container.rotation = rad;
                     }

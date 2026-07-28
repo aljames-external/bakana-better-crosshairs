@@ -221,9 +221,10 @@ export class BaseCrosshairShape {
             animationAnchor: this.animationAnchor
         });
 
+        const isRemote = !(crosshair && (crosshair.parent || crosshair.transform || typeof crosshair.addChild === "function"));
         const isSticky = Boolean(this.stickToToken && this.token);
         const attachOptions = {
-            bindRotation: true,
+            bindRotation: !isRemote,
             ...((this.type === "rect" && !isSticky) ? { align: "top-left" } : {})
         };
         seq.effect()
