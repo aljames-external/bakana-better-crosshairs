@@ -466,6 +466,7 @@ export class RemoteCrosshairVisual {
             try {
                 await Sequencer.EffectManager.endEffects({ name: this.effectName });
                 await Sequencer.EffectManager.endEffects({ name: `${this.effectName}-line` });
+                await Sequencer.EffectManager.endEffects({ name: `${this.effectName}-icon` });
             } catch (e) {
                 log.debug("RemoteCrosshairVisual.destroy | Exception terminating remote Sequencer effects:", e);
             }

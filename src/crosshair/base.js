@@ -237,6 +237,20 @@ export class BaseCrosshairShape {
             .locally()
             .persist();
 
+        if (this.icon) {
+            const iconPath = resolveCrosshairIcon(this.icon);
+            if (iconPath) {
+                seq.effect()
+                    .name(`${this.id}-icon`)
+                    .file(iconPath)
+                    .attachTo(crosshair, attachOptions)
+                    .size(50, { gridUnits: false })
+                    .opacity(0.9)
+                    .locally()
+                    .persist();
+            }
+        }
+
         return seq.play();
     }
 
