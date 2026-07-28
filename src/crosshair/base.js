@@ -717,33 +717,19 @@ export class BaseCrosshairShape {
 
         if (this.sequencerCrosshair && !this.sequencerCrosshair.destroyed) {
             const isRect = this.type === "rect" || this.type === "square";
-            const isAttached = Boolean(this.stickToToken && this.token);
-            if (!isAttached) {
-                this.sequencerCrosshair.direction = newAngleDeg;
-                if (!isRect) {
-                    this.sequencerCrosshair.rotation = rad;
-                } else {
-                    this.sequencerCrosshair.rotation = 0;
-                }
-                if (this.sequencerCrosshair.config) {
-                    this.sequencerCrosshair.config.direction = newAngleDeg;
-                    this.sequencerCrosshair.config.rotation = rad;
-                }
-                if (this.sequencerCrosshair.data) {
-                    this.sequencerCrosshair.data.direction = newAngleDeg;
-                    this.sequencerCrosshair.data.rotation = rad;
-                }
+            this.sequencerCrosshair.direction = newAngleDeg;
+            if (!isRect) {
+                this.sequencerCrosshair.rotation = rad;
             } else {
-                this.sequencerCrosshair.direction = 0;
                 this.sequencerCrosshair.rotation = 0;
-                if (this.sequencerCrosshair.config) {
-                    this.sequencerCrosshair.config.direction = 0;
-                    this.sequencerCrosshair.config.rotation = 0;
-                }
-                if (this.sequencerCrosshair.data) {
-                    this.sequencerCrosshair.data.direction = 0;
-                    this.sequencerCrosshair.data.rotation = 0;
-                }
+            }
+            if (this.sequencerCrosshair.config) {
+                this.sequencerCrosshair.config.direction = newAngleDeg;
+                this.sequencerCrosshair.config.rotation = rad;
+            }
+            if (this.sequencerCrosshair.data) {
+                this.sequencerCrosshair.data.direction = newAngleDeg;
+                this.sequencerCrosshair.data.rotation = rad;
             }
 
             alignCrosshairAndEffects(this.sequencerCrosshair, this.config, rad);
