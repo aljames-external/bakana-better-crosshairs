@@ -400,6 +400,14 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
             const effects = Sequencer.EffectManager.getEffects({ name: config.id });
             for (const eff of effects) {
                 if (!isAttached) {
+                    if (Number.isFinite(crosshair?.x) && Number.isFinite(crosshair?.y)) {
+                        if (eff.container?.position?.set) {
+                            eff.container.position.set(crosshair.x, crosshair.y);
+                        } else if (eff.container) {
+                            eff.container.x = crosshair.x;
+                            eff.container.y = crosshair.y;
+                        }
+                    }
                     if (isRect) {
                         if (eff.container) {
                             eff.container.pivot.set(0, 0);

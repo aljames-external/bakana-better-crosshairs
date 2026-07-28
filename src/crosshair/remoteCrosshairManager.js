@@ -152,6 +152,30 @@ export class RemoteCrosshairVisual {
     }
 
     /**
+     * Frame ticker callback updating active Sequencer effect position to match peer canvas cursor.
+     * @protected
+     * @returns {void}
+     */
+    _onTick() {
+        if (this.isDestroyed || typeof Sequencer === "undefined") return;
+        const pos = this.resolveTargetPosition();
+        if (!pos || !Number.isFinite(pos.x) || !Number.isFinite(pos.y)) return;
+
+        if (this.shape) {
+            this.shape.x = pos.x;
+            this.shape.y = pos.y;
+        }
+
+        const dir = this.shape?.direction ?? this.rawDirection;
+        const rad = dir * (Math.PI / 180);
+        const targetAnchorObj = { x: pos.x, y: pos.y, rotation: rad };
+
+        if (this.shape) {
+            alignCrosshairAndEffects(targetAnchorObj, this.shape.config, rad);
+        }
+    }
+
+    /**
      * Create and play the remote Sequencer visual effect reusing BaseCrosshairShape animation logic.
      * @returns {Promise<void>}
      */
@@ -172,6 +196,13 @@ export class RemoteCrosshairVisual {
         await this.shape.playGraphicEffect(targetAnchorObj);
 
         alignCrosshairAndEffects(targetAnchorObj, this.shape.config, this.shape.direction * (Math.PI / 180));
+
+        if (canvas?.app?.ticker) {
+            try {
+                canvas.app.ticker.add(this._onTick, this);
+            } catch (e) {}
+        }
+
         log.debug(`RemoteCrosshairVisual.create | Playing remote crosshair visual "${this.effectName}" for user "${this.senderUserId}" at:`, pos);
     }
 
@@ -195,19 +226,7 @@ export class RemoteCrosshairVisual {
 
         if (typeof updatePayload.direction === "number") this.rawDirection = updatePayload.direction;
 
-        const pos = this.resolveTargetPosition();
-        if (this.shape) {
-            this.shape.x = pos.x;
-            this.shape.y = pos.y;
-        }
-
-        const dir = this.shape?.direction ?? this.rawDirection;
-        const rad = dir * (Math.PI / 180);
-        const targetAnchorObj = { x: pos.x, y: pos.y, rotation: rad };
-
-        if (this.shape) {
-            alignCrosshairAndEffects(targetAnchorObj, this.shape.config, rad);
-        }
+        this._onTick();
     }
 
     /**
@@ -217,6 +236,12 @@ export class RemoteCrosshairVisual {
     async destroy() {
         if (this.isDestroyed) return;
         this.isDestroyed = true;
+
+        if (canvas?.app?.ticker) {
+            try {
+                canvas.app.ticker.remove(this._onTick, this);
+            } catch (e) {}
+        }
 
         if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
             try {
