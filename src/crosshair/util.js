@@ -415,16 +415,20 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
                             if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
                         }
                     }
-                    if (eff.container && typeof eff.container.rotation !== "undefined") {
-                        eff.container.rotation = rad;
-                    }
-                    if (typeof eff.rotation !== "undefined") eff.rotation = rad;
-                    if (typeof eff.update === "function") {
-                        try {
-                            eff.update({ rotation: rad });
-                        } catch (e) {
-                            log.debug("alignCrosshairAndEffects | Exception updating Sequencer effect rotation:", e);
-                        }
+                }
+
+                if (eff.container && typeof eff.container.rotation !== "undefined") {
+                    eff.container.rotation = rad;
+                }
+                if (eff.spriteContainer && typeof eff.spriteContainer.rotation !== "undefined") {
+                    eff.spriteContainer.rotation = rad;
+                }
+                if (typeof eff.rotation !== "undefined") eff.rotation = rad;
+                if (typeof eff.update === "function") {
+                    try {
+                        eff.update({ rotation: rad });
+                    } catch (e) {
+                        log.debug("alignCrosshairAndEffects | Exception updating Sequencer effect rotation:", e);
                     }
                 }
             }
