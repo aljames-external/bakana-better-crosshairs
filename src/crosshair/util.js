@@ -394,6 +394,7 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
     const shapeType = config.type ?? config.t ?? crosshair?.type ?? "circle";
     const isRect = shapeType === "rect" || shapeType === "square";
     const isAttached = shouldStickToToken(config, shapeType) && Boolean(config.token ?? crosshair?.config?.token ?? crosshair?.token);
+    const isRemote = String(config.id ?? "").startsWith("remote-crosshair-") || !(crosshair && (crosshair.parent || crosshair.transform || typeof crosshair.addChild === "function"));
 
     if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
         try {
@@ -415,6 +416,9 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
                             if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
                         }
                     }
+                }
+
+                if (!isAttached || isRemote) {
                     if (eff.container && typeof eff.container.rotation !== "undefined") {
                         eff.container.rotation = rad;
                     }
