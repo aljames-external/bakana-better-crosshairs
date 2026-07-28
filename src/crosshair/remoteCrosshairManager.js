@@ -123,6 +123,7 @@ export class RemoteCrosshairVisual {
         this.rawX = Number(payload.x ?? 0);
         this.rawY = Number(payload.y ?? 0);
         this.rawDirection = Number(payload.direction ?? 0);
+        this.lastCursorLogTime = 0;
         this.shape = createRemoteShapeInstance(this.shapeType, this.config);
         if (this.shape) {
             this.shape.x = this.rawX;
@@ -173,6 +174,18 @@ export class RemoteCrosshairVisual {
         if (this.shape) {
             alignCrosshairAndEffects(targetAnchorObj, this.shape.config, rad);
         }
+
+        // Periodic 2-second cursor position debug logging
+        const now = Date.now();
+        if (now - this.lastCursorLogTime >= 2000) {
+            this.lastCursorLogTime = now;
+            log.debug(`RemoteCrosshairVisual.cursorLog | Active remote crosshair position for user "${this.senderUserId}":`, {
+                senderUserId: this.senderUserId,
+                placementId: this.placementId,
+                cursorPos: pos,
+                direction: dir
+            });
+        }
     }
 
     /**
@@ -192,18 +205,40 @@ export class RemoteCrosshairVisual {
         this.shape.x = pos.x;
         this.shape.y = pos.y;
 
-        const targetAnchorObj = { x: pos.x, y: pos.y, rotation: this.shape.direction * (Math.PI / 180) };
-        await this.shape.playGraphicEffect(targetAnchorObj);
+        const dirDeg = this.shape.direction ?? this.rawDirection;
+        const rotRad = dirDeg * (Math.PI / 180);
+        const targetAnchorObj = { x: pos.x, y: pos.y, rotation: rotRad };
 
-        alignCrosshairAndEffects(targetAnchorObj, this.shape.config, this.shape.direction * (Math.PI / 180));
+        log.debug(`RemoteCrosshairVisual.create | Render initialization info for user "${this.senderUserId}":`, {
+            senderUserId: this.senderUserId,
+            placementId: this.placementId,
+            shapeType: this.shapeType,
+            effectName: this.effectName,
+            distance: this.shape.distance,
+            width: this.shape.width,
+            angle: this.shape.angle,
+            direction: dirDeg,
+            rotationRad: rotRad,
+            file: this.config.file,
+            lineFile: this.config.lineFile,
+            icon: this.config.icon,
+            fillColor: this.config.fillColor,
+            fillAlpha: this.config.fillAlpha,
+            borderColor: this.config.borderColor,
+            borderAlpha: this.config.borderAlpha,
+            stickToToken: this.config.stickToToken,
+            showLine: this.config.showLine,
+            initialPos: pos
+        });
+
+        await this.shape.playGraphicEffect(targetAnchorObj);
+        alignCrosshairAndEffects(targetAnchorObj, this.shape.config, rotRad);
 
         if (canvas?.app?.ticker) {
             try {
                 canvas.app.ticker.add(this._onTick, this);
             } catch (e) {}
         }
-
-        log.debug(`RemoteCrosshairVisual.create | Playing remote crosshair visual "${this.effectName}" for user "${this.senderUserId}" at:`, pos);
     }
 
     /**
