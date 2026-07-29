@@ -759,6 +759,23 @@ export class BaseFoundryVTTAdapter {
         const h = tok.h ?? (tokenHeight * size);
         const centerPoint = tok.center ?? tok.document?.center ?? { x: tx + w / 2, y: ty + h / 2 };
 
+        const dx = targetMouse.x - centerPoint.x;
+        const dy = targetMouse.y - centerPoint.y;
+        const dist = Math.hypot(dx, dy);
+
+        let dragAngle = Math.atan2(dy, dx) * (180 / Math.PI);
+        if (dragAngle < 0) dragAngle += 360;
+        const direction = dragAngle % 360;
+
+        let farPoint = targetMouse;
+        if (dist > 0) {
+            const scale = Math.max(10000, (w + h) * 10) / dist;
+            farPoint = {
+                x: centerPoint.x + dx * scale,
+                y: centerPoint.y + dy * scale
+            };
+        }
+
         const points = [tx, ty, tx + w, ty, tx + w, ty + h, tx, ty + h];
 
         let intersection = null;
@@ -767,14 +784,14 @@ export class BaseFoundryVTTAdapter {
                 const p1 = { x: points[i], y: points[i + 1] };
                 const p2Idx = (i + 2) >= points.length ? 0 : (i + 2);
                 const p2 = { x: points[p2Idx], y: points[p2Idx + 1] };
-                intersection = foundry.utils.lineSegmentIntersection(centerPoint, targetMouse, p1, p2);
+                intersection = foundry.utils.lineSegmentIntersection(centerPoint, farPoint, p1, p2);
                 if (intersection) break;
             }
         }
 
         if (!intersection) {
             if (Ray) {
-                const ray = new Ray(centerPoint, targetMouse);
+                const ray = new Ray(centerPoint, farPoint);
                 if (typeof ray.intersectSegment === "function") {
                     for (let i = 0; i < points.length; i += 2) {
                         const p1 = { x: points[i], y: points[i + 1] };
@@ -793,23 +810,7 @@ export class BaseFoundryVTTAdapter {
                 x: clamp(targetMouse.x, tx, tx + w),
                 y: clamp(targetMouse.y, ty, ty + h)
             };
-            if (intersection.x === targetMouse.x && intersection.y === targetMouse.y) {
-                const dx = targetMouse.x - centerPoint.x;
-                const dy = targetMouse.y - centerPoint.y;
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    intersection.x = dx >= 0 ? tx + w : tx;
-                } else {
-                    intersection.y = dy >= 0 ? ty + h : ty;
-                }
-            }
         }
-
-        let dragAngle = Math.atan2(targetMouse.y - intersection.y, targetMouse.x - intersection.x) * (180 / Math.PI);
-        if (Number.isNaN(dragAngle) || (targetMouse.x === intersection.x && targetMouse.y === intersection.y)) {
-            dragAngle = Math.atan2(targetMouse.y - centerPoint.y, targetMouse.x - centerPoint.x) * (180 / Math.PI);
-        }
-        if (dragAngle < 0) dragAngle += 360;
-        const direction = dragAngle % 360;
 
         return {
             x: intersection.x,
