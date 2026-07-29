@@ -271,6 +271,7 @@ export class RemoteCrosshairVisual {
             .size({ width: widthPx * factor, height: heightPx * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
             .belowTokens()
+            .locally()
             .persist();
 
         await seq.play();
@@ -316,28 +317,38 @@ export class RemoteCrosshairVisual {
             this.shape.direction = this.rawDirection;
         }
 
-        if (!this.activeEffect && typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
-            const [eff] = Sequencer.EffectManager.getEffects({ name: this.effectName });
-            if (eff) this.activeEffect = eff;
-        }
+        if (Sequencer.EffectManager) {
+            const effects = Sequencer.EffectManager.getEffects({ name: this.effectName });
+            for (const eff of effects) {
+                eff.x = this.rawX;
+                eff.y = this.rawY;
+                if (eff.worldPosition) {
+                    eff.worldPosition.x = this.rawX;
+                    eff.worldPosition.y = this.rawY;
+                }
+                if (eff.position) {
+                    eff.position.x = this.rawX;
+                    eff.position.y = this.rawY;
+                }
+                eff.rotation = rad;
 
-        if (this.activeEffect) {
-            if (this.activeEffect.container?.position?.set) {
-                this.activeEffect.container.position.set(this.rawX, this.rawY);
-                this.activeEffect.container.rotation = rad;
-            } else if (this.activeEffect.container) {
-                this.activeEffect.container.x = this.rawX;
-                this.activeEffect.container.y = this.rawY;
-                this.activeEffect.container.rotation = rad;
-            }
-            if (typeof this.activeEffect.update === "function") {
-                try {
-                    this.activeEffect.update({
-                        position: { x: this.rawX, y: this.rawY },
-                        rotation: rad
-                    });
-                } catch (e) {
-                    log.debug("RemoteCrosshairVisual.update | Exception invoking activeEffect.update:", e);
+                if (eff.container) {
+                    if (eff.container.position?.set) {
+                        eff.container.position.set(this.rawX, this.rawY);
+                    } else {
+                        eff.container.x = this.rawX;
+                        eff.container.y = this.rawY;
+                    }
+                    eff.container.rotation = rad;
+                }
+
+                if (typeof eff.update === "function") {
+                    try {
+                        eff.update({
+                            position: { x: this.rawX, y: this.rawY },
+                            rotation: rad
+                        });
+                    } catch (e) {}
                 }
             }
         }
