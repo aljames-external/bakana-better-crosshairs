@@ -456,11 +456,25 @@ export class BaseCrosshairShape {
             y: live.y
         };
 
+        this._lastBroadcastState = { ...live };
         socketlib.emit(initialPayload);
 
         this.broadcastTimer = setInterval(() => {
             if (!this.placementId) return;
             const updated = getLiveState();
+            const last = this._lastBroadcastState ?? {};
+
+            const hasChanged =
+                Math.abs((updated.x ?? 0) - (last.x ?? 0)) > 1e-3 ||
+                Math.abs((updated.y ?? 0) - (last.y ?? 0)) > 1e-3 ||
+                Math.abs((updated.direction ?? 0) - (last.direction ?? 0)) > 1e-2 ||
+                updated.distance !== last.distance ||
+                updated.width !== last.width ||
+                updated.angle !== last.angle;
+
+            if (!hasChanged) return;
+
+            this._lastBroadcastState = { ...updated };
             socketlib.emit({
                 type: "CROSSHAIR_UPDATE",
                 placementId: this.placementId,
@@ -485,6 +499,8 @@ export class BaseCrosshairShape {
             clearInterval(this.broadcastTimer);
             this.broadcastTimer = null;
         }
+
+        this._lastBroadcastState = null;
 
         if (this.placementId) {
             socketlib.emit({
