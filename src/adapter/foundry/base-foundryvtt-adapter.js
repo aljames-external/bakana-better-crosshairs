@@ -935,12 +935,21 @@ export class BaseFoundryVTTAdapter {
             async resolve(coords = {}) {
                 const targetToken = token ?? entryConfig?.token;
                 if (targetToken && (entryConfig?.stickToToken ?? true)) {
-                    const mousePos = canvas?.mousePosition ?? { x: coords.x, y: coords.y };
-                    const anchored = self.resolveAnchorPlacement(targetToken, mousePos);
-                    coords.x = anchored.x;
-                    coords.y = anchored.y;
-                    coords.direction = anchored.direction;
-                    coords.rotation = anchored.direction;
+                    const posX = coords.x ?? placeable?.x ?? 0;
+                    const posY = coords.y ?? placeable?.y ?? 0;
+                    const mousePos = canvas?.mousePosition ?? { x: posX, y: posY };
+                    const dx = mousePos.x - posX;
+                    const dy = mousePos.y - posY;
+                    let dir = coords.direction;
+                    if (Math.abs(dx) > 1e-6 || Math.abs(dy) > 1e-6) {
+                        let deg = Math.atan2(dy, dx) * (180 / Math.PI);
+                        if (deg < 0) deg += 360;
+                        dir = deg % 360;
+                    }
+                    coords.x = posX;
+                    coords.y = posY;
+                    coords.direction = dir;
+                    coords.rotation = dir;
                 }
                 Object.assign(this, coords);
                 this.resolved = true;

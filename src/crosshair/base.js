@@ -830,11 +830,21 @@ export class BaseCrosshairShape {
         let posY = this.y;
         let dir = this.direction;
         if (this.stickToToken && this.token) {
+            if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x) && Number.isFinite(this.sequencerCrosshair.y)) {
+                posX = this.sequencerCrosshair.x;
+                posY = this.sequencerCrosshair.y;
+            }
             const mousePos = canvas?.mousePosition ?? { x: posX, y: posY };
-            const anchored = crosshairAdapter.resolveAnchorPlacement(this.token, mousePos);
-            posX = anchored.x;
-            posY = anchored.y;
-            dir = anchored.direction;
+            const dx = mousePos.x - posX;
+            const dy = mousePos.y - posY;
+            if (Math.abs(dx) > 1e-6 || Math.abs(dy) > 1e-6) {
+                let deg = Math.atan2(dy, dx) * (180 / Math.PI);
+                if (deg < 0) deg += 360;
+                dir = deg % 360;
+            } else {
+                const anchored = crosshairAdapter.resolveAnchorPlacement(this.token, mousePos);
+                dir = anchored.direction;
+            }
         } else if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x) && Number.isFinite(this.sequencerCrosshair.y)) {
             posX = this.sequencerCrosshair.x;
             posY = this.sequencerCrosshair.y;
