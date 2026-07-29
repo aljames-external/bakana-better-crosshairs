@@ -226,8 +226,10 @@ export class RemoteCrosshairVisual {
             currentDirection: payload.direction
         };
 
-        this.rawX = Number(payload.x ?? 0);
-        this.rawY = Number(payload.y ?? 0);
+        this.rawX = Number(payload.originX ?? payload.x ?? 0);
+        this.rawY = Number(payload.originY ?? payload.y ?? 0);
+        this.cursorX = Number(payload.cursorX ?? this.rawX);
+        this.cursorY = Number(payload.cursorY ?? this.rawY);
         this.rawDirection = Number(payload.direction ?? 0);
         this.config.isRemote = true;
 
@@ -277,14 +279,27 @@ export class RemoteCrosshairVisual {
     update(updatePayload) {
         if (this.isDestroyed || typeof Sequencer === "undefined") return;
 
-        if (typeof updatePayload.x === "number") this.rawX = updatePayload.x;
-        if (typeof updatePayload.y === "number") this.rawY = updatePayload.y;
-        if (typeof updatePayload.direction === "number") this.rawDirection = updatePayload.direction;
+        const ox = Number(updatePayload.originX ?? updatePayload.x);
+        const oy = Number(updatePayload.originY ?? updatePayload.y);
+        const cx = Number(updatePayload.cursorX);
+        const cy = Number(updatePayload.cursorY);
+        const dir = Number(updatePayload.direction);
 
-        log.info(`[Bakana Remote Socket Update] User: "${this.senderUserId}" | Pos: (${this.rawX}, ${this.rawY}) | Direction: ${this.rawDirection}°`);
+        if (Number.isFinite(ox)) this.rawX = ox;
+        if (Number.isFinite(oy)) this.rawY = oy;
+        if (Number.isFinite(cx)) this.cursorX = cx;
+        if (Number.isFinite(cy)) this.cursorY = cy;
+        if (Number.isFinite(dir)) this.rawDirection = dir;
+
+        log.info(`[Bakana Remote Socket Update] Sender: "${this.senderUserId}" | Origin: (${this.rawX}, ${this.rawY}) | Cursor: (${this.cursorX}, ${this.cursorY}) | Direction: ${this.rawDirection}°`);
 
         if (this.shape) {
-            this.shape.move(this.rawX, this.rawY);
+            this.shape.x = this.rawX;
+            this.shape.y = this.rawY;
+            if (this.shape.sequencerCrosshair) {
+                this.shape.sequencerCrosshair.x = this.rawX;
+                this.shape.sequencerCrosshair.y = this.rawY;
+            }
             if (Number.isFinite(this.rawDirection)) {
                 this.shape.rotate(this.rawDirection);
             }
