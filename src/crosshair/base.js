@@ -406,15 +406,12 @@ export class BaseCrosshairShape {
         this.stopBroadcasting();
 
         const getLiveState = () => {
-            let x = this.x;
-            let y = this.y;
-            if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x) && Number.isFinite(this.sequencerCrosshair.y)) {
-                x = this.sequencerCrosshair.x;
-                y = this.sequencerCrosshair.y;
-            } else if (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.x) && Number.isFinite(canvas.mousePosition.y)) {
-                x = canvas.mousePosition.x;
-                y = canvas.mousePosition.y;
-            }
+            let x = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.x))
+                ? canvas.mousePosition.x
+                : ((this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x)) ? this.sequencerCrosshair.x : this.x);
+            let y = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.y))
+                ? canvas.mousePosition.y
+                : ((this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.y)) ? this.sequencerCrosshair.y : this.y);
 
             let direction = this.config?.currentDirection ?? this.direction ?? 0;
             if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.direction)) {
