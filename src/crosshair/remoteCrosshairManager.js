@@ -297,9 +297,10 @@ export class RemoteCrosshairVisual {
         if (Number.isFinite(cy)) this.cursorY = cy;
         if (Number.isFinite(dir)) this.rawDirection = dir;
 
-        log.debug(`[Bakana Remote Socket Update] Sender: "${this.senderUserId}" | Origin: (${this.rawX}, ${this.rawY}) | Cursor: (${this.cursorX}, ${this.cursorY}) | Direction: ${this.rawDirection}°`);
+        const deg = this.rawDirection ?? 0;
+        const rad = deg * (Math.PI / 180);
 
-        const rad = (this.rawDirection ?? 0) * (Math.PI / 180);
+        log.debug(`[Bakana Remote Socket Update] Sender: "${this.senderUserId}" | Origin: (${this.rawX}, ${this.rawY}) | Cursor: (${this.cursorX}, ${this.cursorY}) | Direction: ${this.rawDirection}° | PIXI Container Rotation: ${rad.toFixed(4)} rad`);
 
         if (this.shape) {
             this.shape.x = this.rawX;
@@ -428,9 +429,10 @@ class RemoteCrosshairManagerClass {
                 const finalCursorX = Number(payload.cursorX ?? visual.cursorX);
                 const finalCursorY = Number(payload.cursorY ?? visual.cursorY);
                 const finalDirection = Number(payload.direction ?? visual.rawDirection);
+                const finalRotationRad = Number(payload.rotationRad ?? (finalDirection * (Math.PI / 180)));
                 const reason = String(payload.reason ?? "placed");
 
-                log.debug(`[Bakana Remote Final Placement] Sender: "${senderUserId}" | Reason: "${reason}" | Final Origin: (${finalOriginX}, ${finalOriginY}) | Final Cursor: (${finalCursorX}, ${finalCursorY}) | Final Direction: ${finalDirection}°`);
+                log.debug(`[Bakana Remote Final Placement] Sender: "${senderUserId}" | Reason: "${reason}" | Final Origin: (${finalOriginX}, ${finalOriginY}) | Final Cursor: (${finalCursorX}, ${finalCursorY}) | Final Direction: ${finalDirection}° | PIXI Container Rotation: ${finalRotationRad.toFixed(4)} rad`);
 
                 if (Number.isFinite(finalOriginX)) visual.rawX = finalOriginX;
                 if (Number.isFinite(finalOriginY)) visual.rawY = finalOriginY;

@@ -487,6 +487,7 @@ export class BaseCrosshairShape {
             width: live.width,
             angle: live.angle,
             direction: live.direction,
+            rotationRad: (live.direction ?? 0) * (Math.PI / 180),
             tokenId: this.token?.id ?? null,
             stickToToken: Boolean(this.stickToToken && this.token),
             showLine: Boolean(this.showLine),
@@ -530,6 +531,7 @@ export class BaseCrosshairShape {
                 x: updated.originX,
                 y: updated.originY,
                 direction: updated.direction,
+                rotationRad: (updated.direction ?? 0) * (Math.PI / 180),
                 distance: updated.distance,
                 width: updated.width,
                 angle: updated.angle
@@ -561,8 +563,9 @@ export class BaseCrosshairShape {
             } else if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.rotation)) {
                 finalDirection = this.sequencerCrosshair.rotation * (180 / Math.PI);
             }
+            const finalRotationRad = finalDirection * (Math.PI / 180);
 
-            log.debug(`[Bakana Crosshair Final Broadcast] Sender: "${game?.user?.id}" | Reason: "${reason}" | Final Origin: (${finalOriginX}, ${finalOriginY}) | Final Cursor: (${finalCursorX}, ${finalCursorY}) | Final Direction: ${finalDirection}°`);
+            log.debug(`[Bakana Crosshair Final Broadcast] Sender: "${game?.user?.id}" | Reason: "${reason}" | Final Origin: (${finalOriginX}, ${finalOriginY}) | Final Cursor: (${finalCursorX}, ${finalCursorY}) | Final Direction: ${finalDirection}° | PIXI Container Rotation: ${finalRotationRad.toFixed(4)} rad`);
 
             socketlib.emit({
                 type: "CROSSHAIR_END",
@@ -576,6 +579,7 @@ export class BaseCrosshairShape {
                 x: finalOriginX,
                 y: finalOriginY,
                 direction: finalDirection,
+                rotationRad: finalRotationRad,
                 distance: this.distance,
                 width: this.width,
                 angle: this.angle
