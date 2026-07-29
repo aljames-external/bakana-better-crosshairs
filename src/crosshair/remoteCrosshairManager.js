@@ -266,7 +266,7 @@ export class RemoteCrosshairVisual {
             .name(this.effectName)
             .file(effectFile)
             .atLocation({ x: this.rawX, y: this.rawY })
-            .rotate(deg)
+            .rotate(rad)
             .anchor(this.shape?.animationAnchor ?? { x: 0.5, y: 0.5 })
             .size({ width: widthPx * factor, height: heightPx * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
@@ -321,7 +321,7 @@ export class RemoteCrosshairVisual {
                     eff.position.x = this.rawX;
                     eff.position.y = this.rawY;
                 }
-                eff.rotation = deg;
+                eff.rotation = rad;
 
                 if (eff.container) {
                     if (eff.container.position?.set) {
@@ -337,7 +337,7 @@ export class RemoteCrosshairVisual {
                     try {
                         eff.update({
                             position: { x: this.rawX, y: this.rawY },
-                            rotation: deg
+                            rotation: rad
                         });
                     } catch (e) {}
                 }
