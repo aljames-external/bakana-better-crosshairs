@@ -227,7 +227,7 @@ export class RemoteCrosshairVisual {
         };
 
         this.shape = null;
-        this.activeEffect = null;
+        this.container = null;
     }
 
     /**
@@ -246,21 +246,40 @@ export class RemoteCrosshairVisual {
         if (!this.shape) {
             this.shape = await createRemoteShapeInstance(this.shapeType, this.config);
         }
-        if (this.shape) {
-            this.shape.x = this.rawX;
-            this.shape.y = this.rawY;
-            this.shape.direction = this.rawDirection;
-            this.shape.config.isRemote = true;
 
-            try {
-                const [crosshairSeq] = await this.shape.create();
-                if (crosshairSeq) {
-                    await crosshairSeq.play();
-                }
-            } catch (e) {
-                log.debug("RemoteCrosshairVisual.create | Exception playing remote shape sequence:", e);
-            }
+        if (typeof Sequencer === "undefined") return;
+
+        const effectFile = this.shape?.getGraphicFile?.() ?? this.config.file;
+        if (!effectFile) return;
+
+        // Create a non-interactive PIXI Container dummy anchor on canvas
+        const container = new PIXI.Container();
+        container.x = this.rawX;
+        container.y = this.rawY;
+        container.rotation = (this.rawDirection ?? 0) * (Math.PI / 180);
+        container.interactive = false;
+        if (typeof container.eventMode !== "undefined") container.eventMode = "none";
+
+        if (canvas?.stage?.addChild) {
+            canvas.stage.addChild(container);
         }
+        this.container = container;
+
+        const { widthPx, heightPx, factor, gridUnits } = this.shape?.getGraphicDimensions?.() ?? { widthPx: 100, heightPx: 100, factor: 1, gridUnits: false };
+
+        const seq = new Sequence();
+        seq.effect()
+            .name(this.effectName)
+            .file(effectFile)
+            .attachTo(container, { bindRotation: true })
+            .anchor(this.shape?.animationAnchor ?? { x: 0.5, y: 0.5 })
+            .size({ width: widthPx * factor, height: heightPx * factor }, { gridUnits: Boolean(gridUnits) })
+            .opacity(0.8)
+            .belowTokens()
+            .locally()
+            .persist();
+
+        await seq.play();
     }
 
     /**
@@ -285,11 +304,18 @@ export class RemoteCrosshairVisual {
 
         log.debug(`[Bakana Remote Socket Update] Sender: "${this.senderUserId}" | Origin: (${this.rawX}, ${this.rawY}) | Cursor: (${this.cursorX}, ${this.cursorY}) | Direction: ${this.rawDirection}°`);
 
+        const rad = (this.rawDirection ?? 0) * (Math.PI / 180);
+
+        if (this.container) {
+            this.container.x = this.rawX;
+            this.container.y = this.rawY;
+            this.container.rotation = rad;
+        }
+
         if (this.shape) {
-            this.shape.move(this.rawX, this.rawY);
-            if (Number.isFinite(this.rawDirection)) {
-                this.shape.rotate(this.rawDirection);
-            }
+            this.shape.x = this.rawX;
+            this.shape.y = this.rawY;
+            this.shape.direction = this.rawDirection;
         }
     }
 
@@ -309,6 +335,14 @@ export class RemoteCrosshairVisual {
             } catch (e) {
                 log.debug("RemoteCrosshairVisual.destroy | Exception terminating remote Sequencer effects:", e);
             }
+        }
+
+        if (this.container && this.container.parent) {
+            try {
+                this.container.parent.removeChild(this.container);
+                this.container.destroy({ children: true });
+            } catch (e) {}
+            this.container = null;
         }
     }
 }
