@@ -9,10 +9,10 @@ import { CrosshairController, attachCrosshairToToken, getShapeClasses } from "./
  * Factory helper to instantiate shape model subclasses for remote crosshair rendering.
  * @param {string} shapeType - Target shape identifier ("circle", "cone", "ray", "square", "rect")
  * @param {Object} config - Crosshair configuration options
- * @returns {import("./base.js").BaseCrosshairShape|null} Instantiated shape subclass instance or null
+ * @returns {Promise<import("./base.js").BaseCrosshairShape|null>} Instantiated shape subclass instance or null
  */
-export function createRemoteShapeInstance(shapeType, config = {}) {
-    const classes = shapeClasses ?? {};
+export async function createRemoteShapeInstance(shapeType, config = {}) {
+    const classes = await getShapeClasses();
     const type = String(shapeType ?? "circle").toLowerCase();
     const previewPlaceable = crosshairAdapter.createUnpersistedPreviewPlaceable(config);
     if (type === "cone" && classes.ConeCrosshairShape) return new classes.ConeCrosshairShape(previewPlaceable, config);
@@ -246,19 +246,8 @@ export class RemoteCrosshairVisual {
         this.rawDirection = Number(payload.direction ?? 0);
         this.config.isRemote = true;
 
-        this.shape = createRemoteShapeInstance(this.shapeType, this.config);
-        if (this.shape) {
-            this.shape.x = this.rawX;
-            this.shape.y = this.rawY;
-            this.shape.direction = this.rawDirection;
-        }
-
-        this.controller = new CrosshairController(
-            this.shape,
-            this.config,
-            () => this.resolveTargetPosition(),
-            { updateTrigger: "ticker", intervalMs: BROADCAST_INTERVAL_MS }
-        );
+        this.shape = null;
+        this.controller = null;
     }
 
     /**
@@ -274,15 +263,22 @@ export class RemoteCrosshairVisual {
      * @returns {Promise<void>}
      */
     async create() {
-        if (typeof Sequencer === "undefined") return;
-
-        await getShapeClasses();
         if (!this.shape) {
-            this.shape = createRemoteShapeInstance(this.shapeType, this.config);
+            this.shape = await createRemoteShapeInstance(this.shapeType, this.config);
             if (this.shape) {
+                this.shape.x = this.rawX;
+                this.shape.y = this.rawY;
+                this.shape.direction = this.rawDirection;
                 this.shape.config.isRemote = true;
-                this.controller.shape = this.shape;
             }
+        }
+        if (this.shape && !this.controller) {
+            this.controller = new CrosshairController(
+                this.shape,
+                this.config,
+                () => this.resolveTargetPosition(),
+                { updateTrigger: "ticker", intervalMs: BROADCAST_INTERVAL_MS }
+            );
         }
         if (this.shape) {
             try {
