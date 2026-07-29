@@ -266,7 +266,7 @@ export class RemoteCrosshairVisual {
             .name(this.effectName)
             .file(effectFile)
             .atLocation({ x: this.rawX, y: this.rawY })
-            .rotate(rad)
+            .rotate(deg)
             .anchor(this.shape?.animationAnchor ?? { x: 0.5, y: 0.5 })
             .size({ width: widthPx * factor, height: heightPx * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
@@ -299,12 +299,13 @@ export class RemoteCrosshairVisual {
 
         log.debug(`[Bakana Remote Socket Update] Sender: "${this.senderUserId}" | Origin: (${this.rawX}, ${this.rawY}) | Cursor: (${this.cursorX}, ${this.cursorY}) | Direction: ${this.rawDirection}°`);
 
-        const rad = (this.rawDirection ?? 0) * (Math.PI / 180);
+        const deg = this.rawDirection ?? 0;
+        const rad = deg * (Math.PI / 180);
 
         if (this.shape) {
             this.shape.x = this.rawX;
             this.shape.y = this.rawY;
-            this.shape.direction = this.rawDirection;
+            this.shape.direction = deg;
         }
 
         if (Sequencer.EffectManager) {
@@ -320,7 +321,7 @@ export class RemoteCrosshairVisual {
                     eff.position.x = this.rawX;
                     eff.position.y = this.rawY;
                 }
-                eff.rotation = rad;
+                eff.rotation = deg;
 
                 if (eff.container) {
                     if (eff.container.position?.set) {
@@ -336,7 +337,7 @@ export class RemoteCrosshairVisual {
                     try {
                         eff.update({
                             position: { x: this.rawX, y: this.rawY },
-                            rotation: rad
+                            rotation: deg
                         });
                     } catch (e) {}
                 }
