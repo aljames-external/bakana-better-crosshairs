@@ -388,6 +388,7 @@ class RemoteCrosshairManagerClass {
         if (!type.startsWith("CROSSHAIR_")) return;
 
         const senderUserId = String(payload.senderUserId ?? "");
+        log.info(`[Bakana Remote Socket] Received "${type}" payload from sender "${senderUserId}":`, payload);
         if (!this.shouldRenderRemote(senderUserId)) return;
 
         const placementId = String(payload.placementId ?? "");

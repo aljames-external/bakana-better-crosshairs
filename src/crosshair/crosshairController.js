@@ -95,6 +95,7 @@ export class CrosshairController {
         this.lastRenderTime = now;
 
         const cursorPos = this.getCursorPositionFn();
+        log.info(`[Bakana Crosshair Tracking] User: "${this.config?.senderUserId ?? game?.user?.id}" | isRemote: ${Boolean(this.config?.isRemote)} | Cursor Pos:`, cursorPos, `| Direction: ${this.shape?.direction}`);
         if (!cursorPos || !Number.isFinite(cursorPos.x) || !Number.isFinite(cursorPos.y)) {
             if (this.config.isRemote && Number.isFinite(this.shape.direction)) {
                 this.shape.rotate(this.shape.direction);
@@ -282,6 +283,9 @@ export async function attachCrosshairToToken(sourceToken, shape, size, getCursor
                     }
                 } catch (e) {
                     log.debug("attachCrosshairToToken.start | Exception playing shape sequence:", e);
+                }
+                if (!options.isRemote && typeof shapeInstance.startBroadcasting === "function") {
+                    shapeInstance.startBroadcasting();
                 }
             }
             await controller.start();
