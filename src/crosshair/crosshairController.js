@@ -96,6 +96,9 @@ export class CrosshairController {
 
         const cursorPos = this.getCursorPositionFn();
         if (!cursorPos || !Number.isFinite(cursorPos.x) || !Number.isFinite(cursorPos.y)) {
+            if (this.config.isRemote && Number.isFinite(this.shape.direction)) {
+                this.shape.rotate(this.shape.direction);
+            }
             return;
         }
 

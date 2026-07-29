@@ -322,8 +322,9 @@ export class RemoteCrosshairVisual {
         if (typeof updatePayload.width === "number" && this.shape) this.shape.width = updatePayload.width;
         if (typeof updatePayload.angle === "number" && this.shape) this.shape.angle = updatePayload.angle;
 
-        if (this.controller) {
-            this.controller.update(true);
+        if (this.shape) {
+            this.shape.move(this.rawX, this.rawY);
+            this.shape.rotate(this.rawDirection);
         }
     }
 
