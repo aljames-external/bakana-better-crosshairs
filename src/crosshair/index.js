@@ -3,6 +3,7 @@ import { circle, CircleCrosshairShape } from "./circle.js";
 import { ray, RayCrosshairShape } from "./ray.js";
 import { square, SquareCrosshairShape } from "./square.js";
 import { BaseCrosshairShape } from "./base.js";
+import { CrosshairController, attachCrosshairToToken } from "./crosshairController.js";
 import { Token } from "../lib/compat.js";
 
 /**
@@ -48,7 +49,11 @@ export const crosshair = {
         circle,
         ray,
         square,
+        attach: attachCrosshairToToken,
+        hide: CrosshairController.hide,
     },
+    attachToToken: attachCrosshairToToken,
+    hideTokenCrosshair: CrosshairController.hide,
     cone,
     circle,
     ray,
@@ -57,10 +62,13 @@ export const crosshair = {
 };
 
 export {
+    CrosshairController,
+    attachCrosshairToToken,
     BaseCrosshairShape,
     CircleCrosshairShape,
     ConeCrosshairShape,
     RayCrosshairShape,
     SquareCrosshairShape,
 };
+
 

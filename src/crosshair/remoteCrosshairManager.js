@@ -2,26 +2,8 @@ import { MODULE_ID, BROADCAST_INTERVAL_MS } from "../lib/constants.js";
 import { log } from "../lib/logger.js";
 import { crosshairAdapter } from "../adapter/index.js";
 import { alignCrosshairAndEffects, _calculateAngleFromOrigin } from "./util.js";
-import { CrosshairController } from "./crosshairController.js";
+import { CrosshairController, attachCrosshairToToken, getShapeClasses } from "./crosshairController.js";
 
-let shapeClasses = null;
-
-/**
- * Lazy async loader for shape subclass models to prevent circular ES module import dependency loops.
- * @returns {Promise<Object>} Object containing loaded shape class constructors
- */
-export async function getShapeClasses() {
-    if (!shapeClasses) {
-        const [{ CircleCrosshairShape }, { ConeCrosshairShape }, { RayCrosshairShape }, { SquareCrosshairShape }] = await Promise.all([
-            import("./circle.js"),
-            import("./cone.js"),
-            import("./ray.js"),
-            import("./square.js")
-        ]);
-        shapeClasses = { CircleCrosshairShape, ConeCrosshairShape, RayCrosshairShape, SquareCrosshairShape };
-    }
-    return shapeClasses;
-}
 
 /**
  * Factory helper to instantiate shape model subclasses for remote crosshair rendering.
@@ -214,7 +196,7 @@ export function diagnoseUserCursor(identifier = "Gamemaster") {
         childrenDetails
     };
 
-    console.log("%c Bakana Better Crosshairs | User Cursor Diagnostic ", "background: #222; color: #bada55; font-size: 14px;", report);
+    log.debug("Bakana Better Crosshairs | User Cursor Diagnostic", report);
     return report;
 }
 
@@ -274,9 +256,17 @@ export class RemoteCrosshairVisual {
         this.controller = new CrosshairController(
             this.shape,
             this.config,
-            () => getPeerCursorPosition(this.senderUserId),
+            () => this.resolveTargetPosition(),
             { updateTrigger: "ticker", intervalMs: BROADCAST_INTERVAL_MS }
         );
+    }
+
+    /**
+     * Resolve target position for peer cursor.
+     * @returns {{x: number, y: number}} Live peer cursor coordinates or initial payload coordinates
+     */
+    resolveTargetPosition() {
+        return getPeerCursorPosition(this.senderUserId) ?? { x: this.rawX, y: this.rawY };
     }
 
     /**
