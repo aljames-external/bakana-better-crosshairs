@@ -2,6 +2,7 @@ import { MODULE_ID, BROADCAST_INTERVAL_MS } from "../lib/constants.js";
 import { log } from "../lib/logger.js";
 import { crosshairAdapter } from "../adapter/index.js";
 import { alignCrosshairAndEffects } from "./util.js";
+import { getPeerCursorPosition } from "./remoteCrosshairManager.js";
 
 /**
  * Unified Controller managing crosshair animation, snapping, position updates, and visual rendering
@@ -214,7 +215,9 @@ export async function attachCrosshairToToken(sourceToken, shape, size, getCursor
 
     const resolvedGetCursorFn = (typeof getCursorPositionFn === "function")
         ? getCursorPositionFn
-        : () => (canvas?.mousePosition ?? null);
+        : (options.isRemote && options.senderUserId
+            ? () => getPeerCursorPosition(options.senderUserId)
+            : () => (canvas?.mousePosition ?? null));
 
     let resolvedCancelFn = null;
     if (typeof cancelFn === "function") {

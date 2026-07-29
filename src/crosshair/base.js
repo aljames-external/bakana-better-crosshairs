@@ -5,6 +5,7 @@ import { log } from "../lib/logger.js";
 import { crosshairAdapter, systemAdapter } from "../adapter/index.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, resolveCrosshairIcon, alignCrosshairAndEffects, getGridSnapMode, snapCoordinates, activePlacementTracker } from "./util.js";
 import { CrosshairController } from "./crosshairController.js";
+import { getPeerCursorPosition } from "./remoteCrosshairManager.js";
 
 /**
  * Base class for crosshair shape instances, managing Sequencer animations, grid alignments,
