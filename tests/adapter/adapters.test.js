@@ -642,7 +642,7 @@ test('resolveAnchorPlacement and resolveCrosshairPlacement in attached mode lock
     const insideCornerAnchor = adapterV14.resolveAnchorPlacement(mockToken, { x: 110, y: 190 });
     assert.equal(insideCornerAnchor.x, 100);
     assert.equal(insideCornerAnchor.y, 190);
-    const expectedInsideAngle = (Math.atan2(190 - 150, 110 - 150) * (180 / Math.PI) + 360) % 360;
+    const expectedInsideAngle = (Math.atan2(190 - 190, 110 - 100) * (180 / Math.PI) + 360) % 360;
     assert.equal(Math.round(insideCornerAnchor.direction * 100) / 100, Math.round(expectedInsideAngle * 100) / 100);
 
     // 2. Verify resolveCrosshairPlacement in attached mode uses exact visual coordinates from Sequencer when provided

@@ -763,10 +763,6 @@ export class BaseFoundryVTTAdapter {
         const dy = targetMouse.y - centerPoint.y;
         const dist = Math.hypot(dx, dy);
 
-        let dragAngle = Math.atan2(dy, dx) * (180 / Math.PI);
-        if (dragAngle < 0) dragAngle += 360;
-        const direction = dragAngle % 360;
-
         let farPoint = targetMouse;
         if (dist > 0) {
             const scale = Math.max(10000, (w + h) * 10) / dist;
@@ -811,6 +807,17 @@ export class BaseFoundryVTTAdapter {
                 y: clamp(targetMouse.y, ty, ty + h)
             };
         }
+
+        // Calculate direction angle FROM the Sequencer animation pivot point (intersection) TO targetMouse
+        const dxPivot = targetMouse.x - intersection.x;
+        const dyPivot = targetMouse.y - intersection.y;
+        let dragAngle = (Math.abs(dxPivot) > 1e-6 || Math.abs(dyPivot) > 1e-6)
+            ? Math.atan2(dyPivot, dxPivot) * (180 / Math.PI)
+            : Math.atan2(dy, dx) * (180 / Math.PI);
+
+        if (Number.isNaN(dragAngle)) dragAngle = 0;
+        if (dragAngle < 0) dragAngle += 360;
+        const direction = dragAngle % 360;
 
         return {
             x: intersection.x,
