@@ -631,6 +631,13 @@ test('resolveAnchorPlacement and resolveCrosshairPlacement in attached mode lock
     assert.equal(anchorResult.y, 100);
     assert.equal(anchorResult.direction, 270);
 
+    // Verify resolveAnchorPlacement measures angle directly from edge attachment point to target mouse coordinates
+    const nonCardinalAnchor = adapterV14.resolveAnchorPlacement(mockToken, { x: 50, y: 160 });
+    assert.equal(nonCardinalAnchor.x, 100);
+    assert.equal(nonCardinalAnchor.y, 150);
+    const expectedAngle = (Math.atan2(160 - 150, 50 - 100) * (180 / Math.PI) + 360) % 360;
+    assert.equal(Math.round(nonCardinalAnchor.direction * 100) / 100, Math.round(expectedAngle * 100) / 100);
+
     // 2. Verify resolveCrosshairPlacement in attached mode uses exact visual coordinates from Sequencer when provided
     let resolvedPlacement = null;
     const config = {

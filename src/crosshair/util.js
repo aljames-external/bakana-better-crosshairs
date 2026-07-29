@@ -354,19 +354,17 @@ export function attachWheelRotation(shape, config = {}) {
                 if (canvas?.mousePosition) {
                     const pt = canvas.mousePosition;
                     if (isAttached && shape.token) {
-                        const origin = shape.token.center ?? { x: shape.x, y: shape.y };
-                        const { deg } = _calculateAngleFromOrigin(origin, pt);
-                        shape.rotate(deg, false);
+                        const anchored = crosshairAdapter.resolveAnchorPlacement(shape.token, pt);
+                        shape.rotate(anchored.direction, false);
                     }
                     shape.move(pt.x, pt.y);
                 }
             } else {
                 if (isAttached && crosshair && canvas?.mousePosition) {
                     const pt = canvas.mousePosition;
-                    const origin = config.token?.center ?? { x: crosshair.x, y: crosshair.y };
-                    const { rad, deg } = _calculateAngleFromOrigin(origin, pt);
-                    config.currentDirection = deg;
-                    alignCrosshairAndEffects(crosshair, config, rad);
+                    const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, pt);
+                    config.currentDirection = anchored.direction;
+                    alignCrosshairAndEffects(crosshair, config, anchored.direction * (Math.PI / 180));
                 }
                 const rad = (config.currentDirection ?? 0) * (Math.PI / 180);
                 _refreshPreviewHighlights(config.currentDirection, rad, crosshair);

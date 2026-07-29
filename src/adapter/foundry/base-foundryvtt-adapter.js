@@ -804,7 +804,10 @@ export class BaseFoundryVTTAdapter {
             }
         }
 
-        let dragAngle = Math.atan2(targetMouse.y - centerPoint.y, targetMouse.x - centerPoint.x) * (180 / Math.PI);
+        let dragAngle = Math.atan2(targetMouse.y - intersection.y, targetMouse.x - intersection.x) * (180 / Math.PI);
+        if (Number.isNaN(dragAngle) || (targetMouse.x === intersection.x && targetMouse.y === intersection.y)) {
+            dragAngle = Math.atan2(targetMouse.y - centerPoint.y, targetMouse.x - centerPoint.x) * (180 / Math.PI);
+        }
         if (dragAngle < 0) dragAngle += 360;
         const direction = dragAngle % 360;
 
