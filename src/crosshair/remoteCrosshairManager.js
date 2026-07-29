@@ -288,28 +288,12 @@ export class RemoteCrosshairVisual {
     update(updatePayload) {
         if (this.isDestroyed || typeof Sequencer === "undefined") return;
 
-        if (typeof updatePayload.x === "number") {
-            this.rawX = updatePayload.x;
-            if (this.shape) this.shape.x = updatePayload.x;
-        }
-        if (typeof updatePayload.y === "number") {
-            this.rawY = updatePayload.y;
-            if (this.shape) this.shape.y = updatePayload.y;
-        }
-        if (typeof updatePayload.direction === "number") {
-            this.rawDirection = updatePayload.direction;
-            if (this.shape) {
-                this.shape.direction = updatePayload.direction;
-                this.shape.config.currentDirection = updatePayload.direction;
-            }
-        }
-        if (typeof updatePayload.distance === "number" && this.shape) this.shape.distance = updatePayload.distance;
-        if (typeof updatePayload.width === "number" && this.shape) this.shape.width = updatePayload.width;
-        if (typeof updatePayload.angle === "number" && this.shape) this.shape.angle = updatePayload.angle;
+        if (typeof updatePayload.x === "number") this.rawX = updatePayload.x;
+        if (typeof updatePayload.y === "number") this.rawY = updatePayload.y;
+        if (typeof updatePayload.direction === "number") this.rawDirection = updatePayload.direction;
 
         if (this.shape) {
             this.shape.move(this.rawX, this.rawY);
-            this.shape.rotate(this.rawDirection);
         }
     }
 

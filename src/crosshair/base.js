@@ -289,10 +289,9 @@ export class BaseCrosshairShape {
 
         this.configureCrosshairShape(crosshairSeq);
 
-        if (this.stickToToken && this.token && !this.config?.isRemote) {
-            crosshairSeq.location(this.token, { lockToEdge: true, lockToEdgeDirection: false });
-        } else if (this.config?.isRemote) {
-            crosshairSeq.location({ x: this.x, y: this.y });
+        if (this.stickToToken && this.token) {
+            const lockToEdge = !this.config?.isRemote;
+            crosshairSeq.location(this.token, { lockToEdge, lockToEdgeDirection: false });
         } else {
             const locationOpts = {};
             if (this.token && this.config.showRange !== false) {
@@ -699,8 +698,7 @@ export class BaseCrosshairShape {
         this.x = targetX;
         this.y = targetY;
 
-        const isAttached = Boolean(this.stickToToken && this.token && !this.config?.isRemote);
-        if (this.sequencerCrosshair && (!isAttached || this.config?.isRemote)) {
+        if (this.sequencerCrosshair) {
             this.sequencerCrosshair.x = targetX;
             this.sequencerCrosshair.y = targetY;
         }
