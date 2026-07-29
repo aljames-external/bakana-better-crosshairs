@@ -21,15 +21,20 @@ export class BaseCrosshairShape {
         this.placeable = placeable;
         this.config = config;
 
-        const callingUserId = String(
-            config.callingUserId ??
-            config.senderUserId ??
-            config.userId ??
-            config.user?.id ??
-            config.user ??
-            config.actor?.user?.id ??
-            ""
-        );
+        const extractUserId = (val) => {
+            if (!val) return "";
+            if (typeof val === "string") return val;
+            if (typeof val === "object" && typeof val.id === "string") return val.id;
+            return "";
+        };
+
+        const callingUserId =
+            extractUserId(config.callingUserId) ||
+            extractUserId(config.senderUserId) ||
+            extractUserId(config.userId) ||
+            extractUserId(config.user) ||
+            extractUserId(config.actor?.user);
+
         if (callingUserId && callingUserId !== game?.user?.id) {
             config.isRemote = true;
             config.senderUserId = callingUserId;
