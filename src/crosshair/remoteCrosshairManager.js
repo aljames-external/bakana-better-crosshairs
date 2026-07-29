@@ -258,15 +258,15 @@ export class RemoteCrosshairVisual {
         const effectFile = this.shape?.getGraphicFile?.() ?? this.config.file;
         if (!effectFile) return;
 
-        const { widthPx, heightPx, factor, gridUnits } = this.shape?.getGraphicDimensions?.() ?? { widthPx: 100, heightPx: 100, factor: 1, gridUnits: false };
-        const rad = (this.rawDirection ?? 0) * (Math.PI / 180);
+        const deg = this.rawDirection ?? 0;
+        const rad = deg * (Math.PI / 180);
 
         const seq = new Sequence();
         seq.effect()
             .name(this.effectName)
             .file(effectFile)
             .atLocation({ x: this.rawX, y: this.rawY })
-            .rotate(rad)
+            .rotate(deg)
             .anchor(this.shape?.animationAnchor ?? { x: 0.5, y: 0.5 })
             .size({ width: widthPx * factor, height: heightPx * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
