@@ -245,45 +245,20 @@ export class RemoteCrosshairVisual {
     async create() {
         if (!this.shape) {
             this.shape = await createRemoteShapeInstance(this.shapeType, this.config);
-            if (this.shape) {
-                this.shape.x = this.rawX;
-                this.shape.y = this.rawY;
-                this.shape.direction = this.rawDirection;
-                this.shape.config.isRemote = true;
-            }
         }
+        if (this.shape) {
+            this.shape.x = this.rawX;
+            this.shape.y = this.rawY;
+            this.shape.direction = this.rawDirection;
+            this.shape.config.isRemote = true;
 
-        if (typeof Sequencer === "undefined") return;
-
-        const effectFile = this.shape?.getGraphicFile?.() ?? this.config.file;
-        if (!effectFile) return;
-
-        const { widthPx, heightPx, factor, gridUnits } = this.shape?.getGraphicDimensions?.() ?? { widthPx: 100, heightPx: 100, factor: 1, gridUnits: false };
-        const deg = this.rawDirection ?? 0;
-        const rad = deg * (Math.PI / 180);
-
-        const seq = new Sequence();
-        seq.effect()
-            .name(this.effectName)
-            .file(effectFile)
-            .atLocation({ x: this.rawX, y: this.rawY })
-            .rotate(rad)
-            .anchor(this.shape?.animationAnchor ?? { x: 0.5, y: 0.5 })
-            .size({ width: widthPx * factor, height: heightPx * factor }, { gridUnits: Boolean(gridUnits) })
-            .opacity(0.8)
-            .belowTokens()
-            .locally()
-            .persist();
-
-        await seq.play();
-
-        if (Sequencer.EffectManager) {
-            const [eff] = Sequencer.EffectManager.getEffects({ name: this.effectName });
-            if (eff) {
-                this.activeEffect = eff;
-                if (this.shape) {
-                    this.shape.sequencerCrosshair = eff.container ?? eff;
+            try {
+                const [crosshairSeq] = await this.shape.create();
+                if (crosshairSeq) {
+                    await crosshairSeq.play();
                 }
+            } catch (e) {
+                log.debug("RemoteCrosshairVisual.create | Exception playing remote shape sequence:", e);
             }
         }
     }
@@ -294,7 +269,7 @@ export class RemoteCrosshairVisual {
      * @returns {void}
      */
     update(updatePayload) {
-        if (this.isDestroyed || typeof Sequencer === "undefined") return;
+        if (this.isDestroyed) return;
 
         const ox = Number(updatePayload.originX ?? updatePayload.x);
         const oy = Number(updatePayload.originY ?? updatePayload.y);
@@ -310,47 +285,10 @@ export class RemoteCrosshairVisual {
 
         log.debug(`[Bakana Remote Socket Update] Sender: "${this.senderUserId}" | Origin: (${this.rawX}, ${this.rawY}) | Cursor: (${this.cursorX}, ${this.cursorY}) | Direction: ${this.rawDirection}°`);
 
-        const rad = (this.rawDirection ?? 0) * (Math.PI / 180);
-
         if (this.shape) {
-            this.shape.x = this.rawX;
-            this.shape.y = this.rawY;
-            this.shape.direction = this.rawDirection;
-        }
-
-        if (Sequencer.EffectManager) {
-            const effects = Sequencer.EffectManager.getEffects({ name: this.effectName });
-            for (const eff of effects) {
-                eff.x = this.rawX;
-                eff.y = this.rawY;
-                if (eff.worldPosition) {
-                    eff.worldPosition.x = this.rawX;
-                    eff.worldPosition.y = this.rawY;
-                }
-                if (eff.position) {
-                    eff.position.x = this.rawX;
-                    eff.position.y = this.rawY;
-                }
-                eff.rotation = rad;
-
-                if (eff.container) {
-                    if (eff.container.position?.set) {
-                        eff.container.position.set(this.rawX, this.rawY);
-                    } else {
-                        eff.container.x = this.rawX;
-                        eff.container.y = this.rawY;
-                    }
-                    eff.container.rotation = rad;
-                }
-
-                if (typeof eff.update === "function") {
-                    try {
-                        eff.update({
-                            position: { x: this.rawX, y: this.rawY },
-                            rotation: rad
-                        });
-                    } catch (e) {}
-                }
+            this.shape.move(this.rawX, this.rawY);
+            if (Number.isFinite(this.rawDirection)) {
+                this.shape.rotate(this.rawDirection);
             }
         }
     }
