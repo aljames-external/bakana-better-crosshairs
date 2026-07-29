@@ -265,7 +265,7 @@ export class RemoteCrosshairVisual {
         seq.effect()
             .name(this.effectName)
             .file(effectFile)
-            .atPosition({ x: this.rawX, y: this.rawY })
+            .atLocation({ x: this.rawX, y: this.rawY })
             .rotate(rad)
             .anchor(this.shape?.animationAnchor ?? { x: 0.5, y: 0.5 })
             .size({ width: widthPx * factor, height: heightPx * factor }, { gridUnits: Boolean(gridUnits) })
