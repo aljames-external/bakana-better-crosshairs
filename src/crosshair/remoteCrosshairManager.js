@@ -316,6 +316,11 @@ export class RemoteCrosshairVisual {
             this.shape.direction = this.rawDirection;
         }
 
+        if (!this.activeEffect && typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
+            const [eff] = Sequencer.EffectManager.getEffects({ name: this.effectName });
+            if (eff) this.activeEffect = eff;
+        }
+
         if (this.activeEffect) {
             if (this.activeEffect.container?.position?.set) {
                 this.activeEffect.container.position.set(this.rawX, this.rawY);
@@ -324,11 +329,16 @@ export class RemoteCrosshairVisual {
                 this.activeEffect.container.x = this.rawX;
                 this.activeEffect.container.y = this.rawY;
                 this.activeEffect.container.rotation = rad;
-            } else if (typeof this.activeEffect.update === "function") {
-                this.activeEffect.update({
-                    position: { x: this.rawX, y: this.rawY },
-                    rotation: rad
-                });
+            }
+            if (typeof this.activeEffect.update === "function") {
+                try {
+                    this.activeEffect.update({
+                        position: { x: this.rawX, y: this.rawY },
+                        rotation: rad
+                    });
+                } catch (e) {
+                    log.debug("RemoteCrosshairVisual.update | Exception invoking activeEffect.update:", e);
+                }
             }
         }
     }
