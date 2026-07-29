@@ -194,15 +194,18 @@ export class RemoteCrosshairVisual {
      * Single concrete payload Object constructor (Rule 5).
      * @param {Object} payload - Initial CROSSHAIR_START socket message payload dictionary
      */
-    constructor(payload) {
+    constructor(payload = {}) {
         this.placementId = String(payload.placementId ?? "");
         this.senderUserId = String(payload.senderUserId ?? "");
-        this.shapeType = String(payload.shapeType ?? payload.type ?? "circle");
+        this.shapeType = String(payload.shapeType ?? "circle");
         this.effectName = `remote-crosshair-${this.senderUserId}-${this.placementId}`;
         this.isDestroyed = false;
 
-        const tokenId = payload.tokenId ? String(payload.tokenId) : null;
-        const token = (tokenId && canvas?.tokens?.get) ? canvas.tokens.get(tokenId) : null;
+        this.rawX = Number(payload.originX ?? payload.x ?? 0);
+        this.rawY = Number(payload.originY ?? payload.y ?? 0);
+        this.cursorX = Number(payload.cursorX ?? this.rawX);
+        this.cursorY = Number(payload.cursorY ?? this.rawY);
+        this.rawDirection = Number(payload.direction ?? 0);
 
         this.config = {
             id: this.effectName,
@@ -218,23 +221,13 @@ export class RemoteCrosshairVisual {
             width: payload.width,
             angle: payload.angle,
             direction: payload.direction,
-            x: Number(payload.x ?? 0),
-            y: Number(payload.y ?? 0),
-            token,
-            stickToToken: Boolean(payload.stickToToken && token),
-            showLine: Boolean(payload.showLine),
-            currentDirection: payload.direction
+            x: this.rawX,
+            y: this.rawY,
+            isRemote: true
         };
 
-        this.rawX = Number(payload.originX ?? payload.x ?? 0);
-        this.rawY = Number(payload.originY ?? payload.y ?? 0);
-        this.cursorX = Number(payload.cursorX ?? this.rawX);
-        this.cursorY = Number(payload.cursorY ?? this.rawY);
-        this.rawDirection = Number(payload.direction ?? 0);
-        this.config.isRemote = true;
-
         this.shape = null;
-        this.controller = null;
+        this.activeEffect = null;
     }
 
     /**
@@ -246,7 +239,7 @@ export class RemoteCrosshairVisual {
     }
 
     /**
-     * Create and play the remote Sequencer visual effect.
+     * Create and play the remote non-interactive Sequencer visual effect.
      * @returns {Promise<void>}
      */
     async create() {
@@ -259,14 +252,36 @@ export class RemoteCrosshairVisual {
                 this.shape.config.isRemote = true;
             }
         }
-        if (this.shape) {
-            try {
-                const [crosshairSeq] = await this.shape.create();
-                if (crosshairSeq) {
-                    await crosshairSeq.play();
+
+        if (typeof Sequencer === "undefined") return;
+
+        const effectFile = this.shape?.getGraphicFile?.() ?? this.config.file;
+        if (!effectFile) return;
+
+        const { widthPx, heightPx, factor, gridUnits } = this.shape?.getGraphicDimensions?.() ?? { widthPx: 100, heightPx: 100, factor: 1, gridUnits: false };
+        const rad = (this.rawDirection ?? 0) * (Math.PI / 180);
+
+        const seq = new Sequence();
+        seq.effect()
+            .name(this.effectName)
+            .file(effectFile)
+            .atPosition({ x: this.rawX, y: this.rawY })
+            .rotate(rad)
+            .anchor(this.shape?.animationAnchor ?? { x: 0.5, y: 0.5 })
+            .size({ width: widthPx * factor, height: heightPx * factor }, { gridUnits: Boolean(gridUnits) })
+            .opacity(0.8)
+            .belowTokens()
+            .persist();
+
+        await seq.play();
+
+        if (Sequencer.EffectManager) {
+            const [eff] = Sequencer.EffectManager.getEffects({ name: this.effectName });
+            if (eff) {
+                this.activeEffect = eff;
+                if (this.shape) {
+                    this.shape.sequencerCrosshair = eff.container ?? eff;
                 }
-            } catch (e) {
-                log.debug("RemoteCrosshairVisual.create | Exception playing remote shape sequence:", e);
             }
         }
     }
@@ -293,15 +308,27 @@ export class RemoteCrosshairVisual {
 
         log.debug(`[Bakana Remote Socket Update] Sender: "${this.senderUserId}" | Origin: (${this.rawX}, ${this.rawY}) | Cursor: (${this.cursorX}, ${this.cursorY}) | Direction: ${this.rawDirection}°`);
 
+        const rad = (this.rawDirection ?? 0) * (Math.PI / 180);
+
         if (this.shape) {
             this.shape.x = this.rawX;
             this.shape.y = this.rawY;
-            if (this.shape.sequencerCrosshair) {
-                this.shape.sequencerCrosshair.x = this.rawX;
-                this.shape.sequencerCrosshair.y = this.rawY;
-            }
-            if (Number.isFinite(this.rawDirection)) {
-                this.shape.rotate(this.rawDirection);
+            this.shape.direction = this.rawDirection;
+        }
+
+        if (this.activeEffect) {
+            if (this.activeEffect.container?.position?.set) {
+                this.activeEffect.container.position.set(this.rawX, this.rawY);
+                this.activeEffect.container.rotation = rad;
+            } else if (this.activeEffect.container) {
+                this.activeEffect.container.x = this.rawX;
+                this.activeEffect.container.y = this.rawY;
+                this.activeEffect.container.rotation = rad;
+            } else if (typeof this.activeEffect.update === "function") {
+                this.activeEffect.update({
+                    position: { x: this.rawX, y: this.rawY },
+                    rotation: rad
+                });
             }
         }
     }
@@ -313,10 +340,6 @@ export class RemoteCrosshairVisual {
     async destroy() {
         if (this.isDestroyed) return;
         this.isDestroyed = true;
-
-        if (this.controller) {
-            this.controller.stop();
-        }
 
         if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
             try {
