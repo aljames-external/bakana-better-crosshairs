@@ -426,5 +426,65 @@ test('BaseCrosshairShape._updateRangeText keeps distance measurement text unrota
     assert.equal(shape._rangeText.rotation, 0);
 });
 
+test('REGRESSION: Attached Ray template placement preserves Sequencer visual origin and computes ray angle directly to mouse click', async () => {
+    const { RayCrosshairShape } = await import('../../src/crosshair/ray.js');
+    const { resolveCrosshairPlacement } = await import('../../src/crosshair/util.js');
+
+    const mockToken = {
+        id: 'tok-ray-test',
+        x: 100,
+        y: 100,
+        w: 100,
+        h: 100,
+        center: { x: 150, y: 150 }
+    };
+    const mockDocument = { x: 100, y: 100, documentName: 'MeasuredTemplate', t: 'ray' };
+    const mockPlaceable = { x: 100, y: 100, document: mockDocument };
+
+    const config = {
+        type: 'ray',
+        distance: 30,
+        width: 5,
+        stickToToken: true,
+        token: mockToken
+    };
+
+    const shape = new RayCrosshairShape(mockPlaceable, config);
+
+    // Mock Sequencer crosshair container placed at token's bottom-left corner (x: 100, y: 200)
+    const mockSequencerCrosshair = {
+        x: 100,
+        y: 200,
+        direction: 180,
+        destroyed: false,
+        shapeInstance: shape
+    };
+    shape.sequencerCrosshair = mockSequencerCrosshair;
+
+    // Simulate mouse position at (50, 230)
+    globalThis.canvas = {
+        mousePosition: { x: 50, y: 230 }
+    };
+
+    // 1. Verify getPlacementUpdates uses Sequencer's visual origin (100, 200) and calculates direction directly to mouse (50, 230)
+    const updates = shape.getPlacementUpdates();
+    assert.equal(updates.x, 100, 'Placement X must match Sequencer visual origin on token edge');
+    assert.equal(updates.y, 200, 'Placement Y must match Sequencer visual origin on token edge');
+
+    // Expected angle from pivot (100, 200) to mouse (50, 230): dx = -50, dy = 30 -> atan2(30, -50) = 149.03624... deg
+    const expectedAngle = (Math.atan2(230 - 200, 50 - 100) * (180 / Math.PI) + 360) % 360;
+    assert.equal(Math.round(updates.direction * 100) / 100, Math.round(expectedAngle * 100) / 100);
+
+    // 2. Verify resolveCrosshairPlacement resolves identical placement updates when called with shape or sequencer container
+    let resolved = null;
+    config.context = { resolve: (res) => { resolved = res; } };
+    resolveCrosshairPlacement(shape, config);
+
+    assert.ok(resolved);
+    assert.equal(resolved.x, 100);
+    assert.equal(resolved.y, 200);
+    assert.equal(Math.round(resolved.direction * 100) / 100, Math.round(expectedAngle * 100) / 100);
+});
+
 
 
