@@ -244,7 +244,7 @@ export class RemoteCrosshairVisual {
     }
 
     /**
-     * Create and play the remote Sequencer visual effect using CrosshairController.
+     * Create and play the remote Sequencer visual effect.
      * @returns {Promise<void>}
      */
     async create() {
@@ -257,14 +257,6 @@ export class RemoteCrosshairVisual {
                 this.shape.config.isRemote = true;
             }
         }
-        if (this.shape && !this.controller) {
-            this.controller = new CrosshairController(
-                this.shape,
-                this.config,
-                () => this.resolveTargetPosition(),
-                { updateTrigger: "ticker", intervalMs: BROADCAST_INTERVAL_MS }
-            );
-        }
         if (this.shape) {
             try {
                 const [crosshairSeq] = await this.shape.create();
@@ -274,9 +266,6 @@ export class RemoteCrosshairVisual {
             } catch (e) {
                 log.debug("RemoteCrosshairVisual.create | Exception playing remote shape sequence:", e);
             }
-        }
-        if (this.controller) {
-            await this.controller.start();
         }
     }
 
@@ -292,8 +281,13 @@ export class RemoteCrosshairVisual {
         if (typeof updatePayload.y === "number") this.rawY = updatePayload.y;
         if (typeof updatePayload.direction === "number") this.rawDirection = updatePayload.direction;
 
+        log.info(`[Bakana Remote Socket Update] User: "${this.senderUserId}" | Pos: (${this.rawX}, ${this.rawY}) | Direction: ${this.rawDirection}°`);
+
         if (this.shape) {
             this.shape.move(this.rawX, this.rawY);
+            if (Number.isFinite(this.rawDirection)) {
+                this.shape.rotate(this.rawDirection);
+            }
         }
     }
 
