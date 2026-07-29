@@ -267,7 +267,7 @@ export class RemoteCrosshairVisual {
             .name(this.effectName)
             .file(effectFile)
             .atLocation({ x: this.rawX, y: this.rawY })
-            .rotate(deg)
+            .rotate(rad)
             .anchor(this.shape?.animationAnchor ?? { x: 0.5, y: 0.5 })
             .size({ width: widthPx * factor, height: heightPx * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
