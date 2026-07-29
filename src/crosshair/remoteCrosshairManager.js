@@ -35,9 +35,25 @@ export function getGamemasterCursorPosition(identifier = "Gamemaster") {
         ?? game?.users?.get?.(identifier)
         ?? game?.users?.find?.(u => u?.name === identifier || u?.id === identifier);
 
-    const userId = user?.id;
+    const userId = user?.id ?? (game?.users?.has?.(identifier) ? identifier : null);
 
-    // 2. Inspect canvas.controls._cursors (Foundry ControlsLayer internal cursor Map/dictionary)
+    const extractCoords = (obj) => {
+        if (!obj) return null;
+        const px = obj.destination?.x ?? obj.target?.x ?? obj.position?.x ?? obj.x;
+        const py = obj.destination?.y ?? obj.target?.y ?? obj.position?.y ?? obj.y;
+        if (Number.isFinite(px) && Number.isFinite(py)) {
+            return { x: px, y: py };
+        }
+        return null;
+    };
+
+    // 2. Inspect user document activity tracking (Foundry V13/V14 user.activity.cursor)
+    if (user) {
+        const act = extractCoords(user.activity?.cursor) ?? extractCoords(user._activity?.cursor) ?? extractCoords(user._cursor) ?? extractCoords(user.cursor);
+        if (act) return act;
+    }
+
+    // 3. Inspect canvas.controls._cursors (Foundry ControlsLayer internal cursor Map/dictionary)
     if (canvas?.controls?._cursors) {
         const _cursors = canvas.controls._cursors;
         let cursor = null;
@@ -49,17 +65,12 @@ export function getGamemasterCursorPosition(identifier = "Gamemaster") {
             if (!cursor && _cursors[identifier]) cursor = _cursors[identifier];
         }
 
-        if (cursor) {
-            const px = cursor.target?.x ?? cursor.position?.x ?? cursor.x;
-            const py = cursor.target?.y ?? cursor.position?.y ?? cursor.y;
-            if (Number.isFinite(px) && Number.isFinite(py)) {
-                return { x: px, y: py };
-            }
-        }
+        const coords = extractCoords(cursor);
+        if (coords) return coords;
     }
 
-    // 3. Inspect canvas.controls.cursors PIXI children
-    if (canvas?.controls?.cursors?.children && Array.isArray(canvas.controls.cursors.children) && canvas.controls.cursors.children.length > 0) {
+    // 4. Inspect canvas.controls.cursors PIXI children
+    if (canvas?.controls?.cursors?.children && Array.isArray(canvas.controls.cursors.children)) {
         const children = canvas.controls.cursors.children;
         const cursor = children.find(c =>
             c?.user?.name === identifier ||
@@ -68,41 +79,15 @@ export function getGamemasterCursorPosition(identifier = "Gamemaster") {
             (userId && c?._user?.id === userId) ||
             (userId && c?.userId === userId) ||
             (userId && c?._userId === userId) ||
-            (userId && c?.id === userId) ||
+            (userId && c?.id === identifier) ||
             c?.id === identifier ||
             c?.name === identifier ||
             c?.document?.name === identifier ||
             (userId && c?.document?.id === userId)
-        ) ?? (children.length === 1 ? children[0] : null);
+        );
 
-        if (cursor) {
-            const px = cursor.target?.x ?? cursor.position?.x ?? cursor.x;
-            const py = cursor.target?.y ?? cursor.position?.y ?? cursor.y;
-            if (Number.isFinite(px) && Number.isFinite(py)) {
-                return { x: px, y: py };
-            }
-        }
-    }
-
-    // 4. Inspect canvas.controls.cursors dictionary (if cursors itself is an object mapping userId -> cursor)
-    if (canvas?.controls?.cursors && typeof canvas.controls.cursors === "object") {
-        const cursors = canvas.controls.cursors;
-        const cursor = (userId && cursors[userId]) ?? cursors[identifier];
-        if (cursor && (cursor.x || cursor.y || cursor.target || cursor.position)) {
-            const px = cursor.target?.x ?? cursor.position?.x ?? cursor.x;
-            const py = cursor.target?.y ?? cursor.position?.y ?? cursor.y;
-            if (Number.isFinite(px) && Number.isFinite(py)) {
-                return { x: px, y: py };
-            }
-        }
-    }
-
-    // 5. Inspect user document activity tracking
-    if (user) {
-        const c = user.activity?.cursor ?? user._activity?.cursor ?? user._cursor ?? user.cursor;
-        if (c && Number.isFinite(c.x) && Number.isFinite(c.y)) {
-            return { x: c.x, y: c.y };
-        }
+        const coords = extractCoords(cursor);
+        if (coords) return coords;
     }
 
     return null;
