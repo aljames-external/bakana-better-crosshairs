@@ -289,9 +289,10 @@ export class BaseCrosshairShape {
 
         this.configureCrosshairShape(crosshairSeq);
 
-        if (this.stickToToken && this.token) {
-            const lockToEdge = !this.config?.isRemote;
-            crosshairSeq.location(this.token, { lockToEdge, lockToEdgeDirection: false });
+        if (this.stickToToken && this.token && !this.config?.isRemote) {
+            crosshairSeq.location(this.token, { lockToEdge: true, lockToEdgeDirection: false });
+        } else if (this.config?.isRemote) {
+            crosshairSeq.location({ x: this.x, y: this.y });
         } else {
             const locationOpts = {};
             if (this.token && this.config.showRange !== false) {
@@ -708,7 +709,7 @@ export class BaseCrosshairShape {
         let targetX = x;
         let targetY = y;
 
-        if (this.stickToToken && this.token) {
+        if (this.stickToToken && this.token && !this.config?.isRemote) {
             const anchored = crosshairAdapter.resolveAnchorPlacement(this.token, { x, y });
             targetX = anchored.x;
             targetY = anchored.y;
@@ -719,7 +720,7 @@ export class BaseCrosshairShape {
                     this.config.direction = anchored.direction;
                 }
             }
-        } else {
+        } else if (!this.config?.isRemote) {
             const snapMode = getGridSnapMode(this.config);
             if (snapMode !== 0) {
                 const snapped = snapCoordinates(targetX, targetY, snapMode);
