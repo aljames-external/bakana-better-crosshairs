@@ -828,10 +828,17 @@ export class BaseCrosshairShape {
     getPlacementUpdates() {
         let posX = this.x;
         let posY = this.y;
-        if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x) && Number.isFinite(this.sequencerCrosshair.y)) {
+        let dir = this.direction;
+        if (this.stickToToken && this.token) {
+            const mousePos = canvas?.mousePosition ?? { x: posX, y: posY };
+            const anchored = crosshairAdapter.resolveAnchorPlacement(this.token, mousePos);
+            posX = anchored.x;
+            posY = anchored.y;
+            dir = anchored.direction;
+        } else if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x) && Number.isFinite(this.sequencerCrosshair.y)) {
             posX = this.sequencerCrosshair.x;
             posY = this.sequencerCrosshair.y;
         }
-        return crosshairAdapter.formatPlacementCoordinates(posX, posY, this.direction, this.config);
+        return crosshairAdapter.formatPlacementCoordinates(posX, posY, dir, this.config);
     }
 }

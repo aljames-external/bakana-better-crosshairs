@@ -526,17 +526,12 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     let y = clickY;
 
     if (isAnchored && config.token) {
-        if (crosshair && Number.isFinite(crosshair.x) && Number.isFinite(crosshair.y)) {
-            x = crosshair.x;
-            y = crosshair.y;
-            log.debug("resolveCrosshairPlacement | Token anchored placement using exact Sequencer attached visual position ->", { x, y, direction });
-        } else {
-            const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, { x: clickX, y: clickY });
-            x = anchored.x;
-            y = anchored.y;
-            if (direction === undefined) direction = anchored.direction;
-            log.debug("resolveCrosshairPlacement | Token anchored placement via version adapter fallback ->", { x, y, direction });
-        }
+        const mousePos = canvas?.mousePosition ?? { x: clickX, y: clickY };
+        const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, mousePos);
+        x = anchored.x;
+        y = anchored.y;
+        direction = anchored.direction;
+        log.debug("resolveCrosshairPlacement | Token anchored placement via version adapter ->", { x, y, direction });
     } else {
         // Detached / free cursor placement: Origin is where the user clicked (clickX, clickY)
         x = clickX;

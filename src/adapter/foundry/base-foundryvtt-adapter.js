@@ -933,6 +933,15 @@ export class BaseFoundryVTTAdapter {
              * @returns {Promise<void>} Resolves when deferred document placement is processed
              */
             async resolve(coords = {}) {
+                const targetToken = token ?? entryConfig?.token;
+                if (targetToken && (entryConfig?.stickToToken ?? true)) {
+                    const mousePos = canvas?.mousePosition ?? { x: coords.x, y: coords.y };
+                    const anchored = self.resolveAnchorPlacement(targetToken, mousePos);
+                    coords.x = anchored.x;
+                    coords.y = anchored.y;
+                    coords.direction = anchored.direction;
+                    coords.rotation = anchored.direction;
+                }
                 Object.assign(this, coords);
                 this.resolved = true;
 
