@@ -433,6 +433,27 @@ class RemoteCrosshairManagerClass {
         } else if (type === "CROSSHAIR_END") {
             const visual = this.remoteCrosshairs.get(placementId);
             if (visual) {
+                const finalOriginX = Number(payload.originX ?? payload.x ?? visual.rawX);
+                const finalOriginY = Number(payload.originY ?? payload.y ?? visual.rawY);
+                const finalCursorX = Number(payload.cursorX ?? visual.cursorX);
+                const finalCursorY = Number(payload.cursorY ?? visual.cursorY);
+                const finalDirection = Number(payload.direction ?? visual.rawDirection);
+                const reason = String(payload.reason ?? "placed");
+
+                log.debug(`[Bakana Remote Final Placement] Sender: "${senderUserId}" | Reason: "${reason}" | Final Origin: (${finalOriginX}, ${finalOriginY}) | Final Cursor: (${finalCursorX}, ${finalCursorY}) | Final Direction: ${finalDirection}°`);
+
+                if (Number.isFinite(finalOriginX)) visual.rawX = finalOriginX;
+                if (Number.isFinite(finalOriginY)) visual.rawY = finalOriginY;
+                if (Number.isFinite(finalDirection)) visual.rawDirection = finalDirection;
+
+                visual.update({
+                    originX: finalOriginX,
+                    originY: finalOriginY,
+                    cursorX: finalCursorX,
+                    cursorY: finalCursorY,
+                    direction: finalDirection
+                });
+
                 await visual.destroy();
                 this.remoteCrosshairs.delete(placementId);
             }

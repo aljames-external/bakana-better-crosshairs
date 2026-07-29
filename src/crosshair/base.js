@@ -544,11 +544,34 @@ export class BaseCrosshairShape {
         this._lastBroadcastState = null;
 
         if (this.placementId) {
+            const finalOriginX = (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x)) ? this.sequencerCrosshair.x : this.x;
+            const finalOriginY = (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.y)) ? this.sequencerCrosshair.y : this.y;
+            const finalCursorX = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.x)) ? canvas.mousePosition.x : finalOriginX;
+            const finalCursorY = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.y)) ? canvas.mousePosition.y : finalOriginY;
+            let finalDirection = this.config?.currentDirection ?? this.direction ?? 0;
+            if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.direction)) {
+                finalDirection = this.sequencerCrosshair.direction;
+            } else if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.rotation)) {
+                finalDirection = this.sequencerCrosshair.rotation * (180 / Math.PI);
+            }
+
+            log.debug(`[Bakana Crosshair Final Broadcast] Sender: "${game?.user?.id}" | Reason: "${reason}" | Final Origin: (${finalOriginX}, ${finalOriginY}) | Final Cursor: (${finalCursorX}, ${finalCursorY}) | Final Direction: ${finalDirection}°`);
+
             socketlib.emit({
                 type: "CROSSHAIR_END",
                 placementId: this.placementId,
                 senderUserId: game.user.id,
-                reason
+                reason,
+                originX: finalOriginX,
+                originY: finalOriginY,
+                cursorX: finalCursorX,
+                cursorY: finalCursorY,
+                x: finalOriginX,
+                y: finalOriginY,
+                direction: finalDirection,
+                distance: this.distance,
+                width: this.width,
+                angle: this.angle
             });
             this.placementId = null;
         }
