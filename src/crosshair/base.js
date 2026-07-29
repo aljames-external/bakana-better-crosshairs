@@ -676,8 +676,12 @@ export class BaseCrosshairShape {
             const anchored = crosshairAdapter.resolveAnchorPlacement(this.token, { x, y });
             targetX = anchored.x;
             targetY = anchored.y;
-            if (anchored.direction !== undefined && this.config.currentDirection === undefined) {
+            if (anchored.direction !== undefined) {
                 this.direction = anchored.direction;
+                if (this.config) {
+                    this.config.currentDirection = anchored.direction;
+                    this.config.direction = anchored.direction;
+                }
             }
         } else {
             const snapMode = getGridSnapMode(this.config);

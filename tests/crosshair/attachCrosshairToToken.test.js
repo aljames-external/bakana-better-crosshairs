@@ -73,6 +73,27 @@ test("attachCrosshairToToken tracks remote peer player cursor via getPeerCursorP
     assert.equal(handle.controller.isDestroyed, true);
 });
 
+test("attachCrosshairToToken continuously updates shape direction and currentDirection during movement in attached mode", async () => {
+    const dummyToken = { id: "tok-4", x: 100, y: 100, center: { x: 150, y: 150 }, w: 100, h: 100 };
+    let cursorCoords = { x: 50, y: 160 };
+
+    const handle = await attachCrosshairToToken(
+        dummyToken,
+        "ray",
+        { distance: 30, direction: 0, currentDirection: 0 },
+        () => cursorCoords,
+        null,
+        { id: "test-ray-direction-sync" }
+    );
+
+    await handle.start();
+    const expectedAngle = (Math.atan2(160 - 150, 50 - 100) * (180 / Math.PI) + 360) % 360;
+    assert.equal(Math.round(handle.shape.direction * 100) / 100, Math.round(expectedAngle * 100) / 100);
+    assert.equal(Math.round(handle.shape.config.currentDirection * 100) / 100, Math.round(expectedAngle * 100) / 100);
+
+    await handle.stop("placed");
+});
+
 test("CrosshairController.hide terminates Sequencer effects on sourceToken", async () => {
     let endedEffects = [];
     globalThis.Sequencer = {
