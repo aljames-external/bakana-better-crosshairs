@@ -258,6 +258,7 @@ export class RemoteCrosshairVisual {
         const effectFile = this.shape?.getGraphicFile?.() ?? this.config.file;
         if (!effectFile) return;
 
+        const { widthPx, heightPx, factor, gridUnits } = this.shape?.getGraphicDimensions?.() ?? { widthPx: 100, heightPx: 100, factor: 1, gridUnits: false };
         const deg = this.rawDirection ?? 0;
         const rad = deg * (Math.PI / 180);
 

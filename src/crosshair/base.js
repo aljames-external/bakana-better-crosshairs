@@ -390,6 +390,13 @@ export class BaseCrosshairShape {
             try { crosshair.off?.("pointerdown"); } catch (e) {}
             try { crosshair.off?.("click"); } catch (e) {}
         }
+        if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
+            try {
+                await Sequencer.EffectManager.endEffects({ name: this.id });
+                await Sequencer.EffectManager.endEffects({ name: `${this.id}-line` });
+                await Sequencer.EffectManager.endEffects({ name: `${this.id}-icon` });
+            } catch (e) {}
+        }
         await this.playGraphicEffect(crosshair);
         alignCrosshairAndEffects(crosshair, this.config, this.direction * (Math.PI / 180));
         this._updateRangeText();
