@@ -21,6 +21,20 @@ export class BaseCrosshairShape {
         this.placeable = placeable;
         this.config = config;
 
+        const callingUserId = String(
+            config.callingUserId ??
+            config.senderUserId ??
+            config.userId ??
+            config.user?.id ??
+            config.user ??
+            config.actor?.user?.id ??
+            ""
+        );
+        if (callingUserId && callingUserId !== game?.user?.id) {
+            config.isRemote = true;
+            config.senderUserId = callingUserId;
+        }
+
         // Entry-boundary normalization for target document and placeable
         const doc = placeable?.document ?? (placeable?.documentName ? placeable : null);
         this.doc = doc;

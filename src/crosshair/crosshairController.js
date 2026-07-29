@@ -210,6 +210,20 @@ export class CrosshairController {
 export async function attachCrosshairToToken(sourceToken, shape, size, getCursorPositionFn, cancelFn, options = {}) {
     const token = crosshairAdapter.toToken(sourceToken);
 
+    const callingUserId = String(
+        options.callingUserId ??
+        options.senderUserId ??
+        options.userId ??
+        options.user?.id ??
+        options.user ??
+        options.actor?.user?.id ??
+        ""
+    );
+    if (callingUserId && callingUserId !== game?.user?.id) {
+        options.isRemote = true;
+        options.senderUserId = callingUserId;
+    }
+
     let sizeConfig = {};
     if (typeof size === "number" && Number.isFinite(size)) {
         sizeConfig = { distance: size, radius: size };
