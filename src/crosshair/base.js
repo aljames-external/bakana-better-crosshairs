@@ -767,6 +767,8 @@ export class BaseCrosshairShape {
         this.direction = newAngleDeg;
         const rad = newAngleDeg * (Math.PI / 180);
 
+        log.debug(`[Bakana Sequencer Alignment] Shape: "${this.type}" | isRemote: ${Boolean(this.config?.isRemote)} | Origin (x,y): (${this.x}, ${this.y}) | Cursor (x,y): (${this.cursorX ?? "N/A"}, ${this.cursorY ?? "N/A"}) | Deg: ${newAngleDeg}° | Rad: ${rad.toFixed(4)} | Container Pos: (${this.sequencerCrosshair?.x}, ${this.sequencerCrosshair?.y}) | Container Rotation: ${this.sequencerCrosshair?.rotation}`);
+
         if (this.config) {
             this.config.currentDirection = newAngleDeg;
             this.config.direction = newAngleDeg;

@@ -291,7 +291,7 @@ export class RemoteCrosshairVisual {
         if (Number.isFinite(cy)) this.cursorY = cy;
         if (Number.isFinite(dir)) this.rawDirection = dir;
 
-        log.info(`[Bakana Remote Socket Update] Sender: "${this.senderUserId}" | Origin: (${this.rawX}, ${this.rawY}) | Cursor: (${this.cursorX}, ${this.cursorY}) | Direction: ${this.rawDirection}°`);
+        log.debug(`[Bakana Remote Socket Update] Sender: "${this.senderUserId}" | Origin: (${this.rawX}, ${this.rawY}) | Cursor: (${this.cursorX}, ${this.cursorY}) | Direction: ${this.rawDirection}°`);
 
         if (this.shape) {
             this.shape.x = this.rawX;
@@ -366,7 +366,7 @@ class RemoteCrosshairManagerClass {
         if (!type.startsWith("CROSSHAIR_")) return;
 
         const senderUserId = String(payload.senderUserId ?? "");
-        log.info(`[Bakana Remote Socket] Received "${type}" payload from sender "${senderUserId}":`, payload);
+        log.debug(`[Bakana Remote Socket] Received "${type}" payload from sender "${senderUserId}":`, payload);
         if (!this.shouldRenderRemote(senderUserId)) return;
 
         const placementId = String(payload.placementId ?? "");

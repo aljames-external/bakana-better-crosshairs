@@ -95,7 +95,7 @@ export class CrosshairController {
         this.lastRenderTime = now;
 
         const cursorPos = this.getCursorPositionFn();
-        log.info(`[Bakana Crosshair Tracking] User: "${this.config?.senderUserId ?? game?.user?.id}" | isRemote: ${Boolean(this.config?.isRemote)} | Cursor Pos:`, cursorPos, `| Direction: ${this.shape?.direction}`);
+        log.debug(`[Bakana Crosshair Tracking] User: "${this.config?.senderUserId ?? game?.user?.id}" | isRemote: ${Boolean(this.config?.isRemote)} | Cursor Pos:`, cursorPos, `| Direction: ${this.shape?.direction}`);
         if (!cursorPos || !Number.isFinite(cursorPos.x) || !Number.isFinite(cursorPos.y)) {
             if (this.config.isRemote && Number.isFinite(this.shape.direction)) {
                 this.shape.rotate(this.shape.direction);
