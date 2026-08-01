@@ -53,20 +53,22 @@ export function getGamemasterCursorPosition(identifier = "Gamemaster") {
         if (act) return act;
     }
 
-    // 3. Inspect canvas.controls._cursors (Foundry ControlsLayer internal cursor Map/dictionary)
-    if (canvas?.controls?._cursors) {
-        const _cursors = canvas.controls._cursors;
-        let cursor = null;
-        if (typeof _cursors.get === "function") {
-            if (userId) cursor = _cursors.get(userId);
-            if (!cursor) cursor = _cursors.get(identifier);
-        } else if (typeof _cursors === "object") {
-            if (userId && _cursors[userId]) cursor = _cursors[userId];
-            if (!cursor && _cursors[identifier]) cursor = _cursors[identifier];
-        }
+    // 3. Inspect canvas.controls._cursors or canvas.controls.cursors (Foundry ControlsLayer internal cursor Map/dictionary)
+    const cursorSources = [canvas?.controls?._cursors, canvas?.controls?.cursors].filter(Boolean);
+    for (const _cursors of cursorSources) {
+        if (_cursors && !Array.isArray(_cursors) && typeof _cursors === "object") {
+            let cursor = null;
+            if (typeof _cursors.get === "function") {
+                if (userId) cursor = _cursors.get(userId);
+                if (!cursor) cursor = _cursors.get(identifier);
+            } else {
+                if (userId && _cursors[userId]) cursor = _cursors[userId];
+                if (!cursor && _cursors[identifier]) cursor = _cursors[identifier];
+            }
 
-        const coords = extractCoords(cursor);
-        if (coords) return coords;
+            const coords = extractCoords(cursor);
+            if (coords) return coords;
+        }
     }
 
     // 4. Inspect canvas.controls.cursors PIXI children
@@ -333,11 +335,15 @@ export class RemoteCrosshairVisual {
                     eff.container.rotation = rad;
                 }
 
+                if (eff.spriteContainer && typeof eff.spriteContainer.rotation !== "undefined") {
+                    eff.spriteContainer.rotation = 0;
+                }
+
                 if (typeof eff.update === "function") {
                     try {
                         eff.update({
                             position: { x: this.rawX, y: this.rawY },
-                            rotation: rad
+                            rotation: deg
                         });
                     } catch (e) {}
                 }

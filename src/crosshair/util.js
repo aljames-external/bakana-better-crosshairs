@@ -387,7 +387,8 @@ export function attachWheelRotation(shape, config = {}) {
  * @returns {void}
  */
 export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
-    rotateCrosshairInstance(crosshair, config.currentDirection ?? config.direction ?? 0, config);
+    const deg = config.currentDirection ?? config.direction ?? (rad * (180 / Math.PI));
+    rotateCrosshairInstance(crosshair, deg, config);
 
     const shapeType = config.type ?? config.t ?? crosshair?.type ?? "circle";
     log.debug(`[Bakana Sequencer Effect Alignment] Config ID: "${config.id}" | Type: "${shapeType}" | Container Pos: (${crosshair?.x}, ${crosshair?.y}) | Container Rotation: ${crosshair?.rotation} | Rad: ${rad.toFixed(4)} | Deg: ${(rad * (180 / Math.PI)).toFixed(2)}°`);
@@ -426,12 +427,12 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
                         eff.container.rotation = rad;
                     }
                     if (eff.spriteContainer && typeof eff.spriteContainer.rotation !== "undefined") {
-                        eff.spriteContainer.rotation = rad;
+                        eff.spriteContainer.rotation = 0;
                     }
                     if (typeof eff.rotation !== "undefined") eff.rotation = rad;
                     if (typeof eff.update === "function") {
                         try {
-                            eff.update({ rotation: rad });
+                            eff.update({ rotation: deg });
                         } catch (e) {
                             log.debug("alignCrosshairAndEffects | Exception updating Sequencer effect rotation:", e);
                         }

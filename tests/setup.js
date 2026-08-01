@@ -269,6 +269,7 @@ globalThis.Sequencer = {
         stretchTo(loc) { return this; }
         size(sz) { return this; }
         anchor(a) { return this; }
+        rotate(r) { return this; }
         rotation(r) { return this; }
         opacity(o) { return this; }
         belowTokens() { return this; }
@@ -285,6 +286,7 @@ globalThis.Sequencer = {
         play() { return Promise.resolve(this); }
     },
     EffectManager: {
+        getEffects: (opts) => [],
         endEffects: async (opts) => {}
     }
 };

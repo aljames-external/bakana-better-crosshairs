@@ -147,3 +147,50 @@ test("BaseCrosshairShape startBroadcasting and stopBroadcasting emit CROSSHAIR_*
 
     socketlib.emit = origEmit;
 });
+
+test("REGRESSION: RemoteCrosshairVisual.update sets container rotation in radians, zeroes spriteContainer, and passes degrees to Sequencer update", async () => {
+    let updatedPayload = null;
+    const mockEffect = {
+        x: 0,
+        y: 0,
+        rotation: 0,
+        container: { rotation: 0 },
+        spriteContainer: { rotation: 1 },
+        update: (payload) => { updatedPayload = payload; }
+    };
+
+    const origSequencer = globalThis.Sequencer;
+    try {
+        globalThis.Sequencer = {
+            EffectManager: {
+                getEffects: () => [mockEffect],
+                endEffects: async () => {}
+            }
+        };
+
+        const visual = new RemoteCrosshairVisual({
+            placementId: "test-rotation-sync",
+            senderUserId: "peer-user",
+            shapeType: "cone",
+            x: 100,
+            y: 100,
+            direction: 0
+        });
+
+        visual.update({
+            originX: 150,
+            originY: 250,
+            direction: 180
+        });
+
+        const expectedRad = 180 * (Math.PI / 180);
+        assert.equal(visual.rawDirection, 180);
+        assert.equal(mockEffect.container.rotation, expectedRad, "Container rotation must be in radians (Math.PI)");
+        assert.equal(mockEffect.spriteContainer.rotation, 0, "spriteContainer rotation must be zeroed to prevent double rotation");
+        assert.equal(mockEffect.rotation, expectedRad, "Effect rotation property must be in radians");
+        assert.ok(updatedPayload, "eff.update should have been called");
+        assert.equal(updatedPayload.rotation, 180, "eff.update({ rotation }) must receive degrees (180)");
+    } finally {
+        globalThis.Sequencer = origSequencer;
+    }
+});

@@ -1008,9 +1008,9 @@ test('REGRESSION: resolveCrosshairPlacement resolves exact shape instance coordi
 
 test('REGRESSION: alignCrosshairAndEffects updates visual effect rotation for cones and rays in detached mode', () => {
     let mockEffectRotation = null;
-    let mockContainerRotation = null;
     const mockEffect = {
         container: { rotation: 0 },
+        spriteContainer: { rotation: 1 },
         rotation: 0,
         update: ({ rotation }) => { mockEffectRotation = rotation; }
     };
@@ -1034,8 +1034,9 @@ test('REGRESSION: alignCrosshairAndEffects updates visual effect rotation for co
 
         const expectedRad = 45 * (Math.PI / 180);
         assert.equal(mockEffect.container.rotation, expectedRad);
+        assert.equal(mockEffect.spriteContainer.rotation, 0, 'spriteContainer rotation must be 0 to prevent compounding double rotation');
         assert.equal(mockEffect.rotation, expectedRad);
-        assert.equal(mockEffectRotation, expectedRad);
+        assert.equal(mockEffectRotation, 45, 'eff.update({ rotation }) must receive degrees for Sequencer API');
     } finally {
         globalThis.Sequencer = origSequencer;
     }
