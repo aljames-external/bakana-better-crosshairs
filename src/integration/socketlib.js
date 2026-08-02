@@ -1,4 +1,5 @@
 import { MODULE_ID } from "../lib/constants.js";
+import { remoteCrosshairManager } from "../crosshair/remoteCrosshairManager.js";
 
 /**
  * Socket integration utility encapsulating Foundry VTT socket communications (`game.socket`).
@@ -83,14 +84,20 @@ export async function waitForTileReplication(tileId, timeoutMs = 5000) {
 }
 
 /**
- * Internal listener for socket messages handling peer replication handshakes.
+ * Internal listener for socket messages handling peer replication handshakes and crosshair synchronization.
  * @param {Object} payload - Received socket payload
  * @returns {void}
  */
 export function handleSocketMessage(payload) {
     if (!payload || typeof payload !== "object") return;
 
-    if (payload.type === "VERIFY_TILE_REPLICATION") {
+    const type = String(payload.type ?? "");
+    if (type.startsWith("CROSSHAIR_")) {
+        remoteCrosshairManager.handleSocketMessage(payload);
+        return;
+    }
+
+    if (type === "VERIFY_TILE_REPLICATION") {
         const { tileId, senderUserId, trackerId } = payload;
         const hasTile = () => Boolean(canvas?.scene?.tiles?.has(tileId));
 
@@ -109,7 +116,7 @@ export function handleSocketMessage(payload) {
             });
         };
         checkReplication();
-    } else if (payload.type === "REPORT_TILE_RECEIVED") {
+    } else if (type === "REPORT_TILE_RECEIVED") {
         const { recipientUserId, reportingUserId, trackerId } = payload;
         if (recipientUserId !== game.user.id) return;
         const tracker = tileTrackers.get(trackerId);

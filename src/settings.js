@@ -70,5 +70,25 @@ export function registerModuleSettings() {
          */
         onChange: (value) => log.setVerbosity(value ?? 'warn')
     });
+
+    game.settings.register(MODULE_ID, 'enableCrosshairBroadcasting', {
+        name: 'BBC.settings.enableCrosshairBroadcasting.name',
+        hint: 'BBC.settings.enableCrosshairBroadcasting.hint',
+        scope: 'world',
+        config: true,
+        restricted: true,
+        type: Boolean,
+        default: true
+    });
+
+    game.settings.register(MODULE_ID, 'showOtherPlayersCrosshairs', {
+        name: 'BBC.settings.showOtherPlayersCrosshairs.name',
+        hint: 'BBC.settings.showOtherPlayersCrosshairs.hint',
+        scope: 'client',
+        config: true,
+        restricted: false,
+        type: Boolean,
+        default: true
+    });
 }
 
