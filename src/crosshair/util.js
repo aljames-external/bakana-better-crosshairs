@@ -32,7 +32,7 @@ function _normalizeAngleDegrees(angleDeg) {
  * @param {{x: number, y: number}} target - Target point
  * @returns {{rad: number, deg: number}} Angle in radians and degrees
  */
-function _calculateAngleFromOrigin(origin, target) {
+export function _calculateAngleFromOrigin(origin, target) {
     const dx = target.x - origin.x;
     const dy = target.y - origin.y;
     const rad = Math.atan2(dy, dx);
@@ -239,9 +239,11 @@ function rotateCrosshairInstance(crosshair, newDirDeg, config = {}) {
     const mergedConfig = { ...crosshair.config, ...config };
     const shapeType = mergedConfig.type ?? mergedConfig.t ?? crosshair.type ?? "circle";
     const isRect = shapeType === "rect" || shapeType === "square";
+    const isRayOrCone = shapeType === "ray" || shapeType === "cone";
     const isAttached = shouldStickToToken(mergedConfig, shapeType) && Boolean(mergedConfig.token);
+    const isRemote = String(mergedConfig.id ?? "").startsWith("remote-crosshair-");
 
-    if (!isAttached) {
+    if (!isAttached || isRayOrCone || isRemote) {
         crosshair.direction = newDirDeg;
         if (!isRect) {
             try { crosshair.rotation = rad; } catch (e) { log.debug("rotateCrosshairInstance | Exception setting crosshair.rotation:", e); }
@@ -273,8 +275,6 @@ function rotateCrosshairInstance(crosshair, newDirDeg, config = {}) {
         activePlacementTracker.crosshair = crosshair;
         refreshTemplateHighlights(tmpl, newDirDeg, rad);
     }
-
-    const isRayOrCone = shapeType === "ray" || shapeType === "cone";
 
     if (!isRayOrCone && !isAttached) {
         if (typeof crosshair.refresh === "function") {
@@ -354,19 +354,17 @@ export function attachWheelRotation(shape, config = {}) {
                 if (canvas?.mousePosition) {
                     const pt = canvas.mousePosition;
                     if (isAttached && shape.token) {
-                        const origin = shape.token.center ?? { x: shape.x, y: shape.y };
-                        const { deg } = _calculateAngleFromOrigin(origin, pt);
-                        shape.rotate(deg, false);
+                        const anchored = crosshairAdapter.resolveAnchorPlacement(shape.token, pt);
+                        shape.rotate(anchored.direction, false);
                     }
                     shape.move(pt.x, pt.y);
                 }
             } else {
                 if (isAttached && crosshair && canvas?.mousePosition) {
                     const pt = canvas.mousePosition;
-                    const origin = config.token?.center ?? { x: crosshair.x, y: crosshair.y };
-                    const { rad, deg } = _calculateAngleFromOrigin(origin, pt);
-                    config.currentDirection = deg;
-                    alignCrosshairAndEffects(crosshair, config, rad);
+                    const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, pt);
+                    config.currentDirection = anchored.direction;
+                    alignCrosshairAndEffects(crosshair, config, anchored.direction * (Math.PI / 180));
                 }
                 const rad = (config.currentDirection ?? 0) * (Math.PI / 180);
                 _refreshPreviewHighlights(config.currentDirection, rad, crosshair);
@@ -389,35 +387,121 @@ export function attachWheelRotation(shape, config = {}) {
  * @returns {void}
  */
 export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
-    rotateCrosshairInstance(crosshair, config.currentDirection ?? config.direction ?? 0, config);
+    const deg = config.currentDirection ?? config.direction ?? (rad * (180 / Math.PI));
+    rotateCrosshairInstance(crosshair, deg, config);
 
-    const shapeType = config.type ?? config.t ?? crosshair?.type ?? "circle";
+    const shape = crosshair?.shapeInstance ?? config?.shapeInstance ?? activePlacementTracker.crosshair?.shapeInstance;
+    const shapeType = config.type ?? config.t ?? shape?.type ?? crosshair?.type ?? "circle";
     const isRect = shapeType === "rect" || shapeType === "square";
-    const isAttached = shouldStickToToken(config, shapeType) && Boolean(config.token ?? crosshair?.config?.token ?? crosshair?.token);
+    const rawToken = config.token ?? crosshair?.config?.token ?? crosshair?.token ?? shape?.token;
+    const token = crosshairAdapter.toToken(rawToken);
+    const isAttached = shouldStickToToken(config, shapeType) && Boolean(token);
+    const effectId = config.id ?? shape?.id ?? "Crosshair";
+
+    let targetX = 0;
+    let targetY = 0;
+
+    if (isAttached && token) {
+        const cursorPt = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.x))
+            ? canvas.mousePosition
+            : { x: shape?.cursorX ?? shape?.x ?? crosshair?.x ?? 0, y: shape?.cursorY ?? shape?.y ?? crosshair?.y ?? 0 };
+        const anchored = crosshairAdapter.resolveAnchorPlacement(token, cursorPt);
+        targetX = anchored.x;
+        targetY = anchored.y;
+    } else {
+        const cursorPt = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.x))
+            ? canvas.mousePosition
+            : { x: shape?.cursorX ?? shape?.x ?? crosshair?.x ?? 0, y: shape?.cursorY ?? shape?.y ?? crosshair?.y ?? 0 };
+        targetX = cursorPt.x;
+        targetY = cursorPt.y;
+    }
+
+    log.debug(`[Bakana Sequencer Effect Alignment] Config ID: "${effectId}" | Type: "${shapeType}" | Target Pos: (${targetX}, ${targetY}) | Rad: ${rad.toFixed(4)} | Deg: ${deg.toFixed(2)}°`);
 
     if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
         try {
-            const effects = Sequencer.EffectManager.getEffects({ name: config.id });
+            const effects = Sequencer.EffectManager.getEffects({ name: effectId });
             for (const eff of effects) {
-                if (!isAttached) {
-                    if (isRect) {
-                        if (eff.container) {
-                            eff.container.pivot.set(0, 0);
-                            if (eff.sprite) eff.sprite.position.set(0, 0);
-                            if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
-                        }
+                eff.x = targetX;
+                eff.y = targetY;
+                if (eff.worldPosition) {
+                    eff.worldPosition.x = targetX;
+                    eff.worldPosition.y = targetY;
+                }
+                if (eff.position) {
+                    eff.position.x = targetX;
+                    eff.position.y = targetY;
+                }
+                eff.rotation = rad;
+
+                if (eff.container) {
+                    if (eff.container.position?.set) {
+                        eff.container.position.set(targetX, targetY);
+                    } else {
+                        eff.container.x = targetX;
+                        eff.container.y = targetY;
                     }
-                    if (eff.container && typeof eff.container.rotation !== "undefined") {
-                        eff.container.rotation = rad;
+                    eff.container.rotation = rad;
+                }
+
+                if (eff.spriteContainer && typeof eff.spriteContainer.rotation !== "undefined") {
+                    eff.spriteContainer.rotation = 0;
+                }
+
+                if (typeof eff.rotation !== "undefined") eff.rotation = rad;
+                if (typeof eff.update === "function") {
+                    try {
+                        eff.update({
+                            position: { x: targetX, y: targetY },
+                            rotation: deg
+                        });
+                    } catch (e) {
+                        log.debug("alignCrosshairAndEffects | Exception updating Sequencer effect rotation:", e);
                     }
-                    if (typeof eff.rotation !== "undefined") eff.rotation = rad;
-                    if (typeof eff.update === "function") {
-                        try {
-                            eff.update({ rotation: rad });
-                        } catch (e) {
-                            log.debug("alignCrosshairAndEffects | Exception updating Sequencer effect rotation:", e);
-                        }
-                    }
+                }
+
+                if (isRect && eff.container) {
+                    eff.container.pivot.set(0, 0);
+                    if (eff.sprite) eff.sprite.position.set(0, 0);
+                    if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
+                }
+            }
+
+            const iconEffects = Sequencer.EffectManager.getEffects({ name: `${effectId}-icon` });
+            for (const eff of iconEffects) {
+                eff.x = targetX;
+                eff.y = targetY;
+                if (eff.worldPosition) {
+                    eff.worldPosition.x = targetX;
+                    eff.worldPosition.y = targetY;
+                }
+                if (eff.position) {
+                    eff.position.x = targetX;
+                    eff.position.y = targetY;
+                }
+                if (eff.container?.position?.set) {
+                    eff.container.position.set(targetX, targetY);
+                } else if (eff.container) {
+                    eff.container.x = targetX;
+                    eff.container.y = targetY;
+                }
+                if (typeof eff.update === "function") {
+                    try {
+                        eff.update({ position: { x: targetX, y: targetY } });
+                    } catch (e) {}
+                }
+            }
+
+            const lineEffects = Sequencer.EffectManager.getEffects({ name: `${effectId}-line` });
+            for (const eff of lineEffects) {
+                if (eff.target) {
+                    eff.target.x = targetX;
+                    eff.target.y = targetY;
+                }
+                if (typeof eff.update === "function") {
+                    try {
+                        eff.update({ stretchTo: { x: targetX, y: targetY } });
+                    } catch (e) {}
                 }
             }
         } catch (e) {
@@ -503,17 +587,22 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     let y = clickY;
 
     if (isAnchored && config.token) {
-        if (crosshair && Number.isFinite(crosshair.x) && Number.isFinite(crosshair.y)) {
-            x = crosshair.x;
-            y = crosshair.y;
-            log.debug("resolveCrosshairPlacement | Token anchored placement using exact Sequencer attached visual position ->", { x, y, direction });
+        const posX = (crosshair && Number.isFinite(crosshair.x)) ? crosshair.x : clickX;
+        const posY = (crosshair && Number.isFinite(crosshair.y)) ? crosshair.y : clickY;
+        x = posX;
+        y = posY;
+        const mousePos = canvas?.mousePosition ?? { x: clickX, y: clickY };
+        const dx = mousePos.x - posX;
+        const dy = mousePos.y - posY;
+        if (Math.abs(dx) > 1e-6 || Math.abs(dy) > 1e-6) {
+            let deg = Math.atan2(dy, dx) * (180 / Math.PI);
+            if (deg < 0) deg += 360;
+            direction = deg % 360;
         } else {
-            const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, { x: clickX, y: clickY });
-            x = anchored.x;
-            y = anchored.y;
-            if (direction === undefined) direction = anchored.direction;
-            log.debug("resolveCrosshairPlacement | Token anchored placement via version adapter fallback ->", { x, y, direction });
+            const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, mousePos);
+            direction = anchored.direction;
         }
+        log.debug("resolveCrosshairPlacement | Token anchored placement using exact Sequencer visual position ->", { x, y, direction });
     } else {
         // Detached / free cursor placement: Origin is where the user clicked (clickX, clickY)
         x = clickX;

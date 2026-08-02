@@ -1,7 +1,11 @@
+import { MODULE_ID, BROADCAST_INTERVAL_MS } from "../lib/constants.js";
+import { socketlib } from "../integration/socketlib.js";
 import { closest } from "../lib/filemanager.js";
 import { log } from "../lib/logger.js";
 import { crosshairAdapter, systemAdapter } from "../adapter/index.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, resolveCrosshairIcon, alignCrosshairAndEffects, getGridSnapMode, snapCoordinates, activePlacementTracker } from "./util.js";
+import { CrosshairController } from "./crosshairController.js";
+import { getPeerCursorPosition } from "./remoteCrosshairManager.js";
 
 /**
  * Base class for crosshair shape instances, managing Sequencer animations, grid alignments,
@@ -17,6 +21,26 @@ export class BaseCrosshairShape {
         this.placeable = placeable;
         this.config = config;
 
+        const extractUserId = (val) => {
+            if (!val) return null;
+            if (typeof val === "string") return val;
+            if (typeof val === "object" && typeof val.id === "string") return val.id;
+            return null;
+        };
+
+        const callingUserId =
+            extractUserId(config.callingUserId) ??
+            extractUserId(config.senderUserId) ??
+            extractUserId(config.userId) ??
+            extractUserId(config.user) ??
+            extractUserId(config.actor?.user) ??
+            "";
+
+        if (callingUserId && callingUserId !== game?.user?.id) {
+            config.isRemote = true;
+            config.senderUserId = callingUserId;
+        }
+
         // Entry-boundary normalization for target document and placeable
         const doc = placeable?.document ?? (placeable?.documentName ? placeable : null);
         this.doc = doc;
@@ -31,7 +55,14 @@ export class BaseCrosshairShape {
         config.width = config.width ?? docProps.width ?? 5;
         config.angle = config.angle ?? docProps.angle ?? 53.13;
 
-        this.id = config.id ?? this.getDefaultId();
+        this.radius = Number(config.radius);
+        this.distance = Number(config.distance);
+        this.width = Number(config.width);
+        this.angle = Number(config.angle);
+
+        const userId = game?.user?.id ?? "local";
+        const defaultId = this.getDefaultId();
+        this.id = config.id ?? `${defaultId}-${userId}`;
         this.type = this.defaultShapeType;
         this.stickToToken = shouldStickToToken(config, this.type);
         this.context = config.context ?? null;
@@ -46,10 +77,16 @@ export class BaseCrosshairShape {
         // Keep a reference to Sequencer visual container
         this.sequencerCrosshair = null;
 
+        // Socket broadcasting state tracking
+        this.broadcastTimer = null;
+        this.placementId = null;
+
         // Position and direction state tracking
         const safeGet = (obj, prop) => { if (!obj) return undefined; try { return obj[prop]; } catch (e) { return undefined; } };
-        this.x = safeGet(placeable, "x") ?? doc?.x ?? 0;
-        this.y = safeGet(placeable, "y") ?? doc?.y ?? 0;
+        this.x = safeGet(placeable, "x") ?? doc?.x ?? config.x ?? 0;
+        this.y = safeGet(placeable, "y") ?? doc?.y ?? config.y ?? 0;
+        this.cursorX = Number(config.cursorX ?? this.x);
+        this.cursorY = Number(config.cursorY ?? this.y);
         this.direction = config.direction ?? 0;
 
         // Normalize boolean flags on config for clean direct boolean evaluation
@@ -182,17 +219,6 @@ export class BaseCrosshairShape {
     async playGraphicEffect(crosshair) {
         const seq = new Sequence().wait(50);
 
-        if (this.type === "circle" && this.token && this.showLine && !this.stickToToken) {
-            seq.effect()
-                .name(`${this.id}-line`)
-                .file(this.lineFile)
-                .attachTo(this.token)
-                .stretchTo(crosshair, { attachTo: true })
-                .opacity(0.8)
-                .locally()
-                .persist();
-        }
-
         const { widthPx, heightPx, factor, gridUnits } = this.getGraphicDimensions();
         const effectFile = this.getGraphicFile();
         if (!effectFile) {
@@ -200,29 +226,58 @@ export class BaseCrosshairShape {
             return seq.play();
         }
 
+        const isSticky = Boolean(this.stickToToken && this.token);
+        const curX = Number.isFinite(this.cursorX) ? this.cursorX : this.x;
+        const curY = Number.isFinite(this.cursorY) ? this.cursorY : this.y;
+        const initLoc = (isSticky && this.token)
+            ? crosshairAdapter.resolveAnchorPlacement(this.token, { x: curX, y: curY })
+            : { x: curX, y: curY };
+
+        if (this.type === "circle" && this.token && this.showLine && !this.stickToToken) {
+            seq.effect()
+                .name(`${this.id}-line`)
+                .file(this.lineFile)
+                .attachTo(this.token)
+                .stretchTo(initLoc)
+                .opacity(0.8)
+                .locally()
+                .persist();
+        }
+
         log.debug(`BaseCrosshairShape.playGraphicEffect | Sizing graphic for "${this.id}":`, {
             widthPx,
             heightPx,
             factor,
             gridUnits,
-            animationAnchor: this.animationAnchor
+            animationAnchor: this.animationAnchor,
+            initLoc
         });
 
-        const isSticky = Boolean(this.stickToToken && this.token);
-        const attachOptions = {
-            bindRotation: true,
-            ...((this.type === "rect" && !isSticky) ? { align: "top-left" } : {})
-        };
         seq.effect()
             .name(this.id)
             .file(effectFile)
-            .attachTo(crosshair, attachOptions)
+            .atLocation(initLoc)
+            .rotate(this.direction ?? 0)
             .anchor(this.animationAnchor)
             .size({ width: widthPx * factor, height: heightPx * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
             .belowTokens()
             .locally()
             .persist();
+
+        if (this.icon) {
+            const iconPath = resolveCrosshairIcon(this.icon);
+            if (iconPath) {
+                seq.effect()
+                    .name(`${this.id}-icon`)
+                    .file(iconPath)
+                    .atLocation(initLoc)
+                    .size(50, { gridUnits: false })
+                    .opacity(0.9)
+                    .locally()
+                    .persist();
+            }
+        }
 
         return seq.play();
     }
@@ -259,8 +314,10 @@ export class BaseCrosshairShape {
 
         this.configureCrosshairShape(crosshairSeq);
 
-        if (this.stickToToken && this.token) {
+        if (this.stickToToken && this.token && !this.config?.isRemote) {
             crosshairSeq.location(this.token, { lockToEdge: true, lockToEdgeDirection: false });
+        } else if (this.config?.isRemote) {
+            crosshairSeq.location({ x: this.x, y: this.y });
         } else {
             const locationOpts = {};
             if (this.token && this.config.showRange !== false) {
@@ -324,15 +381,217 @@ export class BaseCrosshairShape {
         if (crosshair) {
             this.sequencerCrosshair = crosshair;
             crosshair.shapeInstance = this;
-            activePlacementTracker.crosshair = crosshair;
+            if (!this.config?.isRemote) {
+                activePlacementTracker.crosshair = crosshair;
+            }
         }
         if ((this.type === "rect" || this.type === "square") && !this.stickToToken && !this.token && crosshair?.pivot?.set) {
             crosshair.pivot.set(0, 0);
         }
-        attachWheelRotation(this, this.config);
+        if (!this.config?.isRemote) {
+            attachWheelRotation(this, this.config);
+        } else if (crosshair) {
+            crosshair.interactive = false;
+            if (typeof crosshair.eventMode !== "undefined") crosshair.eventMode = "none";
+            try { crosshair.off?.("pointerdown"); } catch (e) {}
+            try { crosshair.off?.("click"); } catch (e) {}
+        }
+        if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
+            try {
+                await Sequencer.EffectManager.endEffects({ name: this.id });
+                await Sequencer.EffectManager.endEffects({ name: `${this.id}-line` });
+                await Sequencer.EffectManager.endEffects({ name: `${this.id}-icon` });
+            } catch (e) {}
+        }
         await this.playGraphicEffect(crosshair);
         alignCrosshairAndEffects(crosshair, this.config, this.direction * (Math.PI / 180));
         this._updateRangeText();
+
+        if (!this.controller) {
+            this.controller = new CrosshairController(
+                this,
+                this.config,
+                this.config?.isRemote
+                    ? () => getPeerCursorPosition(this.config?.senderUserId)
+                    : () => canvas.mousePosition,
+                {
+                    updateTrigger: this.config?.isRemote ? "ticker" : "event",
+                    intervalMs: BROADCAST_INTERVAL_MS
+                }
+            );
+        }
+        await this.controller.start();
+
+        if (!this.config?.isRemote) {
+            this.startBroadcasting();
+        }
+    }
+
+    /**
+     * Start periodic socket broadcasting of local crosshair state to peer clients.
+     * Cadence interval defined by BROADCAST_INTERVAL_MS (200ms = 5Hz).
+     * @returns {void}
+     */
+    startBroadcasting() {
+        if (!game?.user || !game?.settings) return;
+        const broadcastEnabled = game.settings.get(MODULE_ID, "enableCrosshairBroadcasting") !== false;
+        if (!broadcastEnabled) return;
+
+        this.stopBroadcasting();
+
+        const getLiveState = () => {
+            const originX = (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x))
+                ? this.sequencerCrosshair.x
+                : this.x;
+            const originY = (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.y))
+                ? this.sequencerCrosshair.y
+                : this.y;
+
+            const cursorX = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.x))
+                ? canvas.mousePosition.x
+                : originX;
+            const cursorY = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.y))
+                ? canvas.mousePosition.y
+                : originY;
+
+            let direction = this.config?.currentDirection ?? this.direction ?? 0;
+            if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.direction)) {
+                direction = this.sequencerCrosshair.direction;
+            } else if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.rotation)) {
+                direction = this.sequencerCrosshair.rotation * (180 / Math.PI);
+            }
+
+            return {
+                originX,
+                originY,
+                cursorX,
+                cursorY,
+                x: originX,
+                y: originY,
+                direction,
+                distance: this.distance,
+                width: this.width,
+                angle: this.angle
+            };
+        };
+
+        const live = getLiveState();
+        this.placementId = `${game.user.id}_${this.id}_${Date.now()}`;
+        const initialPayload = {
+            type: "CROSSHAIR_START",
+            placementId: this.placementId,
+            senderUserId: game.user.id,
+            shapeType: this.type,
+            file: this.getGraphicFile(),
+            lineFile: this.lineFile,
+            icon: this.icon,
+            fillColor: this.fillColor,
+            fillAlpha: this.fillAlpha,
+            borderColor: this.borderColor,
+            borderAlpha: this.borderAlpha,
+            distance: live.distance,
+            width: live.width,
+            angle: live.angle,
+            direction: live.direction,
+            rotationRad: (live.direction ?? 0) * (Math.PI / 180),
+            tokenId: this.token?.id ?? null,
+            stickToToken: Boolean(this.stickToToken && this.token),
+            showLine: Boolean(this.showLine),
+            originX: live.originX,
+            originY: live.originY,
+            cursorX: live.cursorX,
+            cursorY: live.cursorY,
+            x: live.originX,
+            y: live.originY
+        };
+
+        this._lastBroadcastState = { ...live };
+        socketlib.emit(initialPayload);
+
+        this.broadcastTimer = setInterval(() => {
+            if (!this.placementId) return;
+            const updated = getLiveState();
+            const last = this._lastBroadcastState ?? {};
+
+            const hasChanged =
+                Math.abs((updated.originX ?? 0) - (last.originX ?? 0)) > 1e-3 ||
+                Math.abs((updated.originY ?? 0) - (last.originY ?? 0)) > 1e-3 ||
+                Math.abs((updated.cursorX ?? 0) - (last.cursorX ?? 0)) > 1e-3 ||
+                Math.abs((updated.cursorY ?? 0) - (last.cursorY ?? 0)) > 1e-3 ||
+                Math.abs((updated.direction ?? 0) - (last.direction ?? 0)) > 1e-2 ||
+                updated.distance !== last.distance ||
+                updated.width !== last.width ||
+                updated.angle !== last.angle;
+
+            if (!hasChanged) return;
+
+            this._lastBroadcastState = { ...updated };
+            socketlib.emit({
+                type: "CROSSHAIR_UPDATE",
+                placementId: this.placementId,
+                senderUserId: game.user.id,
+                originX: updated.originX,
+                originY: updated.originY,
+                cursorX: updated.cursorX,
+                cursorY: updated.cursorY,
+                x: updated.originX,
+                y: updated.originY,
+                direction: updated.direction,
+                rotationRad: (updated.direction ?? 0) * (Math.PI / 180),
+                distance: updated.distance,
+                width: updated.width,
+                angle: updated.angle
+            });
+        }, BROADCAST_INTERVAL_MS);
+    }
+
+    /**
+     * Stop periodic socket broadcasting and emit completion payload to peer clients.
+     * @param {string} [reason="placed"] - Termination reason ("placed" or "canceled")
+     * @returns {void}
+     */
+    stopBroadcasting(reason = "placed") {
+        if (this.broadcastTimer) {
+            clearInterval(this.broadcastTimer);
+            this.broadcastTimer = null;
+        }
+
+        this._lastBroadcastState = null;
+
+        if (this.placementId) {
+            const finalOriginX = (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x)) ? this.sequencerCrosshair.x : this.x;
+            const finalOriginY = (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.y)) ? this.sequencerCrosshair.y : this.y;
+            const finalCursorX = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.x)) ? canvas.mousePosition.x : finalOriginX;
+            const finalCursorY = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.y)) ? canvas.mousePosition.y : finalOriginY;
+            let finalDirection = this.config?.currentDirection ?? this.direction ?? 0;
+            if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.direction)) {
+                finalDirection = this.sequencerCrosshair.direction;
+            } else if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.rotation)) {
+                finalDirection = this.sequencerCrosshair.rotation * (180 / Math.PI);
+            }
+            const finalRotationRad = finalDirection * (Math.PI / 180);
+
+            log.debug(`[Bakana Crosshair Final Broadcast] Sender: "${game?.user?.id}" | Reason: "${reason}" | Final Origin: (${finalOriginX}, ${finalOriginY}) | Final Cursor: (${finalCursorX}, ${finalCursorY}) | Final Direction: ${finalDirection}° | PIXI Container Rotation: ${finalRotationRad.toFixed(4)} rad`);
+
+            socketlib.emit({
+                type: "CROSSHAIR_END",
+                placementId: this.placementId,
+                senderUserId: game.user.id,
+                reason,
+                originX: finalOriginX,
+                originY: finalOriginY,
+                cursorX: finalCursorX,
+                cursorY: finalCursorY,
+                x: finalOriginX,
+                y: finalOriginY,
+                direction: finalDirection,
+                rotationRad: finalRotationRad,
+                distance: this.distance,
+                width: this.width,
+                angle: this.angle
+            });
+            this.placementId = null;
+        }
     }
 
     /**
@@ -447,6 +706,8 @@ export class BaseCrosshairShape {
      * @returns {Promise<void>}
      */
     async onPlacedCallback(crosshair, ...extraArgs) {
+        if (this.controller) this.controller.stop();
+        this.stopBroadcasting("placed");
         this._destroyRangeText();
         Sequencer.EffectManager.endEffects({ name: this.id });
         Sequencer.EffectManager.endEffects({ name: `${this.id}-line` });
@@ -458,6 +719,8 @@ export class BaseCrosshairShape {
      * @returns {void}
      */
     onCancelCallback() {
+        if (this.controller) this.controller.stop();
+        this.stopBroadcasting("canceled");
         this._destroyRangeText();
         detachWheelRotation();
         Sequencer.EffectManager.endEffects({ name: this.id });
@@ -502,17 +765,24 @@ export class BaseCrosshairShape {
      * @param {number} y - New target Y coordinate (pre-snapping)
      */
     move(x, y) {
+        this.cursorX = x;
+        this.cursorY = y;
+
         let targetX = x;
         let targetY = y;
 
-        if (this.stickToToken && this.token) {
+        if (this.stickToToken && this.token && !this.config?.isRemote) {
             const anchored = crosshairAdapter.resolveAnchorPlacement(this.token, { x, y });
             targetX = anchored.x;
             targetY = anchored.y;
-            if (anchored.direction !== undefined && this.config.currentDirection === undefined) {
+            if (anchored.direction !== undefined) {
                 this.direction = anchored.direction;
+                if (this.config) {
+                    this.config.currentDirection = anchored.direction;
+                    this.config.direction = anchored.direction;
+                }
             }
-        } else {
+        } else if (!this.config?.isRemote) {
             const snapMode = getGridSnapMode(this.config);
             if (snapMode !== 0) {
                 const snapped = snapCoordinates(targetX, targetY, snapMode);
@@ -521,21 +791,21 @@ export class BaseCrosshairShape {
             }
         }
 
-        if (this.x === targetX && this.y === targetY) {
-            return;
-        }
-
+        const snappedChanged = (this.x !== targetX || this.y !== targetY);
         this.x = targetX;
         this.y = targetY;
 
-        const isAttached = Boolean(this.stickToToken && this.token);
-        if (this.sequencerCrosshair && !isAttached) {
+        if (this.sequencerCrosshair) {
             this.sequencerCrosshair.x = targetX;
             this.sequencerCrosshair.y = targetY;
         }
 
-        this._updateRangeText();
-        this.refreshTemplateHighlights();
+        if (snappedChanged) {
+            this._updateRangeText();
+            this.refreshTemplateHighlights();
+        }
+
+        alignCrosshairAndEffects(this.sequencerCrosshair ?? this, this.config, this.direction * (Math.PI / 180));
     }
 
     /**
@@ -558,6 +828,8 @@ export class BaseCrosshairShape {
         this.direction = newAngleDeg;
         const rad = newAngleDeg * (Math.PI / 180);
 
+        log.debug(`[Bakana Sequencer Alignment] Shape: "${this.type}" | isRemote: ${Boolean(this.config?.isRemote)} | Origin (x,y): (${this.x}, ${this.y}) | Cursor (x,y): (${this.cursorX ?? "N/A"}, ${this.cursorY ?? "N/A"}) | Deg: ${newAngleDeg}° | Rad: ${rad.toFixed(4)} | Container Pos: (${this.sequencerCrosshair?.x}, ${this.sequencerCrosshair?.y}) | Container Rotation: ${this.sequencerCrosshair?.rotation}`);
+
         if (this.config) {
             this.config.currentDirection = newAngleDeg;
             this.config.direction = newAngleDeg;
@@ -566,37 +838,23 @@ export class BaseCrosshairShape {
 
         if (this.sequencerCrosshair && !this.sequencerCrosshair.destroyed) {
             const isRect = this.type === "rect" || this.type === "square";
-            const isAttached = Boolean(this.stickToToken && this.token);
-            if (!isAttached) {
-                this.sequencerCrosshair.direction = newAngleDeg;
-                if (!isRect) {
-                    this.sequencerCrosshair.rotation = rad;
-                } else {
-                    this.sequencerCrosshair.rotation = 0;
-                }
-                if (this.sequencerCrosshair.config) {
-                    this.sequencerCrosshair.config.direction = newAngleDeg;
-                    this.sequencerCrosshair.config.rotation = rad;
-                }
-                if (this.sequencerCrosshair.data) {
-                    this.sequencerCrosshair.data.direction = newAngleDeg;
-                    this.sequencerCrosshair.data.rotation = rad;
-                }
+            this.sequencerCrosshair.direction = newAngleDeg;
+            if (!isRect) {
+                this.sequencerCrosshair.rotation = rad;
             } else {
-                this.sequencerCrosshair.direction = 0;
                 this.sequencerCrosshair.rotation = 0;
-                if (this.sequencerCrosshair.config) {
-                    this.sequencerCrosshair.config.direction = 0;
-                    this.sequencerCrosshair.config.rotation = 0;
-                }
-                if (this.sequencerCrosshair.data) {
-                    this.sequencerCrosshair.data.direction = 0;
-                    this.sequencerCrosshair.data.rotation = 0;
-                }
             }
-
-            alignCrosshairAndEffects(this.sequencerCrosshair, this.config, rad);
+            if (this.sequencerCrosshair.config) {
+                this.sequencerCrosshair.config.direction = newAngleDeg;
+                this.sequencerCrosshair.config.rotation = rad;
+            }
+            if (this.sequencerCrosshair.data) {
+                this.sequencerCrosshair.data.direction = newAngleDeg;
+                this.sequencerCrosshair.data.rotation = rad;
+            }
         }
+
+        alignCrosshairAndEffects(this.sequencerCrosshair ?? this, this.config, rad);
 
         const doc = this.doc;
         if (doc) {
@@ -668,10 +926,27 @@ export class BaseCrosshairShape {
     getPlacementUpdates() {
         let posX = this.x;
         let posY = this.y;
-        if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x) && Number.isFinite(this.sequencerCrosshair.y)) {
+        let dir = this.direction;
+        if (this.stickToToken && this.token) {
+            if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x) && Number.isFinite(this.sequencerCrosshair.y)) {
+                posX = this.sequencerCrosshair.x;
+                posY = this.sequencerCrosshair.y;
+            }
+            const mousePos = canvas?.mousePosition ?? { x: posX, y: posY };
+            const dx = mousePos.x - posX;
+            const dy = mousePos.y - posY;
+            if (Math.abs(dx) > 1e-6 || Math.abs(dy) > 1e-6) {
+                let deg = Math.atan2(dy, dx) * (180 / Math.PI);
+                if (deg < 0) deg += 360;
+                dir = deg % 360;
+            } else {
+                const anchored = crosshairAdapter.resolveAnchorPlacement(this.token, mousePos);
+                dir = anchored.direction;
+            }
+        } else if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x) && Number.isFinite(this.sequencerCrosshair.y)) {
             posX = this.sequencerCrosshair.x;
             posY = this.sequencerCrosshair.y;
         }
-        return crosshairAdapter.formatPlacementCoordinates(posX, posY, this.direction, this.config);
+        return crosshairAdapter.formatPlacementCoordinates(posX, posY, dir, this.config);
     }
 }

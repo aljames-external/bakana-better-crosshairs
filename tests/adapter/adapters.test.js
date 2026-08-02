@@ -631,6 +631,20 @@ test('resolveAnchorPlacement and resolveCrosshairPlacement in attached mode lock
     assert.equal(anchorResult.y, 100);
     assert.equal(anchorResult.direction, 270);
 
+    // Verify resolveAnchorPlacement measures angle directly from edge attachment point to target mouse coordinates
+    const nonCardinalAnchor = adapterV14.resolveAnchorPlacement(mockToken, { x: 50, y: 160 });
+    assert.equal(nonCardinalAnchor.x, 100);
+    assert.equal(nonCardinalAnchor.y, 150);
+    const expectedAngle = (Math.atan2(160 - 150, 50 - 100) * (180 / Math.PI) + 360) % 360;
+    assert.equal(Math.round(nonCardinalAnchor.direction * 100) / 100, Math.round(expectedAngle * 100) / 100);
+
+    // Verify resolveAnchorPlacement projects rays through cursor when cursor is inside token boundaries near corners
+    const insideCornerAnchor = adapterV14.resolveAnchorPlacement(mockToken, { x: 110, y: 190 });
+    assert.equal(insideCornerAnchor.x, 100);
+    assert.equal(insideCornerAnchor.y, 190);
+    const expectedInsideAngle = (Math.atan2(190 - 190, 110 - 100) * (180 / Math.PI) + 360) % 360;
+    assert.equal(Math.round(insideCornerAnchor.direction * 100) / 100, Math.round(expectedInsideAngle * 100) / 100);
+
     // 2. Verify resolveCrosshairPlacement in attached mode uses exact visual coordinates from Sequencer when provided
     let resolvedPlacement = null;
     const config = {
@@ -994,9 +1008,9 @@ test('REGRESSION: resolveCrosshairPlacement resolves exact shape instance coordi
 
 test('REGRESSION: alignCrosshairAndEffects updates visual effect rotation for cones and rays in detached mode', () => {
     let mockEffectRotation = null;
-    let mockContainerRotation = null;
     const mockEffect = {
         container: { rotation: 0 },
+        spriteContainer: { rotation: 1 },
         rotation: 0,
         update: ({ rotation }) => { mockEffectRotation = rotation; }
     };
@@ -1020,8 +1034,9 @@ test('REGRESSION: alignCrosshairAndEffects updates visual effect rotation for co
 
         const expectedRad = 45 * (Math.PI / 180);
         assert.equal(mockEffect.container.rotation, expectedRad);
+        assert.equal(mockEffect.spriteContainer.rotation, 0, 'spriteContainer rotation must be 0 to prevent compounding double rotation');
         assert.equal(mockEffect.rotation, expectedRad);
-        assert.equal(mockEffectRotation, expectedRad);
+        assert.equal(mockEffectRotation, 45, 'eff.update({ rotation }) must receive degrees for Sequencer API');
     } finally {
         globalThis.Sequencer = origSequencer;
     }

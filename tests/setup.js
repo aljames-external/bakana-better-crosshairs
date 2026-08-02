@@ -138,7 +138,11 @@ globalThis.game = {
         set(moduleId, key, value) {
             settingsStore.set(`${moduleId}.${key}`, value);
         },
-        register(moduleId, key, data) {},
+        register(moduleId, key, data) {
+            if (!settingsStore.has(`${moduleId}.${key}`) && data && "default" in data) {
+                settingsStore.set(`${moduleId}.${key}`, data.default);
+            }
+        },
         registerMenu(moduleId, key, data) {}
     },
     modules: {
@@ -255,14 +259,37 @@ globalThis.Sequencer = {
         constructor() {
             this._steps = [];
         }
+        wait(ms) { return this; }
         effect() { return this; }
+        name(n) { return this; }
         file(f) { return this; }
         atLocation(loc) { return this; }
+        atPosition(pos) { return this; }
+        attachTo(loc, opts) { return this; }
         stretchTo(loc) { return this; }
         size(sz) { return this; }
+        anchor(a) { return this; }
+        rotate(r) { return this; }
+        rotation(r) { return this; }
+        opacity(o) { return this; }
+        belowTokens() { return this; }
+        locally() { return this; }
+        persist() { return this; }
+        crosshair(pos) { return this; }
+        type(t) { return this; }
+        borderColor(c, o) { return this; }
+        fillColor(c, o) { return this; }
+        location(l, o) { return this; }
+        snapPosition(s) { return this; }
+        icon(i) { return this; }
+        callback(ev, fn) { return this; }
         play() { return Promise.resolve(this); }
     },
     EffectManager: {
+        getEffects: (opts) => [],
         endEffects: async (opts) => {}
     }
 };
+
+globalThis.Sequence = globalThis.Sequencer.Sequence;
+

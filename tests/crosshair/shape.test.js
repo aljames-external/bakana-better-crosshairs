@@ -384,7 +384,9 @@ test('BaseCrosshairShape.playGraphicEffect isolates origin stretch line under ${
         persist() { return this; },
         anchor() { return this; },
         size() { return this; },
-        belowTokens() { return this; }
+        belowTokens() { return this; },
+        atLocation() { return this; },
+        rotate() { return this; }
     };
     globalThis.Sequence = class {
         wait() { return this; }
@@ -393,8 +395,8 @@ test('BaseCrosshairShape.playGraphicEffect isolates origin stretch line under ${
     };
 
     await shape.playGraphicEffect({ x: 100, y: 100 });
-    assert.ok(effectNames.includes("Circle Crosshair-line"));
-    assert.ok(effectNames.includes("Circle Crosshair"));
+    assert.ok(effectNames.some(name => name.includes("Circle Crosshair") && name.endsWith("-line")));
+    assert.ok(effectNames.some(name => name.includes("Circle Crosshair")));
 });
 
 test('BaseCrosshairShape._updateRangeText keeps distance measurement text unrotated', async () => {
@@ -424,6 +426,150 @@ test('BaseCrosshairShape._updateRangeText keeps distance measurement text unrota
     };
     shape._updateRangeText();
     assert.equal(shape._rangeText.rotation, 0);
+});
+
+test('REGRESSION: Attached Ray template placement preserves Sequencer visual origin and computes ray angle directly to mouse click', async () => {
+    const { RayCrosshairShape } = await import('../../src/crosshair/ray.js');
+    const { resolveCrosshairPlacement } = await import('../../src/crosshair/util.js');
+
+    const mockToken = {
+        id: 'tok-ray-test',
+        x: 100,
+        y: 100,
+        w: 100,
+        h: 100,
+        center: { x: 150, y: 150 }
+    };
+    const mockDocument = { x: 100, y: 100, documentName: 'MeasuredTemplate', t: 'ray' };
+    const mockPlaceable = { x: 100, y: 100, document: mockDocument };
+
+    const config = {
+        type: 'ray',
+        distance: 30,
+        width: 5,
+        stickToToken: true,
+        token: mockToken
+    };
+
+    const shape = new RayCrosshairShape(mockPlaceable, config);
+
+    // Mock Sequencer crosshair container placed at token's bottom-left corner (x: 100, y: 200)
+    const mockSequencerCrosshair = {
+        x: 100,
+        y: 200,
+        direction: 180,
+        destroyed: false,
+        shapeInstance: shape
+    };
+    shape.sequencerCrosshair = mockSequencerCrosshair;
+
+    // Simulate mouse position at (50, 230)
+    globalThis.canvas = {
+        mousePosition: { x: 50, y: 230 }
+    };
+
+    // 1. Verify getPlacementUpdates uses Sequencer's visual origin (100, 200) and calculates direction directly to mouse (50, 230)
+    const updates = shape.getPlacementUpdates();
+    assert.equal(updates.x, 100, 'Placement X must match Sequencer visual origin on token edge');
+    assert.equal(updates.y, 200, 'Placement Y must match Sequencer visual origin on token edge');
+
+    // Expected angle from pivot (100, 200) to mouse (50, 230): dx = -50, dy = 30 -> atan2(30, -50) = 149.03624... deg
+    const expectedAngle = (Math.atan2(230 - 200, 50 - 100) * (180 / Math.PI) + 360) % 360;
+    assert.equal(Math.round(updates.direction * 100) / 100, Math.round(expectedAngle * 100) / 100);
+
+    // 2. Verify resolveCrosshairPlacement resolves identical placement updates when called with shape or sequencer container
+    let resolved = null;
+    config.context = { resolve: (res) => { resolved = res; } };
+    resolveCrosshairPlacement(shape, config);
+
+    assert.ok(resolved);
+    assert.equal(resolved.x, 100);
+    assert.equal(resolved.y, 200);
+    assert.equal(Math.round(resolved.direction * 100) / 100, Math.round(expectedAngle * 100) / 100);
+});
+
+test('BaseCrosshairShape tracks mouse fluidly on Sequencer visual effects while preserving snap points on placement and template highlights', async () => {
+    const { CircleCrosshairShape } = await import('../../src/crosshair/circle.js');
+    const { resolveCrosshairPlacement } = await import('../../src/crosshair/util.js');
+
+    const mockDocument = { x: 100, y: 100, documentName: 'MeasuredTemplate', t: 'circle', distance: 20 };
+    const mockPlaceable = { x: 100, y: 100, document: mockDocument };
+
+    const mockEffect = {
+        name: 'test-fluid-circle',
+        x: 100,
+        y: 100,
+        rotation: 0,
+        container: {
+            position: {
+                x: 100,
+                y: 100,
+                set(x, y) { this.x = x; this.y = y; }
+            },
+            rotation: 0
+        },
+        spriteContainer: { rotation: 0 },
+        update(payload) {
+            if (payload.position) {
+                this.x = payload.position.x;
+                this.y = payload.position.y;
+            }
+        }
+    };
+
+    const origSequencer = globalThis.Sequencer;
+    try {
+        globalThis.Sequencer = {
+            ...origSequencer,
+            EffectManager: {
+                getEffects: ({ name }) => (name === 'test-fluid-circle' ? [mockEffect] : []),
+                endEffects: async () => {}
+            }
+        };
+
+        const shape = new CircleCrosshairShape(mockPlaceable, {
+            id: 'test-fluid-circle',
+            radius: 20,
+            snapToGrid: 'corner' // grid size is 100, corners snap to multiples of 100
+        });
+
+        // 1. Initial position
+        assert.equal(shape.x, 100);
+        assert.equal(shape.y, 100);
+
+        // 2. Move mouse to (115, 120) which is near corner (100, 100)
+        globalThis.canvas.mousePosition = { x: 115, y: 120 };
+        shape.move(115, 120);
+
+        // Snap points remain at grid corner (100, 100)
+        assert.equal(shape.x, 100, "Snap point X must remain snapped to grid corner (100)");
+        assert.equal(shape.y, 100, "Snap point Y must remain snapped to grid corner (100)");
+        assert.equal(shape.cursorX, 115, "cursorX must track fluid mouse position (115)");
+        assert.equal(shape.cursorY, 120, "cursorY must track fluid mouse position (120)");
+
+        // Sequencer animation effect container tracks fluid mouse position (115, 120)
+        assert.equal(mockEffect.container.position.x, 115, "Sequencer visual effect must track fluid mouse X (115)");
+        assert.equal(mockEffect.container.position.y, 120, "Sequencer visual effect must track fluid mouse Y (120)");
+
+        // 3. Move mouse to (185, 190) which snaps to next corner (200, 200)
+        globalThis.canvas.mousePosition = { x: 185, y: 190 };
+        shape.move(185, 190);
+
+        // Snap points update to (200, 200)
+        assert.equal(shape.x, 200, "Snap point X must snap to new grid corner (200)");
+        assert.equal(shape.y, 200, "Snap point Y must snap to new grid corner (200)");
+
+        // Sequencer animation effect container tracks fluid mouse position (185, 190)
+        assert.equal(mockEffect.container.position.x, 185, "Sequencer visual effect must track fluid mouse X (185)");
+        assert.equal(mockEffect.container.position.y, 190, "Sequencer visual effect must track fluid mouse Y (190)");
+
+        // 4. Placed result resolves to the exact grid snap points (200, 200)
+        const placement = shape.getPlacementUpdates();
+        assert.equal(placement.x, 200, "Placed template X must be snapped coordinate (200)");
+        assert.equal(placement.y, 200, "Placed template Y must be snapped coordinate (200)");
+    } finally {
+        globalThis.Sequencer = origSequencer;
+    }
 });
 
 

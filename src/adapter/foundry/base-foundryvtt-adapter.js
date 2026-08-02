@@ -572,6 +572,43 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
+     * Create an unpersisted preview placeable object for template/region canvas rendering.
+     * @param {Object} [config={}] - Placement configuration
+     * @returns {PlaceableObject|null} Created placeable or null
+     */
+    createUnpersistedPreviewPlaceable(config = {}) {
+        if (!canvas?.scene) return null;
+        try {
+            const docClass = CONFIG?.MeasuredTemplate?.documentClass;
+            const objClass = CONFIG?.MeasuredTemplate?.objectClass;
+            if (!docClass || !objClass) return null;
+
+            const shapeType = config.type ?? config.t ?? "circle";
+            const isRect = shapeType === "rect" || shapeType === "square";
+            const data = {
+                t: isRect ? "rect" : (shapeType === "cone" ? "cone" : (shapeType === "ray" ? "ray" : "circle")),
+                user: game?.user?.id,
+                x: config.x ?? 0,
+                y: config.y ?? 0,
+                distance: config.distance ?? 5,
+                width: config.width ?? (isRect ? (config.distance ?? 5) : 5),
+                angle: config.angle ?? 53.13,
+                direction: config.direction ?? 0,
+                fillColor: config.fillColor ?? "#000000",
+                borderColor: config.borderColor ?? "#ffffff"
+            };
+
+            const doc = new docClass(data, { parent: canvas.scene });
+            const placeable = new objClass(doc);
+            this.hidePreview(placeable);
+            return placeable;
+        } catch (e) {
+            log.debug("createUnpersistedPreviewPlaceable | Exception creating preview placeable:", e);
+            return null;
+        }
+    }
+
+    /**
      * Mutate a live preview placeable document's shape coordinates during mouse drag.
      * @param {Document} previewDoc - Preview MeasuredTemplate or Region document
      * @param {Object} coords - Destination coordinates payload
@@ -722,6 +759,19 @@ export class BaseFoundryVTTAdapter {
         const h = tok.h ?? (tokenHeight * size);
         const centerPoint = tok.center ?? tok.document?.center ?? { x: tx + w / 2, y: ty + h / 2 };
 
+        const dx = targetMouse.x - centerPoint.x;
+        const dy = targetMouse.y - centerPoint.y;
+        const dist = Math.hypot(dx, dy);
+
+        let farPoint = targetMouse;
+        if (dist > 0) {
+            const scale = Math.max(10000, (w + h) * 10) / dist;
+            farPoint = {
+                x: centerPoint.x + dx * scale,
+                y: centerPoint.y + dy * scale
+            };
+        }
+
         const points = [tx, ty, tx + w, ty, tx + w, ty + h, tx, ty + h];
 
         let intersection = null;
@@ -730,14 +780,14 @@ export class BaseFoundryVTTAdapter {
                 const p1 = { x: points[i], y: points[i + 1] };
                 const p2Idx = (i + 2) >= points.length ? 0 : (i + 2);
                 const p2 = { x: points[p2Idx], y: points[p2Idx + 1] };
-                intersection = foundry.utils.lineSegmentIntersection(centerPoint, targetMouse, p1, p2);
+                intersection = foundry.utils.lineSegmentIntersection(centerPoint, farPoint, p1, p2);
                 if (intersection) break;
             }
         }
 
         if (!intersection) {
             if (Ray) {
-                const ray = new Ray(centerPoint, targetMouse);
+                const ray = new Ray(centerPoint, farPoint);
                 if (typeof ray.intersectSegment === "function") {
                     for (let i = 0; i < points.length; i += 2) {
                         const p1 = { x: points[i], y: points[i + 1] };
@@ -756,18 +806,16 @@ export class BaseFoundryVTTAdapter {
                 x: clamp(targetMouse.x, tx, tx + w),
                 y: clamp(targetMouse.y, ty, ty + h)
             };
-            if (intersection.x === targetMouse.x && intersection.y === targetMouse.y) {
-                const dx = targetMouse.x - centerPoint.x;
-                const dy = targetMouse.y - centerPoint.y;
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    intersection.x = dx >= 0 ? tx + w : tx;
-                } else {
-                    intersection.y = dy >= 0 ? ty + h : ty;
-                }
-            }
         }
 
-        let dragAngle = Math.atan2(targetMouse.y - centerPoint.y, targetMouse.x - centerPoint.x) * (180 / Math.PI);
+        // Calculate direction angle FROM the Sequencer animation pivot point (intersection) TO targetMouse
+        const dxPivot = targetMouse.x - intersection.x;
+        const dyPivot = targetMouse.y - intersection.y;
+        let dragAngle = (Math.abs(dxPivot) > 1e-6 || Math.abs(dyPivot) > 1e-6)
+            ? Math.atan2(dyPivot, dxPivot) * (180 / Math.PI)
+            : Math.atan2(dy, dx) * (180 / Math.PI);
+
+        if (Number.isNaN(dragAngle)) dragAngle = 0;
         if (dragAngle < 0) dragAngle += 360;
         const direction = dragAngle % 360;
 
@@ -885,6 +933,24 @@ export class BaseFoundryVTTAdapter {
              * @returns {Promise<void>} Resolves when deferred document placement is processed
              */
             async resolve(coords = {}) {
+                const targetToken = token ?? entryConfig?.token;
+                if (targetToken && (entryConfig?.stickToToken ?? true)) {
+                    const posX = coords.x ?? placeable?.x ?? 0;
+                    const posY = coords.y ?? placeable?.y ?? 0;
+                    const mousePos = canvas?.mousePosition ?? { x: posX, y: posY };
+                    const dx = mousePos.x - posX;
+                    const dy = mousePos.y - posY;
+                    let dir = coords.direction;
+                    if (Math.abs(dx) > 1e-6 || Math.abs(dy) > 1e-6) {
+                        let deg = Math.atan2(dy, dx) * (180 / Math.PI);
+                        if (deg < 0) deg += 360;
+                        dir = deg % 360;
+                    }
+                    coords.x = posX;
+                    coords.y = posY;
+                    coords.direction = dir;
+                    coords.rotation = dir;
+                }
                 Object.assign(this, coords);
                 this.resolved = true;
 
