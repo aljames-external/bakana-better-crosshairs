@@ -22,18 +22,19 @@ export class BaseCrosshairShape {
         this.config = config;
 
         const extractUserId = (val) => {
-            if (!val) return "";
+            if (!val) return null;
             if (typeof val === "string") return val;
             if (typeof val === "object" && typeof val.id === "string") return val.id;
-            return "";
+            return null;
         };
 
         const callingUserId =
-            extractUserId(config.callingUserId) ||
-            extractUserId(config.senderUserId) ||
-            extractUserId(config.userId) ||
-            extractUserId(config.user) ||
-            extractUserId(config.actor?.user);
+            extractUserId(config.callingUserId) ??
+            extractUserId(config.senderUserId) ??
+            extractUserId(config.userId) ??
+            extractUserId(config.user) ??
+            extractUserId(config.actor?.user) ??
+            "";
 
         if (callingUserId && callingUserId !== game?.user?.id) {
             config.isRemote = true;
@@ -84,6 +85,8 @@ export class BaseCrosshairShape {
         const safeGet = (obj, prop) => { if (!obj) return undefined; try { return obj[prop]; } catch (e) { return undefined; } };
         this.x = safeGet(placeable, "x") ?? doc?.x ?? config.x ?? 0;
         this.y = safeGet(placeable, "y") ?? doc?.y ?? config.y ?? 0;
+        this.cursorX = Number(config.cursorX ?? this.x);
+        this.cursorY = Number(config.cursorY ?? this.y);
         this.direction = config.direction ?? 0;
 
         // Normalize boolean flags on config for clean direct boolean evaluation
@@ -216,17 +219,6 @@ export class BaseCrosshairShape {
     async playGraphicEffect(crosshair) {
         const seq = new Sequence().wait(50);
 
-        if (this.type === "circle" && this.token && this.showLine && !this.stickToToken) {
-            seq.effect()
-                .name(`${this.id}-line`)
-                .file(this.lineFile)
-                .attachTo(this.token)
-                .stretchTo(crosshair, { attachTo: true })
-                .opacity(0.8)
-                .locally()
-                .persist();
-        }
-
         const { widthPx, heightPx, factor, gridUnits } = this.getGraphicDimensions();
         const effectFile = this.getGraphicFile();
         if (!effectFile) {
@@ -234,24 +226,38 @@ export class BaseCrosshairShape {
             return seq.play();
         }
 
+        const isSticky = Boolean(this.stickToToken && this.token);
+        const curX = Number.isFinite(this.cursorX) ? this.cursorX : this.x;
+        const curY = Number.isFinite(this.cursorY) ? this.cursorY : this.y;
+        const initLoc = (isSticky && this.token)
+            ? crosshairAdapter.resolveAnchorPlacement(this.token, { x: curX, y: curY })
+            : { x: curX, y: curY };
+
+        if (this.type === "circle" && this.token && this.showLine && !this.stickToToken) {
+            seq.effect()
+                .name(`${this.id}-line`)
+                .file(this.lineFile)
+                .attachTo(this.token)
+                .stretchTo(initLoc)
+                .opacity(0.8)
+                .locally()
+                .persist();
+        }
+
         log.debug(`BaseCrosshairShape.playGraphicEffect | Sizing graphic for "${this.id}":`, {
             widthPx,
             heightPx,
             factor,
             gridUnits,
-            animationAnchor: this.animationAnchor
+            animationAnchor: this.animationAnchor,
+            initLoc
         });
 
-        const isRemote = !(crosshair && (crosshair.parent || crosshair.transform || typeof crosshair.addChild === "function"));
-        const isSticky = Boolean(this.stickToToken && this.token);
-        const attachOptions = {
-            bindRotation: !isRemote,
-            ...((this.type === "rect" && !isSticky) ? { align: "top-left" } : {})
-        };
         seq.effect()
             .name(this.id)
             .file(effectFile)
-            .attachTo(crosshair, attachOptions)
+            .atLocation(initLoc)
+            .rotate(this.direction ?? 0)
             .anchor(this.animationAnchor)
             .size({ width: widthPx * factor, height: heightPx * factor }, { gridUnits: Boolean(gridUnits) })
             .opacity(0.8)
@@ -265,7 +271,7 @@ export class BaseCrosshairShape {
                 seq.effect()
                     .name(`${this.id}-icon`)
                     .file(iconPath)
-                    .attachTo(crosshair, attachOptions)
+                    .atLocation(initLoc)
                     .size(50, { gridUnits: false })
                     .opacity(0.9)
                     .locally()
@@ -759,6 +765,9 @@ export class BaseCrosshairShape {
      * @param {number} y - New target Y coordinate (pre-snapping)
      */
     move(x, y) {
+        this.cursorX = x;
+        this.cursorY = y;
+
         let targetX = x;
         let targetY = y;
 
@@ -782,10 +791,7 @@ export class BaseCrosshairShape {
             }
         }
 
-        if (this.x === targetX && this.y === targetY) {
-            return;
-        }
-
+        const snappedChanged = (this.x !== targetX || this.y !== targetY);
         this.x = targetX;
         this.y = targetY;
 
@@ -794,11 +800,12 @@ export class BaseCrosshairShape {
             this.sequencerCrosshair.y = targetY;
         }
 
-        this._updateRangeText();
-        this.refreshTemplateHighlights();
-        if (this.sequencerCrosshair) {
-            alignCrosshairAndEffects(this.sequencerCrosshair, this.config, this.direction * (Math.PI / 180));
+        if (snappedChanged) {
+            this._updateRangeText();
+            this.refreshTemplateHighlights();
         }
+
+        alignCrosshairAndEffects(this.sequencerCrosshair ?? this, this.config, this.direction * (Math.PI / 180));
     }
 
     /**
@@ -845,9 +852,9 @@ export class BaseCrosshairShape {
                 this.sequencerCrosshair.data.direction = newAngleDeg;
                 this.sequencerCrosshair.data.rotation = rad;
             }
-
-            alignCrosshairAndEffects(this.sequencerCrosshair, this.config, rad);
         }
+
+        alignCrosshairAndEffects(this.sequencerCrosshair ?? this, this.config, rad);
 
         const doc = this.doc;
         if (doc) {

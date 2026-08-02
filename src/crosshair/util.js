@@ -390,52 +390,73 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
     const deg = config.currentDirection ?? config.direction ?? (rad * (180 / Math.PI));
     rotateCrosshairInstance(crosshair, deg, config);
 
-    const shapeType = config.type ?? config.t ?? crosshair?.type ?? "circle";
-    log.debug(`[Bakana Sequencer Effect Alignment] Config ID: "${config.id}" | Type: "${shapeType}" | Container Pos: (${crosshair?.x}, ${crosshair?.y}) | Container Rotation: ${crosshair?.rotation} | Rad: ${rad.toFixed(4)} | Deg: ${(rad * (180 / Math.PI)).toFixed(2)}°`);
+    const shape = crosshair?.shapeInstance ?? config?.shapeInstance ?? activePlacementTracker.crosshair?.shapeInstance;
+    const shapeType = config.type ?? config.t ?? shape?.type ?? crosshair?.type ?? "circle";
     const isRect = shapeType === "rect" || shapeType === "square";
-    const isAttached = shouldStickToToken(config, shapeType) && Boolean(config.token ?? crosshair?.config?.token ?? crosshair?.token);
-    const isPIXIContainer = Boolean(crosshair && (crosshair.parent || crosshair.transform || typeof crosshair.addChild === "function"));
-    const isRemote = String(config.id ?? "").startsWith("remote-crosshair-") || !isPIXIContainer;
+    const rawToken = config.token ?? crosshair?.config?.token ?? crosshair?.token ?? shape?.token;
+    const token = crosshairAdapter.toToken(rawToken);
+    const isAttached = shouldStickToToken(config, shapeType) && Boolean(token);
+    const effectId = config.id ?? shape?.id ?? "Crosshair";
+
+    let targetX = 0;
+    let targetY = 0;
+
+    if (isAttached && token) {
+        const cursorPt = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.x))
+            ? canvas.mousePosition
+            : { x: shape?.cursorX ?? shape?.x ?? crosshair?.x ?? 0, y: shape?.cursorY ?? shape?.y ?? crosshair?.y ?? 0 };
+        const anchored = crosshairAdapter.resolveAnchorPlacement(token, cursorPt);
+        targetX = anchored.x;
+        targetY = anchored.y;
+    } else {
+        const cursorPt = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.x))
+            ? canvas.mousePosition
+            : { x: shape?.cursorX ?? shape?.x ?? crosshair?.x ?? 0, y: shape?.cursorY ?? shape?.y ?? crosshair?.y ?? 0 };
+        targetX = cursorPt.x;
+        targetY = cursorPt.y;
+    }
+
+    log.debug(`[Bakana Sequencer Effect Alignment] Config ID: "${effectId}" | Type: "${shapeType}" | Target Pos: (${targetX}, ${targetY}) | Rad: ${rad.toFixed(4)} | Deg: ${deg.toFixed(2)}°`);
 
     if (typeof Sequencer !== "undefined" && Sequencer.EffectManager) {
         try {
-            const effects = Sequencer.EffectManager.getEffects({ name: config.id });
+            const effects = Sequencer.EffectManager.getEffects({ name: effectId });
             for (const eff of effects) {
-                if (isPIXIContainer) {
-                    if (eff.container?.position?.set) {
-                        eff.container.position.set(0, 0);
-                    } else if (eff.container) {
-                        eff.container.x = 0;
-                        eff.container.y = 0;
+                eff.x = targetX;
+                eff.y = targetY;
+                if (eff.worldPosition) {
+                    eff.worldPosition.x = targetX;
+                    eff.worldPosition.y = targetY;
+                }
+                if (eff.position) {
+                    eff.position.x = targetX;
+                    eff.position.y = targetY;
+                }
+                eff.rotation = rad;
+
+                if (eff.container) {
+                    if (eff.container.position?.set) {
+                        eff.container.position.set(targetX, targetY);
+                    } else {
+                        eff.container.x = targetX;
+                        eff.container.y = targetY;
                     }
-                    if (eff.container && typeof eff.container.rotation !== "undefined") {
-                        eff.container.rotation = 0;
-                    }
-                    if (eff.spriteContainer && typeof eff.spriteContainer.rotation !== "undefined") {
-                        eff.spriteContainer.rotation = 0;
-                    }
-                } else {
-                    if (Number.isFinite(crosshair?.x) && Number.isFinite(crosshair?.y)) {
-                        if (eff.container?.position?.set) {
-                            eff.container.position.set(crosshair.x, crosshair.y);
-                        } else if (eff.container) {
-                            eff.container.x = crosshair.x;
-                            eff.container.y = crosshair.y;
-                        }
-                    }
-                    if (eff.container && typeof eff.container.rotation !== "undefined") {
-                        eff.container.rotation = rad;
-                    }
-                    if (eff.spriteContainer && typeof eff.spriteContainer.rotation !== "undefined") {
-                        eff.spriteContainer.rotation = 0;
-                    }
-                    if (typeof eff.rotation !== "undefined") eff.rotation = rad;
-                    if (typeof eff.update === "function") {
-                        try {
-                            eff.update({ rotation: deg });
-                        } catch (e) {
-                            log.debug("alignCrosshairAndEffects | Exception updating Sequencer effect rotation:", e);
-                        }
+                    eff.container.rotation = rad;
+                }
+
+                if (eff.spriteContainer && typeof eff.spriteContainer.rotation !== "undefined") {
+                    eff.spriteContainer.rotation = 0;
+                }
+
+                if (typeof eff.rotation !== "undefined") eff.rotation = rad;
+                if (typeof eff.update === "function") {
+                    try {
+                        eff.update({
+                            position: { x: targetX, y: targetY },
+                            rotation: deg
+                        });
+                    } catch (e) {
+                        log.debug("alignCrosshairAndEffects | Exception updating Sequencer effect rotation:", e);
                     }
                 }
 
@@ -443,6 +464,44 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
                     eff.container.pivot.set(0, 0);
                     if (eff.sprite) eff.sprite.position.set(0, 0);
                     if (eff.spriteContainer) eff.spriteContainer.position.set(0, 0);
+                }
+            }
+
+            const iconEffects = Sequencer.EffectManager.getEffects({ name: `${effectId}-icon` });
+            for (const eff of iconEffects) {
+                eff.x = targetX;
+                eff.y = targetY;
+                if (eff.worldPosition) {
+                    eff.worldPosition.x = targetX;
+                    eff.worldPosition.y = targetY;
+                }
+                if (eff.position) {
+                    eff.position.x = targetX;
+                    eff.position.y = targetY;
+                }
+                if (eff.container?.position?.set) {
+                    eff.container.position.set(targetX, targetY);
+                } else if (eff.container) {
+                    eff.container.x = targetX;
+                    eff.container.y = targetY;
+                }
+                if (typeof eff.update === "function") {
+                    try {
+                        eff.update({ position: { x: targetX, y: targetY } });
+                    } catch (e) {}
+                }
+            }
+
+            const lineEffects = Sequencer.EffectManager.getEffects({ name: `${effectId}-line` });
+            for (const eff of lineEffects) {
+                if (eff.target) {
+                    eff.target.x = targetX;
+                    eff.target.y = targetY;
+                }
+                if (typeof eff.update === "function") {
+                    try {
+                        eff.update({ stretchTo: { x: targetX, y: targetY } });
+                    } catch (e) {}
                 }
             }
         } catch (e) {
