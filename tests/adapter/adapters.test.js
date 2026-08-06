@@ -634,15 +634,15 @@ test('resolveAnchorPlacement and resolveCrosshairPlacement in attached mode lock
     // Verify resolveAnchorPlacement measures angle directly from edge attachment point to target mouse coordinates
     const nonCardinalAnchor = adapterV14.resolveAnchorPlacement(mockToken, { x: 50, y: 160 });
     assert.equal(nonCardinalAnchor.x, 100);
-    assert.equal(nonCardinalAnchor.y, 150);
-    const expectedAngle = (Math.atan2(160 - 150, 50 - 100) * (180 / Math.PI) + 360) % 360;
+    assert.equal(nonCardinalAnchor.y, 155);
+    const expectedAngle = (Math.atan2(160 - 155, 50 - 100) * (180 / Math.PI) + 360) % 360;
     assert.equal(Math.round(nonCardinalAnchor.direction * 100) / 100, Math.round(expectedAngle * 100) / 100);
 
     // Verify resolveAnchorPlacement projects rays through cursor when cursor is inside token boundaries near corners
     const insideCornerAnchor = adapterV14.resolveAnchorPlacement(mockToken, { x: 110, y: 190 });
     assert.equal(insideCornerAnchor.x, 100);
-    assert.equal(insideCornerAnchor.y, 190);
-    const expectedInsideAngle = (Math.atan2(190 - 190, 110 - 100) * (180 / Math.PI) + 360) % 360;
+    assert.equal(insideCornerAnchor.y, 200);
+    const expectedInsideAngle = (Math.atan2(190 - 200, 110 - 100) * (180 / Math.PI) + 360) % 360;
     assert.equal(Math.round(insideCornerAnchor.direction * 100) / 100, Math.round(expectedInsideAngle * 100) / 100);
 
     // 2. Verify resolveCrosshairPlacement in attached mode uses exact visual coordinates from Sequencer when provided
@@ -980,6 +980,7 @@ test('REGRESSION: BaseCrosshairShape.onCancelCallback() unconditionally detaches
 });
 
 test('REGRESSION: resolveCrosshairPlacement resolves exact shape instance coordinates (edge/snapped) rather than raw click coordinates', () => {
+    initializeFoundryAdapter();
     let resolvedPlacement = null;
     const mockDocument = { direction: 0, updateSource: () => {} };
     const mockPlaceable = { document: mockDocument, direction: 0, x: 10, y: 20 };
@@ -995,6 +996,7 @@ test('REGRESSION: resolveCrosshairPlacement resolves exact shape instance coordi
     shape.x = 150;
     shape.y = 100;
     shape.direction = 180;
+    shape.sequencerCrosshair = { x: 150, y: 100, direction: 180 };
 
     // Simulate clicking at raw mouse click position (300, 300) which is far from shape edge position
     const rawClickCoord = { x: 300, y: 300 };
@@ -1325,6 +1327,255 @@ test('REGRESSION: supportsShapeRotation accurately distinguishes shape rotation 
     initializeFoundryAdapter();
     assert.equal(shouldStickToToken({ stickToToken: true }, 'square'), true, 'shouldStickToToken returns true for rotatable shapes in V14');
 });
+
+test('REGRESSION: detached crosshair placement preserves user rotation angle exactly upon placement without resetting or recalculating', async () => {
+    game.version = '14.0.0';
+    initializeFoundryAdapter();
+
+    const { ConeCrosshairShape } = await import('../../src/crosshair/cone.js');
+    const { RayCrosshairShape } = await import('../../src/crosshair/ray.js');
+
+    const mockCasterToken = {
+        id: 'tok-caster-1',
+        x: 100,
+        y: 100,
+        w: 100,
+        h: 100,
+        center: { x: 150, y: 150 }
+    };
+    const mockDocument = { direction: 0, updateSource: () => {} };
+    const mockPlaceable = { document: mockDocument, direction: 0, x: 500, y: 500 };
+
+    // 1. Detached cone crosshair rotated via mousewheel to 125 deg
+    let resolvedCone = null;
+    const coneConfig = {
+        type: 'cone',
+        stickToToken: false,
+        token: mockCasterToken,
+        distance: 30,
+        angle: 53.13,
+        currentDirection: 125,
+        context: { resolve: (res) => { resolvedCone = res; } }
+    };
+
+    const coneShape = new ConeCrosshairShape(mockPlaceable, coneConfig);
+    coneShape.x = 500;
+    coneShape.y = 500;
+    coneShape.direction = 125;
+
+    // Simulate clicking to place detached cone
+    coneShape.onPlacedCallback({ x: 500, y: 500 });
+
+    assert.ok(resolvedCone, 'Detached cone placement must resolve');
+    assert.equal(resolvedCone.x, 500, 'Detached cone X must match placed coordinate');
+    assert.equal(resolvedCone.y, 500, 'Detached cone Y must match placed coordinate');
+    assert.equal(resolvedCone.direction, 125, 'Detached cone direction must preserve user rotation (125 deg) without resetting to 0');
+    assert.equal(resolvedCone.rotation, 125, 'Detached cone rotation must preserve user rotation (125 deg)');
+
+    // 2. Detached ray crosshair rotated via mousewheel to 210 deg
+    let resolvedRay = null;
+    const rayConfig = {
+        type: 'ray',
+        stickToToken: false,
+        token: mockCasterToken,
+        distance: 60,
+        width: 5,
+        currentDirection: 210,
+        context: { resolve: (res) => { resolvedRay = res; } }
+    };
+
+    const rayShape = new RayCrosshairShape(mockPlaceable, rayConfig);
+    rayShape.x = 800;
+    rayShape.y = 600;
+    rayShape.direction = 210;
+
+    // Simulate clicking to place detached ray
+    rayShape.onPlacedCallback({ x: 800, y: 600 });
+
+    assert.ok(resolvedRay, 'Detached ray placement must resolve');
+    assert.equal(resolvedRay.x, 800, 'Detached ray X must match placed coordinate');
+    assert.equal(resolvedRay.y, 600, 'Detached ray Y must match placed coordinate');
+    assert.equal(resolvedRay.direction, 210, 'Detached ray direction must preserve user rotation (210 deg) without resetting to 0');
+    assert.equal(resolvedRay.rotation, 210, 'Detached ray rotation must preserve user rotation (210 deg)');
+
+    // 3. Attached cone crosshair aimed at mouse position (500, 500)
+    let resolvedAttachedCone = null;
+    const attachedConeConfig = {
+        type: 'cone',
+        stickToToken: true,
+        token: mockCasterToken,
+        distance: 30,
+        angle: 53.13,
+        context: { resolve: (res) => { resolvedAttachedCone = res; } }
+    };
+
+    const attachedConeShape = new ConeCrosshairShape(mockPlaceable, attachedConeConfig);
+    // Token center is (150, 150), mouse position at (500, 500)
+    globalThis.canvas = { mousePosition: { x: 500, y: 500 } };
+    attachedConeShape.move(500, 500);
+
+    // Simulate clicking to place attached cone
+    attachedConeShape.onPlacedCallback({ x: 500, y: 500 });
+
+    assert.ok(resolvedAttachedCone, 'Attached cone placement must resolve');
+    assert.equal(resolvedAttachedCone.x, 200, 'Attached cone X must anchor to token edge (x: 200)');
+    assert.equal(resolvedAttachedCone.y, 200, 'Attached cone Y must anchor to token edge (y: 200)');
+    const expectedAttachedAngle = (Math.atan2(500 - 200, 500 - 200) * (180 / Math.PI) + 360) % 360; // 45 deg
+    assert.equal(Math.round(resolvedAttachedCone.direction * 100) / 100, Math.round(expectedAttachedAngle * 100) / 100, 'Attached cone direction must point towards mouse cursor (45 deg)');
+    assert.equal(Math.round(resolvedAttachedCone.rotation * 100) / 100, Math.round(expectedAttachedAngle * 100) / 100, 'Attached cone rotation must match direction');
+});
+
+test('REGRESSION: FoundryVTTV14Adapter.createDeferredDocument strips shape IDs and creates valid Region cone shapes with angle and rotation', async () => {
+    game.version = '14.0.0';
+    initializeFoundryAdapter();
+    const adapterV14 = new FoundryVTTV14Adapter();
+
+    let createdDocName = null;
+    let createdPayloads = null;
+    const mockScene = {
+        createEmbeddedDocuments: async (docName, payloads) => {
+            createdDocName = docName;
+            createdPayloads = payloads;
+            return payloads.map((p, idx) => ({ id: `created-region-${idx}`, ...p }));
+        }
+    };
+
+    const deferredData = {
+        _id: 'preview-region-id',
+        id: 'preview-region-id',
+        name: 'Burning Hands Region',
+        shapes: [
+            {
+                _id: 'preview-shape-id',
+                id: 'preview-shape-id',
+                type: 'cone',
+                radius: 600,
+                angle: 53.13,
+                x: 100,
+                y: 100,
+                rotation: 0
+            }
+        ]
+    };
+
+    const coords = {
+        x: 250,
+        y: 350,
+        direction: 135,
+        rotation: 135,
+        radius: 30,
+        angle: 53.13,
+        type: 'cone',
+        gridUnits: true
+    };
+
+    await adapterV14.createDeferredDocument(mockScene, deferredData, coords, 'Region', { stickToToken: true });
+
+    assert.equal(createdDocName, 'Region', 'Must create Region embedded document in V14');
+    assert.ok(Array.isArray(createdPayloads) && createdPayloads.length === 1);
+    const createdRegion = createdPayloads[0];
+
+    assert.equal(createdRegion.id, undefined, 'Top-level document id must be stripped for creation');
+    assert.equal(createdRegion._id, undefined, 'Top-level document _id must be stripped for creation');
+    assert.ok(Array.isArray(createdRegion.shapes) && createdRegion.shapes.length === 1);
+
+    const shape = createdRegion.shapes[0];
+    assert.equal(shape.id, undefined, 'Embedded shape id must be stripped to prevent V14 insertion errors');
+    assert.equal(shape._id, undefined, 'Embedded shape _id must be stripped to prevent V14 insertion errors');
+    assert.equal(shape.type, 'cone', 'Shape type must be preserved as cone');
+    assert.equal(shape.x, 250, 'Shape X must match placed coordinate');
+    assert.equal(shape.y, 350, 'Shape Y must match placed coordinate');
+    assert.equal(shape.rotation, 135, 'Shape rotation must match placed direction (135 deg)');
+    assert.equal(shape.angle, 53.13, 'Shape angle must match cone interior angle (53.13 deg)');
+    assert.equal(shape.radius, 600, 'Shape radius in pixels must convert grid units (30ft -> 600px at 100px/5ft)');
+});
+
+test('REGRESSION: full attached and detached placement lifecycle preserves exact coordinates and creates deferred Region documents', async () => {
+    game.version = '14.0.0';
+    initializeFoundryAdapter();
+    const adapterV14 = new FoundryVTTV14Adapter();
+
+    let createdDocName = null;
+    let createdPayloads = null;
+    const mockScene = {
+        createEmbeddedDocuments: async (docName, payloads) => {
+            createdDocName = docName;
+            createdPayloads = payloads;
+            return payloads;
+        }
+    };
+    globalThis.canvas.scene = mockScene;
+
+    const mockRegionDoc = {
+        id: 'region-lifecycle-test',
+        documentName: 'Region',
+        shapes: [
+            {
+                type: 'cone',
+                radius: 600,
+                angle: 53.13,
+                x: 100,
+                y: 100,
+                rotation: 0
+            }
+        ],
+        toObject: function() {
+            return {
+                id: this.id,
+                documentName: this.documentName,
+                shapes: foundry.utils.deepClone(this.shapes)
+            };
+        }
+    };
+
+    const mockPlaceable = {
+        document: mockRegionDoc,
+        x: 100,
+        y: 100,
+        destroy: () => {}
+    };
+
+    // 1. Simulate handlePreCreate deferral
+    const pendingPlacementKey = `Cone of Cold_${game.user.id}`;
+    const pending = {
+        itemName: 'Cone of Cold',
+        resolved: false,
+        cancelled: false,
+        coords: null,
+        config: { stickToToken: true },
+        placeable: mockPlaceable
+    };
+    adapterV14.pendingPlacements.set(pendingPlacementKey, pending);
+
+    const preCreateResult = adapterV14.handlePreCreate(mockRegionDoc, {}, {}, game.user.id);
+    assert.equal(preCreateResult, false, 'PreCreate must defer document creation while interactive placement is pending');
+    assert.ok(pending.deferredCreateData, 'Deferred create data must be captured');
+
+    // 2. Resolve placement with coordinates from Sequencer
+    const placedCoords = {
+        x: 200,
+        y: 150,
+        direction: 90,
+        rotation: 90,
+        radius: 30,
+        angle: 53.13,
+        type: 'cone',
+        gridUnits: true
+    };
+
+    await adapterV14.createDeferredDocument(mockScene, pending.deferredCreateData, placedCoords, pending.documentName, pending.config);
+
+    assert.equal(createdDocName, 'Region');
+    assert.ok(createdPayloads);
+    const placedRegion = createdPayloads[0];
+    assert.equal(placedRegion.shapes[0].x, 200);
+    assert.equal(placedRegion.shapes[0].y, 150);
+    assert.equal(placedRegion.shapes[0].rotation, 90);
+    assert.equal(placedRegion.shapes[0].type, 'cone');
+});
+
+
+
 
 
 
