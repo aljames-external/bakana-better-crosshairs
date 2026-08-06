@@ -427,7 +427,7 @@ export class BaseFoundryVTTAdapter {
 
     /**
      * Generate structured placement hook descriptors across all supported placeable and document types.
-     * Abstract method quarantined into version-specific subclasses (`FoundryVTTV13Adapter`, `FoundryVTTV14Adapter`).
+     * Abstract method quarantined into version-specific subclasses (`FoundryVTTV14Adapter`).
      * @abstract
      * @param {Object} callbacks - Placement hook callbacks (`{ onDrawPreview, onPreCreate, onCreate }`)
      * @param {Object} [sysAdapter=systemAdapter] - Active System Adapter instance

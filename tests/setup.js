@@ -136,7 +136,7 @@ const registeredCallbacks = new Map();
 
 globalThis.game = {
     user: { id: "test-user", isGM: true },
-    version: "13.335",
+    version: "14.300",
     system: { id: "dnd5e", title: "Dungeons & Dragons 5th Edition" },
     i18n: {
         has(key) { return true; },

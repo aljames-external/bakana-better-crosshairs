@@ -9,23 +9,24 @@ import { snapCoordinates, attachWheelRotation, detachWheelRotation, resolveCross
 import { BaseCrosshairShape } from '../../src/crosshair/base.js';
 import { Token } from '../../src/lib/compat.js';
 import { autorecManager } from '../../src/autorec/autorecManager.js';
-import { FoundryVTTV13Adapter } from '../../src/adapter/foundry/foundryvtt-v13-adapter.js';
 import { FoundryVTTV14Adapter } from '../../src/adapter/foundry/foundryvtt-v14-adapter.js';
 import { Dnd5eSystemAdapter } from '../../src/adapter/system/dnd5e-adapter.js';
 import { Pf2eSystemAdapter } from '../../src/adapter/system/pf2e-adapter.js';
 
 test('initializeFoundryAdapter selects proper Foundry VTT generation adapter based on game.version', () => {
-    globalThis.game.version = "13.335";
-    const adapterV13 = initializeFoundryAdapter();
-    assert.ok(adapterV13 instanceof FoundryVTTV13Adapter);
-    assert.equal(adapterV13.documentTerm, 'template');
-    assert.equal(crosshairAdapter, adapterV13);
-
     globalThis.game.version = "14.300";
     const adapterV14 = initializeFoundryAdapter();
     assert.ok(adapterV14 instanceof FoundryVTTV14Adapter);
     assert.equal(adapterV14.documentTerm, 'region');
     assert.equal(crosshairAdapter, adapterV14);
+
+    globalThis.game.version = "13.335";
+    assert.throws(() => {
+        initializeFoundryAdapter();
+    }, /Unsupported Foundry VTT generation/);
+
+    globalThis.game.version = "14.0.0";
+    initializeFoundryAdapter();
 });
 
 test('initializeSystemAdapter selects proper System adapter based on game.system.id', () => {
@@ -164,10 +165,10 @@ test('extractPlacedStylingFlags and applyDocumentPlacement extract and set borde
         placedBorderColor: '#abcdef',
         placedBorderAlpha: 0.85
     };
-    const adapterV13 = new FoundryVTTV13Adapter();
-    const extracted = adapterV13.extractPlacedStylingFlags(config);
+    const adapterV14 = new FoundryVTTV14Adapter();
+    const extracted = adapterV14.extractPlacedStylingFlags(config);
     assert.equal(extracted.placedBorderAlpha, 0.85);
-    const styling = adapterV13.extractPlacedStylingFlags({
+    const styling = adapterV14.extractPlacedStylingFlags({
         placedFillColor: '#ff0000',
         placedFillAlpha: 0.5,
         placedBorderColor: '#fc753b',
@@ -212,7 +213,7 @@ test('extractPlacedStylingFlags and applyDocumentPlacement extract and set borde
         }
     };
 
-    adapterV13.handleMeasuredTemplateRefresh(mockTemplate);
+    adapterV14.handleMeasuredTemplateRefresh(mockTemplate);
     assert.equal(mockTemplate.document.borderColor, '#fc753b');
     assert.equal(mockTemplate.document.borderAlpha, 0.6);
     assert.equal(mockTemplate.template.geometry.graphicsData[0].lineStyle.color, 0xfc753b);
@@ -232,7 +233,7 @@ test('extractPlacedStylingFlags and applyDocumentPlacement extract and set borde
             fillColor: '#ffffff'
         }
     };
-    adapterV13.handleMeasuredTemplateRefresh(previewTemplate);
+    adapterV14.handleMeasuredTemplateRefresh(previewTemplate);
     assert.equal(previewTemplate.document.borderColor, '#000000', 'Preview template borderColor should not be overwritten by placed border color');
     assert.equal(previewTemplate.document.fillColor, '#ffffff', 'Preview template fillColor should not be overwritten by placed fill color');
 });
@@ -257,18 +258,6 @@ test('abstracted registerPlacementHooks combines both Foundry version adapter an
         assert.ok(registered.includes('preCreateMeasuredTemplate'));
         assert.ok(registered.includes('createRegion'));
         assert.ok(registered.includes('createMeasuredTemplate'));
-
-        registered.length = 0;
-        const adapterV13 = new FoundryVTTV13Adapter();
-        const dndSys = new Dnd5eSystemAdapter();
-        registerPlacementHooks({ onDrawPreview: () => {}, onPreCreate: () => {}, onCreate: () => {} }, {
-            foundryAdapter: adapterV13,
-            sysAdapter: dndSys
-        });
-        assert.ok(registered.includes('drawMeasuredTemplate'));
-        assert.ok(registered.includes('drawMeasuredTemplate5e'));
-        assert.equal(registered.includes('drawRegion'), false, 'V13 adapter does not register Region draw hooks');
-        assert.ok(registered.includes('refreshMeasuredTemplate'));
     } finally {
         globalThis.Hooks.on = originalOn;
     }
@@ -760,14 +749,6 @@ test('createDeferredDocument delegates document creation appropriately in V13 Me
         }
     };
 
-    const adapterV13 = new FoundryVTTV13Adapter();
-    await adapterV13.createDeferredDocument(mockScene, { _id: "temp1", t: "circle", distance: 15 }, { x: 100, y: 200, distance: 20 });
-    assert.equal(createdDocName, "MeasuredTemplate");
-    assert.equal(createdDocPayload.x, 100);
-    assert.equal(createdDocPayload.y, 200);
-    assert.equal(createdDocPayload.distance, 20);
-    assert.equal(createdDocPayload._id, undefined);
-
     const adapterV14 = new FoundryVTTV14Adapter();
     await adapterV14.createDeferredDocument(mockScene, { _id: "temp2", shapes: [{ type: "circle", x: 0, y: 0, radius: 10 }] }, { x: 300, y: 400, radius: 25, gridUnits: false });
     assert.equal(createdDocName, "Region");
@@ -1252,94 +1233,13 @@ test('REGRESSION: Pf2eSystemAdapter and Dnd5eSystemAdapter expose refreshTemplat
     });
 });
 
-test('REGRESSION: FoundryVTTV13Adapter preserves cone template type (t) and angle across detection, formatting, and placement updates', () => {
-    const adapterV13 = new FoundryVTTV13Adapter();
-
-    // 1. Detection
-    const coneDoc = { t: 'cone', distance: 15, angle: 53.13, x: 10, y: 20 };
-    const detected = adapterV13.detectProperties(coneDoc);
-    assert.equal(detected.type, 'cone');
-    assert.equal(detected.t, 'cone');
-    assert.equal(detected.angle, 53.13);
-
-    // 2. Formatting
-    const formatted = adapterV13.formatPlacementCoordinates(100, 200, 45, { ...detected, type: 'cone' });
-    assert.equal(formatted.t, 'cone');
-    assert.equal(formatted.type, 'cone');
-    assert.equal(formatted.angle, 53.13);
-
-    // 3. Document Placement Update
-    let updatedPayload = null;
-    const targetDoc = {
-        t: 'cone',
-        angle: 53.13,
-        updateSource: (data) => { updatedPayload = data; }
-    };
-
-    adapterV13.applyDocumentPlacement(targetDoc, formatted, { itemName: 'Burning Hands' });
-    assert.ok(updatedPayload);
-    assert.equal(updatedPayload.t, 'cone', 't must be cone and not fall back to circle');
-    assert.equal(updatedPayload.angle, 53.13, 'angle must be preserved');
-    assert.equal(updatedPayload.x, 100);
-    assert.equal(updatedPayload.y, 200);
-    assert.equal(updatedPayload.direction, 45);
-});
-
-test('REGRESSION: FoundryVTTV13Adapter normalizes rect diagonal distance and calculates token attachment offsets', () => {
-    const adapterV13 = new FoundryVTTV13Adapter();
-
-    // 1. Verify diagonal distance (28.284) is normalized and does not compound exponentially
-    let updatedPayload = null;
-    const targetDoc = {
-        t: 'rect',
-        distance: 28.284271247461902,
-        width: 20,
-        updateSource: (data) => { updatedPayload = data; }
-    };
-
-    const coords = { x: 1000, y: 1000, direction: 90, distance: 28.284271247461902, width: 20, type: 'square' };
-    adapterV13.applyDocumentPlacement(targetDoc, coords, { originalType: 'square' });
-
-    assert.ok(updatedPayload);
-    assert.equal(updatedPayload.t, 'rect');
-    assert.equal(updatedPayload.width, 20);
-    assert.equal(updatedPayload.distance, 28.28, 'Distance must remain 28.28 (sqrt(20^2+20^2)) and not compound to 34.64+');
-
-    // 2. Verify attached rect template calculates edge offset correctly based on direction angle
-    let attachedPayload = null;
-    const attachedDoc = {
-        t: 'rect',
-        updateSource: (data) => { attachedPayload = data; }
-    };
-
-    // At 90 deg rotation, sin(90)=1, cos(90)=0 -> x offset = 20ft * 20px/ft / 2 = 200px
-    const attachedCoords = { x: 1000, y: 1000, direction: 90, distance: 20, width: 20, sticky: true, token: { name: 'Token' } };
-    adapterV13.applyDocumentPlacement(attachedDoc, attachedCoords, { originalType: 'square', token: { name: 'Token' } });
-
-    assert.ok(attachedPayload);
-    assert.equal(attachedPayload.x, 1200);
-    assert.equal(attachedPayload.y, 1000);
-
-    // 3. Verify formatPlacementCoordinates converts raw crosshair 0 deg rotation into 45 deg diagonal direction for MeasuredTemplate rect
-    const squareFormatted = adapterV13.formatPlacementCoordinates(3000, 1600, 0, { type: 'square', distance: 15, width: 15 });
-    assert.equal(squareFormatted.direction, 45, 'Unrotated square MeasuredTemplate must have direction = 45 (diagonal angle)');
-    assert.equal(squareFormatted.t, 'rect');
-});
-
-test('REGRESSION: supportsShapeRotation accurately distinguishes shape rotation capabilities in V13 vs V14', () => {
-    const adapterV13 = new FoundryVTTV13Adapter();
+test('REGRESSION: supportsShapeRotation accurately verifies shape rotation capabilities in V14', () => {
     const adapterV14 = new FoundryVTTV14Adapter();
-
-    assert.equal(adapterV13.supportsShapeRotation('rect'), false, 'V13 MeasuredTemplate rect cannot rotate');
-    assert.equal(adapterV13.supportsShapeRotation('square'), false, 'V13 MeasuredTemplate square cannot rotate');
-    assert.equal(adapterV13.supportsShapeRotation('cone'), true, 'V13 MeasuredTemplate cone can rotate');
 
     assert.equal(adapterV14.supportsShapeRotation('rect'), true, 'V14 Region rect can rotate');
     assert.equal(adapterV14.supportsShapeRotation('square'), true, 'V14 Region square can rotate');
-
-    game.version = '13.0.0';
-    initializeFoundryAdapter();
-    assert.equal(shouldStickToToken({ stickToToken: true }, 'square'), false, 'shouldStickToToken must return false for non-rotatable shapes in V13');
+    assert.equal(adapterV14.supportsShapeRotation('cone'), true, 'V14 Region cone can rotate');
+    assert.equal(adapterV14.supportsShapeRotation('circle'), true, 'V14 Region circle can rotate');
 
     game.version = '14.0.0';
     initializeFoundryAdapter();
