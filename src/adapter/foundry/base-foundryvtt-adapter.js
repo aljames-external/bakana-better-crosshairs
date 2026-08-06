@@ -5,7 +5,7 @@ import { MODULE_ID } from "../../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY, autorecManager } from "../../autorec/autorecManager.js";
 import { CrosshairConfiguration } from "../../autorec/CrosshairConfiguration.js";
 import { notify } from "../../lib/notifier.js";
-import { runConcurrentScript, activePlacementTracker } from "../../crosshair/util.js";
+import { runConcurrentScript, activePlacementTracker, shouldStickToToken } from "../../crosshair/util.js";
 /**
  * Base abstract class for Foundry VTT version-specific adapters.
  */
@@ -656,6 +656,14 @@ export class BaseFoundryVTTAdapter {
         await this._applyDeferredCoordinates(data, coords, docName);
         this.applyDocumentPlacement(data, coords, config, data);
 
+        if (Array.isArray(data.shapes)) {
+            data.shapes = data.shapes.map(s => {
+                const shapeObj = typeof s?.toObject === "function" ? s.toObject() : s;
+                const { id: sId, _id: sUnderscoreId, _source: sSource, ...cleanShape } = shapeObj;
+                return cleanShape;
+            });
+        }
+
         log.debug(`Adapter.createDeferredDocument | Deferred ${docName} payload:`, {
             docName,
             resolvedCoords: coords,
@@ -933,24 +941,6 @@ export class BaseFoundryVTTAdapter {
              * @returns {Promise<void>} Resolves when deferred document placement is processed
              */
             async resolve(coords = {}) {
-                const targetToken = token ?? entryConfig?.token;
-                if (targetToken && (entryConfig?.stickToToken ?? true)) {
-                    const posX = coords.x ?? placeable?.x ?? 0;
-                    const posY = coords.y ?? placeable?.y ?? 0;
-                    const mousePos = canvas?.mousePosition ?? { x: posX, y: posY };
-                    const dx = mousePos.x - posX;
-                    const dy = mousePos.y - posY;
-                    let dir = coords.direction;
-                    if (Math.abs(dx) > 1e-6 || Math.abs(dy) > 1e-6) {
-                        let deg = Math.atan2(dy, dx) * (180 / Math.PI);
-                        if (deg < 0) deg += 360;
-                        dir = deg % 360;
-                    }
-                    coords.x = posX;
-                    coords.y = posY;
-                    coords.direction = dir;
-                    coords.rotation = dir;
-                }
                 Object.assign(this, coords);
                 this.resolved = true;
 

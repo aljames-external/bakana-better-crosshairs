@@ -92,6 +92,19 @@ globalThis.foundry = {
         deepClone,
         mergeObject,
         isNewerVersion,
+        lineSegmentIntersection: (a, b, c, d) => {
+            const denom = (d.y - c.y) * (b.x - a.x) - (d.x - c.x) * (b.y - a.y);
+            if (Math.abs(denom) < 1e-10) return null;
+            const ua = ((d.x - c.x) * (a.y - c.y) - (d.y - c.y) * (a.x - c.x)) / denom;
+            const ub = ((b.x - a.x) * (a.y - c.y) - (b.y - a.y) * (a.x - c.x)) / denom;
+            if (ua >= 0 && ua <= 1 && ub >= 0 && ub <= 1) {
+                return {
+                    x: a.x + ua * (b.x - a.x),
+                    y: a.y + ua * (b.y - a.y)
+                };
+            }
+            return null;
+        },
         randomID: () => 'test-id-' + Math.random().toString(36).substring(2, 8)
     }
 };

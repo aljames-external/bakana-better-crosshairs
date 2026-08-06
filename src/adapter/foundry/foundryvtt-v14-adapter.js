@@ -432,6 +432,7 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             distance: config.distance ?? primaryDim,
             radius: config.radius ?? primaryDim,
             width: config.width,
+            angle: config.angle,
             gridUnits: Boolean(config.gridUnits ?? true),
             sticky: isSticky,
             type: isSquareOrRect ? "square" : (config.originalType ?? config.type),
@@ -452,11 +453,21 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
     _formatRegionShapeUpdate(originalShape, coords) {
         // Deep clone shape payload as a plain object to prevent mutating caller or carrying stale _source references
         const raw = typeof originalShape?.toObject === "function" ? originalShape.toObject() : (originalShape ?? {});
-        const { _source, ...cleanRaw } = raw;
+        const { _source, id, _id, ...cleanRaw } = raw;
         const shape = foundry.utils.deepClone(cleanRaw);
 
         const pxPerFoot = (canvas?.dimensions?.size ?? 100) / (canvas?.dimensions?.distance ?? 5);
         const isGridUnits = Boolean(coords.gridUnits ?? true);
+
+        const rawType = coords.originalType ?? coords.type ?? coords.t ?? shape.type;
+        const shapeType = rawType === "cone"
+            ? "cone"
+            : (rawType === "circle"
+                ? "circle"
+                : ((rawType === "square" || rawType === "rect" || coords.t === "rect")
+                    ? "rectangle"
+                    : (shape.type ?? "rectangle")));
+        shape.type = shapeType;
 
         // Apply placement origin coordinates and rotation directly
         if (coords.x !== undefined) shape.x = coords.x;
@@ -508,12 +519,21 @@ export class FoundryVTTV14Adapter extends BaseFoundryVTTAdapter {
             if (radFoot !== undefined) {
                 shape.radius = isGridUnits ? Math.round(radFoot * pxPerFoot) : radFoot;
             }
+        } else if (shape.type === "cone") {
+            const radFoot = coords.radius ?? coords.distance;
+            if (radFoot !== undefined) {
+                shape.radius = isGridUnits ? Math.round(radFoot * pxPerFoot) : radFoot;
+            }
+            shape.angle = coords.angle ?? originalShape.angle ?? 53.13;
         } else {
             if (coords.radius !== undefined) {
                 shape.radius = isGridUnits ? Math.round(coords.radius * pxPerFoot) : coords.radius;
             }
             if (coords.width !== undefined) {
                 shape.width = isGridUnits ? Math.round(coords.width * pxPerFoot) : coords.width;
+            }
+            if (coords.angle !== undefined) {
+                shape.angle = coords.angle;
             }
         }
         return shape;

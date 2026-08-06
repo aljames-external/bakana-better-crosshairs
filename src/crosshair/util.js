@@ -469,6 +469,7 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
 
             const iconEffects = Sequencer.EffectManager.getEffects({ name: `${effectId}-icon` });
             for (const eff of iconEffects) {
+                if (effects.includes(eff)) continue;
                 eff.x = targetX;
                 eff.y = targetY;
                 if (eff.worldPosition) {
@@ -494,6 +495,7 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
 
             const lineEffects = Sequencer.EffectManager.getEffects({ name: `${effectId}-line` });
             for (const eff of lineEffects) {
+                if (effects.includes(eff)) continue;
                 if (eff.target) {
                     eff.target.x = targetX;
                     eff.target.y = targetY;
@@ -555,7 +557,9 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
             ? config.direction
             : (typeof shape?.direction === "number")
                 ? shape.direction
-                : undefined;
+                : (typeof crosshair?.direction === "number")
+                    ? crosshair.direction
+                    : undefined;
 
     // Search extra arguments for explicit rotation/direction if not already set by placement config
     if (direction === undefined) {
@@ -591,22 +595,28 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
         const posY = (crosshair && Number.isFinite(crosshair.y)) ? crosshair.y : clickY;
         x = posX;
         y = posY;
-        const mousePos = canvas?.mousePosition ?? { x: clickX, y: clickY };
-        const dx = mousePos.x - posX;
-        const dy = mousePos.y - posY;
-        if (Math.abs(dx) > 1e-6 || Math.abs(dy) > 1e-6) {
-            let deg = Math.atan2(dy, dx) * (180 / Math.PI);
-            if (deg < 0) deg += 360;
-            direction = deg % 360;
-        } else {
-            const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, mousePos);
-            direction = anchored.direction;
+        if (direction === undefined) {
+            if (crosshair && Number.isFinite(crosshair.direction)) {
+                direction = crosshair.direction;
+            } else {
+                const mousePos = canvas?.mousePosition ?? { x: clickX, y: clickY };
+                const dx = mousePos.x - posX;
+                const dy = mousePos.y - posY;
+                if (Math.abs(dx) > 1e-6 || Math.abs(dy) > 1e-6) {
+                    let deg = Math.atan2(dy, dx) * (180 / Math.PI);
+                    if (deg < 0) deg += 360;
+                    direction = deg % 360;
+                } else {
+                    const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, mousePos);
+                    direction = anchored.direction;
+                }
+            }
         }
         log.debug("resolveCrosshairPlacement | Token anchored placement using exact Sequencer visual position ->", { x, y, direction });
     } else {
         // Detached / free cursor placement: Origin is where the user clicked (clickX, clickY)
-        x = clickX;
-        y = clickY;
+        x = (crosshair && Number.isFinite(crosshair.x)) ? crosshair.x : clickX;
+        y = (crosshair && Number.isFinite(crosshair.y)) ? crosshair.y : clickY;
         const snapMode = getGridSnapMode(config);
         if (snapMode !== 0) {
             const snapped = snapCoordinates(x, y, snapMode);
@@ -614,7 +624,7 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
             y = snapped.y;
         }
         if (direction === undefined) {
-            direction = config.currentDirection ?? config.direction ?? config.angle ?? 0;
+            direction = config.currentDirection ?? config.direction ?? (crosshair && Number.isFinite(crosshair.direction) ? crosshair.direction : (config.angle ?? 0));
         }
     }
 
