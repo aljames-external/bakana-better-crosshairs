@@ -1,5 +1,6 @@
 import { MODULE_ID } from "../../lib/constants.js";
 import { log } from "../../lib/logger.js";
+import { slugify } from "../../lib/utils.js";
 import { ItemCrosshairConfigApplication } from "../../autorec/itemConfigMenu.js";
 
 /**
@@ -124,38 +125,72 @@ export class BaseSystemAdapter {
 
     /**
      * Populate the in-memory system defaults map from a dictionary or array of entries.
-     * @param {Object<string, boolean>|Array<Object>} data - Dictionary mapping spell names to stick booleans, or array of entry objects
+     * Indexes both canonical slug keys and localized item names registered in `game.i18n`.
+     * @param {Object<string, boolean>|Array<Object>} data - Dictionary mapping spell names/slugs to stick booleans, or array of entry objects
      * @returns {void}
      */
     setDefaultsData(data) {
         if (!data || typeof data !== "object") return;
-        if (Array.isArray(data)) {
-            for (const entry of data) {
-                if (!entry?.itemName) continue;
-                const key = entry.itemName.trim().toLowerCase();
-                const stick = Boolean(entry.options?.attachMode === "true" || entry.stickToToken === "true" || entry.stickToToken === true);
-                this.defaultsMap.set(key, stick);
+        const entries = Array.isArray(data)
+            ? data.map(entry => [entry.itemName, Boolean(entry.options?.attachMode === "true" || entry.stickToToken === "true" || entry.stickToToken === true)])
+            : Object.entries(data);
+
+        for (const [nameOrSlug, stick] of entries) {
+            if (!nameOrSlug) continue;
+            const boolStick = Boolean(stick);
+            const slug = slugify(nameOrSlug);
+            const rawLower = String(nameOrSlug).trim().toLowerCase();
+
+            this.defaultsMap.set(slug, boolStick);
+            if (rawLower !== slug) {
+                this.defaultsMap.set(rawLower, boolStick);
             }
-        } else {
-            for (const [name, stick] of Object.entries(data)) {
-                if (!name) continue;
-                const key = name.trim().toLowerCase();
-                this.defaultsMap.set(key, Boolean(stick));
+
+            // Check if active localization has a translated string for this default key
+            if (typeof game !== "undefined" && game?.i18n?.has) {
+                const i18nKey = `BBC.defaults.${this.systemId}.${slug}`;
+                if (game.i18n.has(i18nKey)) {
+                    const localized = game.i18n.localize(i18nKey);
+                    if (localized) {
+                        this.defaultsMap.set(localized.trim().toLowerCase(), boolStick);
+                        this.defaultsMap.set(slugify(localized), boolStick);
+                    }
+                }
             }
         }
     }
 
     /**
      * Retrieve the authoritative system default stick setting for a calling item/spell.
-     * Looks up by canonical item name (case-insensitive) in the built-in system dataset.
+     * Evaluates item system identifiers, canonical slugs, and localized names.
      * @param {Object|string} [context={}] - Calling context or item name
      * @returns {boolean|null} True if spell attaches to token, false if free placement, null if unlisted
      */
     getSystemDefault(context) {
-        const rawName = typeof context === "string" ? context : (context?.itemName ?? context?.item?.name ?? "");
-        const key = rawName.trim().toLowerCase();
-        if (!key) return null;
-        return this.defaultsMap.has(key) ? this.defaultsMap.get(key) : null;
+        if (!context) return null;
+        const itemObj = typeof context === "object" ? (context.item ?? (context.documentName === "Item" ? context : null)) : null;
+        const rawName = typeof context === "string" ? context : (context.itemName ?? itemObj?.name ?? "");
+
+        // 1. Check item system identifier / slug if item document is present
+        const itemIdentifier = (itemObj?.system?.identifier ?? itemObj?.identifier ?? itemObj?.flags?.[this.systemId]?.identifier ?? "").trim().toLowerCase();
+        if (itemIdentifier) {
+            const slugIdentifier = slugify(itemIdentifier);
+            if (this.defaultsMap.has(slugIdentifier)) return this.defaultsMap.get(slugIdentifier);
+            if (this.defaultsMap.has(itemIdentifier)) return this.defaultsMap.get(itemIdentifier);
+        }
+
+        // 2. Check canonical item name and normalized slug
+        const lowerName = rawName.trim().toLowerCase();
+        if (lowerName && this.defaultsMap.has(lowerName)) {
+            return this.defaultsMap.get(lowerName);
+        }
+
+        const nameSlug = slugify(rawName);
+        if (nameSlug && this.defaultsMap.has(nameSlug)) {
+            return this.defaultsMap.get(nameSlug);
+        }
+
+        return null;
     }
 
     /**

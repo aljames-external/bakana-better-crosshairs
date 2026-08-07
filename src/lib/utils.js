@@ -10,6 +10,23 @@ export function localize(key, fallback = key) {
 }
 
 /**
+ * Generate a normalized lowercase hyphenated slug from an item/spell name.
+ * Normalizes Unicode accents (e.g. é -> e, ñ -> n) and strips special characters.
+ * @param {string} str - Raw input string name
+ * @returns {string} Normalized lowercase hyphenated slug
+ */
+export function slugify(str) {
+    if (typeof str !== "string" || !str) return "";
+    return str
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+}
+
+/**
  * Version utility for semantic range verification across Foundry VTT releases.
  */
 export const version = {
