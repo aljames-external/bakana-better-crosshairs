@@ -39,6 +39,36 @@
             "lang": "ja",
             "name": "日本語 (D&D 5e Defaults)",
             "path": "lang/ja/dnd5e.json"
+        },
+        {
+            "lang": "en",
+            "name": "English (Pathfinder 2e Defaults)",
+            "path": "lang/en/pf2e.json"
+        },
+        {
+            "lang": "es",
+            "name": "Español (Pathfinder 2e Defaults)",
+            "path": "lang/es/pf2e.json"
+        },
+        {
+            "lang": "ja",
+            "name": "日本語 (Pathfinder 2e Defaults)",
+            "path": "lang/ja/pf2e.json"
+        },
+        {
+            "lang": "en",
+            "name": "English (Pathfinder 1e Defaults)",
+            "path": "lang/en/pf1.json"
+        },
+        {
+            "lang": "es",
+            "name": "Español (Pathfinder 1e Defaults)",
+            "path": "lang/es/pf1.json"
+        },
+        {
+            "lang": "ja",
+            "name": "日本語 (Pathfinder 1e Defaults)",
+            "path": "lang/ja/pf1.json"
         }
     ],
     "url": "#{URL}#",

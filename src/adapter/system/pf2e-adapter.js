@@ -23,6 +23,23 @@ export class Pf2eSystemAdapter extends BaseSystemAdapter {
     }
 
     /**
+     * Determine the Pathfinder 2e system default for whether a crosshair shape should stick to its source token
+     * when no explicit override is configured (stickToToken === "default").
+     * Checks the authoritative Pathfinder 2e spell/ability system defaults first (e.g. Burning Hands, Lightning Bolt, Fireball).
+     * If not found in the dataset, falls back to standard shape defaults (cones and rays/lines stick to token).
+     * @param {string} shapeType - The template or crosshair shape (`"cone"`, `"circle"`, `"ray"`, `"rect"`, `"square"`)
+     * @param {object} [config={}] - Optional crosshair configuration or calling context object
+     * @returns {boolean} Whether the crosshair shape defaults to sticking to the token in Pathfinder 2e
+     */
+    getDefaultStickToToken(shapeType, config = {}) {
+        const itemDefault = this.getSystemDefault(config);
+        if (itemDefault !== null && itemDefault !== undefined) {
+            return Boolean(itemDefault);
+        }
+        return shapeType === "cone" || shapeType === "ray";
+    }
+
+    /**
      * Return whether mouse wheel rotation of a crosshair requires holding the Control / Command modifier key.
      * In Pathfinder 2e, rotating a region/template requires holding Ctrl + mousewheel, so normal mousewheel zooms the canvas.
      * @returns {boolean} True (Pathfinder 2e requires Control key for crosshair wheel rotation)

@@ -13,6 +13,7 @@ import { FoundryVTTV13Adapter } from '../../src/adapter/foundry/foundryvtt-v13-a
 import { FoundryVTTV14Adapter } from '../../src/adapter/foundry/foundryvtt-v14-adapter.js';
 import { Dnd5eSystemAdapter } from '../../src/adapter/system/dnd5e-adapter.js';
 import { Pf2eSystemAdapter } from '../../src/adapter/system/pf2e-adapter.js';
+import { Pf1SystemAdapter } from '../../src/adapter/system/pf1-adapter.js';
 
 test('initializeFoundryAdapter selects proper Foundry VTT generation adapter based on game.version', () => {
     globalThis.game.version = "13.335";
@@ -40,6 +41,20 @@ test('initializeSystemAdapter selects proper System adapter based on game.system
     sysAdapter = initializeSystemAdapter();
     assert.ok(sysAdapter instanceof Pf2eSystemAdapter);
     assert.equal(sysAdapter.systemId, 'pf2e');
+    assert.equal(sysAdapter.supportsActivities, false);
+    assert.equal(systemAdapter, sysAdapter);
+
+    globalThis.game.system.id = "pf1";
+    sysAdapter = initializeSystemAdapter();
+    assert.ok(sysAdapter instanceof Pf1SystemAdapter);
+    assert.equal(sysAdapter.systemId, 'pf1');
+    assert.equal(sysAdapter.supportsActivities, false);
+    assert.equal(systemAdapter, sysAdapter);
+
+    globalThis.game.system.id = "pf";
+    sysAdapter = initializeSystemAdapter();
+    assert.ok(sysAdapter instanceof Pf1SystemAdapter);
+    assert.equal(sysAdapter.systemId, 'pf');
     assert.equal(sysAdapter.supportsActivities, false);
     assert.equal(systemAdapter, sysAdapter);
 });
