@@ -3,6 +3,7 @@ import { log } from './lib/logger.js';
 import { autorecManager } from './autorec/autorecManager.js';
 import { AutorecMenuApplication } from './autorec/autorecMenu.js';
 import { AutorecExchangeMenuApplication } from './autorec/autorecExchangeMenu.js';
+import { LoadSystemDefaultsApplication } from './autorec/loadSystemDefaultsMenu.js';
 
 /**
  * Registers module settings and menus during Foundry VTT initialization.
@@ -32,6 +33,15 @@ export function registerModuleSettings() {
         restricted: true
     });
 
+    game.settings.registerMenu(MODULE_ID, 'loadSystemDefaults', {
+        name: 'BBC.settings.loadSystemDefaults.name',
+        label: 'BBC.settings.loadSystemDefaults.label',
+        hint: 'BBC.settings.loadSystemDefaults.hint',
+        icon: 'fa-solid fa-arrows-rotate',
+        type: LoadSystemDefaultsApplication,
+        restricted: true
+    });
+
     game.settings.register(MODULE_ID, 'registeredTemplates', {
         name: 'BBC.settings.registeredTemplates.name',
         scope: 'world',
@@ -47,6 +57,14 @@ export function registerModuleSettings() {
         onChange: (savedRegistrations) => {
             autorecManager.loadSavedRegistrations(savedRegistrations ?? {});
         }
+    });
+
+    game.settings.register(MODULE_ID, 'systemDefaultsLoaded', {
+        name: 'BBC.settings.systemDefaultsLoaded.name',
+        scope: 'world',
+        config: false,
+        type: Object,
+        default: {}
     });
 
     game.settings.register(MODULE_ID, 'logVerbosity', {

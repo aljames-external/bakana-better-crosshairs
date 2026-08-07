@@ -1,4 +1,6 @@
+import { MODULE_ID } from "../../lib/constants.js";
 import { log } from "../../lib/logger.js";
+import { autorecManager } from "../../autorec/autorecManager.js";
 import { ItemCrosshairConfigApplication } from "../../autorec/itemConfigMenu.js";
 
 /**
@@ -217,6 +219,98 @@ export class BaseSystemAdapter {
             for (const hookName of this._getItemSheetHookNames()) {
                 Hooks.on(hookName, handler);
             }
+        }
+    }
+
+    /**
+     * Load default crosshair configurations for this game system into the autorec registry.
+     * Fetches the system default package `modules/${MODULE_ID}/src/autorec/system-defaults/${this.systemId}.json`.
+     * Single concrete parameter contract with strict nullish coalescing defaults (Rule 1, Rule 4, Rule 5).
+     *
+     * @param {Object} [options={}] - Import options.
+     * @param {boolean} [options.onlyFirstBoot=false] - If true, only loads if defaults have not yet been loaded in this world.
+     * @param {boolean} [options.interactive=false] - Whether to show interactive import dialog.
+     * @param {boolean} [options.overwrite=true] - Whether to overwrite existing registrations in silent mode.
+     * @param {Object} [options.payload=null] - Optional pre-parsed bundle object to use directly instead of fetching.
+     * @returns {Promise<{success: boolean, mergedCount: number, skipped?: boolean, error?: string}>} Summary of the loading operation.
+     */
+    async loadDefaults({
+        onlyFirstBoot = false,
+        interactive = false,
+        overwrite = true,
+        payload = null
+    } = {}) {
+        const targetSystem = String(this.systemId ?? game?.system?.id ?? "dnd5e").trim().toLowerCase();
+
+        // Check first boot condition if onlyFirstBoot is requested
+        if (onlyFirstBoot) {
+            const isGM = Boolean(game?.user?.isGM);
+            if (!isGM && typeof game !== "undefined" && game?.user) {
+                return { success: false, mergedCount: 0, skipped: true, error: "Only the GM can initialize system defaults on first boot." };
+            }
+
+            let loadedMap = {};
+            try {
+                loadedMap = game?.settings?.get?.(MODULE_ID, "systemDefaultsLoaded") ?? {};
+            } catch (e) {
+                log.debug("BaseSystemAdapter.loadDefaults | Setting 'systemDefaultsLoaded' not yet registered.");
+            }
+
+            if (loadedMap[targetSystem]) {
+                log.debug(`BaseSystemAdapter.loadDefaults | Defaults for "${targetSystem}" already initialized in this world. Skipping first boot load.`);
+                return { success: true, mergedCount: 0, skipped: true };
+            }
+        }
+
+        const bundleFilename = `${targetSystem}.json`;
+        const moduleScopeId = `${targetSystem}-defaults`;
+        const packManager = autorecManager.forModule(moduleScopeId);
+
+        try {
+            let packageData = payload;
+
+            if (!packageData) {
+                const bundlePath = `modules/${MODULE_ID}/src/autorec/system-defaults/${bundleFilename}`;
+                log.debug(`BaseSystemAdapter.loadDefaults | Fetching default bundle for "${targetSystem}" from: ${bundlePath}`);
+                const response = await fetch(bundlePath);
+                if (!response.ok) {
+                    throw new Error(`Failed to load bundle file from "${bundlePath}" (HTTP ${response.status})`);
+                }
+                packageData = await response.json();
+            }
+
+            const result = await packManager.import(packageData, {
+                interactive: Boolean(interactive),
+                overwrite: Boolean(overwrite)
+            });
+
+            const mergedCount = Number(result?.mergedCount ?? 0);
+            log.info(`BaseSystemAdapter.loadDefaults | Loaded ${mergedCount} default crosshair configurations for system "${targetSystem}".`);
+
+            if (typeof game !== "undefined" && game?.settings && game?.user?.isGM) {
+                try {
+                    const updated = foundry.utils.deepClone(game.settings.get(MODULE_ID, "systemDefaultsLoaded") ?? {});
+                    updated[targetSystem] = true;
+                    await game.settings.set(MODULE_ID, "systemDefaultsLoaded", updated);
+                } catch (err) {
+                    log.error("BaseSystemAdapter.loadDefaults | Failed to update 'systemDefaultsLoaded' setting:", err);
+                }
+            }
+
+            return {
+                success: true,
+                mergedCount,
+                skipped: false
+            };
+        } catch (err) {
+            const errorMsg = `Failed to load default crosshair configurations for "${targetSystem}": ${err.message}`;
+            log.error(`BaseSystemAdapter.loadDefaults | ${errorMsg}`, err);
+            return {
+                success: false,
+                mergedCount: 0,
+                skipped: false,
+                error: err.message
+            };
         }
     }
 }

@@ -24,6 +24,13 @@ export function initializeSystemAdapter() {
             systemAdapter = new BaseSystemAdapter();
             break;
     }
+
+    if (typeof Hooks?.once === "function") {
+        Hooks.once("ready", async () => {
+            await systemAdapter.loadDefaults({ onlyFirstBoot: true });
+        });
+    }
+
     log.info(`Initialized System Adapter for system: "${systemAdapter.systemId}"`);
     return systemAdapter;
 }

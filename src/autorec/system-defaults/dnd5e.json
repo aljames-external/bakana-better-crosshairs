@@ -1,0 +1,7186 @@
+{
+  "version": "2.0.0",
+  "timestamp": "2026-08-07T15:00:00.000Z",
+  "foundry": "13.338",
+  "system": "dnd5e",
+  "description": "Authoritative D&D 5e AoE Template and Region Crosshair Defaults for Bakana's Better Crosshairs",
+  "module": "dnd5e-defaults",
+  "entries": [
+    {
+      "itemName": "Aganazzar's Scorcher",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Alarm",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Antilife Shell",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Antimagic Field",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Arms of Hadar",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Ashardalon's Stride",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Aura of Conquest",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Aura of Courage",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Aura of Devotion",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Aura of Hate",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Aura of Life",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Aura of Protection",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Aura of Purity",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Aura of Vitality",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Aura of Warding",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Beacon of Hope",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Black Tentacles",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Blade Barrier",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Bones of the Earth",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Booming Blade",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Breath Weapon",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Burning Hands",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Call Lightning",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Circle of Power",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Cloud of Daggers",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Cloudkill",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Color Spray",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Cone of Cold",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Control Water",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Control Winds",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Countercharm",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Crusader's Mantle",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Cube of Force",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Dark Star",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Darkness",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Dawn",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Deflecting Shroud",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Delayed Blast Fireball",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Destructive Wave",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Divine Word",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Draconic Presence",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Draconic Transformation",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Dragon Breath",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Dragon's Breath",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Dust Devil",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Earth Tremor",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Earthquake",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Entangle",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Erupting Earth",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Evard's Black Tentacles",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Event Horizon",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Faerie Fire",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Fear",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Fey Presence",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Fire Storm",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Fireball",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Flaming Sphere",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Fog Cloud",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Forbiddance",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Forcecage",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Freezing Sphere",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Frost Fingers",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Globe of Invulnerability",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Gravity Sinkhole",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Grease",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Green-Flame Blade",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Guards and Wards",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Gust of Wind",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Hallow",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Hallucinatory Terrain",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Healing Spirit",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Heart of the Storm",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Hearth of Moonlight and Shadow",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Holy Aura",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Hunger of Hadar",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Hypnotic Pattern",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Ice Knife",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Ice Storm",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Incendiary Cloud",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Incite Greed",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Insect Plague",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Investiture of Flame",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Investiture of Ice",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Lightning Bolt",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Lightning Lure",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Maddening Darkness",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Maelstrom",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Major Image",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Maximilian's Earthen Grasp",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Meteor Swarm",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Mighty Fortress",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Mirage Arcane",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Mold Earth",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Moonbeam",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Nathair's Mischief",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Otiluke's Freezing Sphere",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Otiluke's Resilient Sphere",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Passwall",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Plant Growth",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Preserve Life",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Prismatic Spray",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Prismatic Wall",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Pulse Wave",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Pyrotechnics",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Radiance of the Dawn",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Ravenous Void",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Resilient Sphere",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Reverse Gravity",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Rime's Binding Frost",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Shadow of Moil",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Shape Water",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Shatter",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Sickening Radiance",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Silence",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Silent Image",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Sleet Storm",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Slow",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Snare",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Snilloc's Snowball Swarm",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Spike Growth",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Spirit Guardians",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Spirit Shroud",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Stinking Cloud",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Storm Sphere",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Storm of Vengeance",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Sunbeam",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Sunburst",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Sword Burst",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Synaptic Static",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Tasha's Caustic Brew",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Temple of the Gods",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Thunder Step",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Thunderclap",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Thunderwave",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Tidal Wave",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Transmute Rock",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Turn Undead",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Twilit Sanctuary",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Vitriolic Sphere",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Wall of Fire",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Wall of Force",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Wall of Ice",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Wall of Light",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Wall of Sand",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Wall of Stone",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Wall of Thorns",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Wall of Water",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Watery Sphere",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Web",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Whirlwind",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Whirlwind Attack",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Wind Wall",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Wither and Bloom",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Word of Radiance",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "true",
+        "showLine": false,
+        "showRange": false,
+        "limitRange": false,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Wrath of Nature",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    },
+    {
+      "itemName": "Zone of Truth",
+      "module": "dnd5e-defaults",
+      "file": {
+        "circle": "eskie.crosshair.circle.fantasy_01.white.full",
+        "cone": "eskie.crosshair.cone.thin.fantasy_01.white.full",
+        "ray": "eskie.crosshair.ray.fantasy_01.white",
+        "square": "eskie.crosshair.ray.fantasy_01.white",
+        "line": "eskie.crosshair.line.generic_01.white",
+        "reticle": "eskie.crosshair.reticle.generic_02.white"
+      },
+      "preview": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0
+        }
+      },
+      "placed": {
+        "fill": {
+          "color": "#000000",
+          "alpha": 0.25
+        },
+        "border": {
+          "color": "#ffffff",
+          "alpha": 0.25
+        }
+      },
+      "options": {
+        "attachMode": "false",
+        "showLine": true,
+        "showRange": true,
+        "limitRange": true,
+        "enablePrePlacement": false,
+        "enableAnimation": true,
+        "enablePlacedStyling": false,
+        "enablePostPlacement": false
+      },
+      "macro": {
+        "pre": "",
+        "post": ""
+      }
+    }
+  ]
+}

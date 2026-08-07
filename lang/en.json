@@ -17,6 +17,13 @@
                 "importBtn": "Import Autorecs from JSON",
                 "countMsg": "{count} global autorec configuration(s) active."
             },
+            "loadSystemDefaults": {
+                "name": "Load System Defaults",
+                "label": "Load Defaults",
+                "hint": "Instantiate or reload built-in crosshair defaults for the active game system.",
+                "confirmContent": "Are you sure you want to load default crosshair configurations for {system}? Existing custom configurations will be preserved.",
+                "reloadSuccess": "Successfully loaded {count} system defaults for {system}."
+            },
             "registeredTemplates": {
                 "name": "Registered Templates"
             },
