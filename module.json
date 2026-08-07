@@ -24,6 +24,21 @@
             "lang": "en",
             "name": "English",
             "path": "lang/en.json"
+        },
+        {
+            "lang": "en",
+            "name": "English (D&D 5e Defaults)",
+            "path": "lang/en/dnd5e.json"
+        },
+        {
+            "lang": "es",
+            "name": "Español (D&D 5e Defaults)",
+            "path": "lang/es/dnd5e.json"
+        },
+        {
+            "lang": "ja",
+            "name": "日本語 (D&D 5e Defaults)",
+            "path": "lang/ja/dnd5e.json"
         }
     ],
     "url": "#{URL}#",

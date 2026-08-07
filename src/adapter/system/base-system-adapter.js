@@ -105,7 +105,8 @@ export class BaseSystemAdapter {
 
     /**
      * Load built-in system defaults dataset for this game system into memory.
-     * Fetches `modules/${MODULE_ID}/src/autorec/system-defaults/${this.systemId}.json`.
+     * Fetches `modules/${MODULE_ID}/src/autorec/system-defaults/${this.systemId}.json`
+     * and discovers all available multi-lingual translation bundles (`lang/<lang>/${this.systemId}.json`).
      * @returns {Promise<void>}
      */
     async loadSystemDefaultsData() {
@@ -116,10 +117,102 @@ export class BaseSystemAdapter {
             if (response.ok) {
                 const data = await response.json();
                 this.setDefaultsData(data ?? {});
+                await this.loadAllSystemLanguages(data ?? {});
                 log.debug(`BaseSystemAdapter | Loaded ${this.defaultsMap.size} system default definitions for "${this.systemId}".`);
             }
         } catch (e) {
             log.debug(`BaseSystemAdapter | No system defaults bundle found for "${this.systemId}":`, e);
+        }
+    }
+
+    /**
+     * Discover and load all registered language translation bundles for this game system.
+     * Indexes translated names across all configured languages (e.g. en, es, ja) simultaneously,
+     * enabling mixed-language item recognition within the same game world.
+     * @param {Object<string, boolean>} baseDefaults - Canonical slug to boolean stickiness map
+     * @returns {Promise<void>}
+     */
+    async loadAllSystemLanguages(baseDefaults) {
+        if (!baseDefaults || typeof baseDefaults !== "object") return;
+        const targetSuffix = `/${this.systemId}.json`;
+        const candidatePaths = new Set();
+
+        // 1. Check registered language paths in module manifest/metadata if available
+        if (typeof game !== "undefined" && game?.modules) {
+            const mod = game.modules.get(MODULE_ID);
+            const languages = mod?.languages ?? mod?.manifest?.languages ?? [];
+            for (const entry of languages) {
+                const p = entry?.path;
+                if (typeof p === "string" && p.endsWith(targetSuffix)) {
+                    candidatePaths.add(`modules/${MODULE_ID}/${p}`);
+                }
+            }
+        }
+
+        // 2. Fallback check for common language directories if module manifest is unpopulated
+        if (candidatePaths.size === 0) {
+            for (const lang of ["en", "es", "ja", "de", "fr", "pt-BR", "it", "pl", "ko", "zh-tw", "zh-cn"]) {
+                candidatePaths.add(`modules/${MODULE_ID}/lang/${lang}/${this.systemId}.json`);
+            }
+        }
+
+        for (const langPath of candidatePaths) {
+            try {
+                const res = await fetch(langPath);
+                if (res.ok) {
+                    const langData = await res.json();
+                    const translations = langData?.BBC?.defaults?.[this.systemId];
+                    if (translations && typeof translations === "object") {
+                        this.registerLocalizedDefaults(translations, baseDefaults);
+                    }
+                }
+            } catch {
+                // Silently skip non-existent language bundles
+            }
+        }
+    }
+
+    /**
+     * Set a system default entry in the lookup map with collision and conflict detection.
+     * Logs a warning if an identical key is registered with conflicting stickiness values.
+     * @param {string} key - Normalized lookup key (slug or lowercase item name)
+     * @param {boolean} boolStick - Stickiness value (true for token attachment, false for free placement)
+     * @param {string} slug - Originating canonical slug
+     * @returns {void}
+     */
+    _setDefaultsEntry(key, boolStick, slug) {
+        if (!key) return;
+        if (this.defaultsMap.has(key)) {
+            const existing = this.defaultsMap.get(key);
+            if (existing !== boolStick) {
+                log.warn(`BaseSystemAdapter | Key collision conflict on "${key}": incoming slug "${slug}" sets stick=${boolStick}, but key was already mapped to stick=${existing}.`);
+            }
+            return;
+        }
+        this.defaultsMap.set(key, boolStick);
+    }
+
+    /**
+     * Register a dictionary of localized translations for canonical system default slugs.
+     * @param {Object<string, string>} translations - Dictionary mapping slugs to localized item names
+     * @param {Object<string, boolean>} [baseDefaults={}] - Canonical slug to boolean stickiness map
+     * @returns {void}
+     */
+    registerLocalizedDefaults(translations, baseDefaults = {}) {
+        if (!translations || typeof translations !== "object") return;
+        for (const [slug, localizedName] of Object.entries(translations)) {
+            if (!slug || !localizedName) continue;
+            const cleanSlug = slugify(slug);
+            const rawStick = baseDefaults[cleanSlug] ?? baseDefaults[slug] ?? this.defaultsMap.get(cleanSlug) ?? this.defaultsMap.get(slug);
+            if (rawStick === undefined || rawStick === null) continue;
+            const boolStick = Boolean(rawStick);
+            const rawLower = String(localizedName).trim().toLowerCase();
+            const localizedSlug = slugify(localizedName);
+
+            this._setDefaultsEntry(rawLower, boolStick, cleanSlug);
+            if (localizedSlug && localizedSlug !== rawLower) {
+                this._setDefaultsEntry(localizedSlug, boolStick, cleanSlug);
+            }
         }
     }
 
@@ -141,9 +234,9 @@ export class BaseSystemAdapter {
             const slug = slugify(nameOrSlug);
             const rawLower = String(nameOrSlug).trim().toLowerCase();
 
-            this.defaultsMap.set(slug, boolStick);
+            this._setDefaultsEntry(slug, boolStick, slug);
             if (rawLower !== slug) {
-                this.defaultsMap.set(rawLower, boolStick);
+                this._setDefaultsEntry(rawLower, boolStick, slug);
             }
 
             // Check if active localization has a translated string for this default key
@@ -152,8 +245,12 @@ export class BaseSystemAdapter {
                 if (game.i18n.has(i18nKey)) {
                     const localized = game.i18n.localize(i18nKey);
                     if (localized) {
-                        this.defaultsMap.set(localized.trim().toLowerCase(), boolStick);
-                        this.defaultsMap.set(slugify(localized), boolStick);
+                        const rawLocalized = localized.trim().toLowerCase();
+                        const localizedSlug = slugify(localized);
+                        this._setDefaultsEntry(rawLocalized, boolStick, slug);
+                        if (localizedSlug && localizedSlug !== rawLocalized) {
+                            this._setDefaultsEntry(localizedSlug, boolStick, slug);
+                        }
                     }
                 }
             }
