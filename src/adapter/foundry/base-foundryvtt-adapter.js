@@ -9,6 +9,7 @@ import { notify } from "../../lib/notifier.js";
 import { runConcurrentScript, activePlacementTracker, shouldStickToToken } from "../../crosshair/util.js";
 import { PendingPlacementSession } from "./pendingPlacementSession.js";
 import { PixiGraphicsStyler } from "./pixiGraphicsStyler.js";
+import { ScriptRunner } from "../../lib/scriptRunner.js";
 /**
  * Base abstract class for Foundry VTT version-specific adapters.
  */
@@ -937,22 +938,15 @@ export class BaseFoundryVTTAdapter {
         const actor = token?.actor ?? item?.actor;
         const scope = { doc, token, actor, item, config };
 
-        try {
-            const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-            const fn = new AsyncFunction(
-                "doc",
-                "token",
-                "actor",
-                "item",
-                "scope",
-                "config",
-                "canvas",
-                "game",
-                code
-            );
-            await fn(doc, token, actor, item, scope, config, typeof canvas !== "undefined" ? canvas : undefined, typeof game !== "undefined" ? game : undefined);
-        } catch (e) {
-            log.error(`BaseFoundryVTTAdapter.handleCreateDocument | Error executing post-placement script for ${doc.documentName}:`, e);
-        }
+        await ScriptRunner.execute(code, {
+            doc,
+            token,
+            actor,
+            item,
+            scope,
+            config,
+            canvas: typeof canvas !== "undefined" ? canvas : undefined,
+            game: typeof game !== "undefined" ? game : undefined
+        }, `BaseFoundryVTTAdapter.handleCreateDocument (${doc.documentName})`);
     }
 }

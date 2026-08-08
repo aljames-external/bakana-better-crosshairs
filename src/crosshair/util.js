@@ -3,6 +3,7 @@ import { closest } from "../lib/filemanager.js";
 import { crosshairAdapter, systemAdapter } from "../adapter/index.js";
 import { TokenGeometry } from "../lib/tokenGeometry.js";
 import { rotationListener } from "./rotationListener.js";
+import { ScriptRunner } from "../lib/scriptRunner.js";
 
 export const activePlacementTracker = {
     placeable: null,
@@ -417,8 +418,6 @@ export function getTokenEdgePoint(tok, targetX, targetY, sticky = false) {
     return TokenGeometry.getTokenEdgePoint(token, targetX, targetY, sticky);
 }
 
-const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
-
 /**
  * Execute custom concurrent Javascript code before running the Sequencer .play() sequence.
  * Wrapped in try/catch block with standard context variables.
@@ -435,20 +434,14 @@ export async function runConcurrentScript(token, config = {}, crosshairSequence 
     const item = config.item;
     const scope = config.scope ?? { token, actor, item, config };
 
-    try {
-        const fn = new AsyncFunction(
-            "token",
-            "actor",
-            "item",
-            "scope",
-            "config",
-            "crosshair",
-            "canvas",
-            "game",
-            code
-        );
-        await fn(token, actor, item, scope, config, crosshairSequence, canvas, game);
-    } catch (e) {
-        log.error("Error executing concurrent placement script:", e);
-    }
+    await ScriptRunner.execute(code, {
+        token,
+        actor,
+        item,
+        scope,
+        config,
+        crosshair: crosshairSequence,
+        canvas: typeof canvas !== "undefined" ? canvas : undefined,
+        game: typeof game !== "undefined" ? game : undefined
+    }, "runConcurrentScript");
 }
