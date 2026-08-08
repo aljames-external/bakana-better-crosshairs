@@ -1,11 +1,12 @@
 import { MODULE_ID, BROADCAST_INTERVAL_MS } from "../lib/constants.js";
-import { socketlib } from "../integration/socketlib.js";
 import { closest } from "../lib/filemanager.js";
 import { log } from "../lib/logger.js";
 import { crosshairAdapter, systemAdapter } from "../adapter/index.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, resolveCrosshairIcon, alignCrosshairAndEffects, getGridSnapMode, snapCoordinates, activePlacementTracker } from "./util.js";
 import { CrosshairController } from "./crosshairController.js";
 import { getPeerCursorPosition } from "./remoteCrosshairManager.js";
+import { CrosshairRangeOverlay } from "./rangeOverlay.js";
+import { CrosshairBroadcaster } from "./crosshairBroadcaster.js";
 
 /**
  * Base class for crosshair shape instances, managing Sequencer animations, grid alignments,
@@ -108,6 +109,9 @@ export class BaseCrosshairShape {
             x: config.shapeAnchor?.x ?? defShapeAnchor.x,
             y: config.shapeAnchor?.y ?? defShapeAnchor.y
         };
+
+        this.rangeOverlay = new CrosshairRangeOverlay(this);
+        this.broadcaster = new CrosshairBroadcaster(this);
     }
 
     /**
@@ -446,120 +450,10 @@ export class BaseCrosshairShape {
 
     /**
      * Start periodic socket broadcasting of local crosshair state to peer clients.
-     * Cadence interval defined by BROADCAST_INTERVAL_MS (200ms = 5Hz).
      * @returns {void}
      */
     startBroadcasting() {
-        if (!game?.user || !game?.settings) return;
-        const broadcastEnabled = game.settings.get(MODULE_ID, "enableCrosshairBroadcasting") !== false;
-        if (!broadcastEnabled) return;
-
-        this.stopBroadcasting();
-
-        const getLiveState = () => {
-            const originX = (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x))
-                ? this.sequencerCrosshair.x
-                : this.x;
-            const originY = (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.y))
-                ? this.sequencerCrosshair.y
-                : this.y;
-
-            const cursorX = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.x))
-                ? canvas.mousePosition.x
-                : originX;
-            const cursorY = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.y))
-                ? canvas.mousePosition.y
-                : originY;
-
-            let direction = this.config?.currentDirection ?? this.direction ?? 0;
-            if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.direction)) {
-                direction = this.sequencerCrosshair.direction;
-            } else if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.rotation)) {
-                direction = this.sequencerCrosshair.rotation * (180 / Math.PI);
-            }
-
-            return {
-                originX,
-                originY,
-                cursorX,
-                cursorY,
-                x: originX,
-                y: originY,
-                direction,
-                distance: this.distance,
-                width: this.width,
-                angle: this.angle
-            };
-        };
-
-        const live = getLiveState();
-        this.placementId = `${game.user.id}_${this.id}_${Date.now()}`;
-        const initialPayload = {
-            type: "CROSSHAIR_START",
-            placementId: this.placementId,
-            senderUserId: game.user.id,
-            shapeType: this.type,
-            file: this.getGraphicFile(),
-            lineFile: this.lineFile,
-            icon: this.icon,
-            fillColor: this.fillColor,
-            fillAlpha: this.fillAlpha,
-            borderColor: this.borderColor,
-            borderAlpha: this.borderAlpha,
-            distance: live.distance,
-            width: live.width,
-            angle: live.angle,
-            direction: live.direction,
-            rotationRad: (live.direction ?? 0) * (Math.PI / 180),
-            tokenId: this.token?.id ?? null,
-            stickToToken: Boolean(this.stickToToken && this.token),
-            showLine: Boolean(this.showLine),
-            originX: live.originX,
-            originY: live.originY,
-            cursorX: live.cursorX,
-            cursorY: live.cursorY,
-            x: live.originX,
-            y: live.originY
-        };
-
-        this._lastBroadcastState = { ...live };
-        socketlib.emit(initialPayload);
-
-        this.broadcastTimer = setInterval(() => {
-            if (!this.placementId) return;
-            const updated = getLiveState();
-            const last = this._lastBroadcastState ?? {};
-
-            const hasChanged =
-                Math.abs((updated.originX ?? 0) - (last.originX ?? 0)) > 1e-3 ||
-                Math.abs((updated.originY ?? 0) - (last.originY ?? 0)) > 1e-3 ||
-                Math.abs((updated.cursorX ?? 0) - (last.cursorX ?? 0)) > 1e-3 ||
-                Math.abs((updated.cursorY ?? 0) - (last.cursorY ?? 0)) > 1e-3 ||
-                Math.abs((updated.direction ?? 0) - (last.direction ?? 0)) > 1e-2 ||
-                updated.distance !== last.distance ||
-                updated.width !== last.width ||
-                updated.angle !== last.angle;
-
-            if (!hasChanged) return;
-
-            this._lastBroadcastState = { ...updated };
-            socketlib.emit({
-                type: "CROSSHAIR_UPDATE",
-                placementId: this.placementId,
-                senderUserId: game.user.id,
-                originX: updated.originX,
-                originY: updated.originY,
-                cursorX: updated.cursorX,
-                cursorY: updated.cursorY,
-                x: updated.originX,
-                y: updated.originY,
-                direction: updated.direction,
-                rotationRad: (updated.direction ?? 0) * (Math.PI / 180),
-                distance: updated.distance,
-                width: updated.width,
-                angle: updated.angle
-            });
-        }, BROADCAST_INTERVAL_MS);
+        this.broadcaster.start();
     }
 
     /**
@@ -568,47 +462,7 @@ export class BaseCrosshairShape {
      * @returns {void}
      */
     stopBroadcasting(reason = "placed") {
-        if (this.broadcastTimer) {
-            clearInterval(this.broadcastTimer);
-            this.broadcastTimer = null;
-        }
-
-        this._lastBroadcastState = null;
-
-        if (this.placementId) {
-            const finalOriginX = (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x)) ? this.sequencerCrosshair.x : this.x;
-            const finalOriginY = (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.y)) ? this.sequencerCrosshair.y : this.y;
-            const finalCursorX = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.x)) ? canvas.mousePosition.x : finalOriginX;
-            const finalCursorY = (canvas?.mousePosition && Number.isFinite(canvas.mousePosition.y)) ? canvas.mousePosition.y : finalOriginY;
-            let finalDirection = this.config?.currentDirection ?? this.direction ?? 0;
-            if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.direction)) {
-                finalDirection = this.sequencerCrosshair.direction;
-            } else if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.rotation)) {
-                finalDirection = this.sequencerCrosshair.rotation * (180 / Math.PI);
-            }
-            const finalRotationRad = finalDirection * (Math.PI / 180);
-
-            log.debug(`[Bakana Crosshair Final Broadcast] Sender: "${game?.user?.id}" | Reason: "${reason}" | Final Origin: (${finalOriginX}, ${finalOriginY}) | Final Cursor: (${finalCursorX}, ${finalCursorY}) | Final Direction: ${finalDirection}° | PIXI Container Rotation: ${finalRotationRad.toFixed(4)} rad`);
-
-            socketlib.emit({
-                type: "CROSSHAIR_END",
-                placementId: this.placementId,
-                senderUserId: game.user.id,
-                reason,
-                originX: finalOriginX,
-                originY: finalOriginY,
-                cursorX: finalCursorX,
-                cursorY: finalCursorY,
-                x: finalOriginX,
-                y: finalOriginY,
-                direction: finalDirection,
-                rotationRad: finalRotationRad,
-                distance: this.distance,
-                width: this.width,
-                angle: this.angle
-            });
-            this.placementId = null;
-        }
+        this.broadcaster.stop(reason);
     }
 
     /**
@@ -617,17 +471,7 @@ export class BaseCrosshairShape {
      * @returns {void}
      */
     _destroyRangeText() {
-        if (this._rangeText) {
-            try {
-                if (this._rangeText.parent && typeof this._rangeText.parent.removeChild === "function") {
-                    this._rangeText.parent.removeChild(this._rangeText);
-                }
-                if (typeof this._rangeText.destroy === "function") {
-                    this._rangeText.destroy({ children: true });
-                }
-            } catch (e) {}
-            this._rangeText = null;
-        }
+        this.rangeOverlay.destroy();
     }
 
     /**
@@ -636,84 +480,7 @@ export class BaseCrosshairShape {
      * @returns {void}
      */
     _updateRangeText() {
-        if (this.stickToToken || !this.token || this.config.showRange === false || !this.sequencerCrosshair) {
-            if (this._rangeText) this._rangeText.visible = false;
-            return;
-        }
-        const origin = this.token.center ?? { x: this.token.x ?? 0, y: this.token.y ?? 0 };
-        const targetX = (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x)) ? this.sequencerCrosshair.x : this.x;
-        const targetY = (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.y)) ? this.sequencerCrosshair.y : this.y;
-        const target = { x: targetX, y: targetY };
-        let distance = 0;
-        try {
-            if (canvas?.grid && typeof canvas.grid.measurePath === "function") {
-                const measured = canvas.grid.measurePath([origin, target]);
-                distance = measured?.distance ?? 0;
-            } else if (canvas?.grid && typeof canvas.grid.measureDistance === "function") {
-                distance = Math.round(canvas.grid.measureDistance(origin, target) * 10) / 10;
-            } else if (canvas?.dimensions) {
-                const distPx = Math.hypot(target.x - origin.x, target.y - origin.y);
-                const gridDist = canvas.dimensions.distance ?? 5;
-                const gridSize = canvas.dimensions.size ?? 100;
-                distance = Math.round((distPx / gridSize) * gridDist);
-            }
-        } catch (e) {
-            const distPx = Math.hypot(target.x - origin.x, target.y - origin.y);
-            const gridDist = canvas?.dimensions?.distance ?? 5;
-            const gridSize = canvas?.dimensions?.size ?? 100;
-            distance = Math.round((distPx / gridSize) * gridDist);
-        }
-
-        const units = canvas?.grid?.units ?? canvas?.dimensions?.units ?? "ft";
-        const labelStr = `${distance} ${units}`;
-
-        if (!this._rangeText) {
-            const TextClass = foundry?.canvas?.containers?.PreciseText ?? PreciseText ?? PIXI?.Text;
-            if (!TextClass) return;
-            const style = CONFIG?.canvasTextStyle
-                ? CONFIG.canvasTextStyle.clone()
-                : {
-                    fontFamily: "Signika, sans-serif",
-                    fontSize: 24,
-                    fill: "#ffffff",
-                    stroke: "#000000",
-                    strokeThickness: 4,
-                    align: "center"
-                };
-            if (style) style.align = "center";
-            try {
-                this._rangeText = new TextClass(labelStr, style);
-                if (this._rangeText.anchor && typeof this._rangeText.anchor.set === "function") {
-                    this._rangeText.anchor.set(0.5, 1);
-                }
-                const parentContainer = this.sequencerCrosshair.parent ?? canvas?.controls ?? canvas?.stage ?? this.sequencerCrosshair;
-                if (typeof parentContainer.addChild === "function") {
-                    parentContainer.addChild(this._rangeText);
-                }
-            } catch (e) {
-                log.debug("BaseCrosshairShape._updateRangeText | Could not create range text element:", e);
-                return;
-            }
-        } else {
-            const targetParent = this.sequencerCrosshair.parent ?? canvas?.controls ?? canvas?.stage ?? this.sequencerCrosshair;
-            if (this._rangeText.parent !== targetParent && typeof targetParent.addChild === "function") {
-                try { targetParent.addChild(this._rangeText); } catch (e) {}
-            }
-        }
-
-        this._rangeText.text = labelStr;
-        this._rangeText.visible = true;
-        if (this._rangeText.parent !== this.sequencerCrosshair) {
-            if (this._rangeText.position && typeof this._rangeText.position.set === "function") {
-                this._rangeText.position.set(target.x, target.y - 25);
-            }
-            try { this._rangeText.rotation = 0; } catch (e) {}
-        } else {
-            if (this._rangeText.position && typeof this._rangeText.position.set === "function") {
-                this._rangeText.position.set(0, -25);
-            }
-            try { this._rangeText.rotation = -(this.sequencerCrosshair.rotation ?? 0); } catch (e) {}
-        }
+        this.rangeOverlay.update();
     }
 
     /**

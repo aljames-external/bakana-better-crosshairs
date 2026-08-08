@@ -1,6 +1,7 @@
 import { systemAdapter } from "../system/index.js";
 import { log } from "../../lib/logger.js";
 import { Token, Ray, clearHighlightLayer } from "../../lib/compat.js";
+import { TokenGeometry } from "../../lib/tokenGeometry.js";
 import { MODULE_ID } from "../../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY, autorecManager } from "../../autorec/autorecManager.js";
 import { CrosshairConfiguration } from "../../autorec/CrosshairConfiguration.js";
@@ -764,87 +765,8 @@ export class BaseFoundryVTTAdapter {
      * @returns {{x: number, y: number, direction: number}} Resolved anchor placement coordinates and facing direction
      */
     resolveAnchorPlacement(targetTok, clickCoords = {}) {
-        const rawClickX = clickCoords.x ?? 0;
-        const rawClickY = clickCoords.y ?? 0;
         const tok = this.toToken(targetTok);
-        if (!tok) return { x: rawClickX, y: rawClickY, direction: 0 };
-
-        const size = canvas?.grid?.size ?? 100;
-        const targetMouse = { x: rawClickX, y: rawClickY };
-
-        const tx = tok.x ?? tok.document?.x ?? 0;
-        const ty = tok.y ?? tok.document?.y ?? 0;
-        const tokenWidth = tok.document?.width ?? tok.width ?? 1;
-        const tokenHeight = tok.document?.height ?? tok.height ?? 1;
-        const w = tok.w ?? (tokenWidth * size);
-        const h = tok.h ?? (tokenHeight * size);
-        const centerPoint = tok.center ?? tok.document?.center ?? { x: tx + w / 2, y: ty + h / 2 };
-
-        const dx = targetMouse.x - centerPoint.x;
-        const dy = targetMouse.y - centerPoint.y;
-        const dist = Math.hypot(dx, dy);
-
-        let farPoint = targetMouse;
-        if (dist > 0) {
-            const scale = Math.max(10000, (w + h) * 10) / dist;
-            farPoint = {
-                x: centerPoint.x + dx * scale,
-                y: centerPoint.y + dy * scale
-            };
-        }
-
-        const points = [tx, ty, tx + w, ty, tx + w, ty + h, tx, ty + h];
-
-        let intersection = null;
-        if (typeof foundry?.utils?.lineSegmentIntersection === "function") {
-            for (let i = 0; i < points.length; i += 2) {
-                const p1 = { x: points[i], y: points[i + 1] };
-                const p2Idx = (i + 2) >= points.length ? 0 : (i + 2);
-                const p2 = { x: points[p2Idx], y: points[p2Idx + 1] };
-                intersection = foundry.utils.lineSegmentIntersection(centerPoint, farPoint, p1, p2);
-                if (intersection) break;
-            }
-        }
-
-        if (!intersection) {
-            if (Ray) {
-                const ray = new Ray(centerPoint, farPoint);
-                if (typeof ray.intersectSegment === "function") {
-                    for (let i = 0; i < points.length; i += 2) {
-                        const p1 = { x: points[i], y: points[i + 1] };
-                        const p2Idx = (i + 2) >= points.length ? 0 : (i + 2);
-                        const p2 = { x: points[p2Idx], y: points[p2Idx + 1] };
-                        intersection = ray.intersectSegment([p1.x, p1.y, p2.x, p2.y]);
-                        if (intersection) break;
-                    }
-                }
-            }
-        }
-
-        if (!intersection) {
-            const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
-            intersection = {
-                x: clamp(targetMouse.x, tx, tx + w),
-                y: clamp(targetMouse.y, ty, ty + h)
-            };
-        }
-
-        // Calculate direction angle FROM the Sequencer animation pivot point (intersection) TO targetMouse
-        const dxPivot = targetMouse.x - intersection.x;
-        const dyPivot = targetMouse.y - intersection.y;
-        let dragAngle = (Math.abs(dxPivot) > 1e-6 || Math.abs(dyPivot) > 1e-6)
-            ? Math.atan2(dyPivot, dxPivot) * (180 / Math.PI)
-            : Math.atan2(dy, dx) * (180 / Math.PI);
-
-        if (Number.isNaN(dragAngle)) dragAngle = 0;
-        if (dragAngle < 0) dragAngle += 360;
-        const direction = dragAngle % 360;
-
-        return {
-            x: intersection.x,
-            y: intersection.y,
-            direction
-        };
+        return TokenGeometry.resolveAnchorPlacement(tok, clickCoords);
     }
 
     /**

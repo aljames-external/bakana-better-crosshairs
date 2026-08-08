@@ -1,6 +1,7 @@
 import { log } from "../lib/logger.js";
 import { closest } from "../lib/filemanager.js";
 import { crosshairAdapter, systemAdapter } from "../adapter/index.js";
+import { TokenGeometry } from "../lib/tokenGeometry.js";
 
 let activeWheelHandler = null;
 let activePointerHandler = null;
@@ -19,25 +20,12 @@ export const activePlacementTracker = {
  * @param {number} angleDeg - Raw angle in degrees
  * @returns {number} Normalized angle in degrees between 0 and 360
  */
-function _normalizeAngleDegrees(angleDeg) {
-    if (typeof angleDeg !== "number" || !Number.isFinite(angleDeg)) return 0;
-    let norm = angleDeg % 360;
-    if (norm < 0) norm += 360;
-    return norm;
+export function _normalizeAngleDegrees(angleDeg) {
+    return TokenGeometry.normalizeAngle(angleDeg);
 }
 
-/**
- * Helper: Calculate angle in radians and degrees from origin to target.
- * @param {{x: number, y: number}} origin - Origin point
- * @param {{x: number, y: number}} target - Target point
- * @returns {{rad: number, deg: number}} Angle in radians and degrees
- */
 export function _calculateAngleFromOrigin(origin, target) {
-    const dx = target.x - origin.x;
-    const dy = target.y - origin.y;
-    const rad = Math.atan2(dy, dx);
-    const deg = _normalizeAngleDegrees(rad * (180 / Math.PI));
-    return { rad, deg };
+    return TokenGeometry.calculateAngle(origin, target);
 }
 
 /**
@@ -645,45 +633,8 @@ export function snapCoordinates(x, y, mode = "all") {
  * @returns {object} Edge point coordinates and angle `{ x, y, direction }`
  */
 export function getTokenEdgePoint(tok, targetX, targetY, sticky = false) {
-    if (!tok) return { x: targetX, y: targetY, direction: 0 };
-    const token = crosshairAdapter.toToken(tok) ?? (tok.object ?? tok);
-    if (!token) return { x: targetX, y: targetY, direction: 0 };
-    const size = canvas?.grid?.size ?? 100;
-    const cx = token.center?.x ?? (token.x + (token.w ?? size) / 2);
-    const cy = token.center?.y ?? (token.y + (token.h ?? size) / 2);
-    const hw = (token.w ?? size) / 2;
-    const hh = (token.h ?? size) / 2;
-
-    const { rad: angleRad, deg: angleDeg } = _calculateAngleFromOrigin({ x: cx, y: cy }, { x: targetX, y: targetY });
-
-    if (sticky) {
-        // 8-way sticky perimeter snap (snaps origin to 4 corners and 4 cardinal edge midpoints)
-        const sector = Math.round(angleDeg / 45) % 8;
-        let x = cx, y = cy;
-        switch (sector) {
-            case 0: x = cx + hw; y = cy; break;      // 0 deg (Right)
-            case 1: x = cx + hw; y = cy + hh; break; // 45 deg (Bottom-Right)
-            case 2: x = cx;      y = cy + hh; break; // 90 deg (Bottom)
-            case 3: x = cx - hw; y = cy + hh; break; // 135 deg (Bottom-Left)
-            case 4: x = cx - hw; y = cy; break;      // 180 deg (Left)
-            case 5: x = cx - hw; y = cy - hh; break; // 225 deg (Top-Left)
-            case 6: x = cx;      y = cy - hh; break; // 270 deg (Top)
-            case 7: x = cx + hw; y = cy - hh; break; // 315 deg (Top-Right)
-        }
-        return { x, y, direction: angleDeg };
-    }
-
-    const cosA = Math.cos(angleRad);
-    const sinA = Math.sin(angleRad);
-    const tx = Math.abs(cosA) > 1e-6 ? Math.abs(hw / cosA) : Infinity;
-    const ty = Math.abs(sinA) > 1e-6 ? Math.abs(hh / sinA) : Infinity;
-    const t = Math.min(tx, ty);
-
-    return {
-        x: cx + cosA * t,
-        y: cy + sinA * t,
-        direction: angleDeg
-    };
+    const token = crosshairAdapter.toToken(tok) ?? (tok?.object ?? tok);
+    return TokenGeometry.getTokenEdgePoint(token, targetX, targetY, sticky);
 }
 
 const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
