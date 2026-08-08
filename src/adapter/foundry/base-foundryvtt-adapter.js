@@ -7,6 +7,7 @@ import { DEFAULT_AUTOREC_ENTRY, autorecManager } from "../../autorec/autorecMana
 import { CrosshairConfiguration } from "../../autorec/CrosshairConfiguration.js";
 import { notify } from "../../lib/notifier.js";
 import { runConcurrentScript, activePlacementTracker, shouldStickToToken } from "../../crosshair/util.js";
+import { PendingPlacementSession } from "./pendingPlacementSession.js";
 /**
  * Base abstract class for Foundry VTT version-specific adapters.
  */
@@ -858,65 +859,7 @@ export class BaseFoundryVTTAdapter {
         };
         this.pendingPlacements.set(placementKey, pending);
 
-        const self = this;
-        const context = {
-            x: undefined,
-            y: undefined,
-            distance: undefined,
-            direction: undefined,
-            t: undefined,
-            radius: undefined,
-            rotation: undefined,
-            type: undefined,
-            cancelled: false,
-            resolved: false,
-            /**
-             * Resolve the pending sequencer crosshair placement with specified coordinates.
-             * @param {Object} [coords={}] - Placed coordinates and properties
-             * @returns {Promise<void>} Resolves when deferred document placement is processed
-             */
-            async resolve(coords = {}) {
-                Object.assign(this, coords);
-                this.resolved = true;
-
-                const pendingItem = self.pendingPlacements.get(placementKey);
-                if (pendingItem) {
-                    pendingItem.coords = coords;
-                    pendingItem.resolved = true;
-
-                    if (pendingItem.deferredCreateData && typeof canvas !== "undefined" && canvas.scene) {
-                        await self.createDeferredDocument(canvas.scene, pendingItem.deferredCreateData, coords, pendingItem.documentName, pendingItem.config);
-                        if (placeable && typeof self.dismissPreview === "function") {
-                            self.dismissPreview(placeable);
-                        }
-                    } else if (doc && typeof canvas !== "undefined" && canvas.scene) {
-                        systemAdapter.handleProgrammaticPlacement(canvas.scene, doc, placeable, coords, {
-                            crosshairAdapter: self,
-                            pendingPlacements: self.pendingPlacements,
-                            placementKey,
-                            config: pendingItem.config
-                        });
-                    }
-                }
-            },
-            /**
-             * Cancel the pending sequencer crosshair placement.
-             * @returns {void}
-             */
-            cancel() {
-                this.cancelled = true;
-                this.resolved = true;
-                const pendingItem = self.pendingPlacements.get(placementKey);
-                if (pendingItem) {
-                    pendingItem.cancelled = true;
-                    pendingItem.resolved = true;
-                }
-                self.pendingPlacements.delete(placementKey);
-                if (placeable && typeof self.dismissPreview === "function") {
-                    self.dismissPreview(placeable);
-                }
-            }
-        };
+        const context = new PendingPlacementSession(this, placementKey, pending, doc, placeable);
 
         try {
             // 3. Auto-detect template properties and assemble sequence config
