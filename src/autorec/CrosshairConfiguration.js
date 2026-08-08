@@ -75,6 +75,23 @@ export class CrosshairConfiguration {
     }
 
     /**
+     * Resolve the animation asset filepath configured for a specific shape type.
+     * @param {string} shapeType - Canonical shape type ('circle' | 'cone' | 'ray' | 'square' | 'rect')
+     * @returns {string} Configured file path
+     */
+    getFileForShape(shapeType = "circle") {
+        const normType = String(shapeType).toLowerCase() === "rect" ? "square" : String(shapeType).toLowerCase();
+        switch (normType) {
+            case "cone": return this.coneFile;
+            case "ray": return this.rayFile;
+            case "square": return this.squareFile;
+            case "circle":
+            default:
+                return this.circleFile;
+        }
+    }
+
+    /**
      * Create a normalized CrosshairConfiguration instance from any raw source object.
      * @param {Object} [source={}] - Raw configuration object
      * @returns {CrosshairConfiguration} Normalized configuration instance
