@@ -630,7 +630,7 @@ test('crosshair.util.attachWheelRotation synchronizes container and effect rotat
     }
 });
 
-test('resolveAnchorPlacement and resolveCrosshairPlacement in attached mode lock template origin exactly to Sequencer visual without shifting', () => {
+test('resolveAnchorPlacement and resolveCrosshairPlacement in attached mode lock template origin exactly to Sequencer visual without shifting', async () => {
     const adapterV14 = new FoundryVTTV14Adapter();
     const mockToken = {
         x: 100,
@@ -675,6 +675,31 @@ test('resolveAnchorPlacement and resolveCrosshairPlacement in attached mode lock
     assert.equal(resolvedPlacement.x, 150);
     assert.equal(resolvedPlacement.y, 100);
     assert.equal(resolvedPlacement.direction, 270);
+
+    // 3. REGRESSION: Attached directional shape moves to non-cardinal position and resolves placement directly to edge point (100, 155), NOT corner (100, 200)
+    const { ConeCrosshairShape } = await import('../../src/crosshair/cone.js');
+    let resolvedNonCardinal = null;
+    const nonCardinalConfig = {
+        type: 'cone',
+        stickToToken: true,
+        token: mockToken,
+        distance: 30,
+        angle: 53.13,
+        context: { resolve: (res) => { resolvedNonCardinal = res; } }
+    };
+    const mockPlaceable = { document: { x: 100, y: 100 }, x: 100, y: 100 };
+    const shape = new ConeCrosshairShape(mockPlaceable, nonCardinalConfig);
+    shape.sequencerCrosshair = { x: 100, y: 200 }; // Simulate sequencer crosshair placeable sitting at a corner
+    shape.move(50, 160); // Mouse at (50, 160) -> edge anchor is (100, 155)
+
+    const updates = shape.getPlacementUpdates();
+    assert.equal(updates.x, 100, 'Placement update X must match edge anchor (100)');
+    assert.equal(updates.y, 155, 'Placement update Y must match edge anchor (155), not corner (200)');
+
+    shape.onPlacedCallback();
+    assert.ok(resolvedNonCardinal, 'Placement must resolve');
+    assert.equal(resolvedNonCardinal.x, 100, 'Resolved X must match edge anchor (100)');
+    assert.equal(resolvedNonCardinal.y, 155, 'Resolved Y must match edge anchor (155), not corner (200)');
 });
 
 test('foundry adapter layer encapsulates isOwner and toToken helper methods', () => {
@@ -856,7 +881,7 @@ test('REGRESSION: alignCrosshairAndEffects resolves token attachment and keeps d
     assert.equal(mockSequencerCrosshair.data.rotation, 0);
 });
 
-test('REGRESSION: BaseCrosshairShape.move() does not mutate sequencerCrosshair visual coordinates in attached mode', () => {
+test('REGRESSION: BaseCrosshairShape.move() synchronizes coordinates to token center in attached circle mode', () => {
     const mockDocument = { direction: 0, updateSource: () => {} };
     const mockPlaceable = { document: mockDocument, direction: 0 };
     const mockToken = { center: { x: 500, y: 500 }, width: 1, height: 1 };
@@ -872,8 +897,10 @@ test('REGRESSION: BaseCrosshairShape.move() does not mutate sequencerCrosshair v
 
     shape.move(600, 500);
 
-    assert.equal(mockSequencerCrosshair.x, 550, 'sequencerCrosshair X must not be overwritten by move() when attached to token');
-    assert.equal(mockSequencerCrosshair.y, 500, 'sequencerCrosshair Y must not be overwritten by move() when attached to token');
+    assert.equal(shape.x, 500, 'shape X must be token center X (500)');
+    assert.equal(shape.y, 500, 'shape Y must be token center Y (500)');
+    assert.equal(mockSequencerCrosshair.x, 500, 'sequencerCrosshair X must be token center X (500)');
+    assert.equal(mockSequencerCrosshair.y, 500, 'sequencerCrosshair Y must be token center Y (500)');
 });
 
 test('REGRESSION: FoundryVTTV14Adapter.refreshTemplateHighlights does not overwrite tmpl.ray', () => {
@@ -1059,7 +1086,7 @@ test('REGRESSION: alignCrosshairAndEffects updates visual effect rotation for co
     }
 });
 
-test('REGRESSION: getPlacementUpdates prioritizes sequencerCrosshair visual container coordinates for directional attached shapes', () => {
+test('REGRESSION: getPlacementUpdates uses shape visual attachment coordinates for directional attached shapes', () => {
     const mockDocument = { direction: 0, updateSource: () => {} };
     const mockPlaceable = { document: mockDocument, direction: 0, x: 10, y: 20 };
     const config = {
@@ -1069,15 +1096,17 @@ test('REGRESSION: getPlacementUpdates prioritizes sequencerCrosshair visual cont
     };
 
     const shape = new BaseCrosshairShape(mockPlaceable, config);
-    shape.x = 10;
-    shape.y = 20;
+    shape.x = 120;
+    shape.y = 150;
+    shape.direction = 60;
 
-    // Attach sequencerCrosshair object with actual visual animation coordinates on canvas (e.g. 150, 100)
-    shape.sequencerCrosshair = { x: 150, y: 100 };
+    // Simulate sequencerCrosshair sitting at a corner point (100, 100)
+    shape.sequencerCrosshair = { x: 100, y: 100, direction: 0 };
 
     const updates = shape.getPlacementUpdates();
-    assert.equal(updates.x, 150, 'placement X must match sequencerCrosshair visual position (150) where animation appeared');
-    assert.equal(updates.y, 100, 'placement Y must match sequencerCrosshair visual position (100) where animation appeared');
+    assert.equal(updates.x, 120, 'placement X must match shape visual position (120) where animation appeared');
+    assert.equal(updates.y, 150, 'placement Y must match shape visual position (150) where animation appeared');
+    assert.equal(updates.direction, 60, 'placement direction must match shape direction (60)');
 });
 
 test('REGRESSION: getPlacementUpdates centers attached circle templates at token center rather than tile perimeter', () => {

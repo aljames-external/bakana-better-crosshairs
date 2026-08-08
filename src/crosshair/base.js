@@ -851,8 +851,7 @@ export class BaseCrosshairShape {
         this.x = targetX;
         this.y = targetY;
 
-        const isAttached = Boolean(this.stickToToken && this.token);
-        if (!isAttached && this.sequencerCrosshair) {
+        if (this.sequencerCrosshair) {
             this.sequencerCrosshair.x = targetX;
             this.sequencerCrosshair.y = targetY;
         }
@@ -992,25 +991,9 @@ export class BaseCrosshairShape {
                 posY = center.y;
                 dir = 0;
             } else {
-                if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x) && Number.isFinite(this.sequencerCrosshair.y)) {
-                    posX = this.sequencerCrosshair.x;
-                    posY = this.sequencerCrosshair.y;
-                }
-                if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.direction)) {
-                    dir = this.sequencerCrosshair.direction;
-                } else {
-                    const mousePos = canvas?.mousePosition ?? { x: posX, y: posY };
-                    const dx = mousePos.x - posX;
-                    const dy = mousePos.y - posY;
-                    if (Math.abs(dx) > 1e-6 || Math.abs(dy) > 1e-6) {
-                        let deg = Math.atan2(dy, dx) * (180 / Math.PI);
-                        if (deg < 0) deg += 360;
-                        dir = deg % 360;
-                    } else {
-                        const anchored = crosshairAdapter.resolveAnchorPlacement(this.token, mousePos);
-                        dir = anchored.direction;
-                    }
-                }
+                posX = this.x;
+                posY = this.y;
+                dir = this.direction;
             }
         } else if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x) && Number.isFinite(this.sequencerCrosshair.y)) {
             posX = this.sequencerCrosshair.x;
