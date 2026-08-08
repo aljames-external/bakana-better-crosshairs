@@ -975,7 +975,8 @@ export class BaseFoundryVTTAdapter {
 
     /**
      * Handle document update hook (v13 updateMeasuredTemplate / v14 updateRegion).
-     * Synchronizes persistent Sequencer animation position, dimensions, rotation, and lifecycle.
+     * Synchronizes persistent Sequencer animation position, dimensions, rotation, and lifecycle,
+     * and ensures BBC styling flags stay synchronized with native document color/alpha changes.
      * @param {Document|PlaceableObject} target - Template or Region document or placeable that was updated
      * @param {Object} [changed={}] - Document diff payload
      * @param {Object} [_options={}] - Document update options
@@ -985,6 +986,21 @@ export class BaseFoundryVTTAdapter {
     async handleUpdateDocument(target, changed = {}, _options = {}, userId) {
         if (!target) return;
         const doc = target.document ?? target;
+
+        if (doc.flags?.bbc && (!userId || userId === game?.user?.id)) {
+            const flagUpdates = {};
+            if (changed.fillColor !== undefined) flagUpdates.placedFillColor = changed.fillColor;
+            if (changed.color !== undefined) flagUpdates.placedFillColor = changed.color;
+            if (changed.borderColor !== undefined) flagUpdates.placedBorderColor = changed.borderColor;
+            if (changed.fillAlpha !== undefined) flagUpdates.placedFillAlpha = changed.fillAlpha;
+            if (changed.borderAlpha !== undefined) flagUpdates.placedBorderAlpha = changed.borderAlpha;
+            if (changed.alpha !== undefined) flagUpdates.placedFillAlpha = changed.alpha;
+
+            if (Object.keys(flagUpdates).length > 0 && typeof doc.setFlag === "function") {
+                await doc.setFlag("bbc", flagUpdates);
+            }
+        }
+
         if (!userId || userId === game?.user?.id) {
             await PersistedAnimationManager.syncPersistedAnimation(doc);
         }

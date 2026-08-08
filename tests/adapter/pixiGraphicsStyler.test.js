@@ -43,3 +43,42 @@ test('PixiGraphicsStyler.applyPlacedStyling applies border and fill colors acros
     assert.equal(gd.fillStyle.color, 0x00ff00);
     assert.equal(gd.fillStyle.alpha, 0.4);
 });
+
+test('PixiGraphicsStyler.applyPlacedStyling prioritizes updated document colors without overwriting with stale flags', () => {
+    const mockGraphic = {
+        geometry: {
+            graphicsData: [
+                { lineStyle: { width: 2, color: 0x000000, alpha: 1 }, fillStyle: { alpha: 0.5, color: 0x000000 } }
+            ],
+            invalidate: () => {}
+        }
+    };
+
+    const mockPlaceable = {
+        document: {
+            fillColor: '#123456',
+            borderColor: '#abcdef',
+            fillAlpha: 0.9,
+            borderAlpha: 0.7,
+            flags: {
+                bbc: {
+                    placedBorderColor: '#ff0000',
+                    placedBorderAlpha: 0.8,
+                    placedFillColor: '#00ff00',
+                    placedFillAlpha: 0.4
+                }
+            }
+        },
+        template: mockGraphic
+    };
+
+    PixiGraphicsStyler.applyPlacedStyling(mockPlaceable, false);
+
+    const gd = mockGraphic.geometry.graphicsData[0];
+    assert.equal(gd.lineStyle.color, 0xabcdef);
+    assert.equal(gd.lineStyle.alpha, 0.7);
+    assert.equal(gd.fillStyle.color, 0x123456);
+    assert.equal(gd.fillStyle.alpha, 0.9);
+    assert.equal(mockPlaceable.document.fillColor, '#123456');
+    assert.equal(mockPlaceable.document.borderColor, '#abcdef');
+});

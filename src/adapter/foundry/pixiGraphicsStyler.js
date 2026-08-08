@@ -31,30 +31,13 @@ export class PixiGraphicsStyler {
         const bbcFlags = doc.flags?.bbc ?? {};
         const docFillColor = "fillColor" in doc ? doc.fillColor : doc.color;
         const docFillAlpha = "fillAlpha" in doc ? doc.fillAlpha : doc.alpha;
+        const docBorderColor = "borderColor" in doc ? doc.borderColor : undefined;
+        const docBorderAlpha = "borderAlpha" in doc ? doc.borderAlpha : undefined;
 
-        const placedBorderColor = bbcFlags.placedBorderColor ?? doc.borderColor;
-        const placedBorderAlpha = bbcFlags.placedBorderAlpha ?? doc.borderAlpha;
-        const placedFillColor = bbcFlags.placedFillColor ?? docFillColor;
-        const placedFillAlpha = bbcFlags.placedFillAlpha ?? docFillAlpha;
-
-        if (bbcFlags.placedBorderColor !== undefined && bbcFlags.placedBorderColor !== null && doc.borderColor !== bbcFlags.placedBorderColor) {
-            try { doc.borderColor = bbcFlags.placedBorderColor; } catch (e) {}
-        }
-        if (bbcFlags.placedBorderAlpha !== undefined && doc.borderAlpha !== bbcFlags.placedBorderAlpha) {
-            try { doc.borderAlpha = bbcFlags.placedBorderAlpha; } catch (e) {}
-        }
-        if (bbcFlags.placedFillColor !== undefined && bbcFlags.placedFillColor !== null && doc.fillColor !== bbcFlags.placedFillColor) {
-            try { doc.fillColor = bbcFlags.placedFillColor; } catch (e) {}
-        }
-        if (bbcFlags.placedFillAlpha !== undefined && doc.fillAlpha !== bbcFlags.placedFillAlpha) {
-            try { doc.fillAlpha = bbcFlags.placedFillAlpha; } catch (e) {}
-        }
-        if (bbcFlags.placedFillColor !== undefined && bbcFlags.placedFillColor !== null && doc.color !== bbcFlags.placedFillColor) {
-            try { doc.color = bbcFlags.placedFillColor; } catch (e) {}
-        }
-        if (bbcFlags.placedFillAlpha !== undefined && doc.alpha !== bbcFlags.placedFillAlpha) {
-            try { doc.alpha = bbcFlags.placedFillAlpha; } catch (e) {}
-        }
+        const placedBorderColor = docBorderColor ?? bbcFlags.placedBorderColor;
+        const placedBorderAlpha = docBorderAlpha ?? bbcFlags.placedBorderAlpha;
+        const placedFillColor = docFillColor ?? bbcFlags.placedFillColor;
+        const placedFillAlpha = docFillAlpha ?? bbcFlags.placedFillAlpha;
 
         const borderNum = this.toColorNumber(placedBorderColor);
         const borderAlphaNum = typeof placedBorderAlpha === "number" && !Number.isNaN(placedBorderAlpha) ? placedBorderAlpha : undefined;
