@@ -417,15 +417,16 @@ test('BaseCrosshairShape._updateRangeText keeps distance measurement text unrota
             this.parent = null;
         }
     }
-    globalThis.foundry = { canvas: { containers: { PreciseText: MockText } } };
+    foundry.canvas.containers = foundry.canvas.containers ?? {};
+    foundry.canvas.containers.PreciseText = MockText;
     shape.sequencerCrosshair = {
         x: 100,
         y: 100,
         rotation: 0.785,
         parent: { addChild(child) { child.parent = this; } }
     };
-    shape._updateRangeText();
-    assert.equal(shape._rangeText.rotation, 0);
+    shape.rangeOverlay.update();
+    assert.equal(shape.rangeOverlay.rangeText?.rotation ?? 0, 0);
 });
 
 test('REGRESSION: Attached Ray template placement preserves Sequencer visual origin and computes ray angle directly to mouse click', async () => {
@@ -464,9 +465,7 @@ test('REGRESSION: Attached Ray template placement preserves Sequencer visual ori
     shape.sequencerCrosshair = mockSequencerCrosshair;
 
     // Simulate mouse position at (50, 230)
-    globalThis.canvas = {
-        mousePosition: { x: 50, y: 230 }
-    };
+    globalThis.canvas.mousePosition = { x: 50, y: 230 };
 
     // 1. Verify getPlacementUpdates uses Sequencer's visual origin (100, 200) and calculates direction directly to mouse (50, 230)
     const updates = shape.getPlacementUpdates();
@@ -590,12 +589,73 @@ test('REGRESSION: SquareCrosshairShape.create passes valid Sequencer type rect e
         callback() { return this; },
         location() { return this; }
     };
-    globalThis.Sequence = class {
-        crosshair() { return mockCrosshairBuilder; }
-    };
+    const origSeq = globalThis.Sequence;
+    try {
+        globalThis.Sequence = class {
+            crosshair() { return mockCrosshairBuilder; }
+        };
 
-    await shape.create();
-    assert.equal(passedType, 'rect', 'Sequencer requires type to be "rect", not "square"');
+        await shape.create();
+        assert.equal(passedType, 'rect', 'Sequencer requires type to be "rect", not "square"');
+    } finally {
+        globalThis.Sequence = origSeq;
+    }
+});
+
+test('resolveRectangleAsset correctly chooses 1:1 square vs 2:1 rectangle animation sizes and colors', async () => {
+    const { resolveRectangleAsset, SquareCrosshairShape } = await import('../../src/crosshair/square.js');
+
+    // 1. Square dimensions (ratio < 1.5)
+    assert.equal(
+        resolveRectangleAsset('eskie.crosshair.rectangle.fantasy_01.white', 5, 5),
+        'eskie.crosshair.rectangle.fantasy_01.white.no_base.05x05ft'
+    );
+    assert.equal(
+        resolveRectangleAsset('eskie.crosshair.rectangle.fantasy_01.white', 10, 10),
+        'eskie.crosshair.rectangle.fantasy_01.white.no_base.10x10ft'
+    );
+    assert.equal(
+        resolveRectangleAsset('eskie.crosshair.rectangle.fantasy_01.white', 15, 15),
+        'eskie.crosshair.rectangle.fantasy_01.white.no_base.20x20ft'
+    );
+    assert.equal(
+        resolveRectangleAsset('eskie.crosshair.rectangle.fantasy_01.white', 20, 20),
+        'eskie.crosshair.rectangle.fantasy_01.white.no_base.20x20ft'
+    );
+    assert.equal(
+        resolveRectangleAsset('eskie.crosshair.rectangle.fantasy_01.white', 30, 30),
+        'eskie.crosshair.rectangle.fantasy_01.white.no_base.20x20ft'
+    );
+
+    // 2. Rectangle dimensions (ratio >= 1.5, e.g. 2:1)
+    assert.equal(
+        resolveRectangleAsset('eskie.crosshair.rectangle.fantasy_01.white', 10, 5),
+        'eskie.crosshair.rectangle.fantasy_01.white.no_base.10x05ft'
+    );
+    assert.equal(
+        resolveRectangleAsset('eskie.crosshair.rectangle.fantasy_01.white', 20, 10),
+        'eskie.crosshair.rectangle.fantasy_01.white.no_base.20x10ft'
+    );
+    assert.equal(
+        resolveRectangleAsset('eskie.crosshair.rectangle.fantasy_01.white', 40, 20),
+        'eskie.crosshair.rectangle.fantasy_01.white.no_base.40x20ft'
+    );
+
+    // 3. Custom color preservation
+    assert.equal(
+        resolveRectangleAsset('eskie.crosshair.rectangle.fantasy_01.blue', 20, 20),
+        'eskie.crosshair.rectangle.fantasy_01.blue.no_base.20x20ft'
+    );
+
+    // 4. SquareCrosshairShape._getGraphicFile delegates to resolveRectangleAsset
+    const mockDocument = { x: 0, y: 0 };
+    const mockPlaceable = { x: 0, y: 0, document: mockDocument };
+    const shape = new SquareCrosshairShape(mockPlaceable, {
+        squareFile: 'eskie.crosshair.rectangle.fantasy_01.white',
+        distance: 20,
+        width: 10
+    });
+    assert.equal(shape.getGraphicFile(), 'eskie.crosshair.rectangle.fantasy_01.white.no_base.20x10ft');
 });
 
 

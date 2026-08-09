@@ -1,8 +1,10 @@
-import { closest } from "../lib/filemanager.js";
 import { log } from "../lib/logger.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
 import { BaseCrosshairShape } from "./base.js";
 import { RayCrosshairShape } from "./ray.js";
+import { resolveRectangleAsset } from "./assetResolvers.js";
+
+export { resolveRectangleAsset };
 
 /**
  * Square crosshair shape class encapsulating square/rect animation, dimensions, and top-left/custom anchor point logic.
@@ -91,12 +93,16 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * @returns {string} Resolved file path or key
      */
     _getGraphicFile() {
-        const rawFile = String(this.config.file ?? "").trim();
-        if (Boolean(rawFile)) {
-            return closest(rawFile);
+        const rawFile = String(this.config.squareFile ?? this.config.file ?? "").trim();
+        const rawDistance = Math.round(this.config.distance ?? 30);
+        const rawWidth = Math.round(this.config.width ?? 30);
+        let distance = rawDistance;
+        if (rawWidth > 0 && rawDistance > rawWidth) {
+            const isSquareDiagonal = rawDistance <= rawWidth * 1.6;
+            distance = isSquareDiagonal ? rawWidth : Math.round(Math.sqrt(Math.max(0, rawDistance * rawDistance - rawWidth * rawWidth)));
         }
-        const defaultKey = "eskie.crosshair.square.thin.white.full";
-        return closest(defaultKey) ?? defaultKey;
+        const width = rawWidth > 0 ? rawWidth : distance;
+        return resolveRectangleAsset(rawFile, distance, width);
     }
 
     /**
@@ -113,7 +119,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
                 originalType: "square",
                 distance: this.config.distance ?? 30,
                 width: this.config.width ?? 30,
-                rayFile: this.config.squareFile ?? this.config.file ?? "eskie.crosshair.ray.fantasy_01.white.full"
+                rayFile: this.config.squareFile ?? this.config.file ?? "eskie.crosshair.rectangle.fantasy_01.white"
             };
             const rayShape = new RayCrosshairShape(this.placeable, rayConfig);
             return rayShape.create();

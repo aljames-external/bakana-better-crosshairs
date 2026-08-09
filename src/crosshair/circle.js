@@ -1,27 +1,9 @@
-import { closest } from "../lib/filemanager.js";
 import { log } from "../lib/logger.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
 import { BaseCrosshairShape } from "./base.js";
+import { resolveCircleAsset } from "./assetResolvers.js";
 
-/**
- * Resolves the circle crosshair asset path based on the provided file path or key and the effect size.
- *
- * @param {string|null} pathOrKey - The asset file path or Sequencer database key.
- * @param {number} [effectSize=40] - The target effect size in feet or grid distance.
- * @returns {string} The resolved file path or asset key for the circle crosshair.
- */
-export function resolveCircleAsset(pathOrKey, size = 10) {
-    const key = String(pathOrKey ?? "eskie.crosshair.circle.fantasy_01.white").trim() || "eskie.crosshair.circle.fantasy_01.white";
-    if (key.startsWith('eskie.crosshair.circle.fantasy_01')) {
-        const [eskie, crosshair, shape, genre, COLOR] = key.split('.');
-        const color = COLOR ?? "white";
-        if (size <= 10) return closest(`eskie.crosshair.circle.fantasy_01.${color}.no_base.radius_10ft`);
-        if (size <= 20) return closest(`eskie.crosshair.circle.fantasy_01.${color}.no_base.radius_20ft`);
-        if (size <= 30) return closest(`eskie.crosshair.circle.fantasy_01.${color}.no_base.radius_30ft`);
-        return closest(`eskie.crosshair.circle.fantasy_01.${color}.no_base.radius_60ft`);
-    }
-    return closest(key);
-}
+export { resolveCircleAsset };
 
 /**
  * Circle crosshair shape class encapsulating circle animation, dimensions, and center anchor point logic.

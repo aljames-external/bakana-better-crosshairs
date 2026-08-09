@@ -756,9 +756,21 @@ export class BaseCrosshairShape {
                 posY = center.y;
                 dir = 0;
             } else {
-                posX = this.x;
-                posY = this.y;
-                dir = this.direction;
+                if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x) && Number.isFinite(this.sequencerCrosshair.y)) {
+                    posX = this.sequencerCrosshair.x;
+                    posY = this.sequencerCrosshair.y;
+                } else {
+                    posX = this.x;
+                    posY = this.y;
+                }
+                const mousePos = canvas?.mousePosition;
+                if (mousePos && Number.isFinite(mousePos.x) && Number.isFinite(mousePos.y)) {
+                    const dx = mousePos.x - posX;
+                    const dy = mousePos.y - posY;
+                    dir = (Math.atan2(dy, dx) * (180 / Math.PI) + 360) % 360;
+                } else {
+                    dir = this.direction;
+                }
             }
         } else if (this.sequencerCrosshair && Number.isFinite(this.sequencerCrosshair.x) && Number.isFinite(this.sequencerCrosshair.y)) {
             posX = this.sequencerCrosshair.x;

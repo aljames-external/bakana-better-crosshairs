@@ -31,7 +31,7 @@ export const DEFAULT_AUTOREC_ENTRY = {
     circleFile: "eskie.crosshair.circle.fantasy_01.white.full",
     coneFile: "eskie.crosshair.cone.thin.fantasy_01.white.full",
     rayFile: "eskie.crosshair.ray.fantasy_01.white",
-    squareFile: "eskie.crosshair.ray.fantasy_01.white",
+    squareFile: "eskie.crosshair.rectangle.fantasy_01.white",
     lineFile: "eskie.crosshair.line.generic_01.white",
     placedFillColor: "#000000",
     placedFillAlpha: 0.25,

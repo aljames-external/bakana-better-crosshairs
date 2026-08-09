@@ -1,6 +1,6 @@
 import { log } from "../lib/logger.js";
 import { crosshairAdapter } from "../adapter/foundry/index.js";
-import { resolveCircleAsset } from "./circle.js";
+import { resolveCircleAsset, resolveRectangleAsset } from "./assetResolvers.js";
 import { closest } from "../lib/filemanager.js";
 
 /**
@@ -105,9 +105,9 @@ export class PersistedAnimationManager {
             }
             case "square":
             case "rect": {
-                effectFile = bbcFlags.squareFile ?? "eskie.crosshair.ray.fantasy_01.white";
                 const dist = detected.distance ?? 30;
                 const width = detected.width ?? dist;
+                effectFile = resolveRectangleAsset(bbcFlags.squareFile ?? "eskie.crosshair.rectangle.fantasy_01.white", dist, width);
                 widthPx = dist * pxPerFoot;
                 heightPx = width * pxPerFoot;
                 anchor = { x: 0, y: 0 };
