@@ -41,6 +41,7 @@ function inspectScopeCustomState(customConfig) {
             (customConfig.circleFile ||
                 customConfig.coneFile ||
                 customConfig.rayFile ||
+                customConfig.rectangleFile ||
                 customConfig.squareFile ||
                 customConfig.showLine !== undefined ||
                 customConfig.stickToToken !== undefined)
@@ -236,7 +237,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
             circleFile: source.circleFile ?? DEFAULT_AUTOREC_ENTRY.circleFile,
             coneFile: source.coneFile ?? DEFAULT_AUTOREC_ENTRY.coneFile,
             rayFile: source.rayFile ?? DEFAULT_AUTOREC_ENTRY.rayFile,
-            squareFile: source.squareFile ?? DEFAULT_AUTOREC_ENTRY.squareFile,
+            rectangleFile: source.rectangleFile ?? source.squareFile ?? DEFAULT_AUTOREC_ENTRY.rectangleFile,
             lineFile: source.lineFile ?? DEFAULT_AUTOREC_ENTRY.lineFile,
             stickToToken: stickToTokenValue,
             showLine: Boolean(source.showLine),
@@ -314,7 +315,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
             circleFile: localize("BBC.autorecMenu.labels.circleFile", "Circle Sequencer Filepath"),
             coneFile: localize("BBC.autorecMenu.labels.coneFile", "Cone Sequencer Filepath"),
             rayFile: localize("BBC.autorecMenu.labels.rayFile", "Ray Sequencer Filepath"),
-            squareFile: localize("BBC.autorecMenu.labels.squareFile", "Square Sequencer Filepath"),
+            rectangleFile: localize("BBC.autorecMenu.labels.rectangleFile", "Rectangle Sequencer Filepath"),
             lockToToken: localize("BBC.autorecMenu.labels.lockToToken", "Lock to Token (Stick)"),
             originLine: localize("BBC.autorecMenu.labels.originLine", "Origin Stretch Line"),
             showLineLabel: localize("BBC.autorecMenu.labels.showLine", "Show Line"),
@@ -485,7 +486,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
             circleFile: String(formData.get("circleFile") ?? "").trim(),
             coneFile: String(formData.get("coneFile") ?? "").trim(),
             rayFile: String(formData.get("rayFile") ?? "").trim(),
-            squareFile: String(formData.get("squareFile") ?? "").trim(),
+            rectangleFile: String(formData.get("rectangleFile") ?? formData.get("squareFile") ?? "").trim(),
             stickToToken: String(formData.get("stickToToken") ?? "default"),
             showLine: formData.get("showLine") === "on",
             showRange: formData.get("showRange") === "on",

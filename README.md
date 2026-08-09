@@ -55,7 +55,7 @@ Bakana's Better Crosshairs supports two primary targeting modes configured per-i
 The **Autorec Configuration Hub** allows you to define custom crosshair rules that automatically trigger whenever an item or spell is cast:
 - **Built-in `DEFAULT` Fallback Entry**: Includes a permanent, non-deletable `DEFAULT` workflow entry. Any template placeable drawn that lacks a specific item entry automatically adopts the animated crosshair configuration of `DEFAULT` (unless explicitly disabled via *Workflow Enabled: Disabled*).
 - **Multi-Activity Hierarchy & Priority Matching**: Define independent entries for each activity on an item (`e.g. Longbow > Line Fire`, `Longbow > Rapid Fire`, and `Longbow > <no activity named>`). Activity-specific workflows automatically take precedence over general item fallback workflows (`<no activity named>`), with stable front-to-back tiebreaking (`first registered matching rule wins`).
-- **Shape & Animation Override**: Force an item to spawn a specific crosshair shape (`Circle`, `Cone`, `Ray`, `Square`) and select specific Sequencer database animations (`circleFile`, `coneFile`, `rayFile`, `squareFile`, `lineFile`).
+- **Shape & Animation Override**: Force an item to spawn a specific crosshair shape (`Circle`, `Cone`, `Ray`, `Rectangle` / `Square`) and select specific Sequencer database animations (`circleFile`, `coneFile`, `rayFile`, `rectangleFile`, `lineFile`).
 - **Color & Border Themes**: Set custom fill colors, border colors, and opacity alphas per spell or weapon (`placedFillColor`, `placedBorderColor`, etc.). When a template is placed, native schema fields (`fillColor`, `borderColor`, etc.) are written directly to the database so standard canvas colors persist across scene reloads.
 - **Pre & Post Placement Scripting (`concurrentCode` & `postPlacementCode`)**: Run custom asynchronous JavaScript snippets immediately before targeting (`concurrentCode`) or asynchronously right after document creation in the database (`postPlacementCode`).
 
@@ -99,7 +99,7 @@ Bakana's Better Crosshairs supports item-level overrides stored directly on item
 
 For game systems without native integration or modules looking to programmatically configure items, `BBC` exposes two helper methods on `bbc.manager`:
 
-- **`bbc.manager.getDefaultConfig()`**: Returns a clean copy (`{ ...DEFAULT_AUTOREC_ENTRY }`) of the canonical default crosshair configuration schema outlining all required and available fields (`enabled`, `circleFile`, `coneFile`, `rayFile`, `squareFile`, `stickToToken`, `showLine`, `borderColor`, `borderAlpha`, `fillColor`, `fillAlpha`, `placedFillColor`, `concurrentCode`, `postPlacementCode`, etc.).
+- **`bbc.manager.getDefaultConfig()`**: Returns a clean copy (`{ ...DEFAULT_AUTOREC_ENTRY }`) of the canonical default crosshair configuration schema outlining all required and available fields (`enabled`, `circleFile`, `coneFile`, `rayFile`, `rectangleFile`, `stickToToken`, `showLine`, `borderColor`, `borderAlpha`, `fillColor`, `fillAlpha`, `placedFillColor`, `concurrentCode`, `postPlacementCode`, etc.).
 - **`bbc.manager.customize(item, config)`**: Programmatically store or clear a custom crosshair configuration override on any Item document owned by the calling user (`item.setFlag("bakana-better-crosshairs", "customConfig", config)`). Passing `config === undefined` (or `null`) clears the override.
 
 ---

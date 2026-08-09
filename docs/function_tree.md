@@ -141,7 +141,7 @@ Binds a global canvas mousewheel listener (`Shift+Scroll` / `Ctrl+Scroll`) to ro
 
 #### `bbc.manager.getDefaultConfig()`
 Returns a fresh reference copy (`{ ...DEFAULT_AUTOREC_ENTRY }`) of the canonical default Better Crosshairs configuration entry schema.
-- **Returns**: (*Object*) Complete crosshair configuration template dictionary (`id`, `enabled`, `stickToToken`, `showLine`, `circleFile`, `coneFile`, `rayFile`, `squareFile`, `borderColor`, `borderAlpha`, `fillColor`, `fillAlpha`, `placedFillColor`, `concurrentCode`, `postPlacementCode`, `icon`).
+- **Returns**: (*Object*) Complete crosshair configuration template dictionary (`id`, `enabled`, `stickToToken`, `showLine`, `circleFile`, `coneFile`, `rayFile`, `rectangleFile`, `borderColor`, `borderAlpha`, `fillColor`, `fillAlpha`, `placedFillColor`, `concurrentCode`, `postPlacementCode`).
 
 #### `bbc.manager.customize(item, config)`
 Programmatically stores or clears (`config === undefined`) an item-specific crosshair override configuration on an Item document's flags (`bakana-better-crosshairs.customConfig`).

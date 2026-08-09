@@ -287,7 +287,7 @@ Legacy flat key structures are mapped strictly to nested object namespaces:
 
 | Legacy `v1.0.0` Flat Key | Canonical `v2.0.0` Hierarchical Namespace |
 | :--- | :--- |
-| `circleFile`, `coneFile`, `rayFile`, `squareFile`, `lineFile` | `file.circle`, `file.cone`, `file.ray`, `file.square`, `file.line` |
+| `circleFile`, `coneFile`, `rayFile`, `rectangleFile` / `squareFile`, `lineFile` | `file.circle`, `file.cone`, `file.ray`, `file.rectangle` / `file.square`, `file.line` |
 | `borderColor`, `borderAlpha`, `fillColor`, `fillAlpha` | `preview.border.color`, `preview.border.alpha`, `preview.fill.color`, `preview.fill.alpha` |
 | `placedBorderColor`, `placedBorderAlpha`, `placedFillColor`, `placedFillAlpha` | `placed.border.color`, `placed.border.alpha`, `placed.fill.color`, `placed.fill.alpha` |
 | `concurrentCode`, `postPlacementCode` | `macro.pre`, `macro.post` |

@@ -101,7 +101,8 @@ export function sanitizeEntryForExchange(entry) {
             circle: String(fileRaw.circle ?? raw.circleFile ?? DEFAULT_AUTOREC_ENTRY.circleFile),
             cone: String(fileRaw.cone ?? raw.coneFile ?? DEFAULT_AUTOREC_ENTRY.coneFile),
             ray: String(fileRaw.ray ?? raw.rayFile ?? DEFAULT_AUTOREC_ENTRY.rayFile),
-            square: String(fileRaw.square ?? raw.squareFile ?? DEFAULT_AUTOREC_ENTRY.squareFile),
+            rectangle: String(fileRaw.rectangle ?? fileRaw.square ?? raw.rectangleFile ?? raw.squareFile ?? DEFAULT_AUTOREC_ENTRY.rectangleFile),
+            square: String(fileRaw.rectangle ?? fileRaw.square ?? raw.rectangleFile ?? raw.squareFile ?? DEFAULT_AUTOREC_ENTRY.rectangleFile),
             line: String(fileRaw.line ?? raw.lineFile ?? DEFAULT_AUTOREC_ENTRY.lineFile)
         },
         preview: {

@@ -651,7 +651,7 @@ test('resolveRectangleAsset correctly chooses 1:1 square vs 2:1 rectangle animat
     const mockDocument = { x: 0, y: 0 };
     const mockPlaceable = { x: 0, y: 0, document: mockDocument };
     const shape = new SquareCrosshairShape(mockPlaceable, {
-        squareFile: 'eskie.crosshair.rectangle.fantasy_01.white',
+        rectangleFile: 'eskie.crosshair.rectangle.fantasy_01.white',
         distance: 20,
         width: 10
     });

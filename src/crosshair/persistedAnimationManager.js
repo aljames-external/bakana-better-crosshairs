@@ -107,7 +107,7 @@ export class PersistedAnimationManager {
             case "rect": {
                 const dist = detected.distance ?? 30;
                 const width = detected.width ?? dist;
-                effectFile = resolveRectangleAsset(bbcFlags.squareFile ?? "eskie.crosshair.rectangle.fantasy_01.white", dist, width);
+                effectFile = resolveRectangleAsset(bbcFlags.rectangleFile ?? bbcFlags.squareFile ?? "eskie.crosshair.rectangle.fantasy_01.white", dist, width);
                 widthPx = dist * pxPerFoot;
                 heightPx = width * pxPerFoot;
                 anchor = { x: 0, y: 0 };

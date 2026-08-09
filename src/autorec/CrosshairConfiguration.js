@@ -32,7 +32,7 @@ export class CrosshairConfiguration {
         this.circleFile = String(source.circleFile ?? file.circle ?? defaults.circleFile).trim();
         this.coneFile = String(source.coneFile ?? file.cone ?? defaults.coneFile).trim();
         this.rayFile = String(source.rayFile ?? file.ray ?? defaults.rayFile).trim();
-        this.squareFile = String(source.squareFile ?? file.square ?? defaults.squareFile).trim();
+        this.rectangleFile = String(source.rectangleFile ?? source.squareFile ?? file.rectangle ?? file.square ?? defaults.rectangleFile).trim();
         this.lineFile = String(source.lineFile ?? file.line ?? defaults.lineFile).trim();
 
         // Lock to Token option ("true" | "false" | "default")
@@ -75,16 +75,27 @@ export class CrosshairConfiguration {
     }
 
     /**
+     * Backward-compatibility getter for squareFile referencing rectangleFile.
+     * @returns {string} Configured rectangle file path
+     */
+    get squareFile() {
+        return this.rectangleFile;
+    }
+
+    /**
      * Resolve the animation asset filepath configured for a specific shape type.
-     * @param {string} shapeType - Canonical shape type ('circle' | 'cone' | 'ray' | 'square' | 'rect')
+     * @param {string} shapeType - Canonical shape type ('circle' | 'cone' | 'ray' | 'square' | 'rect' | 'rectangle')
      * @returns {string} Configured file path
      */
     getFileForShape(shapeType = "circle") {
-        const normType = String(shapeType).toLowerCase() === "rect" ? "square" : String(shapeType).toLowerCase();
+        const normType = String(shapeType).toLowerCase();
         switch (normType) {
             case "cone": return this.coneFile;
             case "ray": return this.rayFile;
-            case "square": return this.squareFile;
+            case "rect":
+            case "square":
+            case "rectangle":
+                return this.rectangleFile;
             case "circle":
             default:
                 return this.circleFile;
@@ -139,7 +150,7 @@ export class CrosshairConfiguration {
             merged.circleFile = customSource.circleFile ?? this.circleFile;
             merged.coneFile = customSource.coneFile ?? this.coneFile;
             merged.rayFile = customSource.rayFile ?? this.rayFile;
-            merged.squareFile = customSource.squareFile ?? this.squareFile;
+            merged.rectangleFile = customSource.rectangleFile ?? customSource.squareFile ?? this.rectangleFile;
 
             const stickToTokenVal = String(customSource.stickToToken ?? "default");
             merged.stickToToken = stickToTokenVal !== "default" ? stickToTokenVal : this.stickToToken;
@@ -185,7 +196,7 @@ export class CrosshairConfiguration {
             circleFile: this.circleFile,
             coneFile: this.coneFile,
             rayFile: this.rayFile,
-            squareFile: this.squareFile,
+            rectangleFile: this.rectangleFile,
             lineFile: this.lineFile,
             stickToToken: this.stickToToken,
             showLine: this.showLine,

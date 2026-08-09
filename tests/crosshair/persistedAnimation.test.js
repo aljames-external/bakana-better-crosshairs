@@ -33,16 +33,18 @@ test('FoundryVTTV13Adapter and FoundryVTTV14Adapter extractPlacedStylingFlags in
         circleFile: 'eskie.crosshair.circle.custom',
         coneFile: 'eskie.crosshair.cone.custom',
         rayFile: 'eskie.crosshair.ray.custom',
-        squareFile: 'eskie.crosshair.square.custom'
+        rectangleFile: 'eskie.crosshair.rectangle.custom'
     };
 
     const v13Flags = v13.extractPlacedStylingFlags(config);
     assert.equal(v13Flags.flags.bbc.persist, true);
     assert.equal(v13Flags.flags.bbc.circleFile, 'eskie.crosshair.circle.custom');
+    assert.equal(v13Flags.flags.bbc.rectangleFile, 'eskie.crosshair.rectangle.custom');
 
     const v14Flags = v14.extractPlacedStylingFlags(config);
     assert.equal(v14Flags.flags.bbc.persist, true);
     assert.equal(v14Flags.flags.bbc.coneFile, 'eskie.crosshair.cone.custom');
+    assert.equal(v14Flags.flags.bbc.rectangleFile, 'eskie.crosshair.rectangle.custom');
 });
 
 test('PersistedAnimationManager creates, updates, and ends persistent Sequencer effects bound to template', async () => {

@@ -433,7 +433,8 @@ export class BaseFoundryVTTAdapter {
                 circleFile: config.circleFile,
                 coneFile: config.coneFile,
                 rayFile: config.rayFile,
-                squareFile: config.squareFile
+                rectangleFile: config.rectangleFile ?? config.squareFile,
+                squareFile: config.rectangleFile ?? config.squareFile
             }
         };
 

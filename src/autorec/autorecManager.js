@@ -28,10 +28,10 @@ export const DEFAULT_AUTOREC_ENTRY = {
     borderAlpha: 0,
     fillColor: "#000000",
     fillAlpha: 0,
-    circleFile: "eskie.crosshair.circle.fantasy_01.white.full",
-    coneFile: "eskie.crosshair.cone.thin.fantasy_01.white.full",
+    circleFile: "eskie.crosshair.circle.fantasy_01.white",
+    coneFile: "eskie.crosshair.cone.thin.fantasy_01.white",
     rayFile: "eskie.crosshair.ray.fantasy_01.white",
-    squareFile: "eskie.crosshair.rectangle.fantasy_01.white",
+    rectangleFile: "eskie.crosshair.rectangle.fantasy_01.white",
     lineFile: "eskie.crosshair.line.generic_01.white",
     placedFillColor: "#000000",
     placedFillAlpha: 0.25,
@@ -234,7 +234,7 @@ export class AutorecManager {
         const circleFile = String(baseConfig.circleFile ?? fileRaw.circle ?? DEFAULT_AUTOREC_ENTRY.circleFile).trim();
         const coneFile = String(baseConfig.coneFile ?? fileRaw.cone ?? DEFAULT_AUTOREC_ENTRY.coneFile).trim();
         const rayFile = String(baseConfig.rayFile ?? fileRaw.ray ?? DEFAULT_AUTOREC_ENTRY.rayFile).trim();
-        const squareFile = String(baseConfig.squareFile ?? fileRaw.square ?? DEFAULT_AUTOREC_ENTRY.squareFile).trim();
+        const rectangleFile = String(baseConfig.rectangleFile ?? baseConfig.squareFile ?? fileRaw.rectangle ?? fileRaw.square ?? DEFAULT_AUTOREC_ENTRY.rectangleFile).trim();
         const lineFile = String(baseConfig.lineFile ?? fileRaw.line ?? DEFAULT_AUTOREC_ENTRY.lineFile).trim();
 
         const stickToToken = String(baseConfig.stickToToken ?? optionsRaw.attachMode ?? DEFAULT_AUTOREC_ENTRY.stickToToken);
@@ -277,7 +277,7 @@ export class AutorecManager {
             circleFile,
             coneFile,
             rayFile,
-            squareFile,
+            rectangleFile,
             lineFile,
             stickToToken,
             showLine,
@@ -847,7 +847,7 @@ export class AutorecManager {
             const circleFile = config.circleFile ?? DEFAULT_AUTOREC_ENTRY.circleFile;
             const coneFile = config.coneFile ?? DEFAULT_AUTOREC_ENTRY.coneFile;
             const rayFile = config.rayFile ?? DEFAULT_AUTOREC_ENTRY.rayFile;
-            const squareFile = config.squareFile ?? DEFAULT_AUTOREC_ENTRY.squareFile;
+            const rectangleFile = config.rectangleFile ?? config.squareFile ?? DEFAULT_AUTOREC_ENTRY.rectangleFile;
 
             const unitFt = localize("BBC.Units.Feet", "ft");
             const distVal = config.distance ?? null;
@@ -920,7 +920,7 @@ export class AutorecManager {
                 circleFile,
                 coneFile,
                 rayFile,
-                squareFile,
+                rectangleFile,
                 file,
                 isCustomFunction,
                 isLocal,

@@ -93,7 +93,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * @returns {string} Resolved file path or key
      */
     _getGraphicFile() {
-        const rawFile = String(this.config.squareFile ?? this.config.file ?? "").trim();
+        const rawFile = String(this.config.rectangleFile ?? this.config.squareFile ?? this.config.file ?? "").trim();
         const rawDistance = Math.round(this.config.distance ?? 30);
         const rawWidth = Math.round(this.config.width ?? 30);
         let distance = rawDistance;
@@ -119,7 +119,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
                 originalType: "square",
                 distance: this.config.distance ?? 30,
                 width: this.config.width ?? 30,
-                rayFile: this.config.squareFile ?? this.config.file ?? "eskie.crosshair.rectangle.fantasy_01.white"
+                rayFile: this.config.rectangleFile ?? this.config.squareFile ?? this.config.file ?? "eskie.crosshair.rectangle.fantasy_01.white"
             };
             const rayShape = new RayCrosshairShape(this.placeable, rayConfig);
             return rayShape.create();
