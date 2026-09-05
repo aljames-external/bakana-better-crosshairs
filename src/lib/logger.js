@@ -42,6 +42,17 @@ export class Logger {
             warn: (message) => this._enqueueNotification("warn", message),
             error: (message) => this._enqueueNotification("error", message)
         });
+
+        this.error = this.error.bind(this);
+        this.warn = this.warn.bind(this);
+        this.info = this.info.bind(this);
+        this.debug = this.debug.bind(this);
+        this.group = this.group.bind(this);
+        this.groupCollapsed = this.groupCollapsed.bind(this);
+        this.groupExpanded = this.groupExpanded.bind(this);
+        this.groupEnd = this.groupEnd.bind(this);
+        this.getVerbosityLevel = this.getVerbosityLevel.bind(this);
+        this.setVerbosity = this.setVerbosity.bind(this);
     }
 
     /**
