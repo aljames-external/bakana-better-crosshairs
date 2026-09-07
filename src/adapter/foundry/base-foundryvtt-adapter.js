@@ -217,13 +217,8 @@ export class BaseFoundryVTTAdapter {
      * @param {string} uuid - The document UUID
      * @returns {Document|null} The resolved document or null
      */
-    fromUuidSync(uuid) {
-        if (!uuid || typeof uuid !== "string") return null;
-        try {
-            return foundry.utils.fromUuidSync(uuid) ?? null;
-        } catch (_) {
-            return null;
-        }
+    fromUuidSync(uuid, options = {}) {
+        return foundry.utils.fromUuidSync(uuid, options);
     }
 
     /**
