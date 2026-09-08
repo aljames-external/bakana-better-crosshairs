@@ -1,7 +1,7 @@
 import { MODULE_ID, BROADCAST_INTERVAL_MS, REMOTE_CROSSHAIR_TIMEOUT_MS } from "../lib/constants.js";
 import { socketlib } from "../integration/socketlib.js";
 import { log } from "../lib/logger.js";
-import { crosshairAdapter } from "../adapter/index.js";
+import { adapter } from "../adapter/index.js";
 import { alignCrosshairAndEffects, _calculateAngleFromOrigin } from "./util.js";
 import { CrosshairController, attachCrosshairToToken, getShapeClasses } from "./crosshairController.js";
 
@@ -15,7 +15,7 @@ import { CrosshairController, attachCrosshairToToken, getShapeClasses } from "./
 export async function createRemoteShapeInstance(shapeType, config = {}) {
     const classes = await getShapeClasses();
     const type = String(shapeType ?? "circle").toLowerCase();
-    const previewPlaceable = crosshairAdapter.createUnpersistedPreviewPlaceable(config);
+    const previewPlaceable = adapter.crosshair.createUnpersistedPreviewPlaceable(config);
     if (type === "cone" && classes.ConeCrosshairShape) return new classes.ConeCrosshairShape(previewPlaceable, config);
     if (type === "ray" && classes.RayCrosshairShape) return new classes.RayCrosshairShape(previewPlaceable, config);
     if ((type === "square" || type === "rect") && classes.SquareCrosshairShape) return new classes.SquareCrosshairShape(previewPlaceable, config);
@@ -55,7 +55,7 @@ export function getGamemasterCursorPosition(identifier = "Gamemaster") {
     }
 
     // 3. Inspect canvas controls cursors
-    const controls = crosshairAdapter.controls;
+    const controls = adapter.crosshair.controls;
     const cursorSources = [controls?._cursors, controls?.cursors].filter(Boolean);
     for (const _cursors of cursorSources) {
         if (!_cursors) continue;
@@ -120,7 +120,7 @@ export function diagnoseUserCursor(identifier = "Gamemaster") {
 
     const userId = user?.id;
 
-    const controls = crosshairAdapter.controls;
+    const controls = adapter.crosshair.controls;
     const cursorsContainer = controls?.cursors;
     const internalCursors = controls?._cursors;
 
@@ -294,7 +294,7 @@ export class RemoteCrosshairVisual {
         }
 
         if (hasIcon) {
-            const gridSize = crosshairAdapter.gridSize;
+            const gridSize = adapter.crosshair.gridSize;
             const iconSize = Math.max(gridSize * 0.5, 36);
             seq.effect()
                 .name(`${this.effectName}-icon`)
@@ -596,3 +596,7 @@ class RemoteCrosshairManagerClass {
 }
 
 export const remoteCrosshairManager = new RemoteCrosshairManagerClass();
+remoteCrosshairManager.getPeerCursorPosition = getPeerCursorPosition;
+remoteCrosshairManager.getGamemasterCursorPosition = getGamemasterCursorPosition;
+remoteCrosshairManager.diagnoseUserCursor = diagnoseUserCursor;
+remoteCrosshairManager.createRemoteShapeInstance = createRemoteShapeInstance;

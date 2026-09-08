@@ -1,6 +1,6 @@
 import { closest } from "../lib/filemanager.js";
 import { log } from "../lib/logger.js";
-import { crosshairAdapter } from "../adapter/foundry/index.js";
+import { adapter } from "../adapter/index.js";
 import { BaseCrosshairShape } from "./base.js";
 
 /**
@@ -60,11 +60,11 @@ export class RayCrosshairShape extends BaseCrosshairShape {
     _getGraphicDimensions() {
         const distance = Math.round(this.config.distance ?? 30);
         const width = Math.round(this.config.width ?? 5);
-        const gridDist = crosshairAdapter.gridDistance;
-        const gridSize = crosshairAdapter.gridSize;
+        const gridDist = adapter.crosshair.gridDistance;
+        const gridSize = adapter.crosshair.gridSize;
         const lengthPixels = (distance / gridDist) * gridSize;
         const widthPixels = Math.max(gridSize, (width / gridDist) * gridSize);
-        const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
+        const { factor, gridUnits } = adapter.crosshair.getTemplatePixelFactor();
         log.debug("RayCrosshairShape._getGraphicDimensions | Sizing ray graphic.", { distance, width, lengthPixels, widthPixels, factor, gridUnits });
         return { widthPx: lengthPixels, heightPx: widthPixels, factor, gridUnits };
     }
@@ -119,7 +119,7 @@ async function play(placeable, config = {}) {
  * @returns {Promise<void>} A promise resolving when the matching crosshair effects have been terminated
  */
 async function stop(token, options = {}) {
-    const targetToken = crosshairAdapter.toToken(token);
+    const targetToken = adapter.crosshair.toToken(token);
     const opts = options ?? {};
     const id = opts.id ?? "Ray Crosshair";
     log.debug("ray.stop | Stopping ray crosshair sequence effect.", { id, token: targetToken?.name });

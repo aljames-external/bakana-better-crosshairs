@@ -2,7 +2,7 @@ import { MODULE_ID, BROADCAST_INTERVAL_MS } from "../lib/constants.js";
 import { closest } from "../lib/filemanager.js";
 import { log } from "../lib/logger.js";
 import { getUserColor } from "../lib/utils.js";
-import { crosshairAdapter, systemAdapter } from "../adapter/index.js";
+import { adapter } from "../adapter/index.js";
 import { resolveCrosshairPlacement, attachWheelRotation, detachWheelRotation, shouldStickToToken, alignCrosshairAndEffects, getGridSnapMode, snapCoordinates, activePlacementTracker } from "./util.js";
 import { CrosshairController } from "./crosshairController.js";
 import { getPeerCursorPosition } from "./remoteCrosshairManager.js";
@@ -47,10 +47,10 @@ export class BaseCrosshairShape {
         this.doc = doc;
         const flagsToken = doc?.flags?.bbc?.token ?? doc?.flags?.bakana?.token ?? activePlacementTracker.sticky;
         const rawToken = config.token ?? flagsToken;
-        this.token = crosshairAdapter.toToken(rawToken);
+        this.token = adapter.crosshair.toToken(rawToken);
 
         // Normalize config properties using adapter properties extraction
-        const docProps = doc ? crosshairAdapter.detectProperties(doc) : {};
+        const docProps = doc ? adapter.crosshair.detectProperties(doc) : {};
         config.radius = config.radius ?? docProps.radius ?? 20;
         config.distance = config.distance ?? docProps.distance ?? 30;
         config.width = config.width ?? docProps.width ?? 5;
@@ -107,7 +107,7 @@ export class BaseCrosshairShape {
             if (document?.item?.img) return document.item.img;
             const origin = document?.flags?.dnd5e?.origin ?? document?.flags?.["midi-qol"]?.origin;
             if (origin) {
-                const fromUuid = crosshairAdapter.fromUuidSync(origin);
+                const fromUuid = adapter.crosshair.fromUuidSync(origin);
                 if (fromUuid?.img) return fromUuid.img;
             }
             return null;
@@ -136,7 +136,7 @@ export class BaseCrosshairShape {
                 this.y = center.y;
                 this.direction = 0;
             } else {
-                const anchored = crosshairAdapter.resolveAnchorPlacement(this.token, { x: this.cursorX, y: this.cursorY });
+                const anchored = adapter.crosshair.resolveAnchorPlacement(this.token, { x: this.cursorX, y: this.cursorY });
                 this.x = anchored.x;
                 this.y = anchored.y;
                 if (anchored.direction !== undefined) {
@@ -280,7 +280,7 @@ export class BaseCrosshairShape {
      * @returns {{widthPx: number, heightPx: number, factor: number, gridUnits: boolean}}
      */
     _getGraphicDimensions() {
-        const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
+        const { factor, gridUnits } = adapter.crosshair.getTemplatePixelFactor();
         return { widthPx: 100, heightPx: 100, factor, gridUnits };
     }
 
@@ -305,7 +305,7 @@ export class BaseCrosshairShape {
         const curX = Number.isFinite(this.cursorX) ? this.cursorX : this.x;
         const curY = Number.isFinite(this.cursorY) ? this.cursorY : this.y;
         const initLoc = (isSticky && this.token)
-            ? ((this.type === "circle") ? (this.token.center ?? { x: this.token.x ?? 0, y: this.token.y ?? 0 }) : crosshairAdapter.resolveAnchorPlacement(this.token, { x: curX, y: curY }))
+            ? ((this.type === "circle") ? (this.token.center ?? { x: this.token.x ?? 0, y: this.token.y ?? 0 }) : adapter.crosshair.resolveAnchorPlacement(this.token, { x: curX, y: curY }))
             : { x: curX, y: curY };
 
         if (this.type === "circle" && this.token && this.showLine && !this.stickToToken) {
@@ -353,7 +353,7 @@ export class BaseCrosshairShape {
         }
 
         if (hasIcon) {
-            const gridSize = crosshairAdapter.gridSize;
+            const gridSize = adapter.crosshair.gridSize;
             const iconSize = Math.max(gridSize * 0.5, 36);
 
             const iconEffect = seq.effect()
@@ -436,7 +436,7 @@ export class BaseCrosshairShape {
             // Preserved for future enablement once upstream Sequencer range constraint behaviors are stabilized:
             /*
             const limitRangeEnabled = this.config.limitRange !== false;
-            const maxRange = limitRangeEnabled ? (this.config.maxRange ?? systemAdapter?.getItemMaxRange?.(this.config.item, this.config.activity)) : null;
+            const maxRange = limitRangeEnabled ? (this.config.maxRange ?? adapter.system?.getItemMaxRange?.(this.config.item, this.config.activity)) : null;
             if (this.token && Number.isFinite(maxRange) && maxRange > 0) {
                 locationOpts.limitMaxRange = maxRange;
                 locationOpts.displayRangePoly = true;
@@ -507,10 +507,10 @@ export class BaseCrosshairShape {
                 this.y = center.y;
                 this.direction = 0;
             } else {
-                const mousePos = (crosshairAdapter.mousePosition && Number.isFinite(crosshairAdapter.mousePosition.x))
-                    ? crosshairAdapter.mousePosition
+                const mousePos = (adapter.crosshair.mousePosition && Number.isFinite(adapter.crosshair.mousePosition.x))
+                    ? adapter.crosshair.mousePosition
                     : { x: this.cursorX, y: this.cursorY };
-                const anchored = crosshairAdapter.resolveAnchorPlacement(this.token, mousePos);
+                const anchored = adapter.crosshair.resolveAnchorPlacement(this.token, mousePos);
                 this.x = anchored.x;
                 this.y = anchored.y;
                 if (anchored.direction !== undefined) {
@@ -675,7 +675,7 @@ export class BaseCrosshairShape {
         this.context?.cancel?.();
         const placeableToDismiss = this.placeable ?? activePlacementTracker.placeable;
         if (placeableToDismiss) {
-            crosshairAdapter?.dismissPreview?.(placeableToDismiss);
+            adapter.crosshair?.dismissPreview?.(placeableToDismiss);
         }
         activePlacementTracker.placeable = null;
         activePlacementTracker.crosshair = null;
@@ -708,7 +708,7 @@ export class BaseCrosshairShape {
      * Hide the template preview placeable on canvas.
      */
     hide() {
-        crosshairAdapter.hidePreview(this.placeable);
+        adapter.crosshair.hidePreview(this.placeable);
     }
 
     /**
@@ -735,7 +735,7 @@ export class BaseCrosshairShape {
                     this.config.direction = 0;
                 }
             } else {
-                const anchored = crosshairAdapter.resolveAnchorPlacement(this.token, { x, y });
+                const anchored = adapter.crosshair.resolveAnchorPlacement(this.token, { x, y });
                 targetX = anchored.x;
                 targetY = anchored.y;
                 if (anchored.direction !== undefined) {
@@ -770,7 +770,7 @@ export class BaseCrosshairShape {
             this.refreshTemplateHighlights();
         } else {
             const hId = this.placeable?._bbcHighlightId ?? this.placeable?.highlightId;
-            const hl = crosshairAdapter.getHighlightLayer(hId);
+            const hl = adapter.crosshair.getHighlightLayer(hId);
             if (hl && (!hl.visible || !hl.renderable)) {
                 hl.visible = true;
                 hl.renderable = true;
@@ -786,7 +786,7 @@ export class BaseCrosshairShape {
      * @param {boolean} [refresh=true] - Whether to trigger immediate template rendering refresh
      */
     rotate(newAngleDeg, refresh = true) {
-        if (!crosshairAdapter.supportsShapeRotation(this.type)) {
+        if (!adapter.crosshair.supportsShapeRotation(this.type)) {
             return;
         }
 
@@ -823,7 +823,7 @@ export class BaseCrosshairShape {
                 const ox = this.sequencerCrosshair.x ?? this.x ?? 0;
                 const oy = this.sequencerCrosshair.y ?? this.y ?? 0;
                 const dist = this.sequencerCrosshair.ray.distance ?? 1000;
-                const newRay = crosshairAdapter.createRayFromAngle(ox, oy, rad, dist);
+                const newRay = adapter.crosshair.createRayFromAngle(ox, oy, rad, dist);
                 if (newRay) this.sequencerCrosshair.ray = newRay;
             }
             if (!isRect) {
@@ -855,10 +855,10 @@ export class BaseCrosshairShape {
             try { this.placeable.rotation = rad; } catch (e) {}
             const ox = this.placeable.x ?? this.x ?? 0;
             const oy = this.placeable.y ?? this.y ?? 0;
-            const pxPerFoot = crosshairAdapter.pixelsPerDistance ?? 100;
+            const pxPerFoot = adapter.crosshair.pixelsPerDistance ?? 100;
             const isRect = this.type === "rect" || this.type === "square";
             const dist = isRect && doc?.distance ? doc.distance * pxPerFoot : (this.placeable.ray?.distance ?? ((doc?.distance ?? 30) * pxPerFoot));
-            const newRay = crosshairAdapter.createRayFromAngle(ox, oy, rad, dist);
+            const newRay = adapter.crosshair.createRayFromAngle(ox, oy, rad, dist);
             if (newRay) this.placeable.ray = newRay;
             try {
                 delete this.placeable._shape;
@@ -892,13 +892,13 @@ export class BaseCrosshairShape {
         const doc = this.doc;
         if (doc) {
             const dims = this.placeable?.dimensions ?? doc.dimensions ?? activePlacementTracker.dimensions;
-            const docProps = crosshairAdapter.detectProperties(doc);
+            const docProps = adapter.crosshair.detectProperties(doc);
             const initialDist = dims?.distance ?? docProps.distance;
             const initialWidth = dims?.width ?? docProps.width;
             const isGridUnits = dims?.gridUnits ?? true;
             const shapeType = this.type ?? this.config?.type ?? "circle";
 
-            crosshairAdapter.updatePreviewShape(doc, {
+            adapter.crosshair.updatePreviewShape(doc, {
                 x: this.x,
                 y: this.y,
                 direction: this.direction,
@@ -920,9 +920,9 @@ export class BaseCrosshairShape {
                 } catch (e) {}
             }
         }
-        if (crosshairAdapter?.refreshTemplateHighlights && this.placeable) {
+        if (adapter.crosshair?.refreshTemplateHighlights && this.placeable) {
             try {
-                crosshairAdapter.refreshTemplateHighlights(this.placeable, this.direction);
+                adapter.crosshair.refreshTemplateHighlights(this.placeable, this.direction);
             } catch (e) {
                 log.debug("BaseCrosshairShape.refreshTemplateHighlights | Adapter refresh call failed gracefully:", e);
             }
@@ -947,7 +947,7 @@ export class BaseCrosshairShape {
             } else {
                 posX = this.x;
                 posY = this.y;
-                const mousePos = crosshairAdapter.mousePosition;
+                const mousePos = adapter.crosshair.mousePosition;
                 if (mousePos && Number.isFinite(mousePos.x) && Number.isFinite(mousePos.y) && (mousePos.x !== posX || mousePos.y !== posY)) {
                     const dx = mousePos.x - posX;
                     const dy = mousePos.y - posY;
@@ -963,6 +963,6 @@ export class BaseCrosshairShape {
                 dir = this.sequencerCrosshair.direction;
             }
         }
-        return crosshairAdapter.formatPlacementCoordinates(posX, posY, dir, this.config);
+        return adapter.crosshair.formatPlacementCoordinates(posX, posY, dir, this.config);
     }
 }

@@ -1,4 +1,5 @@
 import { localize, notify, getUserColor } from "../lib/utils.js";
+import { adapter } from "../adapter/index.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -47,20 +48,20 @@ export class BaseCrosshairMenuApplication extends HandlebarsApplicationMixin(App
     }
 
     /**
-     * Helper to retrieve common section titles and document terms from crosshairAdapter.
+     * Helper to retrieve common section titles and document terms from adapter.crosshair.
      * Evaluates adapter dynamically to avoid circular module dependencies.
      * @protected
      * @returns {{prePlacementTitle: string, placementSectionTitle: string, postPlacementTitle: string, docTerm: string}} Normalized adapter titles.
      */
     _getAdapterTitles() {
-        const adapter = game.modules?.get("bakana-better-crosshairs")?.api?.crosshairAdapter;
-        if (adapter) {
+        const crosshairAdapter = adapter.crosshair;
+        if (crosshairAdapter) {
             return {
-                prePlacementTitle: adapter.prePlacementTitle,
-                previewPlacementSectionTitle: adapter.previewPlacementSectionTitle,
-                placementSectionTitle: adapter.placementSectionTitle,
-                postPlacementTitle: adapter.postPlacementTitle,
-                docTerm: adapter.documentTerm
+                prePlacementTitle: crosshairAdapter.prePlacementTitle,
+                previewPlacementSectionTitle: crosshairAdapter.previewPlacementSectionTitle,
+                placementSectionTitle: crosshairAdapter.placementSectionTitle,
+                postPlacementTitle: crosshairAdapter.postPlacementTitle,
+                docTerm: crosshairAdapter.documentTerm
             };
         }
         return {

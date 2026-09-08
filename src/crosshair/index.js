@@ -1,10 +1,26 @@
-import { cone, ConeCrosshairShape } from "./cone.js";
-import { circle, CircleCrosshairShape } from "./circle.js";
-import { ray, RayCrosshairShape } from "./ray.js";
-import { square, SquareCrosshairShape } from "./square.js";
-import { BaseCrosshairShape } from "./base.js";
+import { adapter } from "../adapter/index.js";
+import { cone } from "./cone.js";
+import { circle } from "./circle.js";
+import { ray } from "./ray.js";
+import { square } from "./square.js";
 import { CrosshairController, attachCrosshairToToken } from "./crosshairController.js";
-import { remoteCrosshairManager } from "./remoteCrosshairManager.js";
+import {
+    remoteCrosshairManager,
+    getPeerCursorPosition,
+    getGamemasterCursorPosition,
+    diagnoseUserCursor
+} from "./remoteCrosshairManager.js";
+import {
+    attachWheelRotation,
+    detachWheelRotation,
+    resolveCrosshairPlacement,
+    getTokenEdgePoint,
+    snapCoordinates,
+    shouldStickToToken,
+    rotateCrosshairInstance,
+    alignCrosshairAndEffects,
+    activePlacementTracker
+} from "./util.js";
 
 /**
  * Normalizes polymorphic arguments passed to the play entry point into a standard builder, target, and configuration object.
@@ -61,17 +77,24 @@ export const crosshair = {
     ray,
     square,
     play,
+    remote: remoteCrosshairManager,
+    remoteCrosshairManager,
+    getPeerCursorPosition,
+    getGamemasterCursorPosition,
+    diagnoseUserCursor,
+    util: {
+        attachWheelRotation,
+        detachWheelRotation,
+        resolveCrosshairPlacement,
+        getTokenEdgePoint,
+        snapCoordinates,
+        shouldStickToToken,
+        rotateCrosshairInstance,
+        alignCrosshairAndEffects,
+        activePlacementTracker
+    }
 };
 
-export {
-    CrosshairController,
-    attachCrosshairToToken,
-    BaseCrosshairShape,
-    CircleCrosshairShape,
-    ConeCrosshairShape,
-    RayCrosshairShape,
-    SquareCrosshairShape,
-    remoteCrosshairManager,
-};
+adapter.registerCrosshair(crosshair);
 
 

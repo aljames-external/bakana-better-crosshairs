@@ -1,7 +1,6 @@
 import { MODULE_ID } from '../lib/constants.js';
 import { log } from '../lib/logger.js';
-import { systemAdapter } from '../adapter/system/index.js';
-import { crosshairAdapter } from '../adapter/index.js';
+import { adapter } from '../adapter/index.js';
 import { socketlib } from '../integration/index.js';
 import { localize, notify, getUserColor } from '../lib/utils.js';
 import { buildExportPackage, validateImportPackage as exchangeValidateImportPackage, analyzeImportDiff as exchangeAnalyzeImportDiff, triggerFileDownload } from './autorecExchange.js';
@@ -210,7 +209,7 @@ export class AutorecManager {
 
     /**
      * Resolve the normalized calling Item and Activity context from a document and workflow payload.
-     * Delegates directly to the active system adapter (`systemAdapter.extractCallingContext`).
+     * Delegates directly to the active system adapter (`adapter.system.extractCallingContext`).
      * Normalizes caller entry boundary before passing to system adapter (Rule 5).
      * @param {Document|Object} target - Target template/region document or placeable object
      * @param {Object} [baseContext={}] - Upstream workflow calling context
@@ -218,7 +217,7 @@ export class AutorecManager {
      */
     resolveItemAndActivity(target, baseContext = {}) {
         const doc = target?.document ?? target;
-        return systemAdapter.extractCallingContext(doc, baseContext);
+        return adapter.system.extractCallingContext(doc, baseContext);
     }
 
     /**
@@ -420,7 +419,7 @@ export class AutorecManager {
 
     /**
      * Match a canvas Template or Region Document to a registered autorec workflow.
-     * Delegates document inspection to the Foundry Adapter (`crosshairAdapter.matchAutorecEntry`).
+     * Delegates document inspection to the Foundry Adapter (`adapter.crosshair.matchAutorecEntry`).
      * Normalizes caller entry boundary before passing to adapter (Rule 5).
      * @param {Document|Object} target - Target candidate Document or Placeable
      * @returns {Object|null} Registered autorec configuration or null
@@ -428,7 +427,7 @@ export class AutorecManager {
     getEntryForDocument(target) {
         if (!target) return null;
         const doc = target?.document ?? target;
-        return crosshairAdapter.matchAutorecEntry(doc, this.registeredHandlers);
+        return adapter.crosshair.matchAutorecEntry(doc, this.registeredHandlers);
     }
 
     /**
@@ -504,7 +503,7 @@ export class AutorecManager {
         const isGM = Boolean(game.user?.isGM);
         if (isGM) {
             try {
-                const saved = crosshairAdapter.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") ?? {});
+                const saved = adapter.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") ?? {});
                 saved[itemName] = config;
                 game.settings.set(MODULE_ID, "registeredTemplates", saved);
                 this.persistedItemNames.add(itemName);
@@ -531,7 +530,7 @@ export class AutorecManager {
         const isGM = Boolean(game.user?.isGM);
         if (isGM) {
             try {
-                const saved = crosshairAdapter.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") ?? {});
+                const saved = adapter.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") ?? {});
                 if (itemName in saved) {
                     delete saved[itemName];
                     game.settings.set(MODULE_ID, "registeredTemplates", saved);
@@ -795,7 +794,7 @@ export class AutorecManager {
             const isGM = Boolean(game.user?.isGM);
             if (isGM) {
                 try {
-                    const saved = crosshairAdapter.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") ?? {});
+                    const saved = adapter.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") ?? {});
                     Object.assign(saved, toPersist);
                     await game.settings.set(MODULE_ID, "registeredTemplates", saved);
                     this.broadcastSync();
@@ -975,7 +974,7 @@ export class AutorecManager {
                 activityName,
                 hasActivity,
                 activityDisplay,
-                supportsActivities: systemAdapter.supportsActivities,
+                supportsActivities: adapter.system.supportsActivities,
                 type,
                 typeKey: rawType.toLowerCase(),
                 isAutoDetect: rawType === "Auto-Detect",
@@ -1233,7 +1232,7 @@ export class AutorecManager {
             const isGM = Boolean(game?.user?.isGM);
             if (isGM) {
                 try {
-                    const saved = crosshairAdapter.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") ?? {});
+                    const saved = adapter.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") ?? {});
                     Object.assign(saved, toPersist);
                     await game.settings.set(MODULE_ID, "registeredTemplates", saved);
                     this.broadcastSync();
@@ -1278,9 +1277,14 @@ export function makeCallableManager(managerInstance) {
     });
 }
 
+rawAutorecManager.ModuleAutorecManager = ModuleAutorecManager;
+rawAutorecManager.Module = ModuleAutorecManager;
+
 /**
  * Callable singleton instance of AutorecManager.
  * Can be called as a function `autorecManager("module-id")` or used as a standard manager object.
  * @type {Function & AutorecManager}
  */
 export const autorecManager = makeCallableManager(rawAutorecManager);
+autorecManager.ModuleAutorecManager = ModuleAutorecManager;
+autorecManager.Module = ModuleAutorecManager;

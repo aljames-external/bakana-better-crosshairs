@@ -93,11 +93,16 @@ test('setupModule initializes adapters, hooks, settings, and populates module.ap
     setupModule();
 
     assert.ok(mockModule.api);
-    assert.ok(mockModule.api.crosshair);
-    assert.ok(mockModule.api.util);
-    assert.ok(mockModule.api.autorecManager);
-    assert.ok(mockModule.api.systemAdapter);
-    assert.ok(mockModule.api.crosshairAdapter);
+    assert.ok(mockModule.api.adapter);
+    assert.ok(mockModule.api.adapter.system);
+    assert.ok(mockModule.api.adapter.foundry);
+    assert.ok(mockModule.api.adapter.crosshair);
+    assert.ok(mockModule.api.adapter.crosshair.util);
+    assert.ok(mockModule.api.adapter.canvas);
+    assert.ok(mockModule.api.adapter.autorec);
+    assert.ok(mockModule.api.adapter.socket);
+    assert.ok(mockModule.api.adapter.file);
+    assert.ok(mockModule.api.log);
 
     game.modules.get = origGet;
 });

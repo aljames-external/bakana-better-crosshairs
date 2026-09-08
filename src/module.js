@@ -1,18 +1,6 @@
-import { crosshair } from './crosshair/index.js';
-import { file, closest, absolutePath } from './lib/filemanager.js';
+import { adapter } from './adapter/index.js';
+import './crosshair/index.js';
 import { log } from './lib/logger.js';
-import { autorecManager } from './autorec/autorecManager.js';
-import { ModuleAutorecManager } from './autorec/moduleAutorecManager.js';
-import { remoteCrosshairManager, getPeerCursorPosition, getGamemasterCursorPosition, diagnoseUserCursor } from './crosshair/remoteCrosshairManager.js';
-import { socketlib, handleSocketMessage } from './integration/socketlib.js';
-import {
-    systemAdapter,
-    crosshairAdapter,
-    canvasAdapter,
-    initializeHooks
-} from './adapter/index.js';
-import { attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement, getTokenEdgePoint, snapCoordinates } from './crosshair/util.js';
-import { localize } from './lib/utils.js';
 import { registerModuleSettings } from './settings.js';
 import { MODULE_ID, MODULE_NAME } from './lib/constants.js';
 
@@ -26,7 +14,7 @@ export function setupApiCalls(exportedFunctions) {
     if (!exportedFunctions || typeof exportedFunctions !== "object") return;
     const mod = game?.modules?.get(MODULE_ID);
     if (mod) {
-        mod.api = crosshairAdapter.mergeObject(mod.api ?? {}, exportedFunctions);
+        mod.api = Object.assign(mod.api ?? {}, exportedFunctions);
     }
 }
 
@@ -37,11 +25,8 @@ export function setupApiCalls(exportedFunctions) {
  */
 export function setupModule() {
     registerModuleSettings();
-    systemAdapter.initialize();
-    crosshairAdapter.initialize();
-    canvasAdapter.initialize();
-    initializeHooks();
-    crosshairAdapter.loadTemplates([
+    adapter.initialize();
+    adapter.loadTemplates([
         `modules/${MODULE_ID}/src/autorec/configFieldsPartial.html`,
         `modules/${MODULE_ID}/src/autorec/autorecImportDialog.html`,
         `modules/${MODULE_ID}/src/autorec/autorecExchangeMenu.html`,
@@ -49,32 +34,8 @@ export function setupModule() {
         `modules/${MODULE_ID}/src/autorec/itemConfigMenu.html`
     ]);
 
-    const manager = autorecManager;
-
-    const util = {
-        localize,
-        file,
-        closest,
-        absolutePath,
-        attachWheelRotation,
-        detachWheelRotation,
-        resolveCrosshairPlacement,
-        getTokenEdgePoint,
-        snapCoordinates,
-    };
-
     const moduleApi = {
-        crosshair,
-        util,
-        autorecManager,
-        ModuleAutorecManager,
-        remoteCrosshairManager,
-        getPeerCursorPosition,
-        getGamemasterCursorPosition,
-        diagnoseUserCursor,
-        systemAdapter,
-        crosshairAdapter,
-        canvasAdapter,
+        adapter,
         log,
     };
 
@@ -97,7 +58,7 @@ Hooks.once('init', () => {
  * @returns {void}
  */
 Hooks.once('i18nInit', () => {
-    systemAdapter.refreshLocalizedDefaults('i18nInit');
+    adapter.system.refreshLocalizedDefaults('i18nInit');
 });
 
 /**
@@ -106,15 +67,15 @@ Hooks.once('i18nInit', () => {
  * @returns {void}
  */
 Hooks.once('ready', () => {
-    systemAdapter.refreshLocalizedDefaults('ready');
-    autorecManager.initializeReadySync();
-    socketlib.on(handleSocketMessage);
+    adapter.system.refreshLocalizedDefaults('ready');
+    adapter.autorec.initializeReadySync();
+    adapter.socket.on(adapter.handleSocketMessage);
     Hooks.on('canvasReady', () => {
-        remoteCrosshairManager.clear();
+        adapter.crosshair.remote.clear();
     });
     Hooks.on('userConnected', (user, connected) => {
         if (!connected && user?.id) {
-            remoteCrosshairManager.clearForUser(user.id);
+            adapter.crosshair.remote.clearForUser(user.id);
         }
     });
     log.info(`${MODULE_NAME} module ready`);

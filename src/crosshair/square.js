@@ -1,5 +1,5 @@
 import { log } from "../lib/logger.js";
-import { crosshairAdapter } from "../adapter/foundry/index.js";
+import { adapter } from "../adapter/index.js";
 import { BaseCrosshairShape } from "./base.js";
 import { RayCrosshairShape } from "./ray.js";
 import { resolveRectangleAsset } from "./assetResolvers.js";
@@ -78,11 +78,11 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
         }
         const width = rawWidth > 0 ? rawWidth : distance;
 
-        const gridDist = crosshairAdapter.gridDistance;
-        const gridSize = crosshairAdapter.gridSize;
+        const gridDist = adapter.crosshair.gridDistance;
+        const gridSize = adapter.crosshair.gridSize;
         const lengthPixels = (distance / gridDist) * gridSize;
         const widthPixels = (width / gridDist) * gridSize;
-        const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
+        const { factor, gridUnits } = adapter.crosshair.getTemplatePixelFactor();
         log.debug("SquareCrosshairShape._getGraphicDimensions | Sizing square graphic.", { distance, width, lengthPixels, widthPixels, factor, gridUnits });
         return { widthPx: lengthPixels, heightPx: widthPixels, factor, gridUnits };
     }
@@ -164,7 +164,7 @@ async function play(placeable, config = {}) {
  * @returns {Promise<void>} A promise resolving when matching effects have been terminated
  */
 async function stop(token, options = {}) {
-    const targetToken = crosshairAdapter.toToken(token);
+    const targetToken = adapter.crosshair.toToken(token);
     const opts = options ?? {};
     const id = opts.id ?? "Square Crosshair";
     log.debug("square.stop | Stopping square crosshair sequence effect.", { id, token: targetToken?.name });

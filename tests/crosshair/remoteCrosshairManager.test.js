@@ -7,10 +7,10 @@ import { remoteCrosshairManager, RemoteCrosshairVisual } from "../../src/crossha
 import { BaseCrosshairShape } from "../../src/crosshair/base.js";
 import { crosshair } from "../../src/crosshair/index.js";
 import { socketlib } from "../../src/integration/socketlib.js";
-import { crosshairAdapter } from "../../src/adapter/index.js";
+import { adapter } from "../../src/adapter/index.js";
 
 beforeEach(() => {
-    crosshairAdapter.initialize();
+    adapter.crosshair.initialize();
 });
 
 

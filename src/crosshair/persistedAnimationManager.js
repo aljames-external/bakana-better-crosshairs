@@ -1,5 +1,5 @@
 import { log } from "../lib/logger.js";
-import { crosshairAdapter } from "../adapter/foundry/index.js";
+import { adapter } from "../adapter/index.js";
 import { resolveCircleAsset, resolveRectangleAsset } from "./assetResolvers.js";
 import { closest } from "../lib/filemanager.js";
 
@@ -70,16 +70,16 @@ export class PersistedAnimationManager {
             }
         }
 
-        const detected = crosshairAdapter.detectProperties(doc);
+        const detected = adapter.crosshair.detectProperties(doc);
         const shapeType = detected.type ?? "circle";
-        const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
-        const pxPerFoot = crosshairAdapter.pixelsPerDistance;
+        const { factor, gridUnits } = adapter.crosshair.getTemplatePixelFactor();
+        const pxPerFoot = adapter.crosshair.pixelsPerDistance;
 
         let effectFile = "";
         let widthPx = 100;
         let heightPx = 100;
         let anchor = { x: 0.5, y: 0.5 };
-        const supportsRotation = crosshairAdapter.supportsShapeRotation(shapeType);
+        const supportsRotation = adapter.crosshair.supportsShapeRotation(shapeType);
         const location = { x: detected.x ?? doc.x ?? 0, y: detected.y ?? doc.y ?? 0 };
         const rotation = supportsRotation ? (detected.direction ?? detected.rotation ?? doc.direction ?? doc.rotation ?? 0) : 0;
 

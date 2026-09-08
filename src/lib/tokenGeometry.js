@@ -1,4 +1,4 @@
-import { crosshairAdapter } from "../adapter/index.js";
+import { adapter } from "../adapter/index.js";
 
 /**
  * Unified geometric utilities for token bounding boxes, ray-casting perimeter intersections,
@@ -37,7 +37,7 @@ export class TokenGeometry {
      * @returns {{x: number, y: number, w: number, h: number, center: {x: number, y: number}}} Bounding box data
      */
     static getBounds(token) {
-        const size = crosshairAdapter.gridSize;
+        const size = adapter.crosshair.gridSize;
         const tx = token?.x ?? token?.document?.x ?? 0;
         const ty = token?.y ?? token?.document?.y ?? 0;
         const tokenWidth = token?.document?.width ?? token?.width ?? 1;
@@ -83,12 +83,12 @@ export class TokenGeometry {
             const p1 = { x: points[i], y: points[i + 1] };
             const p2Idx = (i + 2) >= points.length ? 0 : (i + 2);
             const p2 = { x: points[p2Idx], y: points[p2Idx + 1] };
-            intersection = crosshairAdapter.lineSegmentIntersection(centerPoint, farPoint, p1, p2);
+            intersection = adapter.crosshair.lineSegmentIntersection(centerPoint, farPoint, p1, p2);
             if (intersection) break;
         }
 
         if (!intersection) {
-            const RayClass = crosshairAdapter.Ray;
+            const RayClass = adapter.crosshair.Ray;
             if (RayClass) {
                 const ray = new RayClass(centerPoint, farPoint);
                 if (ray?.intersectSegment) {

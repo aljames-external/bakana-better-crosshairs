@@ -15,7 +15,7 @@ import {
     CanvasV14Adapter
 } from '../../src/adapter/canvas/index.js';
 import { initializeSystemAdapter, systemAdapter } from '../../src/adapter/system/index.js';
-import { registerPlacementHooks, initializeHooks } from '../../src/adapter/index.js';
+import { adapter } from '../../src/adapter/index.js';
 import { snapCoordinates, attachWheelRotation, detachWheelRotation, resolveCrosshairPlacement, alignCrosshairAndEffects, shouldStickToToken, activePlacementTracker } from '../../src/crosshair/util.js';
 import { BaseCrosshairShape } from '../../src/crosshair/base.js';
 import { autorecManager } from '../../src/autorec/autorecManager.js';
@@ -279,7 +279,7 @@ test('abstracted registerPlacementHooks combines both Foundry version adapter an
         const adapterV14 = new FoundryVTTV14Adapter();
         const pf2eSys = new Pf2eSystemAdapter();
 
-        registerPlacementHooks({ onDrawPreview: () => {}, onPreCreate: () => {}, onCreate: () => {} }, {
+        adapter.registerPlacementHooks({ onDrawPreview: () => {}, onPreCreate: () => {}, onCreate: () => {} }, {
             foundryAdapter: adapterV14,
             sysAdapter: pf2eSys
         });
@@ -295,7 +295,7 @@ test('abstracted registerPlacementHooks combines both Foundry version adapter an
         registered.length = 0;
         const adapterV13 = new FoundryVTTV13Adapter();
         const dndSys = new Dnd5eSystemAdapter();
-        registerPlacementHooks({ onDrawPreview: () => {}, onPreCreate: () => {}, onCreate: () => {} }, {
+        adapter.registerPlacementHooks({ onDrawPreview: () => {}, onPreCreate: () => {}, onCreate: () => {} }, {
             foundryAdapter: adapterV13,
             sysAdapter: dndSys
         });
@@ -960,7 +960,7 @@ test('initializeHooks registers placement hooks using default handlers from acti
             if (event === 'preCreateRegion') preCreateHandler = fn;
         };
         const adapterV14 = new FoundryVTTV14Adapter();
-        initializeHooks({ foundryAdapter: adapterV14, sysAdapter: systemAdapter });
+        adapter.initializeHooks({ foundryAdapter: adapterV14, sysAdapter: systemAdapter });
         assert.ok(preCreateHandler, 'preCreateRegion hook should be registered');
     } finally {
         globalThis.Hooks.on = origOn;

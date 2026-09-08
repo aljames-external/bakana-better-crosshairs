@@ -2,8 +2,7 @@ import { MODULE_ID } from "../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY, autorecManager } from "./autorecManager.js";
 import { log } from "../lib/logger.js";
 import { localize, notify, getUserColor } from "../lib/utils.js";
-import { systemAdapter } from "../adapter/system/index.js";
-import { crosshairAdapter } from "../adapter/index.js";
+import { adapter } from "../adapter/index.js";
 import { BaseCrosshairMenuApplication, normalizeHexColor } from "./BaseCrosshairMenuApplication.js";
 
 /**
@@ -204,7 +203,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
         };
 
         const scopes = [itemScope];
-        if (systemAdapter.supportsActivities && item?.system?.activities) {
+        if (adapter.system.supportsActivities && item?.system?.activities) {
             for (const act of item.system.activities.values()) {
                 if (!act?.id) continue;
                 const actCustomConfig = activityConfigs[act.id] ?? null;
@@ -492,7 +491,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
                         notify.info(localize("BBC.itemConfigMenu.removedItemCustom", `Removed custom Item-level crosshair configuration from "${this.item.name}".`));
                     } else {
                         log.debug(`ItemCrosshairConfigApplication | Deleting custom activity-level configuration (${scope}) from "${this.item.name}"`);
-                        const existingMap = crosshairAdapter.deepClone(this.item.getFlag(MODULE_ID, "activityConfigs") ?? {});
+                        const existingMap = adapter.deepClone(this.item.getFlag(MODULE_ID, "activityConfigs") ?? {});
                         delete existingMap[scope];
                         if (Object.keys(existingMap).length === 0) {
                             await this.item.unsetFlag(MODULE_ID, "activityConfigs");
@@ -586,7 +585,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
                 }
                 notify.info(localize("BBC.itemConfigMenu.savedItemCustom", `Saved custom Item-level crosshair configuration for "${this.item.name}".`));
             } else {
-                const existingMap = crosshairAdapter.deepClone(this.item.getFlag(MODULE_ID, "activityConfigs") ?? {});
+                const existingMap = adapter.deepClone(this.item.getFlag(MODULE_ID, "activityConfigs") ?? {});
                 if (!hasAnyOverride) {
                     log.debug(`ItemCrosshairConfigApplication | All overrides disabled for activity "${scope}" on "${this.item.name}", removing custom activity flag.`);
                     delete existingMap[scope];

@@ -5,10 +5,10 @@ import { BaseCrosshairShape } from '../../src/crosshair/base.js';
 import { CircleCrosshairShape } from '../../src/crosshair/circle.js';
 import { ConeCrosshairShape } from '../../src/crosshair/cone.js';
 
-import { crosshairAdapter } from '../../src/adapter/index.js';
+import { adapter } from '../../src/adapter/index.js';
 
 test('BaseCrosshairShape stateful lifecycle: constructor, hide, move, rotate, and getPlacementUpdates', async () => {
-    crosshairAdapter.initialize();
+    adapter.crosshair.initialize();
     // 1. Mock template placeable
     const mockDocument = {
         x: 100,
@@ -1126,7 +1126,7 @@ test('hidePreview keeps native placeable hidden even when placeable.crosshair is
         }
     };
 
-    crosshairAdapter.hidePreview(mockPlaceable);
+    adapter.crosshair.hidePreview(mockPlaceable);
     assert.equal(mockPlaceable.template.visible, false, 'Template must be hidden initially');
 
     // Simulate BBC attaching crosshair reference to placeable

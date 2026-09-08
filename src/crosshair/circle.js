@@ -1,5 +1,5 @@
 import { log } from "../lib/logger.js";
-import { crosshairAdapter } from "../adapter/foundry/index.js";
+import { adapter } from "../adapter/index.js";
 import { BaseCrosshairShape } from "./base.js";
 import { resolveCircleAsset } from "./assetResolvers.js";
 
@@ -60,10 +60,10 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
      */
     _getGraphicDimensions() {
         const radius = Math.round(this.config.radius ?? 20);
-        const gridDist = crosshairAdapter.gridDistance;
-        const gridSize = crosshairAdapter.gridSize;
+        const gridDist = adapter.crosshair.gridDistance;
+        const gridSize = adapter.crosshair.gridSize;
         const diameterPixels = ((radius * 2) / gridDist) * gridSize;
-        const { factor, gridUnits } = crosshairAdapter.getTemplatePixelFactor();
+        const { factor, gridUnits } = adapter.crosshair.getTemplatePixelFactor();
         log.debug("CircleCrosshairShape._getGraphicDimensions | Sizing circle graphic.", { radius, diameterPixels, factor, gridUnits });
         return { widthPx: diameterPixels, heightPx: diameterPixels, factor, gridUnits };
     }
@@ -116,7 +116,7 @@ async function play(placeable, config = {}) {
  * @returns {Promise<void>} A promise resolving once matching Sequencer effects have ended.
  */
 async function stop(token, options = {}) {
-    const targetToken = crosshairAdapter.toToken(token);
+    const targetToken = adapter.crosshair.toToken(token);
     const opts = options ?? {};
     const id = opts.id ?? "Circle Crosshair";
     log.debug("circle.stop | Stopping circle crosshair sequence effect.", { id, token: targetToken?.name });

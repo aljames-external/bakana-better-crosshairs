@@ -1,6 +1,6 @@
 import { MODULE_ID } from "../lib/constants.js";
 import { remoteCrosshairManager } from "../crosshair/remoteCrosshairManager.js";
-import { crosshairAdapter } from "../adapter/index.js";
+import { adapter } from "../adapter/index.js";
 
 /**
  * Socket integration utility encapsulating Foundry VTT socket communications (`game.socket`).
@@ -56,7 +56,7 @@ export async function waitForTileReplication(tileId, timeoutMs = 5000) {
     if (activeUsers.length === 0) return;
 
     const expectedUserIds = activeUsers.map((u) => u.id);
-    const trackerId = crosshairAdapter.randomID();
+    const trackerId = adapter.randomID();
 
     return new Promise((resolve) => {
         const timeoutId = setTimeout(() => {
@@ -99,7 +99,7 @@ export function handleSocketMessage(payload) {
 
     if (type === "VERIFY_TILE_REPLICATION") {
         const { tileId, senderUserId, trackerId } = payload;
-        const hasTile = () => Boolean(crosshairAdapter.scene?.tiles?.has(tileId));
+        const hasTile = () => Boolean(adapter.crosshair.scene?.tiles?.has(tileId));
 
         const checkReplication = async () => {
             let attempts = 0;

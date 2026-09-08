@@ -1,5 +1,5 @@
 import { log } from "../lib/logger.js";
-import { crosshairAdapter, systemAdapter } from "../adapter/index.js";
+import { adapter } from "../adapter/index.js";
 import { TokenGeometry } from "../lib/tokenGeometry.js";
 import { activePlacementTracker, shouldStickToToken, getGridSnapMode, snapCoordinates, alignCrosshairAndEffects } from "./util.js";
 
@@ -28,7 +28,7 @@ export class CrosshairRotationListener {
         const doc = tmpl.document ?? (tmpl.documentName ? tmpl : null);
         if (doc) {
             const dims = tmpl.dimensions ?? doc.dimensions ?? activePlacementTracker.dimensions;
-            const docProps = crosshairAdapter.detectProperties(doc);
+            const docProps = adapter.crosshair.detectProperties(doc);
             const initialDist = dims?.distance ?? docProps.distance;
             const initialWidth = dims?.width ?? docProps.width;
             const isGridUnits = dims?.gridUnits ?? true;
@@ -40,27 +40,27 @@ export class CrosshairRotationListener {
 
             const visual = tmpl.crosshair ?? activePlacementTracker.crosshair;
             if (isSticky && cfg.token && shapeType === "circle") {
-                const token = crosshairAdapter.toToken(cfg.token);
+                const token = adapter.crosshair.toToken(cfg.token);
                 const center = token?.center ?? { x: token?.x ?? 0, y: token?.y ?? 0 };
                 targetX = center.x;
                 targetY = center.y;
             } else if (isSticky && cfg.token && visual && Number.isFinite(visual.x) && Number.isFinite(visual.y)) {
                 targetX = visual.x;
                 targetY = visual.y;
-            } else if (isSticky && cfg.token && crosshairAdapter.mousePosition) {
-                const anchored = crosshairAdapter.resolveAnchorPlacement(cfg.token, crosshairAdapter.mousePosition);
+            } else if (isSticky && cfg.token && adapter.crosshair.mousePosition) {
+                const anchored = adapter.crosshair.resolveAnchorPlacement(cfg.token, adapter.crosshair.mousePosition);
                 targetX = anchored.x;
                 targetY = anchored.y;
             } else {
                 const safeGet = (obj, prop) => { if (!obj) return undefined; try { return obj[prop]; } catch (e) { return undefined; } };
-                const mousePos = crosshairAdapter.mousePosition ?? { x: safeGet(tmpl, "x") ?? doc.x ?? 0, y: safeGet(tmpl, "y") ?? doc.y ?? 0 };
+                const mousePos = adapter.crosshair.mousePosition ?? { x: safeGet(tmpl, "x") ?? doc.x ?? 0, y: safeGet(tmpl, "y") ?? doc.y ?? 0 };
                 const snapMode = getGridSnapMode(cfg);
                 const snapped = snapMode !== 0 ? snapCoordinates(mousePos.x, mousePos.y, snapMode) : mousePos;
                 targetX = snapped.x;
                 targetY = snapped.y;
             }
 
-            crosshairAdapter.updatePreviewShape(doc, {
+            adapter.crosshair.updatePreviewShape(doc, {
                 x: targetX,
                 y: targetY,
                 direction: newDirDeg,
@@ -83,22 +83,22 @@ export class CrosshairRotationListener {
             }
         }
 
-        if (crosshairAdapter?.hidePreview && crosshairAdapter.isPreview(tmpl)) {
-            crosshairAdapter.hidePreview(tmpl);
+        if (adapter.crosshair?.hidePreview && adapter.crosshair.isPreview(tmpl)) {
+            adapter.crosshair.hidePreview(tmpl);
         }
 
-        if (crosshairAdapter?.refreshTemplateHighlights) {
+        if (adapter.crosshair?.refreshTemplateHighlights) {
             try {
-                crosshairAdapter.refreshTemplateHighlights(tmpl, newDirDeg);
+                adapter.crosshair.refreshTemplateHighlights(tmpl, newDirDeg);
             } catch (e) {
-                log.debug("refreshTemplateHighlights | crosshairAdapter call failed gracefully:", e);
+                log.debug("refreshTemplateHighlights | adapter.crosshair call failed gracefully:", e);
             }
         }
-        if (systemAdapter?.refreshTemplateHighlights) {
+        if (adapter.system?.refreshTemplateHighlights) {
             try {
-                systemAdapter.refreshTemplateHighlights(tmpl, newDirDeg);
+                adapter.system.refreshTemplateHighlights(tmpl, newDirDeg);
             } catch (e) {
-                log.debug("refreshTemplateHighlights | systemAdapter call failed gracefully:", e);
+                log.debug("refreshTemplateHighlights | adapter.system call failed gracefully:", e);
             }
         }
     }
@@ -114,10 +114,10 @@ export class CrosshairRotationListener {
     refreshAllActiveHighlights(currentDirection, rad, crosshair, event = null) {
         crosshair?.shapeInstance?._updateRangeText?.();
         const previewLists = [
-            crosshairAdapter.templates?.preview?.children,
-            crosshairAdapter.templates?.placeables,
-            crosshairAdapter.regions?.preview?.children,
-            crosshairAdapter.regions?.placeables,
+            adapter.crosshair.templates?.preview?.children,
+            adapter.crosshair.templates?.placeables,
+            adapter.crosshair.regions?.preview?.children,
+            adapter.crosshair.regions?.placeables,
             crosshair?.template ? [crosshair.template] : null,
             activePlacementTracker.placeable ? [activePlacementTracker.placeable] : null
         ];
@@ -125,7 +125,7 @@ export class CrosshairRotationListener {
         for (const list of previewLists) {
             if (!list) continue;
             for (const tmpl of list) {
-                if (!tmpl || !crosshairAdapter.isPreview(tmpl)) continue;
+                if (!tmpl || !adapter.crosshair.isPreview(tmpl)) continue;
                 this.refreshTemplateHighlights(tmpl, currentDirection, rad, event);
             }
         }
@@ -163,7 +163,7 @@ export class CrosshairRotationListener {
                 const ox = crosshair.x ?? 0;
                 const oy = crosshair.y ?? 0;
                 const dist = crosshair.ray.distance ?? 1000;
-                const newRay = crosshairAdapter.createRayFromAngle(ox, oy, rad, dist);
+                const newRay = adapter.crosshair.createRayFromAngle(ox, oy, rad, dist);
                 if (newRay) crosshair.ray = newRay;
             }
             if (!isRect) {
@@ -257,13 +257,13 @@ export class CrosshairRotationListener {
         const crosshair = isShapeInstance ? shape.sequencerCrosshair : shape;
 
         const shapeType = config.type ?? config.t ?? shape?.type ?? "circle";
-        const canRotate = crosshairAdapter.supportsShapeRotation(shapeType);
+        const canRotate = adapter.crosshair.supportsShapeRotation(shapeType);
         const isAttached = shouldStickToToken(config, shapeType) && Boolean(config.token);
         config.currentDirection = config.currentDirection ?? config.direction ?? 0;
 
         if (!isAttached && canRotate) {
             this.activeWheelHandler = (event) => {
-                const requiresCtrl = systemAdapter.requiresWheelModifier();
+                const requiresCtrl = adapter.system.requiresWheelModifier();
                 if (requiresCtrl && !event.ctrlKey && !event.metaKey) return;
                 event.preventDefault?.();
                 event.stopImmediatePropagation?.();
@@ -291,9 +291,9 @@ export class CrosshairRotationListener {
             const scheduleFrame = window?.requestAnimationFrame ?? ((fn) => { fn(); return null; });
             this.pendingPointerRaf = scheduleFrame(() => {
                 this.pendingPointerRaf = null;
-                let pt = crosshairAdapter.mousePosition;
-                if (!pt && event && crosshairAdapter.stage?.toLocal) {
-                    try { pt = crosshairAdapter.stage.toLocal(event); } catch (e) {}
+                let pt = adapter.crosshair.mousePosition;
+                if (!pt && event && adapter.crosshair.stage?.toLocal) {
+                    try { pt = adapter.crosshair.stage.toLocal(event); } catch (e) {}
                 }
                 if (isShapeInstance) {
                     if (pt) {
@@ -301,7 +301,7 @@ export class CrosshairRotationListener {
                     }
                 } else {
                     if (isAttached && crosshair && pt) {
-                        const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, pt);
+                        const anchored = adapter.crosshair.resolveAnchorPlacement(config.token, pt);
                         config.currentDirection = anchored.direction;
                         alignCrosshairAndEffects(crosshair, config, anchored.direction * (Math.PI / 180));
                     }

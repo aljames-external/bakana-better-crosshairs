@@ -1,7 +1,7 @@
 import { MODULE_ID, BROADCAST_INTERVAL_MS, BROADCAST_HEARTBEAT_INTERVAL_MS } from "../lib/constants.js";
 import { socketlib } from "../integration/socketlib.js";
 import { log } from "../lib/logger.js";
-import { crosshairAdapter } from "../adapter/index.js";
+import { adapter } from "../adapter/index.js";
 
 /**
  * Manages periodic socket broadcasting of local crosshair state to connected peer clients.
@@ -33,7 +33,7 @@ export class CrosshairBroadcaster {
             ? shape.sequencerCrosshair.y
             : shape.y;
 
-        const mousePos = crosshairAdapter.mousePosition;
+        const mousePos = adapter.crosshair.mousePosition;
         const cursorX = (mousePos && Number.isFinite(mousePos.x))
             ? mousePos.x
             : originX;
@@ -198,7 +198,7 @@ export class CrosshairBroadcaster {
             const shape = this.shape;
             const finalOriginX = (shape.sequencerCrosshair && Number.isFinite(shape.sequencerCrosshair.x)) ? shape.sequencerCrosshair.x : shape.x;
             const finalOriginY = (shape.sequencerCrosshair && Number.isFinite(shape.sequencerCrosshair.y)) ? shape.sequencerCrosshair.y : shape.y;
-            const mousePos = crosshairAdapter.mousePosition;
+            const mousePos = adapter.crosshair.mousePosition;
             const finalCursorX = (mousePos && Number.isFinite(mousePos.x)) ? mousePos.x : finalOriginX;
             const finalCursorY = (mousePos && Number.isFinite(mousePos.y)) ? mousePos.y : finalOriginY;
             let finalDirection = shape.config?.currentDirection ?? shape.direction ?? 0;

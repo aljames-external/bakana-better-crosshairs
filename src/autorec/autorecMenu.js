@@ -1,7 +1,6 @@
 import { MODULE_ID } from "../lib/constants.js";
 import { DEFAULT_AUTOREC_ENTRY, autorecManager, computeRegistrationKey } from "./autorecManager.js";
-import { systemAdapter } from "../adapter/system/index.js";
-import { crosshairAdapter } from "../adapter/index.js";
+import { adapter } from "../adapter/index.js";
 import { promptJsonFileImport } from "./autorecExchange.js";
 import { localize, notify, getUserColor } from "../lib/utils.js";
 import { log } from "../lib/logger.js";
@@ -171,7 +170,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
             count: entries.length,
             isEmpty: entries.length === 0,
             isGM: Boolean(game?.user?.isGM),
-            supportsActivities: systemAdapter.supportsActivities,
+            supportsActivities: adapter.system.supportsActivities,
             prePlacementTitle,
             previewPlacementSectionTitle,
             placementSectionTitle,
@@ -216,7 +215,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
         if (addWorkflowBtn) {
             addWorkflowBtn.addEventListener("click", async () => {
                 let result = null;
-                const supportsActivities = systemAdapter.supportsActivities;
+                const supportsActivities = adapter.system.supportsActivities;
 
                 try {
                     result = await DialogV2.prompt({
@@ -419,7 +418,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
         if (!detailEl) return;
 
         const existingEntry = autorecManager.registeredHandlers.get(regKey) ?? autorecManager.get(regKey) ?? {};
-        const config = crosshairAdapter.deepClone(typeof existingEntry === "object" ? existingEntry : {});
+        const config = adapter.deepClone(typeof existingEntry === "object" ? existingEntry : {});
         let modified = false;
 
         detailEl.querySelectorAll("[data-field]").forEach(inputEl => {

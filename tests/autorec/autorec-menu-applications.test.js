@@ -7,9 +7,9 @@ import { BaseCrosshairMenuApplication, normalizeHexColor } from "../../src/autor
 import { AutorecMenuApplication } from "../../src/autorec/autorecMenu.js";
 import { ItemCrosshairConfigApplication } from "../../src/autorec/itemConfigMenu.js";
 import { autorecManager } from "../../src/autorec/autorecManager.js";
-import { systemAdapter } from "../../src/adapter/system/index.js";
+import { adapter } from "../../src/adapter/index.js";
 
-systemAdapter.initialize();
+adapter.initialize();
 
 test("BaseCrosshairMenuApplication & normalizeHexColor utility", async (t) => {
     await t.test("normalizeHexColor validates 6-digit hex strings", () => {

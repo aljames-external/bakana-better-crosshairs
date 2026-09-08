@@ -1,6 +1,6 @@
 import { log } from "../lib/logger.js";
 import { closest } from "../lib/filemanager.js";
-import { crosshairAdapter, systemAdapter } from "../adapter/index.js";
+import { adapter } from "../adapter/index.js";
 import { TokenGeometry } from "../lib/tokenGeometry.js";
 import { rotationListener } from "./rotationListener.js";
 import { ScriptRunner } from "../lib/scriptRunner.js";
@@ -61,11 +61,11 @@ function _notifyPlacementResult(result, config, crosshair, extraArgs) {
  * choice to the active game system adapter based on the shape type (`shapeType`).
  * @param {object} config - Configuration object containing placement options
  * @param {string} [shapeType="circle"] - The shape type (`"cone"`, `"ray"`, `"circle"`, `"square"`, `"rect"`)
- * @param {object} [sysAdapter=systemAdapter] - The active system adapter
+ * @param {object} [sysAdapter=adapter.system] - The active system adapter
  * @returns {boolean} Whether the crosshair should stick to the token
  */
-export function shouldStickToToken(config, shapeType = "circle", sysAdapter = systemAdapter) {
-    if (crosshairAdapter?.supportsShapeRotation && !crosshairAdapter.supportsShapeRotation(shapeType)) {
+export function shouldStickToToken(config, shapeType = "circle", sysAdapter = adapter.system) {
+    if (adapter.crosshair?.supportsShapeRotation && !adapter.crosshair.supportsShapeRotation(shapeType)) {
         return false;
     }
     if (!config) {
@@ -134,7 +134,7 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
     const shapeType = config.type ?? config.t ?? shape?.type ?? crosshair?.type ?? "circle";
     const isRect = shapeType === "rect" || shapeType === "square";
     const rawToken = config.token ?? crosshair?.config?.token ?? crosshair?.token ?? shape?.token;
-    const token = crosshairAdapter.toToken(rawToken);
+    const token = adapter.crosshair.toToken(rawToken);
     const isAttached = shouldStickToToken(config, shapeType) && Boolean(token);
     const effectId = config.id ?? shape?.id ?? "Crosshair";
 
@@ -147,16 +147,16 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
             targetX = center.x;
             targetY = center.y;
         } else {
-            const cursorPt = (crosshairAdapter.mousePosition && Number.isFinite(crosshairAdapter.mousePosition.x))
-                ? crosshairAdapter.mousePosition
+            const cursorPt = (adapter.crosshair.mousePosition && Number.isFinite(adapter.crosshair.mousePosition.x))
+                ? adapter.crosshair.mousePosition
                 : { x: shape?.cursorX ?? shape?.x ?? crosshair?.x ?? 0, y: shape?.cursorY ?? shape?.y ?? crosshair?.y ?? 0 };
-            const anchored = crosshairAdapter.resolveAnchorPlacement(token, cursorPt);
+            const anchored = adapter.crosshair.resolveAnchorPlacement(token, cursorPt);
             targetX = anchored.x;
             targetY = anchored.y;
         }
     } else {
-        const cursorPt = (crosshairAdapter.mousePosition && Number.isFinite(crosshairAdapter.mousePosition.x))
-            ? crosshairAdapter.mousePosition
+        const cursorPt = (adapter.crosshair.mousePosition && Number.isFinite(adapter.crosshair.mousePosition.x))
+            ? adapter.crosshair.mousePosition
             : { x: shape?.cursorX ?? shape?.x ?? crosshair?.x ?? 0, y: shape?.cursorY ?? shape?.y ?? crosshair?.y ?? 0 };
         targetX = cursorPt.x;
         targetY = cursorPt.y;
@@ -286,7 +286,7 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
         }
     }
 
-    const mousePos = crosshairAdapter.mousePosition ?? {};
+    const mousePos = adapter.crosshair.mousePosition ?? {};
     const clickX = mousePos.x ?? 0;
     const clickY = mousePos.y ?? 0;
 
@@ -298,14 +298,14 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
 
     if (isAnchored && config.token) {
         if (shapeType === "circle") {
-            const token = crosshairAdapter.toToken(config.token);
+            const token = adapter.crosshair.toToken(config.token);
             const center = token?.center ?? { x: token?.x ?? 0, y: token?.y ?? 0 };
             x = center.x;
             y = center.y;
             direction = 0;
         } else {
-            const mousePos = crosshairAdapter.mousePosition ?? { x: clickX, y: clickY };
-            const anchored = crosshairAdapter.resolveAnchorPlacement(config.token, mousePos);
+            const mousePos = adapter.crosshair.mousePosition ?? { x: clickX, y: clickY };
+            const anchored = adapter.crosshair.resolveAnchorPlacement(config.token, mousePos);
             x = (crosshair && Number.isFinite(crosshair.x)) ? crosshair.x : anchored.x;
             y = (crosshair && Number.isFinite(crosshair.y)) ? crosshair.y : anchored.y;
             if (direction === undefined) {
@@ -329,7 +329,7 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
     }
 
     const finalDirection = _normalizeAngleDegrees(direction);
-    const result = crosshairAdapter.formatPlacementCoordinates(x, y, finalDirection, config);
+    const result = adapter.crosshair.formatPlacementCoordinates(x, y, finalDirection, config);
 
     return _notifyPlacementResult(result, config, crosshair, extraArgs);
 }
@@ -342,7 +342,7 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
  * @returns {object} Snapped coordinates `{ x, y }`
  */
 export function snapCoordinates(x, y, mode = "all") {
-    return crosshairAdapter.snapCoordinates(x, y, mode);
+    return adapter.crosshair.snapCoordinates(x, y, mode);
 }
 
 /**
@@ -354,7 +354,7 @@ export function snapCoordinates(x, y, mode = "all") {
  * @returns {object} Edge point coordinates and angle `{ x, y, direction }`
  */
 export function getTokenEdgePoint(tok, targetX, targetY, sticky = false) {
-    const token = crosshairAdapter.toToken(tok);
+    const token = adapter.crosshair.toToken(tok);
     return TokenGeometry.getTokenEdgePoint(token, targetX, targetY, sticky);
 }
 

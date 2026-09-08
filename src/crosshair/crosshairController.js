@@ -1,6 +1,6 @@
 import { MODULE_ID, BROADCAST_INTERVAL_MS } from "../lib/constants.js";
 import { log } from "../lib/logger.js";
-import { crosshairAdapter } from "../adapter/index.js";
+import { adapter } from "../adapter/index.js";
 import { alignCrosshairAndEffects } from "./util.js";
 import { getPeerCursorPosition } from "./remoteCrosshairManager.js";
 
@@ -62,15 +62,15 @@ export class CrosshairController {
 
         // Attach position tracking listeners according to updateTrigger
         if (this.updateTrigger === "ticker") {
-            if (crosshairAdapter.app?.ticker) {
+            if (adapter.crosshair.app?.ticker) {
                 try {
-                    crosshairAdapter.app.ticker.add(this._onTickerBound);
+                    adapter.crosshair.app.ticker.add(this._onTickerBound);
                 } catch (e) {}
             }
         } else if (this.updateTrigger === "event") {
-            if (crosshairAdapter.stage) {
+            if (adapter.crosshair.stage) {
                 try {
-                    crosshairAdapter.stage.on("pointermove", this._onPointerMoveBound);
+                    adapter.crosshair.stage.on("pointermove", this._onPointerMoveBound);
                 } catch (e) {}
             }
         }
@@ -107,13 +107,13 @@ export class CrosshairController {
 
         if (isAttached) {
             if (this.shape.type === "circle") {
-                const token = crosshairAdapter.toToken(this.shape.token);
+                const token = adapter.crosshair.toToken(this.shape.token);
                 const center = token?.center ?? { x: token?.x ?? 0, y: token?.y ?? 0 };
                 this.shape.move(center.x, center.y);
                 this.shape.rotate(0);
             } else {
                 // Token edge anchoring for attached rays, cones, and shapes
-                const anchored = crosshairAdapter.resolveAnchorPlacement(this.shape.token, cursorPos);
+                const anchored = adapter.crosshair.resolveAnchorPlacement(this.shape.token, cursorPos);
                 this.shape.move(cursorPos.x, cursorPos.y);
                 const dir = anchored.direction ?? this.shape.direction ?? 0;
                 this.shape.rotate(dir);
@@ -142,15 +142,15 @@ export class CrosshairController {
         if (this.isDestroyed) return;
         this.isDestroyed = true;
 
-        if (crosshairAdapter.stage && this._onPointerMoveBound) {
+        if (adapter.crosshair.stage && this._onPointerMoveBound) {
             try {
-                crosshairAdapter.stage.off("pointermove", this._onPointerMoveBound);
+                adapter.crosshair.stage.off("pointermove", this._onPointerMoveBound);
             } catch (e) {}
         }
 
-        if (crosshairAdapter.app?.ticker && this._onTickerBound) {
+        if (adapter.crosshair.app?.ticker && this._onTickerBound) {
             try {
-                crosshairAdapter.app.ticker.remove(this._onTickerBound);
+                adapter.crosshair.app.ticker.remove(this._onTickerBound);
             } catch (e) {}
         }
 
@@ -181,7 +181,7 @@ export class CrosshairController {
      * @returns {Promise<void>}
      */
     static async hide(sourceToken, options = {}) {
-        const token = crosshairAdapter.toToken(sourceToken);
+        const token = adapter.crosshair.toToken(sourceToken);
         const effectId = options.id ?? "Crosshair";
         if (game.modules.get("sequencer")?.active) {
             try {
@@ -215,7 +215,7 @@ export class CrosshairController {
  * @returns {Promise<object>} Controller handle object with { shape, controller, token, start, update, stop, hide }
  */
 export async function attachCrosshairToToken(sourceToken, shape, size, getCursorPositionFn, cancelFn, options = {}) {
-    const token = crosshairAdapter.toToken(sourceToken);
+    const token = adapter.crosshair.toToken(sourceToken);
 
     const extractUserId = (val) => val?.id ?? val ?? "";
 
@@ -241,7 +241,7 @@ export async function attachCrosshairToToken(sourceToken, shape, size, getCursor
     const resolvedGetCursorFn = getCursorPositionFn
         ?? (options.isRemote && options.senderUserId
             ? () => getPeerCursorPosition(options.senderUserId)
-            : () => (crosshairAdapter.mousePosition ?? null));
+            : () => (adapter.crosshair.mousePosition ?? null));
 
     let resolvedCancelFn = null;
     if (cancelFn?.cancel) {
@@ -263,12 +263,12 @@ export async function attachCrosshairToToken(sourceToken, shape, size, getCursor
         shapeInstance = shape;
         if (token) shapeInstance.token = token;
     } else if (shape?.prototype) {
-        const previewPlaceable = crosshairAdapter.createUnpersistedPreviewPlaceable(mergedConfig);
+        const previewPlaceable = adapter.crosshair.createUnpersistedPreviewPlaceable(mergedConfig);
         shapeInstance = new shape(previewPlaceable, mergedConfig);
     } else {
         const shapeType = String(shape ?? options.type ?? "circle").toLowerCase();
         const classes = await getShapeClasses();
-        const previewPlaceable = crosshairAdapter.createUnpersistedPreviewPlaceable(mergedConfig);
+        const previewPlaceable = adapter.crosshair.createUnpersistedPreviewPlaceable(mergedConfig);
         if (shapeType === "cone" && classes.ConeCrosshairShape) {
             shapeInstance = new classes.ConeCrosshairShape(previewPlaceable, mergedConfig);
         } else if (shapeType === "ray" && classes.RayCrosshairShape) {

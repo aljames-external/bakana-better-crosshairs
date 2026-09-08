@@ -1,5 +1,5 @@
 import { log } from "../lib/logger.js";
-import { crosshairAdapter } from "../adapter/index.js";
+import { adapter } from "../adapter/index.js";
 
 /**
  * Encapsulates live canvas grid distance measurement text beneath an active crosshair reticle.
@@ -20,8 +20,8 @@ export class CrosshairRangeOverlay {
      * @returns {string} Formatted distance label string (e.g. "30 ft")
      */
     measureDistance(origin, target) {
-        const distance = crosshairAdapter.measureDistance(origin, target);
-        const units = crosshairAdapter.gridUnits;
+        const distance = adapter.crosshair.measureDistance(origin, target);
+        const units = adapter.crosshair.gridUnits;
         return `${distance} ${units}`;
     }
 
@@ -43,7 +43,7 @@ export class CrosshairRangeOverlay {
         const labelStr = this.measureDistance(origin, target);
 
         if (!this.textElement) {
-            const TextClass = crosshairAdapter.PreciseText;
+            const TextClass = adapter.crosshair.PreciseText;
             if (!TextClass) return;
             const style = CONFIG?.canvasTextStyle
                 ? CONFIG.canvasTextStyle.clone()
@@ -59,14 +59,14 @@ export class CrosshairRangeOverlay {
             try {
                 this.textElement = new TextClass(labelStr, style);
                 this.textElement.anchor?.set?.(0.5, 1);
-                const parentContainer = shape.sequencerCrosshair.parent ?? crosshairAdapter.controls ?? crosshairAdapter.stage ?? shape.sequencerCrosshair;
+                const parentContainer = shape.sequencerCrosshair.parent ?? adapter.crosshair.controls ?? adapter.crosshair.stage ?? shape.sequencerCrosshair;
                 parentContainer?.addChild?.(this.textElement);
             } catch (e) {
                 log.debug("CrosshairRangeOverlay.update | Could not create range text element:", e);
                 return;
             }
         } else {
-            const targetParent = shape.sequencerCrosshair.parent ?? crosshairAdapter.controls ?? crosshairAdapter.stage ?? shape.sequencerCrosshair;
+            const targetParent = shape.sequencerCrosshair.parent ?? adapter.crosshair.controls ?? adapter.crosshair.stage ?? shape.sequencerCrosshair;
             if (this.textElement.parent !== targetParent) {
                 try { targetParent?.addChild?.(this.textElement); } catch (e) {}
             }
