@@ -67,17 +67,7 @@ const adapter = {
     get socket() { return socketlib; },
     get socketlib() { return socketlib; },
     get file() { return file; },
-    get module() {
-        return new Proxy({}, {
-            get(target, prop) {
-                if (prop === "socketlib") return socketlib;
-                return undefined;
-            }
-        });
-    },
-    get modules() {
-        return this.module;
-    },
+
 
     // Socket message handlers & utilities
     handleSocketMessage,
