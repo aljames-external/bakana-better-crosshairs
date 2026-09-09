@@ -187,15 +187,14 @@ function hasSomeRecommended(dependencyList) {
 
 /**
  * Checks if a required dependency is activated and throws an error if it is not.
- * @param {object|Array<object>} dependencyList - The dependency or list of dependencies to check.
+ * @param {Array<object>} [dependencyList=[]] - The list of dependencies to check.
  * @returns {void} Throws an error if any required dependency is missing.
  */
-function required(dependencyList) {
-    const list = Array.isArray(dependencyList) ? dependencyList : [dependencyList];
+function required(dependencyList: any[] = []) {
     let errorMsg = localize("BBC.Dependency.RequiresAll", "Requires all of the following to be installed and activated:\n");
     let dependencyMet = true;
 
-    for (const dependency of list) {
+    for (const dependency of dependencyList) {
         if (!dependency?.id) continue;
         if (_isActivated(dependency)) continue;
         dependencyMet = false;
