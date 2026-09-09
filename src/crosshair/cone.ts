@@ -45,7 +45,7 @@ export class ConeCrosshairShape extends BaseCrosshairShape {
      * @param {Sequence} crosshairSeq - The Sequencer crosshair builder instance
      * @returns {void}
      */
-    _configureCrosshairShape(crosshairSeq) {
+    _configureCrosshairShape(crosshairSeq: any) {
         const distance = Math.round(this.config.distance ?? 30);
         const angle = this.config.angle ?? 53.13;
         log.debug("ConeCrosshairShape._configureCrosshairShape | Configuring cone distance and angle.", { distance, angle });
@@ -92,7 +92,7 @@ export class ConeCrosshairShape extends BaseCrosshairShape {
  * @param {object} [config={}] - Configuration options for the cone crosshair
  * @returns {Promise<Array>} A promise resolving to an array containing the configured cone sequence and targets [cone, targets]
  */
-async function create(placeable, config = {}) {
+async function create(placeable: any, config: any = {}) {
     const opts = config ?? {};
     log.debug("cone.create | Instantiating ConeCrosshairShape.", { config: opts });
     const shape = new ConeCrosshairShape(placeable, opts);
@@ -106,7 +106,7 @@ async function create(placeable, config = {}) {
  * @param {object} [config={}] - Configuration options for the cone crosshair
  * @returns {Promise<any>} A promise resolving when the crosshair sequence finishes playing
  */
-async function play(placeable, config = {}) {
+async function play(placeable: any, config: any = {}) {
     log.debug("cone.play | Executing cone sequence play.");
     const [seq] = await create(placeable, config);
     return seq.play();
@@ -120,7 +120,7 @@ async function play(placeable, config = {}) {
  * @param {string} [options.id="Cone Crosshair"] - The identifier of the effect to end
  * @returns {Promise<void>} A promise resolving when the matching crosshair effects have been terminated
  */
-async function stop(token: any, options: { id?: string; [key: string]: any } = {}) {
+async function stop(token: any, options: any = {}) {
     const targetToken = adapter.crosshair.toToken(token);
     const opts = options ?? {};
     const id = opts.id ?? "Cone Crosshair";

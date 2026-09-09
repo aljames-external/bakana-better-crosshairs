@@ -56,7 +56,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * @param {Sequence} crosshairSeq - The Sequencer crosshair builder instance
      * @returns {void}
      */
-    _configureCrosshairShape(crosshairSeq) {
+    _configureCrosshairShape(crosshairSeq: any) {
         const distance = Math.round(this.config.distance ?? 30);
         const width = Math.round(this.config.width ?? 30);
         log.debug("SquareCrosshairShape._configureCrosshairShape | Configuring square distance and width.", { distance, width });
@@ -135,7 +135,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
  * @param {object} [config={}] - Configuration options for the square crosshair
  * @returns {Promise<Array<*>>} A promise resolving to an array containing the configured square sequence and targets
  */
-async function create(placeable, config = {}) {
+async function create(placeable: any, config: any = {}) {
     const opts = config ?? {};
     log.debug("square.create | Instantiating SquareCrosshairShape.", { config: opts });
     const shape = new SquareCrosshairShape(placeable, opts);
@@ -149,7 +149,7 @@ async function create(placeable, config = {}) {
  * @param {object} [config={}] - Configuration options for the square crosshair
  * @returns {Promise<any>} A promise resolving when the sequence finishes playing
  */
-async function play(placeable, config = {}) {
+async function play(placeable: any, config: any = {}) {
     log.debug("square.play | Executing square sequence play.");
     const [seq] = await create(placeable, config);
     return seq.play();
@@ -163,7 +163,7 @@ async function play(placeable, config = {}) {
  * @param {string} [options.id="Square Crosshair"] - The identifier of the effect to end
  * @returns {Promise<void>} A promise resolving when matching effects have been terminated
  */
-async function stop(token: any, options: { id?: string; [key: string]: any } = {}) {
+async function stop(token: any, options: any = {}) {
     const targetToken = adapter.crosshair.toToken(token);
     const opts = options ?? {};
     const id = opts.id ?? "Square Crosshair";

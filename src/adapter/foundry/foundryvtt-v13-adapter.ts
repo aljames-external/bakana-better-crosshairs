@@ -169,7 +169,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
 
         if (CONFIG) {
             for (const base of basePlaceables) {
-                const customClass = CONFIG[base]?.objectClass?.name;
+                const customClass = (CONFIG as any)[base]?.objectClass?.name;
                 if (customClass && !basePlaceables.includes(customClass) && !customPlaceables.includes(customClass)) {
                     dynamicPlaceables.push(customClass);
                 }
@@ -188,7 +188,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
 
         if (CONFIG) {
             for (const docType of baseDocumentTypes) {
-                const customDocName = CONFIG[docType]?.documentClass?.documentName;
+                const customDocName = (CONFIG as any)[docType]?.documentClass?.documentName;
                 if (customDocName && !baseDocumentTypes.includes(customDocName) && !customDocumentTypes.includes(customDocName)) {
                     dynamicDocumentTypes.push(customDocName);
                 }
@@ -220,12 +220,12 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {Document} doc - MeasuredTemplate document
      * @returns {{type: string, distance: number, radius: number, width: number, angle: number, direction: number, rotation: number, x: number, y: number, elevation: number}} Detected shape properties and dimensions
      */
-    detectProperties(doc) {
-        const targetDoc = doc?.document ?? doc;
+    detectProperties(doc: any) {
+        const targetDoc = doc?.document ? doc.document : doc;
         if (!targetDoc) {
             return { type: "circle", t: "circle", distance: 0, radius: 0, width: 5, angle: 360, direction: 0, rotation: 0, x: 0, y: 0, elevation: 0 };
         }
-        const shapeMap = {
+        const shapeMap: Record<string, string> = {
             circle: "circle",
             cone: "cone",
             ray: "ray",
@@ -318,7 +318,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {string} shapeType - The shape type identifier
      * @returns {boolean} False for rect and square, true for circle, cone, ray
      */
-    supportsShapeRotation(shapeType) {
+    supportsShapeRotation(shapeType: any) {
         if (!shapeType) return true;
         const lower = String(shapeType).toLowerCase();
         return lower !== "rect" && lower !== "square";
@@ -534,7 +534,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {string} [documentName] - Explicit document type name
      * @returns {string} Always "MeasuredTemplate" in V13
      */
-    _getDeferredDocumentName(data, documentName) {
+    _getDeferredDocumentName(data: any, documentName: any) {
         return "MeasuredTemplate";
     }
 
@@ -545,7 +545,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {string} docName - Document type name
      * @protected
      */
-    _applyDeferredCoordinates(data, coords, docName) {
+    _applyDeferredCoordinates(data: any, coords: any, docName: any) {
         if (coords.x !== undefined) data.x = Math.round(coords.x);
         if (coords.y !== undefined) data.y = Math.round(coords.y);
         const isRect = data.t === "rect" || coords.type === "square" || coords.type === "rect" || coords.originalType === "square" || coords.t === "rect";
@@ -581,7 +581,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {number} direction - The current direction in degrees
      * @returns {void}
      */
-    refreshTemplateHighlights(tmpl, direction) {
+    refreshTemplateHighlights(tmpl: any, direction: any) {
         this._patchRefreshState();
         if (!tmpl || tmpl._bbcRefreshingHighlights) return;
         tmpl._bbcRefreshingHighlights = true;
@@ -714,7 +714,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {PlaceableObject} placeable - Preview placeable
      * @returns {void}
      */
-    _wrapHighlightGrid(placeable) {
+    _wrapHighlightGrid(placeable: any) {
         this._patchRefreshState();
         if (!placeable || placeable._bbcHighlightGridWrapped) return;
         placeable._bbcHighlightGridWrapped = true;
@@ -724,10 +724,10 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
         } catch (e) {}
 
         const self = this;
-        const wrapMethod = (fnName) => {
+        const wrapMethod = (fnName: any) => {
             if (placeable[fnName]) {
                 const orig = placeable[fnName];
-                placeable[fnName] = function (...args) {
+                placeable[fnName] = function (...args: any[]) {
                     if (this._bbcWrappingMethod) {
                         return orig.apply(this, args);
                     }
@@ -869,7 +869,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {PlaceableObject} placeable - Preview placeable
      * @returns {Promise<void>}
      */
-    async handleDrawPreview(placeable) {
+    async handleDrawPreview(placeable: any) {
         this._patchRefreshState();
         return super.handleDrawPreview(placeable);
     }
@@ -881,15 +881,15 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {string} userId - ID of the user creating the document
      * @returns {Promise<void>} Resolves when post-placement execution completes
      */
-    async handleCreateDocument(doc, _options, userId) {
+    async handleCreateDocument(doc: any, _options: any, userId: any) {
         await super.handleCreateDocument(doc, _options, userId);
     }
 
-    _snapPoint(x, y, numMode) {
+    _snapPoint(x: any, y: any, numMode: any) {
         return this.getSnappedPoint({ x, y }, { mode: numMode });
     }
 
-    _getGridCenterPoint(x, y) {
+    _getGridCenterPoint(x: any, y: any) {
         return this.getCenterPoint({ x, y });
     }
 
@@ -899,7 +899,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {string[]} paths - Array of template paths to preload
      * @returns {Promise<Function[]>}
      */
-    async loadTemplates(paths) {
+    async loadTemplates(paths: any) {
         return foundry.applications.handlebars.loadTemplates(paths);
     }
 }

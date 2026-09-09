@@ -12,7 +12,7 @@ import { AUTOREC_EXCHANGE_VERSION } from "./autorecExchange.js";
  * @param {Object} legacyEntry - Historical flat v1.0.0 entry
  * @returns {Object} Upgraded v2.0.0 entry structure
  */
-export function migrateV1ToV2Entry(legacyEntry) {
+export function migrateV1ToV2Entry(legacyEntry: any) {
     if (!legacyEntry || typeof legacyEntry !== "object") {
         return {};
     }
@@ -150,7 +150,7 @@ export function migrateV1ToV2Entry(legacyEntry) {
  * @param {Object|Array<Object>} payload - Input exchange package or entries list
  * @returns {Object|Array<Object>} Upgraded package or entries
  */
-export function migrateV1ToV2(payload) {
+export function migrateV1ToV2(payload: any) {
     log.warn("AutorecMigration | Legacy v1.0.0 schema detected and automatically upgraded to v2.0.0.");
 
     if (Array.isArray(payload)) {
@@ -159,7 +159,7 @@ export function migrateV1ToV2(payload) {
 
     if (payload && typeof payload === "object") {
         const rawEntries = Array.isArray(payload.entries) ? payload.entries : [];
-        const migratedEntries = rawEntries.map(e => migrateV1ToV2Entry(e));
+        const migratedEntries = rawEntries.map((e: any) => migrateV1ToV2Entry(e));
         const moduleName = String(payload.module ?? payload.sourceModule ?? "world").trim();
         const timestamp = String(payload.timestamp ?? payload.exportedAt ?? new Date().toISOString());
         const foundryVer = String(payload.foundry ?? payload.foundryVersion ?? game?.version ?? "unknown");
@@ -185,7 +185,7 @@ export function migrateV1ToV2(payload) {
  * @param {Object|Array<Object>} payload - Raw package or entries array
  * @returns {boolean} True if payload requires v1.0.0 -> v2.0.0 migration
  */
-function isV1Schema(payload) {
+function isV1Schema(payload: any) {
     if (!payload || typeof payload !== "object") {
         return false;
     }
@@ -202,7 +202,7 @@ function isV1Schema(payload) {
     // Unversioned legacy packages or packages with exportedAt / sourceModule headers
     if (!versionStr && (payload.exportedAt || payload.foundryVersion || Array.isArray(payload.entries))) {
         const entries = Array.isArray(payload.entries) ? payload.entries : [];
-        return entries.some(e => Boolean(e && (e.circleFile || e.borderColor || e.concurrentCode || e.stickToToken || !e.file)));
+        return entries.some((e: any) => Boolean(e && (e.circleFile || e.borderColor || e.concurrentCode || e.stickToToken || !e.file)));
     }
 
     return false;
@@ -215,7 +215,7 @@ function isV1Schema(payload) {
  * @param {Object|Array<Object>} packageOrEntries - Raw package object or entries collection
  * @returns {Object|Array<Object>} Upgraded schema payload ready for consumption by v2.0.0 handlers
  */
-export function autorecCompatibilityUpdate(packageOrEntries) {
+export function autorecCompatibilityUpdate(packageOrEntries: any) {
     if (!packageOrEntries) {
         return packageOrEntries;
     }

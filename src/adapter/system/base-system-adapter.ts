@@ -91,7 +91,7 @@ export class BaseSystemAdapter {
      * @param {Object} entry - Registered autorec entry configuration (`{ itemName, itemId }`)
      * @returns {boolean} True if the calling context matches candidate entry item rules
      */
-    isMatch(context, entry) {
+    isMatch(context: any, entry: any) {
         if (!context || !entry) return false;
         if (entry.isDefault) return true;
 
@@ -260,7 +260,7 @@ export class BaseSystemAdapter {
      * @param {string} slug - Originating canonical slug
      * @returns {void}
      */
-    _setDefaultsEntry(key, boolStick, slug) {
+    _setDefaultsEntry(key: any, boolStick: any, slug: any) {
         if (!key) return;
         if (this.defaultsMap.has(key)) {
             const existing = this.defaultsMap.get(key);
@@ -278,7 +278,7 @@ export class BaseSystemAdapter {
      * @param {Object<string, boolean>} [baseDefaults={}] - Canonical slug to boolean stickiness map
      * @returns {void}
      */
-    registerLocalizedDefaults(translations, baseDefaults = {}) {
+    registerLocalizedDefaults(translations: any, baseDefaults: Record<string, any> = {}) {
         if (!translations || typeof translations !== "object") return;
         for (const [slug, localizedName] of Object.entries(translations)) {
             if (!slug || !localizedName) continue;
@@ -302,7 +302,7 @@ export class BaseSystemAdapter {
      * @param {Object<string, boolean>|Array<Object>} data - Dictionary mapping spell names/slugs to stick booleans, or array of entry objects
      * @returns {void}
      */
-    setDefaultsData(data) {
+    setDefaultsData(data: any) {
         if (!data) return;
         this._rawBaseDefaults = data;
         const entries = Object.entries(data);
@@ -342,7 +342,7 @@ export class BaseSystemAdapter {
      * @param {Object|string} [context={}] - Calling context or item name
      * @returns {boolean|null} True if spell attaches to token, false if free placement, null if unlisted
      */
-    getSystemDefault(context) {
+    getSystemDefault(context: any) {
         if (!context) return null;
         const itemObj = context?.item ?? (context?.documentName === "Item" ? context : null);
         const rawName = context?.itemName ?? itemObj?.name ?? (context?.name ?? (context?.documentName ? "" : String(context ?? "")));
@@ -377,7 +377,7 @@ export class BaseSystemAdapter {
      * @param {object} [config={}] - Optional crosshair configuration object
      * @returns {boolean} Whether the crosshair shape defaults to sticking to the token
      */
-    getDefaultStickToToken(shapeType, config = {}) {
+    getDefaultStickToToken(shapeType: any, config = {}) {
         const itemDefault = this.getSystemDefault(config);
         if (itemDefault !== null && itemDefault !== undefined) {
             return Boolean(itemDefault);
@@ -428,7 +428,7 @@ export class BaseSystemAdapter {
      * @param {number} direction - Current rotation direction in degrees
      * @returns {void}
      */
-    refreshTemplateHighlights(tmpl, direction) {
+    refreshTemplateHighlights(tmpl: any, direction: any) {
         return;
     }
 
@@ -438,7 +438,7 @@ export class BaseSystemAdapter {
      * @param {Document} item - Target Item document
      * @returns {void} No return value
      */
-    async openItemCrosshairConfig(item, options = {}) {
+    async openItemCrosshairConfig(item: any, options = {}) {
         if (!item) return;
         const itemDoc = item?.document ?? item;
         const { ItemCrosshairConfigApplication } = await import("../../autorec/itemConfigMenu.js");
@@ -451,7 +451,7 @@ export class BaseSystemAdapter {
      * @param {Array<object>} controls - Array of header control button items
      * @returns {void} No return value
      */
-    addItemSheetHeaderControl(app, controls) {
+    addItemSheetHeaderControl(app: any, controls: any) {
         if (app?.activity || (app?.document && app.document.documentName !== "Item" && app.document.item)) {
             return this.addActivitySheetHeaderControl(app, controls);
         }
@@ -481,7 +481,7 @@ export class BaseSystemAdapter {
      * @param {Array<object>} controls - Array of header control button items
      * @returns {void} No return value
      */
-    addActivitySheetHeaderControl(app, controls) {
+    addActivitySheetHeaderControl(app: any, controls: any) {
         const activity = app?.activity ?? (app?.document?.item ? app.document : null);
         const item = activity?.item ?? app?.item ?? null;
         if (!item || !activity?.id || !item.isOwner) return;
@@ -504,7 +504,7 @@ export class BaseSystemAdapter {
      * @param {Array<object>} options - Array of context menu entry options
      * @returns {void} No return value
      */
-    addActivityContextOption(activity, options) {
+    addActivityContextOption(activity: any, options: any) {
         if (!activity || !Array.isArray(options)) return;
         const item = activity.item ?? activity.document ?? null;
         if (!item || !activity.id || !item.isOwner) return;
@@ -526,7 +526,7 @@ export class BaseSystemAdapter {
      * @param {Array<object>} options - Array of context menu entry options
      * @returns {void} No return value
      */
-    addItemContextOption(item, options) {
+    addItemContextOption(item: any, options: any) {
         const itemDoc = item?.document ?? item;
         if (!itemDoc || itemDoc.documentName !== "Item" || !itemDoc.isOwner || !Array.isArray(options)) return;
         if (options.some(o => o.name === "BBC" || o.name === "BBC.itemConfigMenu.title" || o.icon?.includes("fa-crosshairs"))) return;

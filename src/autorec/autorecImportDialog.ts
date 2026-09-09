@@ -177,7 +177,7 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
         const selectAllBtn = rootEl.querySelector(".bbc-select-all-btn");
         if (selectAllBtn) {
             selectAllBtn.addEventListener("click", () => {
-                rootEl.querySelectorAll(".bbc-entry-checkbox").forEach(chk => {
+                rootEl.querySelectorAll(".bbc-entry-checkbox").forEach((chk: any) => {
                     chk.checked = true;
                     const idx = parseInt(chk.dataset.importIndex, 10);
                     if (!isNaN(idx)) this.selectedIndices.add(idx);
@@ -191,9 +191,9 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
         if (selectNewBtn) {
             selectNewBtn.addEventListener("click", () => {
                 const newIndices = new Set(
-                    (this.diffAnalysis.newEntries ?? []).map(e => e.importIndex)
+                    (this.diffAnalysis.newEntries ?? []).map((e: any) => e.importIndex)
                 );
-                rootEl.querySelectorAll(".bbc-entry-checkbox").forEach(chk => {
+                rootEl.querySelectorAll(".bbc-entry-checkbox").forEach((chk: any) => {
                     const idx = parseInt(chk.dataset.importIndex, 10);
                     const shouldCheck = newIndices.has(idx);
                     chk.checked = shouldCheck;
@@ -208,7 +208,7 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
         const deselectAllBtn = rootEl.querySelector(".bbc-deselect-all-btn");
         if (deselectAllBtn) {
             deselectAllBtn.addEventListener("click", () => {
-                rootEl.querySelectorAll(".bbc-entry-checkbox").forEach(chk => {
+                rootEl.querySelectorAll(".bbc-entry-checkbox").forEach((chk: any) => {
                     chk.checked = false;
                 });
                 this.selectedIndices.clear();
@@ -242,7 +242,7 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
      * @param {number} importIndex - Index of the importable item
      * @returns {void}
      */
-    selectItemByIndex(importIndex) {
+    selectItemByIndex(importIndex: any) {
         if (typeof importIndex === "number" && !isNaN(importIndex)) {
             this.selectedIndices.add(importIndex);
         }
@@ -254,7 +254,7 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
      * @param {number} importIndex - Index of the importable item
      * @returns {void}
      */
-    deselectItemByIndex(importIndex) {
+    deselectItemByIndex(importIndex: any) {
         if (typeof importIndex === "number" && !isNaN(importIndex)) {
             this.selectedIndices.delete(importIndex);
         }
@@ -266,10 +266,10 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
      * @param {HTMLElement} root - Dialog root HTML element
      * @returns {void}
      */
-    updateCountsDisplay(root) {
+    updateCountsDisplay(root: any) {
         if (!root) return;
         const count = this.selectedIndices.size;
-        root.querySelectorAll(".bbc-selected-count, .bbc-merge-count").forEach(el => {
+        root.querySelectorAll(".bbc-selected-count, .bbc-merge-count").forEach((el: any) => {
             el.textContent = String(count);
         });
     }
@@ -281,7 +281,7 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
      */
     _gatherSelectedEntries() {
         const allImportable = this.diffAnalysis?.allImportable ?? [];
-        return allImportable.filter(e => this.selectedIndices.has(e.importIndex));
+        return allImportable.filter((e: any) => this.selectedIndices.has(e.importIndex));
     }
 
     /**
@@ -302,7 +302,7 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
      * @param {Array<Object>|null} result - Selected merge entries or null if cancelled
      * @returns {void}
      */
-    _finish(result) {
+    _finish(result: any) {
         const resolveFn = this._resolvePromise;
         this._resolvePromise = null;
         this.close();
@@ -316,7 +316,7 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
      * @param {Object} diffAnalysis - Diff analysis calculation object
      * @returns {Promise<Array<Object>|null>} Array of selected entries to merge, or null if cancelled
      */
-    static async promptMerge(diffAnalysis) {
+    static async promptMerge(diffAnalysis: any) {
         const dialog = new AutorecImportDialog(diffAnalysis);
         dialog.render(true);
         return dialog.promise;

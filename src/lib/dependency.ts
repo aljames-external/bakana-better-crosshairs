@@ -9,7 +9,7 @@ import { localize } from "./utils.js";
  * @returns {boolean} Whether the versions are in ascending order.
  * @private
  */
-function _isAscending(min, version, max) {
+function _isAscending(min: any, version: any, max: any) {
     if ((Boolean(min) || Boolean(max)) && !version) return false;
     let isValidVersion = true;
     const isNewer = foundry?.utils?.isNewerVersion;
@@ -26,7 +26,7 @@ function _isAscending(min, version, max) {
  * @returns {object|undefined} The module or game object if found.
  * @private
  */
-function _getEntity(dependency) {
+function _getEntity(dependency: any) {
     const depId = dependency?.id;
     if (!depId) return undefined;
     if (depId === "foundry") return game;
@@ -40,7 +40,7 @@ function _getEntity(dependency) {
  * @returns {string|undefined} The version string if present.
  * @private
  */
-function _getVersion(dependency, entity = _getEntity(dependency)) {
+function _getVersion(dependency: any, entity = _getEntity(dependency)) {
     return entity?.version ?? (dependency?.id === "foundry" ? game?.version : undefined);
 }
 
@@ -53,7 +53,7 @@ function _getVersion(dependency, entity = _getEntity(dependency)) {
  * @returns {boolean} Whether the dependency is installed and within the valid version range.
  * @private
  */
-function _isInstalled(dependency) {
+function _isInstalled(dependency: any) {
     if (!dependency?.id) return false;
     const entity = _getEntity(dependency);
     if (!entity) return false;
@@ -70,7 +70,7 @@ function _isInstalled(dependency) {
  * @returns {boolean} Whether the dependency is activated and within the valid version range.
  * @private
  */
-function _isActivated(dependency) {
+function _isActivated(dependency: any) {
     if (!dependency?.id) return false;
     const entity = _getEntity(dependency);
     if (!entity) return false;
@@ -87,7 +87,7 @@ function _isActivated(dependency) {
  * @returns {string} The message with version information appended.
  * @private
  */
-function _versionMessageAppend(dependency, version) {
+function _versionMessageAppend(dependency: any, version: any) {
     let msg = "";
     if (dependency?.min) msg += `\n\t${localize("BBC.Dependency.MinVersion", "Minimum version: ")}${dependency.min}`;
     if (dependency?.max) msg += `\n\t${localize("BBC.Dependency.MaxVersion", "Maximum version: ")}${dependency.max}`;
@@ -159,7 +159,7 @@ function isInstalled(dependency: any, warnMessage?: string) {
  * @param {string} dependency.id - The identifier of the dependency.
  * @returns {boolean} Whether the dependency is activated.
  */
-function hasRecommended(dependency) {
+function hasRecommended(dependency: any) {
     if (!dependency?.id) return false;
     return isActivated(dependency, localize("BBC.Dependency.RecommendInstalling", "Recommend installing the following:"));
 }
@@ -169,7 +169,7 @@ function hasRecommended(dependency) {
  * @param {Array<object>} dependencyList - The list of dependencies to check.
  * @returns {boolean} Whether at least one dependency is activated.
  */
-function hasSomeRecommended(dependencyList) {
+function hasSomeRecommended(dependencyList: any) {
     if (!dependencyList?.length) return false;
     for (const dependency of dependencyList) {
         if (isActivated(dependency)) return true;
@@ -216,7 +216,7 @@ function required(dependencyList: any[] = []) {
  * @param {Array<object>} dependencyList - The list of dependencies to check.
  * @returns {void} Throws an error if no required dependency is activated.
  */
-function someRequired(dependencyList) {
+function someRequired(dependencyList: any) {
     if (!dependencyList?.length) {
         throw new Error("No dependencies specified for someRequired.\n");
     }

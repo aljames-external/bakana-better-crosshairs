@@ -193,7 +193,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
      * @param {object} options - Render options.
      * @returns {void}
      */
-    _attachCustomEventListeners(root, context, options) {
+    _attachCustomEventListeners(root: any, context: any, options: any) {
         const rootEl = this._normalizeElement(root);
         if (!rootEl) return;
 
@@ -206,7 +206,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
                 container.classList.add("edit-mode");
             }
 
-            editToggle.addEventListener("change", (ev) => {
+            editToggle.addEventListener("change", (ev: any) => {
                 const turningOn = Boolean(ev.currentTarget.checked);
                 this._editModeActive = turningOn;
                 container.classList.toggle("edit-mode", turningOn);
@@ -270,8 +270,8 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
         }
 
         // Prevent checkbox click from switching sidebar tab
-        rootEl.querySelectorAll(".bbc-item-select-checkbox").forEach(chk => {
-            chk.addEventListener("click", (ev) => ev.stopPropagation());
+        rootEl.querySelectorAll(".bbc-item-select-checkbox").forEach((chk: any) => {
+            chk.addEventListener("click", (ev: any) => ev.stopPropagation());
         });
 
         // Batch Remove Selected Workflows
@@ -306,7 +306,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
         const importJsonBtn = rootEl.querySelector(".bbc-import-json-btn");
         if (importJsonBtn) {
             importJsonBtn.addEventListener("click", () => {
-                promptJsonFileImport(async (content) => {
+                promptJsonFileImport(async (content: any) => {
                     try {
                         const res = await autorecManager.importAutorecs(content, { sourceModule: "world", interactive: true });
                         if (res) {
@@ -321,8 +321,8 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
         }
 
         // Single Save Workflow button in header and footer
-        rootEl.querySelectorAll(".bbc-save-single-btn").forEach(btn => {
-            btn.addEventListener("click", async (ev) => {
+        rootEl.querySelectorAll(".bbc-save-single-btn").forEach((btn: any) => {
+            btn.addEventListener("click", async (ev: any) => {
                 ev.preventDefault();
                 ev.stopPropagation();
                 const itemName = ev.currentTarget.dataset.itemName;
@@ -333,8 +333,8 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
         });
 
         // Single Remove Workflow button in header
-        rootEl.querySelectorAll(".bbc-delete-single-btn").forEach(btn => {
-            btn.addEventListener("click", (ev) => {
+        rootEl.querySelectorAll(".bbc-delete-single-btn").forEach((btn: any) => {
+            btn.addEventListener("click", (ev: any) => {
                 const itemName = ev.currentTarget.dataset.itemName;
                 if (itemName) {
                     autorecManager.unregister(itemName, { persist: true });
@@ -350,9 +350,9 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
         const cards = rootEl.querySelectorAll(".bbc-item-card");
 
         if (searchInput) {
-            searchInput.addEventListener("input", (ev) => {
+            searchInput.addEventListener("input", (ev: any) => {
                 const query = (ev.target.value ?? "").toLowerCase().trim();
-                cards.forEach(el => {
+                cards.forEach((el: any) => {
                     const name = (el.dataset.itemName ?? "").toLowerCase();
                     el.style.display = (query === "" || name.includes(query)) ? "flex" : "none";
                 });
@@ -360,8 +360,8 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
         }
 
         // Sidebar Item Selection
-        cards.forEach(card => {
-            card.addEventListener("click", (ev) => {
+        cards.forEach((card: any) => {
+            card.addEventListener("click", (ev: any) => {
                 const itemName = ev.currentTarget.dataset.itemName;
                 if (itemName) this.selectItem(rootEl, itemName);
             });
@@ -380,7 +380,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
      * @param {string} itemName - Registration key or name of the workflow item to select.
      * @returns {void}
      */
-    selectItem(target, itemName) {
+    selectItem(target: any, itemName: any) {
         const root = this._normalizeElement(target);
         if (!root || !itemName) return;
         this._selectedItemName = itemName;
@@ -390,7 +390,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
         const emptyState = root.querySelector(".bbc-inspector-empty");
 
         let found = false;
-        cards.forEach(c => {
+        cards.forEach((c: any) => {
             if (c.dataset.itemName === itemName) {
                 c.classList.add("active");
                 found = true;
@@ -401,7 +401,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
 
         if (found) {
             if (emptyState) emptyState.style.display = "none";
-            details.forEach(d => {
+            details.forEach((d: any) => {
                 d.style.display = (d.dataset.itemName === itemName) ? "flex" : "none";
             });
         }
@@ -414,7 +414,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
      * @param {string} regKey - Registration key or item name to save.
      * @returns {Promise<void>}
      */
-    async saveSingleConfiguration(target, regKey) {
+    async saveSingleConfiguration(target: any, regKey: any) {
         const root = this._normalizeElement(target);
         if (!root || !regKey) return;
         const detailEl = root.querySelector(`.bbc-inspector-detail[data-item-name="${CSS.escape(regKey)}"]`);
@@ -424,7 +424,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
         const config = adapter.deepClone(typeof existingEntry === "object" ? existingEntry : {});
         let modified = false;
 
-        detailEl.querySelectorAll("[data-field]").forEach(inputEl => {
+        detailEl.querySelectorAll("[data-field]").forEach((inputEl: any) => {
             const field = inputEl.dataset.field;
             if (!field) return;
 
@@ -454,7 +454,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
             autorecManager.register(regKey, config, { persist: false, local: Boolean(config.local), isHydration: true });
         }
 
-        const persistedDict = {};
+        const persistedDict: Record<string, any> = {};
         for (const k of autorecManager.list()) {
             const entry = autorecManager.registeredHandlers.get(k) ?? autorecManager.get(k);
             if (entry && typeof entry === "object" && !entry.local && typeof entry !== "function") {

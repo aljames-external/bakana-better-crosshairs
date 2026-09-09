@@ -9,7 +9,7 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
  * @param {string} [fallback="#000000"] - Fallback hex string.
  * @returns {string} Valid 6-digit hex color string.
  */
-export function normalizeHexColor(val, fallback = "#000000") {
+export function normalizeHexColor(val: any, fallback = "#000000") {
     if (typeof val === "string" && /^#[0-9A-Fa-f]{6}$/.test(val)) return val;
     return fallback;
 }
@@ -27,7 +27,7 @@ export class BaseCrosshairMenuApplication extends HandlebarsApplicationMixin(App
      * @param {unknown} target - Target element, event, or application.
      * @returns {HTMLElement|null} Normalized HTMLElement or null.
      */
-    _normalizeElement(target) {
+    _normalizeElement(target: any): any {
         if (!target) return null;
         if (typeof HTMLElement !== "undefined" && target instanceof HTMLElement) return target;
         if (typeof target === "object" && target.nodeType === 1 && typeof target.tagName === "string") {
@@ -96,19 +96,19 @@ export class BaseCrosshairMenuApplication extends HandlebarsApplicationMixin(App
      * @param {HTMLElement} root - Normalized root DOM element.
      * @returns {void}
      */
-    _attachCommonEventListeners(root) {
+    _attachCommonEventListeners(root: any) {
         if (!root) return;
 
         // 1. Color swatches initial background color setup
-        root.querySelectorAll(".bbc-color-swatch").forEach(el => {
+        root.querySelectorAll(".bbc-color-swatch").forEach((el: any) => {
             if (el.dataset.color) {
                 el.style.backgroundColor = el.dataset.color;
             }
         });
 
         // 2. Synchronize HTML color pickers with adjacent text inputs across input and change events
-        root.querySelectorAll("input[type='color'].bbc-edit-color, input[type='color'][data-color-target]").forEach(picker => {
-            const syncToText = (ev) => {
+        root.querySelectorAll("input[type='color'].bbc-edit-color, input[type='color'][data-color-target]").forEach((picker: any) => {
+            const syncToText = (ev: any) => {
                 const targetEl = ev.currentTarget;
                 const row = targetEl.closest(".bbc-edit-color-row");
                 const colorTargetId = targetEl.getAttribute("data-color-target") ?? "";
@@ -125,8 +125,8 @@ export class BaseCrosshairMenuApplication extends HandlebarsApplicationMixin(App
         });
 
         // 3. Synchronize text inputs back to adjacent HTML color pickers when valid hex entered
-        root.querySelectorAll(".bbc-edit-color-row input[type='text'], input[type='text'][id^='bbc-item-']").forEach(textInput => {
-            const syncToPicker = (ev) => {
+        root.querySelectorAll(".bbc-edit-color-row input[type='text'], input[type='text'][id^='bbc-item-']").forEach((textInput: any) => {
+            const syncToPicker = (ev: any) => {
                 const targetEl = ev.currentTarget;
                 const val = (targetEl.value ?? "").trim();
                 const row = targetEl.closest(".bbc-edit-color-row");
@@ -142,12 +142,12 @@ export class BaseCrosshairMenuApplication extends HandlebarsApplicationMixin(App
         });
 
         // 4. Player color checkbox toggling disables/enables adjacent color picker and text input
-        root.querySelectorAll(".bbc-player-color-checkbox").forEach(chk => {
+        root.querySelectorAll(".bbc-player-color-checkbox").forEach((chk: any) => {
             const updateState = () => {
                 const row = chk.closest(".bbc-edit-color-row");
                 if (!row) return;
                 const isChecked = Boolean(chk.checked);
-                row.querySelectorAll("input[type='color'], input[type='text']").forEach(input => {
+                row.querySelectorAll("input[type='color'], input[type='text']").forEach((input: any) => {
                     input.disabled = isChecked;
                 });
             };
@@ -156,8 +156,8 @@ export class BaseCrosshairMenuApplication extends HandlebarsApplicationMixin(App
         });
 
         // 5. Expandable section accordions
-        root.querySelectorAll(".bbc-section-header").forEach(header => {
-            header.addEventListener("click", (ev) => {
+        root.querySelectorAll(".bbc-section-header").forEach((header: any) => {
+            header.addEventListener("click", (ev: any) => {
                 const h = ev.currentTarget;
                 const body = h.nextElementSibling;
                 const icon = h.querySelector(".bbc-chevron");
@@ -173,8 +173,8 @@ export class BaseCrosshairMenuApplication extends HandlebarsApplicationMixin(App
         });
 
         // 5. Copy text button action
-        root.querySelectorAll(".bbc-copy-btn").forEach(btn => {
-            btn.addEventListener("click", (ev) => {
+        root.querySelectorAll(".bbc-copy-btn").forEach((btn: any) => {
+            btn.addEventListener("click", (ev: any) => {
                 const text = ev.currentTarget.dataset.copyText;
                 if (text && typeof navigator?.clipboard?.writeText === "function") {
                     navigator.clipboard.writeText(text);
@@ -184,14 +184,14 @@ export class BaseCrosshairMenuApplication extends HandlebarsApplicationMixin(App
         });
 
         // 6. Live-toggle child configuration fields marked with data-override-child when enabling checkboxes toggle
-        root.querySelectorAll("input[type='checkbox'][name^='enable']").forEach(chk => {
-            chk.addEventListener("change", (ev) => {
+        root.querySelectorAll("input[type='checkbox'][name^='enable']").forEach((chk: any) => {
+            chk.addEventListener("change", (ev: any) => {
                 const fieldName = ev.currentTarget.name;
                 const isChecked = Boolean(ev.currentTarget.checked);
-                root.querySelectorAll(`[data-override-child='${fieldName}']`).forEach(el => {
+                root.querySelectorAll(`[data-override-child='${fieldName}']`).forEach((el: any) => {
                     el.style.display = isChecked ? "" : "none";
                 });
-                root.querySelectorAll(`[data-override-badge='${fieldName}']`).forEach(el => {
+                root.querySelectorAll(`[data-override-badge='${fieldName}']`).forEach((el: any) => {
                     el.textContent = isChecked
                         ? localize("BBC.itemConfigMenu.badgeCustomOverride", "CUSTOM OVERRIDE")
                         : localize("BBC.itemConfigMenu.badgeInherited", "INHERITED");
@@ -208,7 +208,7 @@ export class BaseCrosshairMenuApplication extends HandlebarsApplicationMixin(App
      * @param {object} options - Rendering options.
      * @returns {void}
      */
-    _attachCustomEventListeners(root, context, options) {
+    _attachCustomEventListeners(root: any, context: any, options: any) {
         // Overridden by subclasses
     }
 }

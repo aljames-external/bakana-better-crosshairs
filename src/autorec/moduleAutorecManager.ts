@@ -49,7 +49,7 @@ export class ModuleAutorecManager {
      * @returns {Promise<void>}
      * @throws {Error} If entries parameter is not an Array
      */
-    async register(entries, { persist = true, isHydration = false, isImport = false, suppressWarn = false } = {}) {
+    async register(entries: any, { persist = true, isHydration = false, isImport = false, suppressWarn = false } = {}) {
         if (!Array.isArray(entries)) {
             log.error(`ModuleAutorecManager[${this.moduleId}].register | Argument 'entries' must be an Array.`);
             throw new Error("ModuleAutorecManager.register requires an array of registration entries.");
@@ -145,7 +145,7 @@ export class ModuleAutorecManager {
      * @returns {Promise<void>}
      * @throws {Error} If itemNames parameter is not an Array
      */
-    async unregister(itemNames, options = {}) {
+    async unregister(itemNames: any, options = {}) {
         if (!Array.isArray(itemNames)) {
             log.error(`ModuleAutorecManager[${this.moduleId}].unregister | Argument 'itemNames' must be an Array.`);
             throw new Error("ModuleAutorecManager.unregister requires an array of item names.");
@@ -160,7 +160,7 @@ export class ModuleAutorecManager {
      * @param {string|null} [activityNameOrId=null] - Optional sub-activity name or activity ID filter
      * @returns {Object|null} Active autorec entry configuration or null
      */
-    get(itemName, activityNameOrId = null) {
+    get(itemName: any, activityNameOrId = null) {
         const cleanItemName = String(itemName ?? "").trim();
         if (!cleanItemName) return null;
         const cleanActivity = String(activityNameOrId ?? "").trim();
@@ -176,11 +176,11 @@ export class ModuleAutorecManager {
      * @param {string} itemName - Target item/spell name
      * @returns {Array<Object>} Ordered array of candidate configurations belonging to this module
      */
-    getEntriesForItem(itemName) {
+    getEntriesForItem(itemName: any) {
         const cleanItemName = String(itemName ?? "").trim();
         if (!cleanItemName) return [];
         return this._parent.getEntriesForItem(cleanItemName)
-            .filter(entry => entry.sourceModule === this.moduleId);
+            .filter((entry: any) => entry.sourceModule === this.moduleId);
     }
 
     /**
@@ -189,7 +189,7 @@ export class ModuleAutorecManager {
      * @param {string|null} [activityNameOrId=null] - Optional sub-activity name or activity ID filter
      * @returns {boolean} True if registration exists
      */
-    has(itemName, activityNameOrId = null) {
+    has(itemName: any, activityNameOrId = null) {
         const cleanItemName = String(itemName ?? "").trim();
         if (!cleanItemName) return false;
         const cleanActivity = String(activityNameOrId ?? "").trim();
@@ -219,7 +219,7 @@ export class ModuleAutorecManager {
      * @returns {Array<Object>} List of registration entry representations tagged with this module's ID
      */
     getAllEntries() {
-        return this._parent.getAllEntries().filter(entry => entry.sourceModule === this.moduleId);
+        return this._parent.getAllEntries().filter((entry: any) => entry.sourceModule === this.moduleId);
     }
 
     /**
@@ -228,7 +228,7 @@ export class ModuleAutorecManager {
      * @returns {Object} Exchange package object
      */
     export({ includeDefault = false, description = "" } = {}) {
-        const moduleEntries = this.getAllEntries().map(e => e.config);
+        const moduleEntries = this.getAllEntries().map((e: any) => e.config);
         return this._parent.exportAutorecs({
             sourceModule: this.moduleId,
             includeDefault,
@@ -246,7 +246,7 @@ export class ModuleAutorecManager {
      * @param {boolean} [options.overwrite=true] - Default conflict strategy when non-interactive
      * @returns {Promise<{mergedCount: number, importedEntries: Array<Object>}|null>} Result summary or null if cancelled
      */
-    async import(jsonOrString, { interactive = true, overwrite = true } = {}) {
+    async import(jsonOrString: any, { interactive = true, overwrite = true } = {}) {
         log.debug(`ModuleAutorecManager[${this.moduleId}].import | Importing bundle with module-id tag set to "${this.moduleId}".`);
         return this._parent.importAutorecs(jsonOrString, {
             sourceModule: this.moduleId,

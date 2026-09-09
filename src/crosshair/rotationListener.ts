@@ -57,7 +57,7 @@ export class CrosshairRotationListener {
                 targetX = anchored.x;
                 targetY = anchored.y;
             } else {
-                const safeGet = (obj, prop) => { if (!obj) return undefined; try { return obj[prop]; } catch (e) { return undefined; } };
+                const safeGet = (obj: any, prop: any) => { if (!obj) return undefined; try { return obj[prop]; } catch (e) { return undefined; } };
                 const mousePos = adapter.crosshair.mousePosition ?? { x: safeGet(tmpl, "x") ?? doc.x ?? 0, y: safeGet(tmpl, "y") ?? doc.y ?? 0 };
                 const snapMode = getGridSnapMode(cfg);
                 const snapped = snapMode !== 0 ? snapCoordinates(mousePos.x, mousePos.y, snapMode) : mousePos;
@@ -143,7 +143,7 @@ export class CrosshairRotationListener {
      * @param {object} [config={}] - Crosshair placement configuration
      * @returns {void}
      */
-    rotateCrosshairInstance(crosshair, newDirDeg, config = {}) {
+    rotateCrosshairInstance(crosshair: any, newDirDeg: any, config = {}) {
         if (!crosshair) return;
         const rad = newDirDeg * (Math.PI / 180);
 

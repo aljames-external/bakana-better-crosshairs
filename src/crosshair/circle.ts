@@ -47,7 +47,7 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
      * @param {Sequence} crosshairSeq - The Sequencer crosshair builder instance
      * @returns {void}
      */
-    _configureCrosshairShape(crosshairSeq) {
+    _configureCrosshairShape(crosshairSeq: any) {
         const radius = Math.round(this.config.radius ?? 20);
         log.debug("CircleCrosshairShape._configureCrosshairShape | Configuring circle distance.", { radius });
         crosshairSeq.distance(radius);
@@ -87,7 +87,7 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
  * @param {object} [config={}] - Configuration options for the circle crosshair.
  * @returns {Promise<Array>} A promise resolving to an array containing the configured circle Sequence and targets.
  */
-async function create(placeable, config = {}) {
+async function create(placeable: any, config: any = {}) {
     const opts = config ?? {};
     log.debug("circle.create | Instantiating CircleCrosshairShape.", { config: opts });
     const shape = new CircleCrosshairShape(placeable, opts);
@@ -101,7 +101,7 @@ async function create(placeable, config = {}) {
  * @param {object} [config={}] - Configuration options for the circle crosshair.
  * @returns {Promise<any>} A promise resolving when the crosshair sequence finishes playing.
  */
-async function play(placeable, config = {}) {
+async function play(placeable: any, config: any = {}) {
     log.debug("circle.play | Executing circle sequence play.");
     const [seq] = await create(placeable, config);
     return seq.play();
@@ -115,7 +115,7 @@ async function play(placeable, config = {}) {
  * @param {string} [options.id="Circle Crosshair"] - Identifier of the circle crosshair effect to terminate.
  * @returns {Promise<void>} A promise resolving once matching Sequencer effects have ended.
  */
-async function stop(token: any, options: { id?: string; [key: string]: any } = {}) {
+async function stop(token: any, options: any = {}) {
     const targetToken = adapter.crosshair.toToken(token);
     const opts = options ?? {};
     const id = opts.id ?? "Circle Crosshair";

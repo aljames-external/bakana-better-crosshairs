@@ -104,7 +104,7 @@ export function getGamemasterCursorPosition(identifier = "Gamemaster") {
  * @param {string} userId - User ID of the peer player
  * @returns {{x: number, y: number}|null} Canvas coordinates or null
  */
-export function getPeerCursorPosition(userId) {
+export function getPeerCursorPosition(userId: any) {
     if (!userId) return null;
 
     return getGamemasterCursorPosition(userId);
@@ -404,7 +404,7 @@ export class RemoteCrosshairVisual {
      * @param {Object} updatePayload - Socket payload containing updated coordinate and transform properties
      * @returns {void}
      */
-    update(updatePayload) {
+    update(updatePayload: any) {
         this.resetTimeout();
         if (this.isDestroyed || !Sequencer) return;
 
@@ -520,7 +520,7 @@ class RemoteCrosshairManagerClass {
      * @param {string} senderUserId - User ID of the socket sender
      * @returns {boolean} True if payload should be processed and rendered
      */
-    shouldRenderRemote(senderUserId) {
+    shouldRenderRemote(senderUserId: any) {
         if (!senderUserId || senderUserId === game?.user?.id) return false;
         if (!game?.settings) return false;
 
@@ -536,7 +536,7 @@ class RemoteCrosshairManagerClass {
      * @param {Object} payload - Received socket message dictionary
      * @returns {Promise<void>}
      */
-    async handleSocketMessage(payload) {
+    async handleSocketMessage(payload: any) {
         if (!payload?.type) return;
         const type = String(payload.type ?? "");
         if (!type.startsWith("CROSSHAIR_")) return;

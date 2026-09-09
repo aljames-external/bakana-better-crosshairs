@@ -44,7 +44,7 @@ export function registerModuleSettings() {
          * @param {Object<string, Object>} savedRegistrations - The updated dictionary of saved template registrations.
          * @returns {void}
          */
-        onChange: (savedRegistrations) => {
+        onChange: (savedRegistrations: any) => {
             autorecManager.loadSavedRegistrations((savedRegistrations as any) ?? {});
         }
     } as any);
@@ -98,7 +98,7 @@ export function registerModuleSettings() {
  * @param {HTMLElement|jQuery} html - The settings config DOM element
  * @param {object} [_app=null] - The settings application instance
  */
-export function injectSettingsHeaders(html, _app = null) {
+export function injectSettingsHeaders(html: any, _app = null) {
     const root = html?.querySelector ? html : html?.[0];
     if (!root?.querySelector) return;
 

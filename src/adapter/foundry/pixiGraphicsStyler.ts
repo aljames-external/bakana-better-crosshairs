@@ -57,7 +57,7 @@ export class PixiGraphicsStyler {
         const fillNum = this.toColorNumber(placedFillColor);
         const fillAlphaNum = Number.isFinite(placedFillAlpha) ? placedFillAlpha : DEFAULT_AUTOREC_ENTRY.placedFillAlpha;
 
-        const applyGraphicsData = (gfx) => {
+        const applyGraphicsData = (gfx: any) => {
             if (!gfx) return false;
             let dirty = false;
             if (gfx.geometry?.graphicsData) {

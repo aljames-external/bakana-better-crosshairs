@@ -48,7 +48,7 @@ const STRIPPED_COMPARE_KEYS = new Set([
  * @param {Object} entry - Raw autorec entry configuration object
  * @returns {Object} Explicit schema content dictionary suitable for serialization
  */
-export function sanitizeEntryForExchange(entry) {
+export function sanitizeEntryForExchange(entry: any) {
     if (!entry || typeof entry !== "object") {
         return {};
     }
@@ -177,7 +177,7 @@ export function sanitizeEntryForExchange(entry) {
  * @param {string} [options.description=""] - Optional human readable tag or description
  * @returns {Object} Explicit schema structure of the full exported package
  */
-export function buildExportPackage(entries: any, { sourceModule = "world", includeDefault = false, description = "" } = {}) {
+export function buildExportPackage(entries: any, { sourceModule = "world", includeDefault = false, description = "" }: any = {}) {
     const exportedEntries: any[] = [];
     for (const rawEntry of entries ?? []) {
         if (!rawEntry || typeof rawEntry === "function") {
@@ -218,7 +218,7 @@ export function buildExportPackage(entries: any, { sourceModule = "world", inclu
  * @returns {Object} Validated and parsed package object
  * @throws {Error} If package format or any individual entry fails validation
  */
-export function validateImportPackage(rawInput, { overrideSourceModule = null } = {}) {
+export function validateImportPackage(rawInput: any, { overrideSourceModule = null }: any = {}) {
     let parsed = rawInput;
     if (typeof rawInput === "string") {
         try {
@@ -312,7 +312,7 @@ export function validateImportPackage(rawInput, { overrideSourceModule = null } 
  * @param {string} activityName - Activity label
  * @returns {string} Normalized lowercase lookup token
  */
-export function getEntryLookupToken(itemName, activityId = "", activityName = "") {
+export function getEntryLookupToken(itemName: any, activityId = "", activityName = "") {
     const cleanItem = String(itemName ?? "").trim().toLowerCase();
     const cleanActId = String(activityId ?? "").trim().toLowerCase();
     const cleanActName = String(activityName ?? "").trim().toLowerCase();
@@ -472,7 +472,7 @@ export function analyzeImportDiff(validatedPackage: any, currentRegistrations: a
  * @param {string} [filename="bbc-autorec-export.json"] - Output filename
  * @returns {void}
  */
-export function triggerFileDownload(jsonString, filename = "bbc-autorec-export.json") {
+export function triggerFileDownload(jsonString: any, filename = "bbc-autorec-export.json") {
     try {
         const saved = adapter.crosshair.saveDataToFile(jsonString, "text/json", filename);
         if (saved) {
@@ -500,7 +500,7 @@ export function triggerFileDownload(jsonString, filename = "bbc-autorec-export.j
  * @param {function(string): (void|Promise<void>)} onFileLoaded - Callback executed with loaded text string.
  * @returns {void}
  */
-export function promptJsonFileImport(onFileLoaded) {
+export function promptJsonFileImport(onFileLoaded: any) {
     if (typeof onFileLoaded !== "function") {
         log.error("AutorecExchange.promptJsonFileImport | Argument 'onFileLoaded' must be a function.");
         return;

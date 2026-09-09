@@ -73,7 +73,7 @@ export const DEFAULT_AUTOREC_ENTRY = {
  * @param {string} [activityId=""] - Optional system activity ID
  * @returns {string} Deterministic registration identity key
  */
-export function computeRegistrationKey(itemName, activityName = "", activityId = "") {
+export function computeRegistrationKey(itemName: any, activityName = "", activityId = "") {
     const cleanItem = String(itemName ?? "").trim();
     const cleanActName = String(activityName ?? "").trim();
     const cleanActId = String(activityId ?? "").trim();
@@ -158,7 +158,7 @@ export class AutorecManager {
      * @param {string} moduleId - Unique caller module identifier (e.g. "eskie-macro-pack")
      * @returns {ModuleAutorecManager} Scoped manager instance
      */
-    forModule(moduleId) {
+    forModule(moduleId: any) {
         return new ModuleAutorecManager(moduleId, this);
     }
 
@@ -167,7 +167,7 @@ export class AutorecManager {
      * @param {Function} callback - Callback function to execute on registration
      * @returns {void}
      */
-    onRegister(callback) {
+    onRegister(callback: any) {
         if (callback) {
             this._onRegisterCallback = callback;
         }
@@ -190,8 +190,8 @@ export class AutorecManager {
      * @param {Object|undefined} [config] - Crosshair override configuration object or undefined to clear
      * @returns {Promise<boolean>} True if the item configuration was successfully set or cleared, false otherwise
      */
-    async customize(targetItem, config) {
-        const item = targetItem?.document ?? targetItem;
+    async customize(targetItem: any, config?: any) {
+        const item = targetItem?.document ? targetItem.document : targetItem;
         if (!item || typeof item.setFlag !== "function" || typeof item.unsetFlag !== "function") {
             log.warn("AutorecManager.customize | Invalid item document passed to customize.");
             return false;
@@ -222,8 +222,8 @@ export class AutorecManager {
      * @param {Object} [baseContext={}] - Upstream workflow calling context
      * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}} Normalized calling context containing item and activity details
      */
-    resolveItemAndActivity(target, baseContext = {}) {
-        const doc = target?.document ?? target;
+    resolveItemAndActivity(target: any, baseContext: any = {}) {
+        const doc = target?.document ? target.document : target;
         return adapter.system.extractCallingContext(doc, baseContext);
     }
 
@@ -234,7 +234,7 @@ export class AutorecManager {
      * @param {Object|Function} handler - Autorec configuration or callback
      * @returns {void}
      */
-    indexRegistration(registeredKey, handler) {
+    indexRegistration(registeredKey: any, handler: any) {
         const baseConfig = typeof handler === "function" ? { handler } : (handler ?? {});
         const optionsRaw = baseConfig.options ?? {};
         const fileRaw = baseConfig.file ?? {};
@@ -384,7 +384,7 @@ export class AutorecManager {
      * @param {string} itemName - Target item/spell name
      * @returns {Array<Object>} Ordered candidate autorec entries
      */
-    getEntriesForItem(itemName) {
+    getEntriesForItem(itemName: any) {
         if (!itemName) return [];
         const cleanName = String(itemName).trim().toLowerCase();
         const candidates: Array<Record<string, any>> = [];
@@ -407,7 +407,7 @@ export class AutorecManager {
      * @param {string} itemName - Target item/spell name (`"Fireball"`)
      * @returns {Object|null} Registered autorec configuration or null
      */
-    getEntryByName(itemName) {
+    getEntryByName(itemName: any) {
         if (!itemName) return null;
         const cleanName = String(itemName).trim();
         const lowerClean = cleanName.toLowerCase();
@@ -431,9 +431,9 @@ export class AutorecManager {
      * @param {Document|Object} target - Target candidate Document or Placeable
      * @returns {Object|null} Registered autorec configuration or null
      */
-    getEntryForDocument(target) {
+    getEntryForDocument(target: any) {
         if (!target) return null;
-        const doc = target?.document ?? target;
+        const doc = target?.document ? target.document : target;
         return adapter.crosshair.matchAutorecEntry(doc, this.registeredHandlers);
     }
 
@@ -466,7 +466,7 @@ export class AutorecManager {
             defaultEntry.placedFillAlpha = DEFAULT_AUTOREC_ENTRY.placedFillAlpha;
         }
 
-        socketlib.on((data) => {
+        socketlib.on((data: any) => {
             if (!data || typeof data !== "object") return;
             const isGM = Boolean(game.user?.isGM);
             if (data.type === "REGISTER_TEMPLATE") {
@@ -501,7 +501,7 @@ export class AutorecManager {
      * @param {Object} config - Autorec entry configuration
      * @returns {void}
      */
-    persistRegistration(itemName, config) {
+    persistRegistration(itemName: any, config: any) {
         if (!game.ready) {
             Hooks.once("ready", () => this.persistRegistration(itemName, config));
             return;
@@ -528,7 +528,7 @@ export class AutorecManager {
      * @param {string} itemName - Item/spell name to unpersist
      * @returns {void}
      */
-    persistUnregistration(itemName) {
+    persistUnregistration(itemName: any) {
         if (!game.ready) {
             Hooks.once("ready", () => this.persistUnregistration(itemName));
             return;
@@ -594,7 +594,7 @@ export class AutorecManager {
      * Turning off any previous registration for that item name and registering the new one.
      *
      * @param {string} itemName - Name of the item/spell (e.g., 'Fireball')
-     * @param {Object|Function} [handlerOrConfig={}] - Config object (`{ file: '...', local: true }`) or custom async function (`(token, autoConfig) => ...`)
+     * @param {Object|Function} [handlerOrConfig: any = {}] - Config object (`{ file: '...', local: true }`) or custom async function (`(token, autoConfig) => ...`)
      * @param {Object} [options={}] - Registration options
      * @param {boolean} [options.persist=true] - Whether to persist registration to world settings across reboots/clients
      * @param {boolean} [options.local=false] - Whether this registration should only exist locally on this client and not persist or sync
@@ -684,7 +684,7 @@ export class AutorecManager {
      * @param {boolean} [options.local=false] - If true, only unregister locally
      * @returns {boolean} True if the item registration was successfully deleted, false otherwise
      */
-    unregister(itemName, { persist = true, local = false } = {}) {
+    unregister(itemName: any, { persist = true, local = false } = {}) {
         const cleanName = String(itemName ?? "").trim();
         if (!cleanName) return false;
         const lowerClean = cleanName.toLowerCase();
@@ -765,7 +765,7 @@ export class AutorecManager {
         this.rebuildFastLookupMap();
 
         if (persist && !local) {
-            const persistedDict = {};
+            const persistedDict: Record<string, any> = {};
             for (const [itemName, config] of this.registeredHandlers.entries()) {
                 if (typeof config !== "function" && !config?.local) {
                     persistedDict[itemName] = config;
@@ -784,9 +784,9 @@ export class AutorecManager {
      * @param {boolean} [options.persist=true] - Whether to persist registrations to world settings
      * @returns {Promise<void>}
      */
-    async registerMany(entries, { persist = true } = {}) {
+    async registerMany(entries: any, { persist = true } = {}) {
         if (!Array.isArray(entries)) return;
-        const toPersist = {};
+        const toPersist: Record<string, any> = {};
         for (const { itemName, config, local } of entries) {
             const isEntryLocal = Boolean(local || !persist);
             this.register(itemName, config, { persist: false, local: isEntryLocal, isHydration: true });
@@ -845,7 +845,7 @@ export class AutorecManager {
      * @param {string|Document|Object} targetOrName - Item name or candidate Document/Placeable
      * @returns {boolean} True if a registered handler exists for the target or name
      */
-    has(targetOrName) {
+    has(targetOrName: any) {
         return Boolean(this.get(targetOrName));
     }
 
@@ -855,11 +855,11 @@ export class AutorecManager {
      * @param {string|Document|Object} targetOrName - Item name or candidate Document/Placeable
      * @returns {Object|null} Registered autorec entry configuration or null if not found
      */
-    get(targetOrName) {
+    get(targetOrName: any) {
         if (typeof targetOrName === "string") {
             return this.getEntryByName(targetOrName);
         }
-        const doc = targetOrName?.document ?? targetOrName;
+        const doc = targetOrName?.document ? targetOrName.document : targetOrName;
         return this.getEntryForDocument(doc);
     }
 
@@ -1099,7 +1099,7 @@ export class AutorecManager {
      * @param {string|null} [options.overrideSourceModule=null] - Optional override module-id to force on all imported entries
      * @returns {Object} Validated package container object
      */
-    validateImportPackage(rawInput, { overrideSourceModule = null } = {}) {
+    validateImportPackage(rawInput: any, { overrideSourceModule = null } = {}) {
         return exchangeValidateImportPackage(rawInput, { overrideSourceModule });
     }
 
@@ -1111,7 +1111,7 @@ export class AutorecManager {
      * @param {string|null} [options.overrideSourceModule=null] - Optional override module-id to force on all diff items
      * @returns {Object} Diff analysis view contract
      */
-    analyzeImportDiff(validatedPackage, { defaultSourceModule = "world", overrideSourceModule = null } = {}) {
+    analyzeImportDiff(validatedPackage: any, { defaultSourceModule = "world", overrideSourceModule = null } = {}) {
         return exchangeAnalyzeImportDiff(validatedPackage, this.registeredHandlers, { defaultSourceModule, overrideSourceModule });
     }
 
@@ -1126,7 +1126,7 @@ export class AutorecManager {
      * @param {boolean} [options.overwrite=true] - Default behavior when interactive is false
      * @returns {Promise<{mergedCount: number, importedEntries: Array<Object>}|null>} Merge summary object or null if cancelled
      */
-    async importAutorecs(jsonOrString, { sourceModule = "world", overrideSourceModule = null, interactive = true, overwrite = true } = {}) {
+    async importAutorecs(jsonOrString: any, { sourceModule = "world", overrideSourceModule = null, interactive = true, overwrite = true } = {}) {
         const validatedPkg = this.validateImportPackage(jsonOrString, { overrideSourceModule });
         const diffAnalysis = this.analyzeImportDiff(validatedPkg, { defaultSourceModule: sourceModule, overrideSourceModule });
 
@@ -1172,7 +1172,7 @@ export class AutorecManager {
     /**
      * Alias for importAutorecs.
      */
-    async import(jsonOrString, options = {}) {
+    async import(jsonOrString: any, options = {}) {
         return this.importAutorecs(jsonOrString, options);
     }
 
@@ -1186,12 +1186,12 @@ export class AutorecManager {
      * @param {string|null} [options.overrideSourceModule=null] - Optional override module-id tag applied to all merged items
      * @returns {Promise<number>} Number of successfully merged registration entries
      */
-    async mergeImportedEntries(selectedEntries, { persist = true, fallbackSourceModule = "world", overrideSourceModule = null } = {}) {
+    async mergeImportedEntries(selectedEntries: any, { persist = true, fallbackSourceModule = "world", overrideSourceModule = null } = {}) {
         if (!Array.isArray(selectedEntries) || selectedEntries.length === 0) {
             return 0;
         }
 
-        const toPersist = {};
+        const toPersist: Record<string, any> = {};
         let count = 0;
         const cleanOverride = overrideSourceModule !== null && overrideSourceModule !== undefined
             ? String(overrideSourceModule).trim()
@@ -1262,8 +1262,8 @@ const rawAutorecManager = new AutorecManager();
  * @param {AutorecManager} managerInstance - Raw AutorecManager instance
  * @returns {Function & AutorecManager} Callable proxy wrapping AutorecManager
  */
-export function makeCallableManager(managerInstance) {
-    const callableFn = function (moduleId) {
+export function makeCallableManager(managerInstance: any) {
+    const callableFn = function (moduleId: any) {
         return managerInstance.forModule(moduleId);
     };
     return new Proxy(callableFn, {

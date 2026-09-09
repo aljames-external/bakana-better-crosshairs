@@ -190,7 +190,7 @@ export class CrosshairController {
      * @param {object} [options={}] - Additional configuration options
      * @returns {Promise<object>} Handle object managing attached crosshair session
      */
-    static async attachToToken(sourceToken, shape, size, getCursorPositionFn, cancelFn, options = {}) {
+    static async attachToToken(sourceToken: any, shape: any, size: any, getCursorPositionFn: any, cancelFn: any, options = {}) {
         return attachCrosshairToToken(sourceToken, shape, size, getCursorPositionFn, cancelFn, options);
     }
 
@@ -217,7 +217,7 @@ export class CrosshairController {
     /**
      * Alias for CrosshairController.hide
      */
-    static async stop(sourceToken: any, options: { id?: string; [key: string]: any } = {}) {
+    static async stop(sourceToken: any, options: any = {}) {
         return CrosshairController.hide(sourceToken, options);
     }
 }

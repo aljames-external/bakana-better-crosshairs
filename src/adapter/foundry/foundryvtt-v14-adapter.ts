@@ -97,7 +97,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
 
         if (CONFIG) {
             for (const base of basePlaceables) {
-                const customClass = CONFIG[base]?.objectClass?.name;
+                const customClass = (CONFIG as any)[base]?.objectClass?.name;
                 if (customClass && !basePlaceables.includes(customClass) && !customPlaceables.includes(customClass)) {
                     dynamicPlaceables.push(customClass);
                 }
@@ -116,7 +116,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
 
         if (CONFIG) {
             for (const docType of baseDocumentTypes) {
-                const customDocName = CONFIG[docType]?.documentClass?.documentName;
+                const customDocName = (CONFIG as any)[docType]?.documentClass?.documentName;
                 if (customDocName && !baseDocumentTypes.includes(customDocName) && !customDocumentTypes.includes(customDocName)) {
                     dynamicDocumentTypes.push(customDocName);
                 }
@@ -257,7 +257,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @param {Document} doc - Region document
      * @returns {Array} Array of shape objects or models
      */
-    _getShapesArray(doc) {
+    _getShapesArray(doc: any) {
         const targetDoc = doc?.document ?? doc;
         if (!targetDoc) return [];
         return targetDoc.shapes?.contents ?? targetDoc.shapes ?? [];
@@ -278,7 +278,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @param {string} shapeType - The shape type identifier
      * @returns {boolean} Always true in V14
      */
-    supportsShapeRotation(shapeType) {
+    supportsShapeRotation(shapeType: any) {
         return true;
     }
 
@@ -503,7 +503,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @returns {Object} A cloned and formatted Region shape payload
      * @private
      */
-    _formatRegionShapeUpdate(originalShape, coords) {
+    _formatRegionShapeUpdate(originalShape: any, coords: any) {
         // Deep clone shape payload as a plain object to prevent mutating caller or carrying stale _source references
         const raw = originalShape?.toObject?.() ?? originalShape ?? {};
         const { _source, id, _id, ...cleanRaw } = raw;
@@ -618,7 +618,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @returns {string} Document name ("Region" or "MeasuredTemplate")
      * @protected
      */
-    _getDeferredDocumentName(data, documentName) {
+    _getDeferredDocumentName(data: any, documentName: any) {
         return documentName ?? (data.shapes ? "Region" : "MeasuredTemplate");
     }
 
@@ -629,7 +629,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @param {string} docName - Document type name
      * @protected
      */
-    _applyDeferredCoordinates(data, coords, docName) {
+    _applyDeferredCoordinates(data: any, coords: any, docName: any) {
         if (docName === "Region") {
             const shapesList = data.shapes?.contents ?? data.shapes ?? [];
             if (shapesList.length > 0) {
@@ -650,7 +650,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @param {number} direction - The current direction in degrees
      * @returns {void}
      */
-    refreshTemplateHighlights(tmpl, direction) {
+    refreshTemplateHighlights(tmpl: any, direction: any) {
         this._patchRefreshState();
         if (!tmpl || tmpl._bbcRefreshingHighlights) return;
         tmpl._bbcRefreshingHighlights = true;
@@ -955,7 +955,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @param {string} userId - ID of the user creating the document
      * @returns {Promise<void>} Resolves when post-placement execution completes
      */
-    async handleCreateDocument(doc, _options, userId) {
+    async handleCreateDocument(doc: any, _options: any, userId: any) {
         await super.handleCreateDocument(doc, _options, userId);
     }
 
@@ -967,16 +967,16 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @param {PlaceableObject} placeable - Preview placeable
      * @returns {void}
      */
-    _wrapHighlightGrid(placeable) {
+    _wrapHighlightGrid(placeable: any) {
         this._patchRefreshState();
         if (!placeable || placeable._bbcHighlightGridWrapped) return;
         placeable._bbcHighlightGridWrapped = true;
 
         const self = this;
-        const wrapMethod = (fnName) => {
+        const wrapMethod = (fnName: any) => {
             if (placeable[fnName]) {
                 const orig = placeable[fnName];
-                placeable[fnName] = function (...args) {
+                placeable[fnName] = function (...args: any[]) {
                     if (this._bbcWrappingMethod) {
                         return orig.apply(this, args);
                     }
@@ -1091,7 +1091,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @param {PlaceableObject} placeable - Preview placeable
      * @returns {Promise<void>}
      */
-    async handleDrawPreview(placeable) {
+    async handleDrawPreview(placeable: any) {
         this._patchDeprecations();
         this._patchRefreshState();
         return super.handleDrawPreview(placeable);
@@ -1254,11 +1254,11 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
         }
     }
 
-    _snapPoint(x, y, numMode) {
+    _snapPoint(x: any, y: any, numMode: any) {
         return this.getSnappedPoint({ x, y }, { mode: numMode }) ?? { x, y };
     }
 
-    _getGridCenterPoint(x, y) {
+    _getGridCenterPoint(x: any, y: any) {
         return this.getCenterPoint({ x, y }) ?? { x, y };
     }
 
@@ -1269,7 +1269,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @returns {number[]} [i0, j0, i1, j1] Grid offset range
      * @protected
      */
-    _getGridOffsetRange(bounds) {
+    _getGridOffsetRange(bounds: any) {
         if (!canvas?.grid || !bounds) return [0, 0, 0, 0];
 
         let targetBounds = bounds;
@@ -1373,7 +1373,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
             top: minY,
             right: maxX,
             bottom: maxY,
-            pad(padX, padY = padX) {
+            pad(padX: any, padY = padX) {
                 const px = this.x - padX;
                 const py = this.y - padY;
                 const pw = this.width + (padX * 2);
@@ -1391,7 +1391,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
                     fit: this.fit
                 };
             },
-            fit(other) {
+            fit(other: any) {
                 if (!other) return this;
                 const ox = other.x ?? other.left ?? 0;
                 const oy = other.y ?? other.top ?? 0;
@@ -1428,7 +1428,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @returns {boolean} True if point is inside or within tolerance of the rotated rectangle
      * @protected
      */
-    _testRotatedRectanglePoint(shape, pt, tolerance = 0.75) {
+    _testRotatedRectanglePoint(shape: any, pt: any, tolerance = 0.75) {
         if (!shape || !pt) return false;
         const originX = shape.x ?? 0;
         const originY = shape.y ?? 0;
@@ -1480,7 +1480,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @param {string} highlightId - Identifier for the grid highlight layer
      * @returns {void}
      */
-    _highlightRotatedRectangle(tmpl, doc, rectShape, highlightId) {
+    _highlightRotatedRectangle(tmpl: any, doc: any, rectShape: any, highlightId: any) {
         if (!canvas?.interface?.grid) return;
 
         this.addHighlightLayer(highlightId);

@@ -80,7 +80,7 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * @param {Object} entry - Registered autorec entry configuration
      * @returns {boolean} True if the calling context matches item and activity rules
      */
-    isMatch(context, entry) {
+    isMatch(context: any, entry: any) {
         if (!super.isMatch(context, entry)) return false;
         if (entry.isDefault) {
             log.debug("Dnd5eSystemAdapter.isMatch | Candidate entry is canonical default fallback (isDefault: true) -> MATCHED");
@@ -117,7 +117,7 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * @param {object} [config={}] - Optional crosshair configuration or calling context object
      * @returns {boolean} Whether the crosshair shape defaults to sticking to the token in D&D 5e
      */
-    getDefaultStickToToken(shapeType, config = {}) {
+    getDefaultStickToToken(shapeType: any, config = {}) {
         const itemDefault = this.getSystemDefault(config);
         if (itemDefault !== null && itemDefault !== undefined) {
             return Boolean(itemDefault);
@@ -136,7 +136,7 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * @param {Object} [options={}] - Execution dependencies (`{ crosshairAdapter, pendingPlacements, placementKey }`)
      * @returns {void} No return value
      */
-    handleProgrammaticPlacement(scene, doc, placeable, coords = {}, options = {}) {
+    handleProgrammaticPlacement(scene: any, doc: any, placeable: any, coords = {}, options = {}) {
     }
 
     /**

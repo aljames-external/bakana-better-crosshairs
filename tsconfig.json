@@ -6,7 +6,7 @@
     "lib": ["ESNext", "DOM"],
     "types": ["fvtt-types"],
     "strict": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "noEmit": true,
     "allowJs": true,
     "checkJs": false,

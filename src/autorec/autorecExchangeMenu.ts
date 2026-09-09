@@ -82,7 +82,7 @@ export class AutorecExchangeMenuApplication extends HandlebarsApplicationMixin(A
         if (importBtn) {
             importBtn.addEventListener("click", () => {
                 log.debug("AutorecExchangeMenuApplication | Opening file browser picker for JSON import.");
-                promptJsonFileImport(async (text) => {
+                promptJsonFileImport(async (text: any) => {
                     try {
                         const res = await autorecManager.importAutorecs(text, { sourceModule: "world", overrideSourceModule: null, interactive: true });
                         if (res) {

@@ -7,7 +7,7 @@ import { file } from "../lib/filemanager.js";
 
 let hooksInitialized = false;
 let onRegisterConnected = false;
-let _crosshair = null;
+let _crosshair: any = null;
 
 /**
  * Register canvas placement and document creation hooks across the active Foundry generation and Game System.

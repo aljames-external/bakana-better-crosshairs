@@ -24,11 +24,11 @@ export const activePlacementTracker: {
  * @param {number} angleDeg - Raw angle in degrees
  * @returns {number} Normalized angle in degrees between 0 and 360
  */
-export function _normalizeAngleDegrees(angleDeg) {
+export function _normalizeAngleDegrees(angleDeg: any) {
     return TokenGeometry.normalizeAngle(angleDeg);
 }
 
-export function _calculateAngleFromOrigin(origin, target) {
+export function _calculateAngleFromOrigin(origin: any, target: any) {
     return TokenGeometry.calculateAngle(origin, target);
 }
 
@@ -39,7 +39,7 @@ export function _calculateAngleFromOrigin(origin, target) {
  * @param {object|null} crosshair - Active crosshair instance
  * @param {Event|null} [event=null] - Triggering event if any
  */
-function _refreshPreviewHighlights(currentDirection, rad, crosshair, event = null) {
+function _refreshPreviewHighlights(currentDirection: any, rad: any, crosshair: any, event = null) {
     rotationListener.refreshAllActiveHighlights(currentDirection, rad, crosshair, event);
 }
 
@@ -51,7 +51,7 @@ function _refreshPreviewHighlights(currentDirection, rad, crosshair, event = nul
  * @param {Array} extraArgs - Extra callback arguments
  * @returns {object} The formatted placement result
  */
-function _notifyPlacementResult(result, config, crosshair, extraArgs) {
+function _notifyPlacementResult(result: any, config: any, crosshair: any, extraArgs: any) {
     config.context?.resolve?.(result);
     try {
         config._onPlaced?.(result, crosshair, ...extraArgs);
@@ -70,7 +70,7 @@ function _notifyPlacementResult(result, config, crosshair, extraArgs) {
  * @param {object} [sysAdapter=adapter.system] - The active system adapter
  * @returns {boolean} Whether the crosshair should stick to the token
  */
-export function shouldStickToToken(config, shapeType = "circle", sysAdapter = adapter.system) {
+export function shouldStickToToken(config: any, shapeType = "circle", sysAdapter = adapter.system) {
     if (adapter.crosshair?.supportsShapeRotation && !adapter.crosshair.supportsShapeRotation(shapeType)) {
         return false;
     }
@@ -91,7 +91,7 @@ export function shouldStickToToken(config, shapeType = "circle", sysAdapter = ad
  * @param {Event|null} [wheelEvent=null] - Optional wheel event
  * @returns {void}
  */
-function refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
+function refreshTemplateHighlights(tmpl: any, newDirDeg: any, rad: any, wheelEvent = null) {
     rotationListener.refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent);
 }
 
@@ -109,7 +109,7 @@ export function detachWheelRotation() {
  * @param {object} [config={}] - Crosshair configuration containing rotation options
  * @returns {void}
  */
-export function attachWheelRotation(shape, config = {}) {
+export function attachWheelRotation(shape: any, config: any = {}) {
     rotationListener.attach(shape, config);
 }
 
@@ -120,7 +120,7 @@ export function attachWheelRotation(shape, config = {}) {
  * @param {object} [config={}] - Crosshair placement configuration
  * @returns {void}
  */
-export function rotateCrosshairInstance(crosshair, newDirDeg, config = {}) {
+export function rotateCrosshairInstance(crosshair: any, newDirDeg: any, config: any = {}) {
     rotationListener.rotateCrosshairInstance(crosshair, newDirDeg, config);
 }
 

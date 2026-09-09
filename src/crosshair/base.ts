@@ -62,7 +62,7 @@ export class BaseCrosshairShape {
         this.placeable = placeable;
         this.config = config;
 
-        const extractUserId = (val) => {
+        const extractUserId = (val: any) => {
             if (!val) return null;
             return val.id ?? val;
         };
@@ -137,7 +137,7 @@ export class BaseCrosshairShape {
         this.showItemIcon = config.showItemIcon !== false;
         this.broadcast = config.broadcast !== false;
 
-        const resolveItemIcon = (cfg, document) => {
+        const resolveItemIcon = (cfg: any, document: any) => {
             if (cfg?.icon) return cfg.icon;
             if (cfg?.item?.img) return cfg.item.img;
             if (cfg?.activity?.img) return cfg.activity.img;
@@ -160,7 +160,7 @@ export class BaseCrosshairShape {
         this.placementId = null;
 
         // Position and direction state tracking
-        const safeGet = (obj, prop) => { if (!obj) return undefined; try { return obj[prop]; } catch (e) { return undefined; } };
+        const safeGet = (obj: any, prop: any) => { if (!obj) return undefined; try { return obj[prop]; } catch (e) { return undefined; } };
         this.x = safeGet(placeable, "x") ?? doc?.x ?? config.x ?? 0;
         this.y = safeGet(placeable, "y") ?? doc?.y ?? config.y ?? 0;
         this.cursorX = Number(config.cursorX ?? this.x);
@@ -327,7 +327,7 @@ export class BaseCrosshairShape {
      * @param {object} crosshair - The Sequencer crosshair placeable/container instance
      * @returns {Promise<any>} A promise resolving when the graphic sequence begins or completes
      */
-    async playGraphicEffect(crosshair) {
+    async playGraphicEffect(crosshair: any) {
         const seq = new Sequence().wait(50);
 
         const { widthPx, heightPx, factor, gridUnits } = this.getGraphicDimensions();
@@ -507,7 +507,7 @@ export class BaseCrosshairShape {
      * @param {Sequence} crosshairSeq - The Sequencer crosshair builder instance
      * @returns {void}
      */
-    configureCrosshairShape(crosshairSeq) {
+    configureCrosshairShape(crosshairSeq: any) {
         this._configureCrosshairShape(crosshairSeq);
     }
 
@@ -517,14 +517,14 @@ export class BaseCrosshairShape {
      * @param {Sequence} crosshairSeq - The Sequencer crosshair builder instance
      * @returns {void}
      */
-    _configureCrosshairShape(crosshairSeq) {}
+    _configureCrosshairShape(crosshairSeq: any) {}
 
     /**
      * Execute callback when the crosshair is first shown on canvas.
      * @param {object} crosshair - The active crosshair container/placeable
      * @returns {Promise<void>}
      */
-    async onShowCallback(crosshair) {
+    async onShowCallback(crosshair: any) {
         if (crosshair) {
             this.sequencerCrosshair = crosshair;
             crosshair.shapeInstance = this;
@@ -638,7 +638,7 @@ export class BaseCrosshairShape {
      * @param {...*} extraArgs - Additional arguments passed by placement callback
      * @returns {Promise<void>}
      */
-    async onPlacedCallback(crosshair, ...extraArgs) {
+    async onPlacedCallback(crosshair: any, ...extraArgs: any[]) {
         if (this.controller) this.controller.stop();
         this.stopBroadcasting("placed");
         this._destroyRangeText();
@@ -735,7 +735,7 @@ export class BaseCrosshairShape {
      * @param {string} [options.id] - The identifier of the effect to end
      * @returns {Promise<void>} A promise resolving when matching effects have been terminated
      */
-    static async stop(token: any, options: { id?: string } = {}) {
+    static async stop(token: any, options: any = {}) {
         const id = options?.id ?? "Crosshair";
         await Sequencer.EffectManager.endEffects({ name: id, object: token });
         await Sequencer.EffectManager.endEffects({ name: `${id}-line`, object: token });
@@ -754,7 +754,7 @@ export class BaseCrosshairShape {
      * @param {number} x - New target X coordinate (pre-snapping)
      * @param {number} y - New target Y coordinate (pre-snapping)
      */
-    move(x, y) {
+    move(x: any, y: any) {
         this.cursorX = x;
         this.cursorY = y;
 
@@ -823,7 +823,7 @@ export class BaseCrosshairShape {
      * @param {number} newAngleDeg - New direction in degrees
      * @param {boolean} [refresh=true] - Whether to trigger immediate template rendering refresh
      */
-    rotate(newAngleDeg, refresh = true) {
+    rotate(newAngleDeg: any, refresh = true) {
         if (!adapter.crosshair.supportsShapeRotation(this.type)) {
             return;
         }

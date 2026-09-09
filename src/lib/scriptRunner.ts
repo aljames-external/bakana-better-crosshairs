@@ -14,7 +14,7 @@ export class ScriptRunner {
      * @param {string} [contextName="ScriptRunner"] - Label for error logging
      * @returns {Promise<void>}
      */
-    static async execute(code, context = {}, contextName = "ScriptRunner") {
+    static async execute(code: any, context = {}, contextName = "ScriptRunner") {
         if (!code || typeof code !== "string" || !code.trim()) return;
 
         const keys = Object.keys(context);

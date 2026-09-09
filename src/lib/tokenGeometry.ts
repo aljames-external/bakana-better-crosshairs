@@ -10,7 +10,7 @@ export class TokenGeometry {
      * @param {number} angleDeg - Raw angle in degrees
      * @returns {number} Normalized angle in degrees [0, 360)
      */
-    static normalizeAngle(angleDeg) {
+    static normalizeAngle(angleDeg: any) {
         if (typeof angleDeg !== "number" || !Number.isFinite(angleDeg)) return 0;
         let norm = angleDeg % 360;
         if (norm < 0) norm += 360;
@@ -23,7 +23,7 @@ export class TokenGeometry {
      * @param {{x: number, y: number}} target - Target point
      * @returns {{rad: number, deg: number}} Calculated angle
      */
-    static calculateAngle(origin, target) {
+    static calculateAngle(origin: any, target: any) {
         const dx = target.x - origin.x;
         const dy = target.y - origin.y;
         const rad = Math.atan2(dy, dx);
@@ -36,7 +36,7 @@ export class TokenGeometry {
      * @param {object} token - Target Token placeable or document
      * @returns {{x: number, y: number, w: number, h: number, center: {x: number, y: number}}} Bounding box data
      */
-    static getBounds(token) {
+    static getBounds(token: any) {
         if (!token) return { x: 0, y: 0, w: 0, h: 0, center: { x: 0, y: 0 } };
         const size = adapter.crosshair.gridSize;
         const tx = token.x ?? 0;
@@ -105,7 +105,7 @@ export class TokenGeometry {
         }
 
         if (!intersection) {
-            const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+            const clamp = (val: any, min: any, max: any) => Math.max(min, Math.min(max, val));
             intersection = {
                 x: clamp(targetMouse.x, tx, tx + w),
                 y: clamp(targetMouse.y, ty, ty + h)
@@ -137,7 +137,7 @@ export class TokenGeometry {
      * @param {boolean} [sticky=false] - Whether to snap to 8-way perimeter sectors
      * @returns {{x: number, y: number, direction: number}} Edge coordinates and direction
      */
-    static getTokenEdgePoint(token, targetX, targetY, sticky = false) {
+    static getTokenEdgePoint(token: any, targetX: any, targetY: any, sticky = false) {
         if (!token) return { x: targetX, y: targetY, direction: 0 };
         const { w, h, center } = this.getBounds(token);
         const cx = center.x;

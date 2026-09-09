@@ -12,7 +12,7 @@ export const socketlib = {
      * @param {Object} payload - Socket message dictionary (`{ type: string, ... }`)
      * @returns {void}
      */
-    emit(payload) {
+    emit(payload: any) {
         if (!payload || typeof payload !== "object") return;
         if (!game?.socket) return;
         game.socket.emit(`module.${MODULE_ID}`, payload);
@@ -23,7 +23,7 @@ export const socketlib = {
      * @param {Function} handler - Callback function invoked when a module socket payload is received
      * @returns {void}
      */
-    on(handler) {
+    on(handler: any) {
         if (typeof handler !== "function") return;
         if (!game?.socket) return;
         game.socket.on(`module.${MODULE_ID}`, handler);
@@ -34,7 +34,7 @@ export const socketlib = {
      * @param {Function} handler - Callback function to remove
      * @returns {void}
      */
-    off(handler) {
+    off(handler: any) {
         if (typeof handler !== "function") return;
         if (!game?.socket) return;
         game.socket.off(`module.${MODULE_ID}`, handler);
@@ -50,7 +50,7 @@ const tileTrackers = new Map();
  * @param {number} [timeoutMs=5000] - Safety timeout in milliseconds
  * @returns {Promise<void>}
  */
-export async function waitForTileReplication(tileId, timeoutMs = 5000) {
+export async function waitForTileReplication(tileId: any, timeoutMs = 5000) {
     if (!tileId || !game?.users || !game?.socket) return;
     const activeUsers = game.users.filter((u) => u.active && !u.isSelf);
     if (activeUsers.length === 0) return;

@@ -87,7 +87,7 @@ export class BaseFoundryVTTAdapter {
      * @param {{x: number, y: number}} target - Ray target point
      * @returns {Ray|null} Instantiated Ray object or null
      */
-    createRay(origin, target) {
+    createRay(origin: any, target: any) {
         const RayClass = this.Ray;
         return RayClass ? new RayClass(origin, target) : null;
     }
@@ -100,7 +100,7 @@ export class BaseFoundryVTTAdapter {
      * @param {number} dist - Ray distance
      * @returns {Ray|null} Instantiated Ray object or null
      */
-    createRayFromAngle(x, y, rad, dist) {
+    createRayFromAngle(x: any, y: any, rad: any, dist: any) {
         const RayClass = this.Ray;
         return RayClass?.fromAngle ? RayClass.fromAngle(x, y, rad, dist) : null;
     }
@@ -118,7 +118,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string} id - The identifier of the highlight layer to add.
      * @returns {void}
      */
-    addHighlightLayer(id) {
+    addHighlightLayer(id: any) {
         return this.canvasAdapter.addHighlightLayer(id);
     }
 
@@ -127,7 +127,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string} id - The identifier of the highlight layer to get.
      * @returns {Object|null} The highlight layer or null
      */
-    getHighlightLayer(id) {
+    getHighlightLayer(id: any) {
         return this.canvasAdapter.getHighlightLayer(id);
     }
 
@@ -136,7 +136,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string} id - The identifier of the highlight layer to clear.
      * @returns {void}
      */
-    clearHighlightLayer(id) {
+    clearHighlightLayer(id: any) {
         return this.canvasAdapter.clearHighlightLayer(id);
     }
 
@@ -145,7 +145,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string} id - The identifier of the highlight layer to destroy.
      * @returns {void}
      */
-    destroyHighlightLayer(id) {
+    destroyHighlightLayer(id: any) {
         return this.canvasAdapter.destroyHighlightLayer(id);
     }
 
@@ -183,7 +183,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string} [filename="export.json"] - Output filename
      * @returns {boolean} True if native Foundry save helper handled the request
      */
-    saveDataToFile(data, type = "application/json", filename = "export.json") {
+    saveDataToFile(data: any, type = "application/json", filename = "export.json") {
         const rawFilename = filename ?? "export.json";
         const trimmedFilename = String(rawFilename).replace(/[/\\]/g, "_").trim();
         const cleanFilename = trimmedFilename.length > 0 ? trimmedFilename : "export.json";
@@ -218,7 +218,7 @@ export class BaseFoundryVTTAdapter {
      * @param {*} obj - Source object to clone
      * @returns {*} Cloned object
      */
-    deepClone(obj) {
+    deepClone(obj: any) {
         return foundry.utils.deepClone(obj);
     }
 
@@ -258,7 +258,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Point} d - Second endpoint of segment 2
      * @returns {Point|null} Intersection point or null
      */
-    lineSegmentIntersection(a, b, c, d) {
+    lineSegmentIntersection(a: any, b: any, c: any, d: any) {
         return foundry.utils.lineSegmentIntersection(a, b, c, d);
     }
 
@@ -428,7 +428,7 @@ export class BaseFoundryVTTAdapter {
      * @param {{x?: number, y?: number, i?: number, j?: number}} coords - Coordinates object
      * @returns {{x: number, y: number}} The center coordinates
      */
-    getCenterPoint(coords) {
+    getCenterPoint(coords: any) {
         return this.canvasAdapter.getCenterPoint(coords);
     }
 
@@ -437,7 +437,7 @@ export class BaseFoundryVTTAdapter {
      * @param {{x?: number, y?: number, i?: number, j?: number}} coords - Coordinates object
      * @returns {{x: number, y: number}} The top-left coordinates
      */
-    getTopLeftPoint(coords) {
+    getTopLeftPoint(coords: any) {
         return this.canvasAdapter.getTopLeftPoint(coords);
     }
 
@@ -456,7 +456,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Object} bounds - Bounding rectangle { x, y, width, height }
      * @returns {number[]|null} [i0, j0, i1, j1] Grid offset range or null
      */
-    getOffsetRange(bounds) {
+    getOffsetRange(bounds: any) {
         return this.canvasAdapter.getOffsetRange(bounds);
     }
 
@@ -467,7 +467,7 @@ export class BaseFoundryVTTAdapter {
      * @returns {number[]} [i0, j0, i1, j1] Grid offset range
      * @protected
      */
-    _getGridOffsetRange(bounds) {
+    _getGridOffsetRange(bounds: any) {
         if (!canvas?.grid || !bounds) return [0, 0, 0, 0];
 
         let targetBounds = bounds;
@@ -517,7 +517,7 @@ export class BaseFoundryVTTAdapter {
      * @param {{x: number, y: number}} target - Target point
      * @returns {number} Measured distance in grid units
      */
-    measureDistance(origin, target) {
+    measureDistance(origin: any, target: any) {
         return this.canvasAdapter.measureDistance(origin, target);
     }
 
@@ -572,7 +572,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string} shapeType - The shape type identifier ("circle", "cone", "ray", "rect", "square")
      * @returns {boolean} True if the shape type can be rotated in this Foundry version
      */
-    supportsShapeRotation(shapeType) {
+    supportsShapeRotation(shapeType: any) {
         return true;
     }
 
@@ -582,7 +582,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Document} doc - The template or region document
      * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}} Normalized calling context object containing item and activity details
      */
-    extractCallingContext(doc) {
+    extractCallingContext(doc: any) {
         if (!doc) return { item: null, itemName: "", itemId: "", activity: null, activityName: "", activityId: "" };
         const itemObj = doc.item ?? null;
         const activityObj = doc.activity ?? null;
@@ -616,7 +616,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Map<string, Object>} entries - Registered autorec entries map
      * @returns {Object|null} The matching crosshair configuration entry or null
      */
-    matchAutorecEntry(target, entries) {
+    matchAutorecEntry(target: any, entries: any) {
         if (!target || !entries) return null;
         const doc = target.document ?? target;
         const context = this.extractCallingContext(doc);
@@ -730,10 +730,10 @@ export class BaseFoundryVTTAdapter {
      * @param {PlaceableObject} placeable - The placeable graphic object to hide
      * @returns {void} No return value
      */
-    hidePreview(placeable) {
+    hidePreview(placeable: any) {
         if (!placeable) return;
 
-        const isSeqCrosshair = (target) => {
+        const isSeqCrosshair = (target: any) => {
             if (!target) return false;
             return target.constructor?.name === "CrosshairsPlaceable"
                 || Boolean(target.document?.crosshair)
@@ -742,7 +742,7 @@ export class BaseFoundryVTTAdapter {
 
         if (isSeqCrosshair(placeable)) return;
 
-        const makeInvisible = (target, isRoot = false) => {
+        const makeInvisible = (target: any, isRoot = false) => {
             if (!target || isSeqCrosshair(target)) return;
 
             try { target.interactive = false; } catch (e) {}
@@ -789,7 +789,7 @@ export class BaseFoundryVTTAdapter {
             }
         };
 
-        const hideContainers = (obj, isRoot = true) => {
+        const hideContainers = (obj: any, isRoot = true) => {
             if (!obj || isSeqCrosshair(obj)) return;
             makeInvisible(obj, isRoot);
 
@@ -847,7 +847,7 @@ export class BaseFoundryVTTAdapter {
                 obj._bbcAddChildWrapped = true;
                 const origAddChild = obj.addChild;
                 if (origAddChild) {
-                    obj.addChild = function (...children) {
+                    obj.addChild = function (...children: any[]) {
                         for (const child of children) {
                             if (child) makeInvisible(child, false);
                         }
@@ -856,7 +856,7 @@ export class BaseFoundryVTTAdapter {
                 }
                 const origAddChildAt = obj.addChildAt;
                 if (origAddChildAt) {
-                    obj.addChildAt = function (child, index) {
+                    obj.addChildAt = function (child: any, index: any) {
                         if (child) makeInvisible(child, false);
                         return origAddChildAt.apply(this, [child, index]);
                     };
@@ -877,7 +877,7 @@ export class BaseFoundryVTTAdapter {
             if (methodName === "refresh" || methodName === "_refresh" || placeable[methodName]) {
                 try {
                     const orig = placeable[methodName];
-                    placeable[methodName] = function (...args) {
+                    placeable[methodName] = function (...args: any[]) {
                         let result;
                         try { result = orig?.apply(this, args); } catch (e) {}
                         hideContainers(this);
@@ -896,15 +896,15 @@ export class BaseFoundryVTTAdapter {
      * @param {PlaceableObject} placeable - Preview placeable
      * @returns {void}
      */
-    _wrapHighlightGrid(placeable) {
+    _wrapHighlightGrid(placeable: any) {
         if (!placeable || placeable._bbcHighlightGridWrapped) return;
         placeable._bbcHighlightGridWrapped = true;
 
         const self = this;
-        const wrapMethod = (fnName) => {
+        const wrapMethod = (fnName: any) => {
             if (placeable[fnName]) {
                 const orig = placeable[fnName];
-                placeable[fnName] = function (...args) {
+                placeable[fnName] = function (...args: any[]) {
                     if (this._bbcWrappingMethod) {
                         return orig.apply(this, args);
                     }
@@ -1006,7 +1006,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Object} flags - Key-value pair object of desired render flags (`{ [flagName]: boolean }`)
      * @returns {void}
      */
-    _safeSetRenderFlags(tmpl, flags) {
+    _safeSetRenderFlags(tmpl: any, flags: any) {
         if (!tmpl?.renderFlags?.set || !flags) return;
 
         try {
@@ -1027,7 +1027,7 @@ export class BaseFoundryVTTAdapter {
      * @param {PlaceableObject} placeable - The placeable graphic object to dismiss and destroy
      * @returns {void} No return value
      */
-    dismissPreview(placeable) {
+    dismissPreview(placeable: any) {
         if (!placeable || placeable._bbcDismissed) return;
         placeable._bbcDismissed = true;
 
@@ -1164,7 +1164,7 @@ export class BaseFoundryVTTAdapter {
      * @param {PlaceableObject} placeable - Canvas placeable object
      * @returns {boolean} True if the placeable is a live preview graphic
      */
-    isPreview(placeable) {
+    isPreview(placeable: any) {
         if (!placeable) return false;
         if (placeable._bbcDismissed) return false;
         if (placeable.isPreview === false) return false;
@@ -1307,7 +1307,7 @@ export class BaseFoundryVTTAdapter {
      * @param {PlaceableObject} template - Placeable object on canvas
      * @returns {void}
      */
-    handleMeasuredTemplateRefresh(template) {
+    handleMeasuredTemplateRefresh(template: any) {
         PixiGraphicsStyler.applyPlacedStyling(template, this.isPreview(template));
     }
 
@@ -1449,11 +1449,11 @@ export class BaseFoundryVTTAdapter {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement _applyDeferredCoordinates(data, coords, docName).");
     }
 
-    snapCoordinates(x, y, mode = "all") {
+    snapCoordinates(x: any, y: any, mode = "all") {
         return this.canvasAdapter.snapCoordinates(x, y, mode);
     }
 
-    _getGridSnapMode(snapToGrid) {
+    _getGridSnapMode(snapToGrid: any) {
         if (snapToGrid === false || snapToGrid === "none" || snapToGrid === 0 || snapToGrid === "0") return 0;
         if (typeof snapToGrid === "number") return snapToGrid;
         if (snapToGrid === "center") return CONST?.GRID_SNAPPING_MODES?.CENTER ?? 1;
@@ -1499,7 +1499,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Document|PlaceableObject} target - Template or Region document or placeable
      * @returns {boolean} True if the current user owns or authored the document
      */
-    isOwner(target) {
+    isOwner(target: any) {
         if (!target) return true;
         const doc = target.document ?? target;
         if (!doc.id) return true; // Preview templates on canvas are always local to the drawing client
@@ -1514,7 +1514,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Token|Item|Actor|Object|null} target - Candidate object to normalize
      * @returns {Token|null} Canonical Token object or null
      */
-    toToken(target) {
+    toToken(target: any) {
         if (!target) return null;
         return target.object ?? target;
     }
@@ -1524,7 +1524,7 @@ export class BaseFoundryVTTAdapter {
      * @param {PlaceableObject} placeable - Canvas PlaceableObject representing the preview template or region
      * @returns {Promise<void>} Resolves when preview handling is complete
      */
-    async handleDrawPreview(placeable) {
+    async handleDrawPreview(placeable: any) {
         if (!placeable || !placeable.document) return;
         const doc = placeable.document;
         const isPreview = this.isPreview(placeable);
@@ -1613,7 +1613,7 @@ export class BaseFoundryVTTAdapter {
                     ? (String(explicitType).toLowerCase() === "rect" ? "square" : String(explicitType).toLowerCase())
                     : (detected.type ?? "circle");
                 const { crosshair } = await import("../../crosshair/index.js");
-                const builder = crosshair[crosshairType] ?? crosshair.circle;
+                const builder = (crosshair as Record<string, any>)[crosshairType] ?? crosshair.circle;
 
                 const shapeFileKey = `${crosshairType}File`;
                 const shapeSpecificFile = entryConfig[shapeFileKey]
@@ -1658,7 +1658,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string} userId - ID of the user creating the document
      * @returns {boolean} True to proceed with normal creation, false to abort or defer
      */
-    handlePreCreate(target, _data, _options, userId) {
+    handlePreCreate(target: any, _data: any, _options: any, userId: any) {
         if (!target) return true;
         const doc = target.document ?? target;
 
@@ -1725,7 +1725,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string} userId - ID of the user creating the document
      * @returns {Promise<void>} Resolves when post-placement execution completes
      */
-    async handleCreateDocument(target, _options, userId) {
+    async handleCreateDocument(target: any, _options: any, userId: any) {
         if (!target) return;
         const doc = target.document ?? target;
 

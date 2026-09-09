@@ -13,8 +13,8 @@ export class PersistedAnimationManager {
      * @param {Document|string} docOrId - Target document or document ID
      * @returns {string} Unique effect name
      */
-    static getEffectName(docOrId) {
-        const id = docOrId?.id ?? docOrId?._id ?? docOrId ?? "";
+    static getEffectName(target: any): string {
+        const id = typeof target === "string" ? target : (target?.id ?? "");
         return `bbc-persisted-${id}`;
     }
 
@@ -24,9 +24,9 @@ export class PersistedAnimationManager {
      * @param {Document|PlaceableObject} target - The placed template or region document or placeable
      * @returns {Promise<any>}
      */
-    static async syncPersistedAnimation(target) {
+    static async syncPersistedAnimation(target: any) {
         if (!target) return;
-        const doc = target.document ?? target;
+        const doc = target?.document ? target.document : target;
         const docId = doc?.id;
         if (!docId) return;
 
@@ -153,8 +153,8 @@ export class PersistedAnimationManager {
      * @param {Document|string} docOrId - Target document or document ID
      * @returns {void}
      */
-    static endPersistedAnimation(docOrId) {
-        const id = docOrId?.id ?? docOrId?._id ?? docOrId ?? "";
+    static endPersistedAnimation(target: any) {
+        const id = typeof target === "string" ? target : (target?.id ?? "");
         if (!id) return;
         const effectName = this.getEffectName(id);
 

@@ -7,7 +7,7 @@ import { closest } from "../lib/filemanager.js";
  * @param {number} [size=10] - The target effect size in feet or grid distance.
  * @returns {string} The resolved file path or asset key for the circle crosshair.
  */
-export function resolveCircleAsset(pathOrKey, size = 10) {
+export function resolveCircleAsset(pathOrKey: any, size = 10) {
     const trimmedKey = String(pathOrKey ?? "").trim();
     const key = trimmedKey.length > 0 ? trimmedKey : "eskie.crosshair.circle.fantasy_01.white";
     if (key.startsWith("eskie.crosshair.circle.fantasy_01")) {
@@ -29,7 +29,7 @@ export function resolveCircleAsset(pathOrKey, size = 10) {
  * @param {number} [width=30] - The target width in feet or grid distance.
  * @returns {string} The resolved file path or asset key for the rectangle crosshair.
  */
-export function resolveRectangleAsset(pathOrKey, distance = 30, width = 30) {
+export function resolveRectangleAsset(pathOrKey: any, distance = 30, width = 30) {
     const trimmedKey = String(pathOrKey ?? "").trim();
     const key = trimmedKey.length > 0 ? trimmedKey : "eskie.crosshair.rectangle.fantasy_01.white";
     if (key.startsWith("eskie.crosshair.rectangle.fantasy_01") || key.startsWith("eskie.crosshair.square.fantasy_01")) {

@@ -11,7 +11,7 @@ import { BaseCrosshairMenuApplication, normalizeHexColor } from "./BaseCrosshair
  * @param {object|null} customConfig - Stored custom configuration object or null
  * @returns {{hasCustom: boolean, enablePrePlacement: boolean, enableAnimation: boolean, enablePlacedStyling: boolean, enablePostPlacement: boolean, overrideCount: number}} Inspected override state
  */
-function inspectScopeCustomState(customConfig) {
+function inspectScopeCustomState(customConfig: any) {
     if (!customConfig || typeof customConfig !== "object") {
         return {
             hasCustom: false,
@@ -430,7 +430,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
      * @param {object} options - Render options
      * @returns {void}
      */
-    _attachCustomEventListeners(root, context, options) {
+    _attachCustomEventListeners(root: any, context: any, options: any) {
         const rootEl = this._normalizeElement(root);
         if (!rootEl) return;
 
@@ -446,25 +446,25 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
                 container.classList.remove("edit-mode");
             }
 
-            const syncEditModeControls = (turningOn) => {
+            const syncEditModeControls = (turningOn: any) => {
                 this.isEditMode = turningOn;
                 container.classList.toggle("edit-mode", turningOn);
-                rootEl.querySelectorAll("input:not(#bbc-item-edit-mode-toggle), textarea, button[type='submit']").forEach(el => {
+                rootEl.querySelectorAll("input:not(#bbc-item-edit-mode-toggle), textarea, button[type='submit']").forEach((el: any) => {
                     el.disabled = !turningOn;
                 });
             };
 
             syncEditModeControls(this.isEditMode);
 
-            editToggle.addEventListener("change", (ev) => {
+            editToggle.addEventListener("change", (ev: any) => {
                 this.isEditMode = Boolean(ev.currentTarget.checked);
                 this.render(false);
             });
         }
 
         // Handle Sidebar Scope Card Selection Click
-        rootEl.querySelectorAll(".bbc-item-card[data-scope]").forEach(card => {
-            card.addEventListener("click", (ev) => {
+        rootEl.querySelectorAll(".bbc-item-card[data-scope]").forEach((card: any) => {
+            card.addEventListener("click", (ev: any) => {
                 ev.preventDefault();
                 ev.stopPropagation();
                 const scope = card.getAttribute("data-scope");
@@ -478,7 +478,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
         // Handle Delete CUSTOM Configuration action button
         const deleteBtn = rootEl.querySelector("button[data-action='delete-custom']");
         if (deleteBtn) {
-            deleteBtn.addEventListener("click", async (ev) => {
+            deleteBtn.addEventListener("click", async (ev: any) => {
                 ev.preventDefault();
                 ev.stopPropagation();
                 if (!this.item) {
@@ -518,7 +518,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
      * @param {HTMLFormElement|object} target - Rendered form element or object containing form
      * @returns {Promise<void>} Resolves when custom item flags are saved
      */
-    async _saveConfiguration(target) {
+    async _saveConfiguration(target: any) {
         if (!this.item) {
             log.warn("ItemCrosshairConfigApplication | Cannot save configuration: target item is missing.");
             return;
