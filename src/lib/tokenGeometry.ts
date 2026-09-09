@@ -55,7 +55,7 @@ export class TokenGeometry {
      * @param {{x?: number, y?: number}} [clickCoords={}] - Target cursor coordinates
      * @returns {{x: number, y: number, direction: number}} Resolved anchor placement
      */
-    static resolveAnchorPlacement(token, clickCoords = {}) {
+    static resolveAnchorPlacement(token: any, clickCoords: { x?: number; y?: number } = {}) {
         const rawClickX = clickCoords.x ?? 0;
         const rawClickY = clickCoords.y ?? 0;
         if (!token) return { x: rawClickX, y: rawClickY, direction: 0 };
@@ -78,7 +78,7 @@ export class TokenGeometry {
 
         const points = [tx, ty, tx + w, ty, tx + w, ty + h, tx, ty + h];
 
-        let intersection = null;
+        let intersection: { x: number; y: number } | null = null;
         for (let i = 0; i < points.length; i += 2) {
             const p1 = { x: points[i], y: points[i + 1] };
             const p2Idx = (i + 2) >= points.length ? 0 : (i + 2);
