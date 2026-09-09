@@ -10,9 +10,9 @@ import { MODULE_ID, MODULE_NAME } from './lib/constants.js';
  * @param {Record<string, unknown>} exportedFunctions - Object containing functions or utilities to export globally.
  * @returns {void}
  */
-export function setupApiCalls(exportedFunctions) {
+export function setupApiCalls(exportedFunctions: Record<string, unknown>): void {
     if (!exportedFunctions || typeof exportedFunctions !== "object") return;
-    const mod = game?.modules?.get(MODULE_ID);
+    const mod = game?.modules?.get(MODULE_ID) as any;
     if (mod) {
         mod.api = Object.assign(mod.api ?? {}, exportedFunctions);
     }
