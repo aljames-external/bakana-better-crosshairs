@@ -169,7 +169,7 @@ export class BaseCrosshairShape {
 
         if (this.stickToToken && this.token) {
             if (this.type === "circle") {
-                const center = this.token.center ?? { x: this.token.x ?? 0, y: this.token.y ?? 0 };
+                const center = this.token.center;
                 this.x = center.x;
                 this.y = center.y;
                 this.direction = 0;
@@ -343,7 +343,7 @@ export class BaseCrosshairShape {
         const curX = Number.isFinite(this.cursorX) ? this.cursorX : this.x;
         const curY = Number.isFinite(this.cursorY) ? this.cursorY : this.y;
         const initLoc = (isSticky && this.token)
-            ? ((this.type === "circle") ? (this.token.center ?? { x: this.token.x ?? 0, y: this.token.y ?? 0 }) : adapter.crosshair.resolveAnchorPlacement(this.token, { x: curX, y: curY }))
+            ? ((this.type === "circle") ? this.token.center : adapter.crosshair.resolveAnchorPlacement(this.token, { x: curX, y: curY }))
             : { x: curX, y: curY };
 
         if (this.type === "circle" && this.token && this.showLine && !this.stickToToken) {
@@ -540,7 +540,7 @@ export class BaseCrosshairShape {
         }
         if (this.stickToToken && this.token) {
             if (this.type === "circle") {
-                const center = this.token.center ?? { x: this.token.x ?? 0, y: this.token.y ?? 0 };
+                const center = this.token.center;
                 this.x = center.x;
                 this.y = center.y;
                 this.direction = 0;
@@ -764,7 +764,7 @@ export class BaseCrosshairShape {
 
         if (this.stickToToken && this.token && !this.config?.isRemote) {
             if (this.type === "circle") {
-                const center = this.token.center ?? { x: this.token.x ?? 0, y: this.token.y ?? 0 };
+                const center = this.token.center;
                 targetX = center.x;
                 targetY = center.y;
                 this.direction = 0;
@@ -978,7 +978,7 @@ export class BaseCrosshairShape {
         const isAttached = Boolean(this.stickToToken && this.token);
         if (isAttached) {
             if (this.type === "circle") {
-                const center = this.token.center ?? { x: this.token.x ?? 0, y: this.token.y ?? 0 };
+                const center = this.token.center;
                 posX = center.x;
                 posY = center.y;
                 dir = 0;

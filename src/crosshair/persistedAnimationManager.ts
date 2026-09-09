@@ -27,7 +27,7 @@ export class PersistedAnimationManager {
     static async syncPersistedAnimation(target) {
         if (!target) return;
         const doc = target.document ?? target;
-        const docId = doc.id ?? doc._id;
+        const docId = doc?.id;
         if (!docId) return;
 
         const bbcFlags = doc.flags?.bbc ?? {};
@@ -80,8 +80,8 @@ export class PersistedAnimationManager {
         let heightPx = 100;
         let anchor = { x: 0.5, y: 0.5 };
         const supportsRotation = adapter.crosshair.supportsShapeRotation(shapeType);
-        const location = { x: detected.x ?? doc.x ?? 0, y: detected.y ?? doc.y ?? 0 };
-        const rotation = supportsRotation ? (detected.direction ?? detected.rotation ?? doc.direction ?? doc.rotation ?? 0) : 0;
+        const location = { x: detected.x ?? 0, y: detected.y ?? 0 };
+        const rotation = supportsRotation ? (detected.direction ?? 0) : 0;
 
         switch (shapeType) {
             case "cone": {
@@ -117,7 +117,7 @@ export class PersistedAnimationManager {
             }
             case "circle":
             default: {
-                const radius = detected.radius ?? detected.distance ?? 20;
+                const radius = detected.radius ?? 20;
                 effectFile = resolveCircleAsset(bbcFlags.circleFile ?? "eskie.crosshair.circle.fantasy_01.white.full", radius);
                 const diameterPx = (radius * 2) * pxPerFoot;
                 widthPx = diameterPx;

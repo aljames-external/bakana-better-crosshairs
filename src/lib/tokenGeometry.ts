@@ -37,14 +37,15 @@ export class TokenGeometry {
      * @returns {{x: number, y: number, w: number, h: number, center: {x: number, y: number}}} Bounding box data
      */
     static getBounds(token) {
+        if (!token) return { x: 0, y: 0, w: 0, h: 0, center: { x: 0, y: 0 } };
         const size = adapter.crosshair.gridSize;
-        const tx = token?.x ?? token?.document?.x ?? 0;
-        const ty = token?.y ?? token?.document?.y ?? 0;
-        const tokenWidth = token?.document?.width ?? token?.width ?? 1;
-        const tokenHeight = token?.document?.height ?? token?.height ?? 1;
-        const w = token?.w ?? (tokenWidth * size);
-        const h = token?.h ?? (tokenHeight * size);
-        const center = token?.center ?? token?.document?.center ?? { x: tx + w / 2, y: ty + h / 2 };
+        const tx = token.x ?? 0;
+        const ty = token.y ?? 0;
+        const tokenWidth = token.document?.width ?? 1;
+        const tokenHeight = token.document?.height ?? 1;
+        const w = token.w ?? (tokenWidth * size);
+        const h = token.h ?? (tokenHeight * size);
+        const center = token.center ?? { x: tx + w / 2, y: ty + h / 2 };
         return { x: tx, y: ty, w, h, center };
     }
 

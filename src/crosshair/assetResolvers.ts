@@ -8,7 +8,8 @@ import { closest } from "../lib/filemanager.js";
  * @returns {string} The resolved file path or asset key for the circle crosshair.
  */
 export function resolveCircleAsset(pathOrKey, size = 10) {
-    const key = String(pathOrKey ?? "eskie.crosshair.circle.fantasy_01.white").trim() || "eskie.crosshair.circle.fantasy_01.white";
+    const trimmedKey = String(pathOrKey ?? "").trim();
+    const key = trimmedKey.length > 0 ? trimmedKey : "eskie.crosshair.circle.fantasy_01.white";
     if (key.startsWith("eskie.crosshair.circle.fantasy_01")) {
         const [eskie, crosshair, shape, genre, COLOR] = key.split(".");
         const color = COLOR ?? "white";
@@ -29,13 +30,16 @@ export function resolveCircleAsset(pathOrKey, size = 10) {
  * @returns {string} The resolved file path or asset key for the rectangle crosshair.
  */
 export function resolveRectangleAsset(pathOrKey, distance = 30, width = 30) {
-    const key = String(pathOrKey ?? "eskie.crosshair.rectangle.fantasy_01.white").trim() || "eskie.crosshair.rectangle.fantasy_01.white";
+    const trimmedKey = String(pathOrKey ?? "").trim();
+    const key = trimmedKey.length > 0 ? trimmedKey : "eskie.crosshair.rectangle.fantasy_01.white";
     if (key.startsWith("eskie.crosshair.rectangle.fantasy_01") || key.startsWith("eskie.crosshair.square.fantasy_01")) {
         const [eskie, crosshair, shape, genre, COLOR] = key.split(".");
         const color = COLOR ?? "white";
 
-        const dist = Math.round(Number(distance) || 30);
-        const w = Math.round(Number(width) || dist);
+        const numDistance = Number(distance);
+        const dist = Number.isFinite(numDistance) && numDistance > 0 ? Math.round(numDistance) : 30;
+        const numWidth = Number(width);
+        const w = Number.isFinite(numWidth) && numWidth > 0 ? Math.round(numWidth) : dist;
         const maxDim = Math.max(dist, w);
         const minDim = Math.max(1, Math.min(dist, w));
         const ratio = maxDim / minDim;

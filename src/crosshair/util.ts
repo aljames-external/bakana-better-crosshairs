@@ -149,7 +149,7 @@ export function alignCrosshairAndEffects(crosshair: any, config: Record<string, 
 
     if (isAttached && token) {
         if (shapeType === "circle") {
-            const center = token.center ?? { x: token.x ?? 0, y: token.y ?? 0 };
+            const center = token.center;
             targetX = center.x;
             targetY = center.y;
         } else {
@@ -305,7 +305,7 @@ export function resolveCrosshairPlacement(crosshair: any, config: Record<string,
     if (isAnchored && config.token) {
         if (shapeType === "circle") {
             const token = adapter.crosshair.toToken(config.token);
-            const center = token?.center ?? { x: token?.x ?? 0, y: token?.y ?? 0 };
+            const center = token?.center ?? { x: clickX, y: clickY };
             x = center.x;
             y = center.y;
             direction = 0;

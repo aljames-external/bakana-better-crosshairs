@@ -39,7 +39,7 @@ export class CrosshairRangeOverlay {
             return;
         }
 
-        const origin = shape.token.center ?? { x: shape.token.x ?? 0, y: shape.token.y ?? 0 };
+        const origin = shape.token.center;
         const targetX = (shape.sequencerCrosshair && Number.isFinite(shape.sequencerCrosshair.x)) ? shape.sequencerCrosshair.x : shape.x;
         const targetY = (shape.sequencerCrosshair && Number.isFinite(shape.sequencerCrosshair.y)) ? shape.sequencerCrosshair.y : shape.y;
         const target = { x: targetX, y: targetY };
