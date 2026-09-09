@@ -149,7 +149,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @returns {{type: string, distance: number, radius: number, width: number, angle: number, x: number, y: number}} Detected geometric properties and shape type
      */
     detectProperties(doc: any): any {
-        const targetDoc = doc?.document ?? doc;
+        const targetDoc = doc?.document ? doc.document : doc;
         if (!targetDoc) {
             return { type: "circle", distance: 0, radius: 0, width: 5, angle: 360, x: 0, y: 0 };
         }
@@ -258,7 +258,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @returns {Array} Array of shape objects or models
      */
     _getShapesArray(doc: any) {
-        const targetDoc = doc?.document ?? doc;
+        const targetDoc = doc?.document ? doc.document : doc;
         if (!targetDoc) return [];
         return targetDoc.shapes?.contents ?? targetDoc.shapes ?? [];
     }
@@ -290,7 +290,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      */
     updatePreviewShape(previewDoc: any, coords: any): void {
         if (!previewDoc || !coords) return;
-        const targetDoc = previewDoc.document ?? previewDoc;
+        const targetDoc = previewDoc?.document ? previewDoc.document : previewDoc;
         const docName = targetDoc.documentName ?? (targetDoc.shapes ? "Region" : "MeasuredTemplate");
         if (docName === "Region") {
             const shapesList = this._getShapesArray(targetDoc);
@@ -367,7 +367,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      */
     applyDocumentPlacement(doc: any, coords: any = {}, config: any = {}, data: any = null): void {
         if (!doc) return;
-        const targetDoc = doc.document ?? doc;
+        const targetDoc = doc.document ? doc.document : doc;
         const styling = this.extractPlacedStylingFlags(config);
         const docName = targetDoc.documentName ?? (targetDoc.shapes ? "Region" : "MeasuredTemplate");
         if (docName === "Region") {
@@ -656,7 +656,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
         tmpl._bbcRefreshingHighlights = true;
 
         try {
-            const doc = tmpl.document ?? tmpl;
+            const doc = tmpl.document ? tmpl.document : tmpl;
             if (!doc) return;
 
             const isRegion = doc.documentName === "Region" || Boolean(tmpl.shapes || doc.shapes);
@@ -983,7 +983,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
                     this._bbcWrappingMethod = true;
                     try {
                         const shape = this.crosshair?.shapeInstance ?? activePlacementTracker.crosshair?.shapeInstance;
-                        const isRect = this.document?.t === "rect" || this.t === "rect";
+                        const isRect = this.document?.t === "rect";
                         const isRegion = this.document?.documentName === "Region" || Boolean(this.shapes || this.document?.shapes);
 
                         const shapeDir = shape?.direction
@@ -1004,7 +1004,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
                         if (shape) {
                             const targetX = shape.x;
                             const targetY = shape.y;
-                            let effectiveDir = shapeDir ?? this.direction ?? this.document?.direction;
+                            let effectiveDir = shapeDir ?? this.document?.direction ?? 0;
 
                             if (isRect && !isRegion) {
                                 const w = this.document?.width ?? shape.config?.width ?? 20;

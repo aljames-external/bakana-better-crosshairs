@@ -30,7 +30,7 @@ export class CrosshairRotationListener {
     refreshTemplateHighlights(tmpl: any, newDirDeg: number, rad: number, wheelEvent: Event | null = null) {
         if (!tmpl) return;
 
-        const doc = tmpl.document ?? (tmpl.documentName ? tmpl : null);
+        const doc = tmpl.document ? tmpl.document : (tmpl.documentName ? tmpl : null);
         if (doc) {
             const dims = tmpl.dimensions ?? doc.dimensions ?? activePlacementTracker.dimensions;
             const docProps = adapter.crosshair.detectProperties(doc) as any;

@@ -618,7 +618,7 @@ export class BaseFoundryVTTAdapter {
      */
     matchAutorecEntry(target: any, entries: any) {
         if (!target || !entries) return null;
-        const doc = target.document ?? target;
+        const doc = target.document ? target.document : target;
         const context = this.extractCallingContext(doc);
         if (!context.itemName && !context.itemId) {
             log.debug("matchAutorecEntry | Could not extract calling item context (missing itemName and itemId) from document:", { doc, context });
@@ -916,7 +916,7 @@ export class BaseFoundryVTTAdapter {
                             const targetY = shape.y;
                             let targetDir = shape.direction;
 
-                            const isRect = this.document?.t === "rect" || this.t === "rect";
+                            const isRect = this.document?.t === "rect";
                             const isRegion = this.document?.documentName === "Region";
 
                             if (isRect && !isRegion) {
@@ -1035,7 +1035,7 @@ export class BaseFoundryVTTAdapter {
         try { Object.defineProperty(placeable, 'visible', { get: () => false, configurable: true }); } catch (e) {}
         try { Object.defineProperty(placeable, 'renderable', { get: () => false, configurable: true }); } catch (e) {}
 
-        const doc = placeable.document ?? (placeable.documentName ? placeable : null);
+        const doc = placeable.document ? placeable.document : (placeable.documentName ? placeable : null);
         const isRegion = doc?.documentName === "Region" || Boolean(placeable.shapes || doc?.shapes);
         const primaryHId = placeable.highlightId ?? placeable._bbcHighlightId ?? doc?.highlightId ?? doc?._bbcHighlightId;
 
@@ -1170,7 +1170,7 @@ export class BaseFoundryVTTAdapter {
         if (placeable.isPreview === false) return false;
 
         // Check if document is already persisted in the active scene collection
-        const doc = placeable.document ?? (placeable.documentName ? placeable : null);
+        const doc = placeable.document ? placeable.document : (placeable.documentName ? placeable : null);
         const scene = canvas?.scene;
         if (doc?.id && scene) {
             const inTemplates = Boolean(scene.templates?.has?.(doc.id));
@@ -1501,7 +1501,7 @@ export class BaseFoundryVTTAdapter {
      */
     isOwner(target: any) {
         if (!target) return true;
-        const doc = target.document ?? target;
+        const doc = target.document ? target.document : target;
         if (!doc.id) return true; // Preview templates on canvas are always local to the drawing client
         const authorVal = doc.author ?? doc.user;
         const userId = authorVal?.id ?? authorVal ?? game?.user?.id;
@@ -1660,7 +1660,7 @@ export class BaseFoundryVTTAdapter {
      */
     handlePreCreate(target: any, _data: any, _options: any, userId: any) {
         if (!target) return true;
-        const doc = target.document ?? target;
+        const doc = target.document ? target.document : target;
 
         if (userId !== game?.user?.id) {
             return true;
@@ -1727,7 +1727,7 @@ export class BaseFoundryVTTAdapter {
      */
     async handleCreateDocument(target: any, _options: any, userId: any) {
         if (!target) return;
-        const doc = target.document ?? target;
+        const doc = target.document ? target.document : target;
 
         // Synchronize persistent Sequencer animation if enabled (for creating user)
         if (!userId || userId === game?.user?.id) {
@@ -1777,7 +1777,7 @@ export class BaseFoundryVTTAdapter {
      */
     async handleUpdateDocument(target: any, changed: any = {}, _options: any = {}, userId?: string): Promise<void> {
         if (!target) return;
-        const doc = target.document ?? target;
+        const doc = target.document ? target.document : target;
 
         if (doc.flags?.bbc && (!userId || userId === game?.user?.id)) {
             const flagUpdates: Record<string, any> = {};
@@ -1808,7 +1808,7 @@ export class BaseFoundryVTTAdapter {
      */
     handleDeleteDocument(target: any, _options: any = {}, userId?: string): void {
         if (!target) return;
-        const doc = target.document ?? target;
+        const doc = target.document ? target.document : target;
         if (!userId || userId === game?.user?.id) {
             PersistedAnimationManager.endPersistedAnimation(doc);
         }

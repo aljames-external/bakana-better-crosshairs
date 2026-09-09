@@ -340,8 +340,8 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      */
     updatePreviewShape(previewDoc: any, coords: any): void {
         if (!previewDoc || !coords) return;
-        const targetDoc = previewDoc.document ?? previewDoc;
-        const tmpl = previewDoc._object ?? (previewDoc.document ? previewDoc : null);
+        const targetDoc = previewDoc.document ? previewDoc.document : previewDoc;
+        const tmpl = previewDoc._object ? previewDoc._object : (previewDoc.document ? previewDoc : null);
         const isRect = targetDoc.t === "rect" || coords.type === "square" || coords.type === "rect" || coords.originalType === "square" || coords.t === "rect";
         const pxPerFoot = this.pixelsPerDistance;
         let distFoot = coords.distance ?? coords.radius;
@@ -459,7 +459,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      */
     applyDocumentPlacement(doc: any, coords: any = {}, config: any = {}, data: any = null): void {
         if (!doc) return;
-        const targetDoc = doc.document ?? doc;
+        const targetDoc = doc.document ? doc.document : doc;
         const styling = this.extractPlacedStylingFlags(config);
         const isRect = targetDoc.t === "rect" || coords.type === "square" || coords.type === "rect" || coords.originalType === "square" || config.originalType === "square" || coords.t === "rect" || config.t === "rect" || config.type === "square" || config.type === "rect";
         const updateData: Record<string, any> = {
@@ -734,7 +734,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
                     this._bbcWrappingMethod = true;
                     try {
                         const shape = this.crosshair?.shapeInstance ?? activePlacementTracker.crosshair?.shapeInstance;
-                        const isRect = this.document?.t === "rect" || this.t === "rect";
+                        const isRect = this.document?.t === "rect";
 
                         const shapeDir = shape?.direction
                             ?? this.crosshair?.direction
@@ -746,7 +746,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
                         if (shape) {
                             let targetX = shape.x;
                             let targetY = shape.y;
-                            let effectiveDir = normDir ?? this.direction ?? this.document?.direction ?? 0;
+                            let effectiveDir = normDir ?? this.document?.direction ?? 0;
 
                             const isAttached = Boolean(shape.stickToToken && shape.token);
                             if (isAttached && shape.token) {

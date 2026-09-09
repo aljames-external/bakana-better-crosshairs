@@ -166,7 +166,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
      * @returns {ItemCrosshairConfigApplication} Form application instance
      */
     constructor(options: any = {}) {
-        const itemDoc = options.item?.document ?? options.item ?? null;
+        const itemDoc = options.item?.document ? options.item.document : (options.item ?? null);
         super({
             ...options,
             id: `bbc-item-crosshair-config-${itemDoc?.id ?? "unknown"}`

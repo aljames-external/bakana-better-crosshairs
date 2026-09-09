@@ -440,7 +440,7 @@ export class BaseSystemAdapter {
      */
     async openItemCrosshairConfig(item: any, options = {}) {
         if (!item) return;
-        const itemDoc = item?.document ?? item;
+        const itemDoc = item?.document ? item.document : item;
         const { ItemCrosshairConfigApplication } = await import("../../autorec/itemConfigMenu.js");
         new ItemCrosshairConfigApplication({ item: itemDoc, ...options }).render(true);
     }
@@ -506,7 +506,7 @@ export class BaseSystemAdapter {
      */
     addActivityContextOption(activity: any, options: any) {
         if (!activity || !Array.isArray(options)) return;
-        const item = activity.item ?? activity.document ?? null;
+        const item = activity.item ? activity.item : (activity.document?.item ? activity.document.item : null);
         if (!item || !activity.id || !item.isOwner) return;
         if (options.some(o => o.name === "BBC" || o.name === "BBC.itemConfigMenu.title" || o.icon?.includes("fa-crosshairs"))) return;
 
@@ -527,7 +527,7 @@ export class BaseSystemAdapter {
      * @returns {void} No return value
      */
     addItemContextOption(item: any, options: any) {
-        const itemDoc = item?.document ?? item;
+        const itemDoc = item?.document ? item.document : item;
         if (!itemDoc || itemDoc.documentName !== "Item" || !itemDoc.isOwner || !Array.isArray(options)) return;
         if (options.some(o => o.name === "BBC" || o.name === "BBC.itemConfigMenu.title" || o.icon?.includes("fa-crosshairs"))) return;
 

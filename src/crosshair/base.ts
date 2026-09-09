@@ -81,7 +81,7 @@ export class BaseCrosshairShape {
         }
 
         // Entry-boundary normalization for target document and placeable
-        const doc = placeable?.document ?? (placeable?.documentName ? placeable : null);
+        const doc = placeable?.document ? placeable.document : (placeable?.documentName ? placeable : null);
         this.doc = doc;
         const flagsToken = doc?.flags?.bbc?.token ?? doc?.flags?.bakana?.token ?? activePlacementTracker.sticky;
         const rawToken = config.token ?? flagsToken;
