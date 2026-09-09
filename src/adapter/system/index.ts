@@ -40,4 +40,4 @@ export function initializeSystemAdapter() {
     return systemAdapter;
 }
 
-BaseSystemAdapter.prototype.initialize = initializeSystemAdapter;
+(BaseSystemAdapter.prototype as any).initialize = initializeSystemAdapter;

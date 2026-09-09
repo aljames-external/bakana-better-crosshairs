@@ -7,6 +7,9 @@ import { log } from "../lib/logger.js";
  * without needing to manually specify module attribution on every single registration.
  */
 export class ModuleAutorecManager {
+    moduleId: string;
+    private _parent: any;
+
     /**
      * Construct a module-scoped autorec manager for a specific module identifier.
      * Single concrete string argument type expected (Rule 5).
@@ -14,7 +17,7 @@ export class ModuleAutorecManager {
      * @param {Object} [parentManager=autorecManager] - Underlying global AutorecManager instance
      * @throws {Error} If valid non-empty string moduleId is not provided
      */
-    constructor(moduleId, parentManager = autorecManager) {
+    constructor(moduleId: string, parentManager: any = autorecManager) {
         const cleanId = String(moduleId ?? "").trim();
         if (!cleanId) {
             log.error("ModuleAutorecManager.constructor | Missing required 'moduleId' string.");
@@ -61,8 +64,8 @@ export class ModuleAutorecManager {
             };
         }
 
-        const prepared = [];
-        const rejected = [];
+        const prepared: any[] = [];
+        const rejected: any[] = [];
         for (const item of entries) {
             if (!item || typeof item !== "object") continue;
             const baseConfig = (item.config && typeof item.config === "object") ? item.config : item;
@@ -202,7 +205,7 @@ export class ModuleAutorecManager {
      */
     list() {
         const all = this._parent.getAllEntries();
-        const matching = [];
+        const matching: any[] = [];
         for (const entry of all) {
             if (entry.sourceModule === this.moduleId) {
                 matching.push(entry.regKey);

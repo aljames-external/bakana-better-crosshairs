@@ -81,19 +81,19 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @param {Object} [sysAdapter=systemAdapter] - Active System Adapter instance
      * @returns {Array<{event: string, handler: Function, category: string, targetName: string}>} Array of generated hook descriptor objects
      */
-    generatePlacementHooks(callbacks = {}, sysAdapter = systemAdapter) {
+    generatePlacementHooks(callbacks: any = {}, sysAdapter: any = systemAdapter): any[] {
         const targetSysAdapter = sysAdapter ?? systemAdapter;
         if (targetSysAdapter && !(targetSysAdapter instanceof BaseSystemAdapter)) {
             throw new Error(`generatePlacementHooks requires a valid BaseSystemAdapter instance, received: ${targetSysAdapter}`);
         }
-        const onDrawPreview = callbacks?.onDrawPreview ?? ((placeable) => this.handleDrawPreview(placeable));
-        const onPreCreate = callbacks?.onPreCreate ?? ((doc, _data, _options, userId) => this.handlePreCreate(doc, _data, _options, userId));
-        const onCreate = callbacks?.onCreate ?? ((doc, _options, userId) => this.handleCreateDocument(doc, _options, userId));
-        const onUpdate = callbacks?.onUpdate ?? ((doc, changed, _options, userId) => this.handleUpdateDocument(doc, changed, _options, userId));
-        const onDelete = callbacks?.onDelete ?? ((doc, _options, userId) => this.handleDeleteDocument(doc, _options, userId));
+        const onDrawPreview = callbacks?.onDrawPreview ?? ((placeable: any) => this.handleDrawPreview(placeable));
+        const onPreCreate = callbacks?.onPreCreate ?? ((doc: any, _data: any, _options: any, userId?: string) => this.handlePreCreate(doc, _data, _options, userId));
+        const onCreate = callbacks?.onCreate ?? ((doc: any, _options: any, userId?: string) => this.handleCreateDocument(doc, _options, userId));
+        const onUpdate = callbacks?.onUpdate ?? ((doc: any, changed: any, _options: any, userId?: string) => this.handleUpdateDocument(doc, changed, _options, userId));
+        const onDelete = callbacks?.onDelete ?? ((doc: any, _options: any, userId?: string) => this.handleDeleteDocument(doc, _options, userId));
         const basePlaceables = this.supportedBasePlaceables;
         const customPlaceables = targetSysAdapter?.getCustomPlaceableClassNames?.() ?? [];
-        const dynamicPlaceables = [];
+        const dynamicPlaceables: any[] = [];
 
         if (CONFIG) {
             for (const base of basePlaceables) {
@@ -107,12 +107,12 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
         const drawPlaceables = new Set([...basePlaceables, ...customPlaceables, ...dynamicPlaceables]);
         const drawHooks = Array.from(drawPlaceables).flatMap((placeableName) => [
             { event: `draw${placeableName}`, handler: onDrawPreview, category: "draw", targetName: placeableName },
-            { event: `refresh${placeableName}`, handler: (template) => this.handleMeasuredTemplateRefresh(template), category: "refresh", targetName: placeableName }
+            { event: `refresh${placeableName}`, handler: (template: any) => this.handleMeasuredTemplateRefresh(template), category: "refresh", targetName: placeableName }
         ]);
 
         const baseDocumentTypes = this.supportedDocumentTypes;
         const customDocumentTypes = targetSysAdapter?.getCustomDocumentTypes?.() ?? [];
-        const dynamicDocumentTypes = [];
+        const dynamicDocumentTypes: any[] = [];
 
         if (CONFIG) {
             for (const docType of baseDocumentTypes) {
@@ -148,7 +148,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @param {Document} doc - The Region or MeasuredTemplate document to inspect
      * @returns {{type: string, distance: number, radius: number, width: number, angle: number, x: number, y: number}} Detected geometric properties and shape type
      */
-    detectProperties(doc) {
+    detectProperties(doc: any): any {
         const targetDoc = doc?.document ?? doc;
         if (!targetDoc) {
             return { type: "circle", distance: 0, radius: 0, width: 5, angle: 360, x: 0, y: 0 };
@@ -175,8 +175,8 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
             };
         }
 
-        const shape = shapesList[0]?.toObject?.() ?? shapesList[0] ?? {};
-        let shapeType = undefined;
+        const shape: any = shapesList[0]?.toObject?.() ?? shapesList[0] ?? {};
+        let shapeType: string = "circle";
         switch (shape.type) {
             case "circle":
             case "ellipse":
@@ -288,14 +288,14 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @param {{x?: number, y?: number, rotation?: number, direction?: number, radius?: number, distance?: number, width?: number, gridUnits?: boolean}} coords - The target canvas placement coordinates
      * @returns {void}
      */
-    updatePreviewShape(previewDoc, coords) {
+    updatePreviewShape(previewDoc: any, coords: any): void {
         if (!previewDoc || !coords) return;
         const targetDoc = previewDoc.document ?? previewDoc;
         const docName = targetDoc.documentName ?? (targetDoc.shapes ? "Region" : "MeasuredTemplate");
         if (docName === "Region") {
             const shapesList = this._getShapesArray(targetDoc);
-            const orig = shapesList[0]?.toObject?.() ?? shapesList[0];
-            const updatedShape = this._formatRegionShapeUpdate(orig, coords);
+            const orig: any = shapesList[0]?.toObject?.() ?? shapesList[0];
+            const updatedShape: any = this._formatRegionShapeUpdate(orig, coords);
             delete updatedShape._id;
             delete updatedShape.id;
             try {
@@ -323,7 +323,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
                 targetY = Math.round(targetY - (wPx / 2) * Math.cos(rad));
             }
 
-            const updateObj = {};
+            const updateObj: Record<string, any> = {};
             if (targetX !== undefined) updateObj.x = targetX;
             if (targetY !== undefined) updateObj.y = targetY;
             if (isRect) {
@@ -365,16 +365,16 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @param {Object} [config={}] - Optional placement styling and behavior configuration
      * @returns {void}
      */
-    applyDocumentPlacement(doc, coords = {}, config = {}, data = null) {
+    applyDocumentPlacement(doc: any, coords: any = {}, config: any = {}, data: any = null): void {
         if (!doc) return;
         const targetDoc = doc.document ?? doc;
         const styling = this.extractPlacedStylingFlags(config);
         const docName = targetDoc.documentName ?? (targetDoc.shapes ? "Region" : "MeasuredTemplate");
         if (docName === "Region") {
             const shapesList = this._getShapesArray(targetDoc);
-            const originalShape = shapesList[0] ?? targetDoc.toObject?.()?.shapes?.[0] ?? data?.shapes?.[0] ?? { type: "rectangle" };
+            const originalShape: any = shapesList[0] ?? (targetDoc as any).toObject?.()?.shapes?.[0] ?? data?.shapes?.[0] ?? { type: "rectangle" };
             if (originalShape) {
-                const updateData = {
+                const updateData: Record<string, any> = {
                     flags: styling.flags
                 };
                 const shapeCoords = {
@@ -382,7 +382,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
                     gridUnits: coords.gridUnits ?? config.gridUnits ?? true,
                     sticky: Boolean(config.token ?? coords.token ?? coords.sticky)
                 };
-                const newShape = this._formatRegionShapeUpdate(originalShape, shapeCoords);
+                const newShape: any = this._formatRegionShapeUpdate(originalShape, shapeCoords);
                 if (originalShape._id) newShape._id = originalShape._id;
                 else if (originalShape.id) newShape.id = originalShape.id;
                 updateData.shapes = [newShape];
@@ -425,7 +425,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
                 targetY = Math.round(targetY - (wPx / 2) * Math.cos(rad));
             }
 
-            const updateData = {
+            const updateData: Record<string, any> = {
                 flags: styling.flags
             };
             if (targetX !== undefined) updateData.x = targetX;
@@ -472,7 +472,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @param {Object} [config={}] - Optional sequence placement configuration
      * @returns {{x: number, y: number, direction: number, rotation: number, distance: number|undefined, radius: number|undefined, width: number|undefined, gridUnits: boolean, sticky: boolean}} Formatted placement coordinates payload
      */
-    formatPlacementCoordinates(x, y, direction, config = {}) {
+    formatPlacementCoordinates(x: number, y: number, direction: number, config: any = {}): any {
         const isSquareOrRect = config.originalType === "square" || config.type === "square" || config.type === "rect" || config.t === "rect" || config.t === "square";
         const stickVal = config.stickToToken ?? config.sticky;
         const isSticky = Boolean(stickVal && stickVal !== "none" && stickVal !== "false" && config.token);
@@ -720,7 +720,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
                     const hl = this.getHighlightLayer(highlightId);
                     if (hl) hl.visible = true;
 
-                    let shapeBounds = null;
+                    let shapeBounds: any = null;
                     if (primaryShape?.type === "circle" || primaryShape?.type === "ellipse") {
                         const origX = primaryShape.x ?? doc.x ?? tmpl.x ?? 0;
                         const origY = primaryShape.y ?? doc.y ?? tmpl.y ?? 0;
@@ -844,7 +844,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
         const targetX = shape?.x ?? doc?.x ?? tmpl.x;
         const targetY = shape?.y ?? doc?.y ?? tmpl.y;
 
-        const updateData = { direction: effectiveDirection };
+        const updateData: Record<string, any> = { direction: effectiveDirection };
         if (isRect && doc) {
             updateData.distance = doc.distance;
             updateData.width = doc.width;
@@ -1022,7 +1022,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
                             }
 
                             if (this.document) {
-                                const updateData = {};
+                                const updateData: Record<string, any> = {};
                                 if (targetX !== undefined) updateData.x = targetX;
                                 if (targetY !== undefined) updateData.y = targetY;
                                 if (effectiveDir !== undefined) updateData.direction = effectiveDir;
@@ -1105,7 +1105,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @returns {void}
      */
     _patchRefreshState() {
-        const classesToPatch = [
+        const classesToPatch: any[] = [
             CONFIG?.MeasuredTemplate?.objectClass,
             CONFIG?.Region?.objectClass
         ].filter(cls => Boolean(cls?.prototype));
@@ -1123,15 +1123,15 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
             cls.prototype._bbcRefreshStatePatched = true;
 
             const orig = cls.prototype._refreshState;
-            cls.prototype._refreshState = function (...args) {
-                const gridApi = canvas?.interface?.grid ?? canvas?.grid;
+            cls.prototype._refreshState = function (this: any, ...args: any[]) {
+                const gridApi: any = canvas?.interface?.grid ?? canvas?.grid;
                 if (gridApi?.getHighlightLayer && this.highlightId) {
                     const hl = gridApi.getHighlightLayer(this.highlightId);
                     if (!hl && gridApi.addHighlightLayer) {
                         try { gridApi.addHighlightLayer(this.highlightId); } catch (e) {}
                     }
                 }
-                const fallbackContainer = {
+                const fallbackContainer: any = {
                     position: { x: 0, y: 0, set: () => {} },
                     visible: false,
                     renderable: false,
@@ -1181,9 +1181,9 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
     _patchDeprecations() {
         this._patchRefreshState();
         try {
-            if (console.warn && !console.warn._bbcPatched) {
+            if (console.warn && !(console.warn as any)._bbcPatched) {
                 const origWarn = console.warn;
-                const wrappedWarn = function (...args) {
+                const wrappedWarn: any = function (this: any, ...args: any[]) {
                     const first = args[0];
                     const msg = first?.message ?? String(first ?? "");
                     if (msg.includes("MEASURED_TEMPLATE_TYPES")) {
@@ -1196,9 +1196,9 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
                 log.debug("FoundryVTTV14Adapter._patchDeprecations | Intercepted console.warn for MEASURED_TEMPLATE_TYPES deprecation.");
             }
 
-            if (console.error && !console.error._bbcPatched) {
+            if (console.error && !(console.error as any)._bbcPatched) {
                 const origError = console.error;
-                const wrappedError = function (...args) {
+                const wrappedError: any = function (this: any, ...args: any[]) {
                     const first = args[0];
                     const msg = first?.message ?? String(first ?? "");
                     if (msg.includes("MEASURED_TEMPLATE_TYPES")) {
@@ -1214,9 +1214,9 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
         }
 
         try {
-            if (foundry?.utils?.logCompatibilityWarning && !foundry.utils.logCompatibilityWarning._bbcPatched) {
+            if (foundry?.utils?.logCompatibilityWarning && !(foundry.utils.logCompatibilityWarning as any)._bbcPatched) {
                 const origLog = foundry.utils.logCompatibilityWarning;
-                const wrappedLog = function (message, ...args) {
+                const wrappedLog: any = function (this: any, message: any, ...args: any[]) {
                     const msgStr = message?.message ?? String(message ?? "");
                     if (msgStr.includes("MEASURED_TEMPLATE_TYPES")) {
                         return;
@@ -1296,7 +1296,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
         if (paddedBounds.bottom === undefined) paddedBounds.bottom = paddedBounds.y + paddedBounds.height;
 
         let i0 = 0, j0 = 0, i1 = 0, j1 = 0;
-        const res = this.getOffsetRange(paddedBounds);
+        const res: any = this.getOffsetRange(paddedBounds);
         if (res?.length >= 4) {
             [i0, j0, i1, j1] = res;
         }
@@ -1323,7 +1323,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @returns {Object} Axis-aligned bounding box or PIXI.Rectangle
      * @protected
      */
-    _computeRotatedRectangleBounds(shape, fallbackRotation = 0, doc = null, tmpl = null) {
+    _computeRotatedRectangleBounds(shape: any, fallbackRotation = 0, doc: any = null, tmpl: any = null) {
         const originX = shape?.x ?? doc?.x ?? tmpl?.x ?? 0;
         const originY = shape?.y ?? doc?.y ?? tmpl?.y ?? 0;
         const width = shape?.width ?? 100;

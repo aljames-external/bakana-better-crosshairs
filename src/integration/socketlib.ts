@@ -58,7 +58,7 @@ export async function waitForTileReplication(tileId, timeoutMs = 5000) {
     const expectedUserIds = activeUsers.map((u) => u.id);
     const trackerId = adapter.randomID();
 
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
         const timeoutId = setTimeout(() => {
             tileTrackers.delete(trackerId);
             resolve();
@@ -77,7 +77,7 @@ export async function waitForTileReplication(tileId, timeoutMs = 5000) {
         socketlib.emit({
             type: "VERIFY_TILE_REPLICATION",
             tileId,
-            senderUserId: game.user.id,
+            senderUserId: game.user?.id,
             trackerId
         });
     });
@@ -88,7 +88,7 @@ export async function waitForTileReplication(tileId, timeoutMs = 5000) {
  * @param {Object} payload - Received socket payload
  * @returns {void}
  */
-export function handleSocketMessage(payload) {
+export function handleSocketMessage(payload: any) {
     if (!payload || typeof payload !== "object") return;
 
     const type = String(payload.type ?? "");
@@ -99,9 +99,8 @@ export function handleSocketMessage(payload) {
 
     if (type === "VERIFY_TILE_REPLICATION") {
         const { tileId, senderUserId, trackerId } = payload;
-        const hasTile = () => Boolean(adapter.crosshair.scene?.tiles?.has(tileId));
-
         const checkReplication = async () => {
+            const hasTile = () => Boolean(canvas?.tiles?.get(tileId));
             let attempts = 0;
             while (!hasTile() && attempts < 50) {
                 await new Promise((r) => setTimeout(r, 50));
@@ -111,14 +110,14 @@ export function handleSocketMessage(payload) {
                 type: "REPORT_TILE_RECEIVED",
                 tileId,
                 recipientUserId: senderUserId,
-                reportingUserId: game.user.id,
+                reportingUserId: game.user?.id,
                 trackerId
             });
         };
         checkReplication();
     } else if (type === "REPORT_TILE_RECEIVED") {
         const { recipientUserId, reportingUserId, trackerId } = payload;
-        if (recipientUserId !== game.user.id) return;
+        if (recipientUserId !== game.user?.id) return;
         const tracker = tileTrackers.get(trackerId);
         if (tracker) {
             tracker.received.add(reportingUserId);

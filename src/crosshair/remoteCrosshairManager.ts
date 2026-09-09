@@ -12,8 +12,9 @@ import { CrosshairController, attachCrosshairToToken, getShapeClasses } from "./
  * @param {Object} config - Crosshair configuration options
  * @returns {Promise<import("./base.js").BaseCrosshairShape|null>} Instantiated shape subclass instance or null
  */
-export async function createRemoteShapeInstance(shapeType, config = {}) {
+export async function createRemoteShapeInstance(shapeType: string, config: Record<string, any> = {}) {
     const classes = await getShapeClasses();
+    if (!classes) return null;
     const type = String(shapeType ?? "circle").toLowerCase();
     const previewPlaceable = adapter.crosshair.createUnpersistedPreviewPlaceable(config);
     if (type === "cone" && classes.ConeCrosshairShape) return new classes.ConeCrosshairShape(previewPlaceable, config);
@@ -38,7 +39,7 @@ export function getGamemasterCursorPosition(identifier = "Gamemaster") {
 
     const userId = user?.id ?? (game?.users?.has?.(identifier) ? identifier : null);
 
-    const extractCoords = (obj) => {
+    const extractCoords = (obj: any) => {
         if (!obj) return null;
         const px = obj.destination?.x ?? obj.target?.x ?? obj.position?.x ?? obj.x;
         const py = obj.destination?.y ?? obj.target?.y ?? obj.position?.y ?? obj.y;
@@ -49,13 +50,14 @@ export function getGamemasterCursorPosition(identifier = "Gamemaster") {
     };
 
     // 2. Inspect user document activity tracking (Foundry V13/V14 user.activity.cursor)
-    if (user) {
-        const act = extractCoords(user.activity?.cursor) ?? extractCoords(user._activity?.cursor) ?? extractCoords(user._cursor) ?? extractCoords(user.cursor);
+    const userAny = user as any;
+    if (userAny) {
+        const act = extractCoords(userAny.activity?.cursor) ?? extractCoords(userAny._activity?.cursor) ?? extractCoords(userAny._cursor) ?? extractCoords(userAny.cursor);
         if (act) return act;
     }
 
     // 3. Inspect canvas controls cursors
-    const controls = adapter.crosshair.controls;
+    const controls = adapter.crosshair.controls as any;
     const cursorSources = [controls?._cursors, controls?.cursors].filter(Boolean);
     for (const _cursors of cursorSources) {
         if (!_cursors) continue;
@@ -75,7 +77,7 @@ export function getGamemasterCursorPosition(identifier = "Gamemaster") {
     // 4. Inspect controls cursors PIXI children
     if (controls?.cursors?.children) {
         const children = controls.cursors.children;
-        const cursor = children.find(c =>
+        const cursor = children.find((c: any) =>
             c?.user?.name === identifier ||
             (userId && c?.user?.id === userId) ||
             c?._user?.name === identifier ||
@@ -120,12 +122,12 @@ export function diagnoseUserCursor(identifier = "Gamemaster") {
 
     const userId = user?.id;
 
-    const controls = adapter.crosshair.controls;
+    const controls = adapter.crosshair.controls as any;
     const cursorsContainer = controls?.cursors;
     const internalCursors = controls?._cursors;
 
-    let _cursorsKeys = [];
-    let _cursorsMatch = null;
+    let _cursorsKeys: string[] = [];
+    let _cursorsMatch: any = null;
     if (internalCursors) {
         if (internalCursors.keys) {
             _cursorsKeys = Array.from(internalCursors.keys());
@@ -135,10 +137,10 @@ export function diagnoseUserCursor(identifier = "Gamemaster") {
 
         if (userId && internalCursors.get) _cursorsMatch = internalCursors.get(userId);
         if (!_cursorsMatch && internalCursors.get) _cursorsMatch = internalCursors.get(identifier);
-        if (!_cursorsMatch) _cursorsMatch = internalCursors[userId] ?? internalCursors[identifier];
+        if (!_cursorsMatch) _cursorsMatch = (userId ? internalCursors[userId] : null) ?? internalCursors[identifier];
     }
 
-    const childrenDetails = cursorsContainer?.children?.map((c, idx) => ({
+    const childrenDetails = cursorsContainer?.children?.map((c: any, idx: number) => ({
         index: idx,
         constructor: c?.constructor?.name,
         cId: c?.id,
@@ -158,13 +160,14 @@ export function diagnoseUserCursor(identifier = "Gamemaster") {
         visible: c?.visible
     })) ?? [];
 
-    const userActivity = user ? {
-        id: user.id,
-        name: user.name,
-        activity: user.activity,
-        _activity: user._activity,
-        _cursor: user._cursor,
-        cursor: user.cursor
+    const userAny = user as any;
+    const userActivity = userAny ? {
+        id: userAny.id,
+        name: userAny.name,
+        activity: userAny.activity,
+        _activity: userAny._activity,
+        _cursor: userAny._cursor,
+        cursor: userAny.cursor
     } : "User not found";
 
     const report = {
@@ -188,16 +191,61 @@ export function diagnoseUserCursor(identifier = "Gamemaster") {
     return report;
 }
 
+export interface RemoteCrosshairPayload {
+    type?: string;
+    placementId?: string;
+    senderUserId?: string;
+    shapeType?: string;
+    timeoutMs?: number;
+    originX?: number;
+    originY?: number;
+    x?: number;
+    y?: number;
+    cursorX?: number;
+    cursorY?: number;
+    direction?: number;
+    icon?: string | null;
+    showItemIcon?: boolean;
+    file?: string;
+    lineFile?: string;
+    fillColor?: string;
+    fillAlpha?: number;
+    borderColor?: string;
+    borderAlpha?: number;
+    distance?: number;
+    width?: number;
+    angle?: number;
+    isRemote?: boolean;
+}
+
 /**
  * Encapsulates a non-interactive remote crosshair visual rendered on a peer client's canvas.
  * Reuses BaseCrosshairShape logic to guarantee identical origin, rotation, anchor, and graphic scaling.
  */
 export class RemoteCrosshairVisual {
+    placementId: string;
+    senderUserId: string;
+    shapeType: string;
+    effectName: string;
+    isDestroyed: boolean;
+    timeoutMs: number;
+    timeoutTimer: any;
+    onTimeout: ((visual: RemoteCrosshairVisual) => void) | null;
+    rawX: number;
+    rawY: number;
+    cursorX: number;
+    cursorY: number;
+    rawDirection: number;
+    icon: string | null;
+    showItemIcon: boolean;
+    config: Record<string, any>;
+    shape: any;
+
     /**
      * Single concrete payload Object constructor (Rule 5).
-     * @param {Object} payload - Initial CROSSHAIR_START socket message payload dictionary
+     * @param {RemoteCrosshairPayload} payload - Initial CROSSHAIR_START socket message payload dictionary
      */
-    constructor(payload = {}) {
+    constructor(payload: RemoteCrosshairPayload = {}) {
         this.placementId = String(payload.placementId ?? "");
         this.senderUserId = String(payload.senderUserId ?? "");
         this.shapeType = String(payload.shapeType ?? "circle");
@@ -316,7 +364,7 @@ export class RemoteCrosshairVisual {
      * @param {Function|null} [onTimeout=null] - Optional callback invoked prior to destruction on timeout
      * @returns {void}
      */
-    resetTimeout(onTimeout = null) {
+    resetTimeout(onTimeout: ((visual: RemoteCrosshairVisual) => void | Promise<void>) | null = null) {
         if (this.timeoutTimer) {
             clearTimeout(this.timeoutTimer);
             this.timeoutTimer = null;
@@ -457,8 +505,13 @@ export class RemoteCrosshairVisual {
  * Singleton manager tracking active remote crosshairs broadcasted by peer clients.
  */
 class RemoteCrosshairManagerClass {
+    remoteCrosshairs: Map<string, RemoteCrosshairVisual>;
+    getPeerCursorPosition?: typeof getPeerCursorPosition;
+    getGamemasterCursorPosition?: typeof getGamemasterCursorPosition;
+    diagnoseUserCursor?: typeof diagnoseUserCursor;
+    createRemoteShapeInstance?: typeof createRemoteShapeInstance;
+
     constructor() {
-        /** @type {Map<string, RemoteCrosshairVisual>} */
         this.remoteCrosshairs = new Map();
     }
 
@@ -560,9 +613,9 @@ class RemoteCrosshairManagerClass {
      * @param {string} userId - User ID whose remote crosshairs should be cleared
      * @returns {Promise<void>}
      */
-    async clearForUser(userId) {
+    async clearForUser(userId: string) {
         if (!userId) return;
-        const toDelete = [];
+        const toDelete: string[] = [];
         for (const [id, visual] of this.remoteCrosshairs.entries()) {
             if (visual.senderUserId === userId) {
                 toDelete.push(id);
@@ -580,7 +633,7 @@ class RemoteCrosshairManagerClass {
      * @param {boolean} [options.broadcast=false] - Whether to broadcast clear event to peer clients
      * @returns {Promise<void>}
      */
-    async clear(options = {}) {
+    async clear(options: { broadcast?: boolean } = {}) {
         for (const [id, visual] of this.remoteCrosshairs.entries()) {
             await visual.destroy();
         }

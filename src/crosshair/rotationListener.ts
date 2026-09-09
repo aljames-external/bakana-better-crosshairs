@@ -7,6 +7,11 @@ import { activePlacementTracker, shouldStickToToken, getGridSnapMode, snapCoordi
  * Manages window-level mousewheel and pointer tracking event listeners for interactive crosshair rotation.
  */
 export class CrosshairRotationListener {
+    activeWheelHandler: ((event: WheelEvent) => void) | null;
+    activePointerHandler: ((event: PointerEvent) => void) | null;
+    activePointerDownHandler: ((event: PointerEvent) => void) | null;
+    pendingPointerRaf: number | null;
+
     constructor() {
         this.activeWheelHandler = null;
         this.activePointerHandler = null;
@@ -22,13 +27,13 @@ export class CrosshairRotationListener {
      * @param {Event|null} [wheelEvent=null] - Optional wheel event
      * @returns {void}
      */
-    refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent = null) {
+    refreshTemplateHighlights(tmpl: any, newDirDeg: number, rad: number, wheelEvent: Event | null = null) {
         if (!tmpl) return;
 
         const doc = tmpl.document ?? (tmpl.documentName ? tmpl : null);
         if (doc) {
             const dims = tmpl.dimensions ?? doc.dimensions ?? activePlacementTracker.dimensions;
-            const docProps = adapter.crosshair.detectProperties(doc);
+            const docProps = adapter.crosshair.detectProperties(doc) as any;
             const initialDist = dims?.distance ?? docProps.distance;
             const initialWidth = dims?.width ?? docProps.width;
             const isGridUnits = dims?.gridUnits ?? true;
@@ -111,7 +116,7 @@ export class CrosshairRotationListener {
      * @param {Event|null} [event=null] - Triggering event
      * @returns {void}
      */
-    refreshAllActiveHighlights(currentDirection, rad, crosshair, event = null) {
+    refreshAllActiveHighlights(currentDirection: number, rad: number, crosshair: any, event: Event | null = null) {
         crosshair?.shapeInstance?._updateRangeText?.();
         const previewLists = [
             adapter.crosshair.templates?.preview?.children,
@@ -250,7 +255,7 @@ export class CrosshairRotationListener {
      * @param {object} [config={}] - Configuration options for crosshair placement
      * @returns {void}
      */
-    attach(shape, config = {}) {
+    attach(shape: any, config: Record<string, any> = {}) {
         this.detach();
 
         const isShapeInstance = Boolean(shape?.rotate && shape?.move);
@@ -288,7 +293,7 @@ export class CrosshairRotationListener {
 
         this.activePointerHandler = (event) => {
             if (this.pendingPointerRaf !== null) return;
-            const scheduleFrame = window?.requestAnimationFrame ?? ((fn) => { fn(); return null; });
+            const scheduleFrame = (cb: FrameRequestCallback) => (window?.requestAnimationFrame ? window.requestAnimationFrame(cb) : (cb(0), 0));
             this.pendingPointerRaf = scheduleFrame(() => {
                 this.pendingPointerRaf = null;
                 let pt = adapter.crosshair.mousePosition;
@@ -321,7 +326,7 @@ export class CrosshairRotationListener {
                 if (isShapeInstance) {
                     try { shape?.onCancelCallback?.(); } catch (e) {}
                 } else {
-                    try { activePlacementTracker.crosshair?.cancel?.(); } catch (e) {}
+                    try { (activePlacementTracker.crosshair as any)?.cancel?.(); } catch (e) {}
                 }
             }
         };

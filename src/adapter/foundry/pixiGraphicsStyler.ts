@@ -12,14 +12,18 @@ export class PixiGraphicsStyler {
      * @param {string|number|null|undefined} col - Input color
      * @returns {number|undefined} Numeric color value or undefined
      */
-    static toColorNumber(col) {
+    static toColorNumber(col: string | number | null | undefined): number | null | undefined {
         if (col === null || col === undefined || col === "") return undefined;
-        if (Number.isFinite(col)) return col;
+        if (Number.isFinite(col)) return col as number;
         if (typeof col === "string" && col.length) {
-            const parsed = crosshairAdapter.parseColor(col, undefined);
-            if (parsed?.valueOf) return parsed.valueOf();
-            if (Number.isFinite(parsed)) return parsed;
-            try { return parseInt(col.replace(/^#/, ""), 16); } catch (e) {}
+            const parsed: any = crosshairAdapter.parseColor(col, undefined);
+            const val = parsed?.valueOf?.();
+            if (typeof val === "number" && Number.isFinite(val)) return val;
+            if (typeof parsed === "number" && Number.isFinite(parsed)) return parsed;
+            try {
+                const hexVal = parseInt(col.replace(/^#/, ""), 16);
+                if (Number.isFinite(hexVal)) return hexVal;
+            } catch (e) {}
         }
         return undefined;
     }
@@ -30,7 +34,7 @@ export class PixiGraphicsStyler {
      * @param {boolean} [isPreview=false] - Whether the placeable is an unpersisted preview
      * @returns {void}
      */
-    static applyPlacedStyling(template, isPreview = false) {
+    static applyPlacedStyling(template: any, isPreview: boolean = false): void {
         if (!template?.document || isPreview) return;
         const doc = template.document;
         const bbcFlags = doc.flags?.bbc ?? {};

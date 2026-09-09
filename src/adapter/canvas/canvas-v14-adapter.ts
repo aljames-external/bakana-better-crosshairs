@@ -18,11 +18,11 @@ export class CanvasV14Adapter extends BaseCanvasAdapter {
      * @param {string} id - Identifier of the highlight layer
      * @returns {void}
      */
-    addHighlightLayer(id) {
+    addHighlightLayer(id: string): any {
         if (!id) return null;
         const cleanId = id.trim();
         if (!cleanId) return null;
-        return canvas.interface.grid.addHighlightLayer(cleanId);
+        return (canvas as any)?.interface?.grid?.addHighlightLayer(cleanId);
     }
 
     /**
@@ -31,11 +31,11 @@ export class CanvasV14Adapter extends BaseCanvasAdapter {
      * @param {string} id - Identifier of the highlight layer
      * @returns {Object|null}
      */
-    getHighlightLayer(id) {
+    getHighlightLayer(id: string): any {
         if (!id) return null;
         const cleanId = id.trim();
         if (!cleanId) return null;
-        return canvas.interface.grid.getHighlightLayer(cleanId);
+        return (canvas as any)?.interface?.grid?.getHighlightLayer(cleanId);
     }
 
     /**
@@ -44,11 +44,11 @@ export class CanvasV14Adapter extends BaseCanvasAdapter {
      * @param {string} id - Identifier of the highlight layer
      * @returns {void}
      */
-    clearHighlightLayer(id) {
+    clearHighlightLayer(id: string): void {
         if (!id) return;
         const cleanId = id.trim();
         if (!cleanId) return;
-        canvas.interface.grid.clearHighlightLayer(cleanId);
+        (canvas as any)?.interface?.grid?.clearHighlightLayer(cleanId);
     }
 
     /**
@@ -57,11 +57,11 @@ export class CanvasV14Adapter extends BaseCanvasAdapter {
      * @param {string} id - Identifier of the highlight layer
      * @returns {void}
      */
-    destroyHighlightLayer(id) {
+    destroyHighlightLayer(id: string): void {
         if (!id) return;
         const cleanId = id.trim();
         if (!cleanId) return;
-        canvas.interface.grid.destroyHighlightLayer(cleanId);
+        (canvas as any)?.interface?.grid?.destroyHighlightLayer(cleanId);
     }
 
     /**
@@ -71,11 +71,11 @@ export class CanvasV14Adapter extends BaseCanvasAdapter {
      * @param {Object} [options={}] - Highlight parameters
      * @returns {void}
      */
-    highlightPosition(id, options = {}) {
+    highlightPosition(id: string, options: any = {}): void {
         if (!id) return;
         const cleanId = id.trim();
         if (!cleanId) return;
-        canvas.interface.grid.highlightPosition(cleanId, options);
+        (canvas as any)?.interface?.grid?.highlightPosition(cleanId, options);
     }
 
     /**
@@ -84,8 +84,8 @@ export class CanvasV14Adapter extends BaseCanvasAdapter {
      * @param {{x?: number, y?: number, i?: number, j?: number}} coords - Coordinates object
      * @returns {{x: number, y: number}}
      */
-    getCenterPoint(coords) {
-        return canvas.grid.getCenterPoint(coords);
+    getCenterPoint(coords: any): any {
+        return (canvas as any)?.grid?.getCenterPoint(coords);
     }
 
     /**
@@ -94,8 +94,8 @@ export class CanvasV14Adapter extends BaseCanvasAdapter {
      * @param {{x?: number, y?: number, i?: number, j?: number}} coords - Coordinates object
      * @returns {{x: number, y: number}}
      */
-    getTopLeftPoint(coords) {
-        return canvas.grid.getTopLeftPoint(coords);
+    getTopLeftPoint(coords: any): any {
+        return (canvas as any)?.grid?.getTopLeftPoint(coords);
     }
 
     /**
@@ -105,8 +105,8 @@ export class CanvasV14Adapter extends BaseCanvasAdapter {
      * @param {Object} [options={}] - Snapping options ({ mode })
      * @returns {{x: number, y: number}|null}
      */
-    getSnappedPoint(point, options = {}) {
-        return canvas.grid.getSnappedPoint(point, options);
+    getSnappedPoint(point: any, options: any = {}): any {
+        return (canvas as any)?.grid?.getSnappedPoint(point, options);
     }
 
     /**
@@ -115,7 +115,7 @@ export class CanvasV14Adapter extends BaseCanvasAdapter {
      * @param {Object} bounds - Bounding rectangle
      * @returns {number[]|null}
      */
-    getOffsetRange(bounds) {
-        return canvas.grid.getOffsetRange(bounds);
+    getOffsetRange(bounds: any): any {
+        return (canvas as any)?.grid?.getOffsetRange(bounds);
     }
 }

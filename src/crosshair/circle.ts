@@ -115,7 +115,7 @@ async function play(placeable, config = {}) {
  * @param {string} [options.id="Circle Crosshair"] - Identifier of the circle crosshair effect to terminate.
  * @returns {Promise<void>} A promise resolving once matching Sequencer effects have ended.
  */
-async function stop(token, options = {}) {
+async function stop(token: any, options: { id?: string; [key: string]: any } = {}) {
     const targetToken = adapter.crosshair.toToken(token);
     const opts = options ?? {};
     const id = opts.id ?? "Circle Crosshair";

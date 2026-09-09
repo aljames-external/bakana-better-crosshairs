@@ -15,7 +15,7 @@ export class AutorecExchangeMenuApplication extends HandlebarsApplicationMixin(A
      * Application configuration options.
      * @type {object}
      */
-    static DEFAULT_OPTIONS = {
+    static override DEFAULT_OPTIONS: any = {
         id: "bbc-autorec-exchange-menu",
         tag: "div",
         window: {
@@ -35,7 +35,7 @@ export class AutorecExchangeMenuApplication extends HandlebarsApplicationMixin(A
      * Template parts rendered by the application.
      * @type {object}
      */
-    static PARTS = {
+    static override PARTS: any = {
         main: {
             template: `modules/${MODULE_ID}/src/autorec/autorecExchangeMenu.html`
         }
@@ -47,8 +47,8 @@ export class AutorecExchangeMenuApplication extends HandlebarsApplicationMixin(A
      * @param {object} options - Application rendering options
      * @returns {Promise<object>} Context data object passed to template
      */
-    async _prepareContext(options) {
-        const count = autorecManager.getAllEntries().filter(entry => !entry.isDefault).length;
+    protected override async _prepareContext(options: any): Promise<any> {
+        const count = autorecManager.getAllEntries().filter((entry: any) => !entry.isDefault).length;
         const rawCountMsg = localize("BBC.settings.autorecExchangeMenu.countMsg", "{count} global autorec configuration(s) active.");
         const countMsg = game?.i18n?.format?.("BBC.settings.autorecExchangeMenu.countMsg", { count }) ?? rawCountMsg.replace("{count}", String(count));
 
@@ -65,8 +65,8 @@ export class AutorecExchangeMenuApplication extends HandlebarsApplicationMixin(A
      * @param {object} options - Options
      * @returns {void}
      */
-    _onRender(context, options) {
-        super._onRender?.(context, options);
+    protected override async _onRender(context: any, options: any): Promise<void> {
+        await super._onRender?.(context, options);
         const rootEl = this.element;
         if (!rootEl) return;
 
@@ -88,9 +88,9 @@ export class AutorecExchangeMenuApplication extends HandlebarsApplicationMixin(A
                         if (res) {
                             this.render(false);
                         }
-                    } catch (err) {
+                    } catch (err: any) {
                         log.error("AutorecExchangeMenuApplication | Import error:", err);
-                        notify.error(localize("BBC.autorecExchange.notify.importError", `Import failed: ${err.message}`));
+                        notify.error(localize("BBC.autorecExchange.notify.importError", `Import failed: ${err?.message ?? err}`));
                     }
                 });
             });

@@ -89,7 +89,7 @@ export function sanitizeEntryForExchange(entry) {
     const placedFillPlayerColor = Boolean(optionsRaw.placedFillPlayerColor ?? placedFill.playerColor ?? raw.placedFillPlayerColor ?? false);
     const placedBorderPlayerColor = Boolean(optionsRaw.placedBorderPlayerColor ?? placedBorder.playerColor ?? raw.placedBorderPlayerColor ?? false);
 
-    const sanitized = {
+    const sanitized: Record<string, any> = {
         itemName,
         activityId,
         activityName,
@@ -177,8 +177,8 @@ export function sanitizeEntryForExchange(entry) {
  * @param {string} [options.description=""] - Optional human readable tag or description
  * @returns {Object} Explicit schema structure of the full exported package
  */
-export function buildExportPackage(entries, { sourceModule = "world", includeDefault = false, description = "" } = {}) {
-    const exportedEntries = [];
+export function buildExportPackage(entries: any, { sourceModule = "world", includeDefault = false, description = "" } = {}) {
+    const exportedEntries: any[] = [];
     for (const rawEntry of entries ?? []) {
         if (!rawEntry || typeof rawEntry === "function") {
             continue;
@@ -223,9 +223,9 @@ export function validateImportPackage(rawInput, { overrideSourceModule = null } 
     if (typeof rawInput === "string") {
         try {
             parsed = JSON.parse(rawInput);
-        } catch (err) {
+        } catch (err: any) {
             log.error("AutorecExchange.validateImportPackage | Failed to parse JSON string payload.", err);
-            throw new Error(`Invalid JSON format: ${err.message}`);
+            throw new Error(`Invalid JSON format: ${err?.message ?? err}`);
         }
     }
 
@@ -265,7 +265,7 @@ export function validateImportPackage(rawInput, { overrideSourceModule = null } 
         ? String(overrideSourceModule).trim()
         : null;
 
-    const validatedEntries = [];
+    const validatedEntries: any[] = [];
     for (let i = 0; i < parsed.entries.length; i++) {
         const item = parsed.entries[i];
         if (!item || typeof item !== "object" || Array.isArray(item)) {
@@ -327,8 +327,8 @@ export function getEntryLookupToken(itemName, activityId = "", activityName = ""
  * @param {Object} existingEntry - Active registered runtime configuration object
  * @returns {Array<{field: string, importedValue: any, existingValue: any}>} List of dynamic field differences
  */
-export function computeFieldDifferences(importedEntry, existingEntry) {
-    const differences = [];
+export function computeFieldDifferences(importedEntry: any, existingEntry: any) {
+    const differences: any[] = [];
     if (!existingEntry || typeof existingEntry !== "object") {
         return differences;
     }
@@ -373,7 +373,7 @@ export function computeFieldDifferences(importedEntry, existingEntry) {
  * @param {string|null} [options.overrideSourceModule=null] - Mandatory explicit source module override if specified
  * @returns {Object} Structured diff analysis contract
  */
-export function analyzeImportDiff(validatedPackage, currentRegistrations, { defaultSourceModule = "world", overrideSourceModule = null } = {}) {
+export function analyzeImportDiff(validatedPackage: any, currentRegistrations: any, { defaultSourceModule = "world", overrideSourceModule = null }: any = {}) {
     const existingTokenMap = new Map();
     for (const [regKey, handler] of currentRegistrations.entries()) {
         if (!handler || typeof handler === "function") {
@@ -389,9 +389,9 @@ export function analyzeImportDiff(validatedPackage, currentRegistrations, { defa
         existingTokenMap.set(token, { regKey, handler });
     }
 
-    const newEntries = [];
-    const conflictEntries = [];
-    const identicalEntries = [];
+    const newEntries: any[] = [];
+    const conflictEntries: any[] = [];
+    const identicalEntries: any[] = [];
 
     const cleanOverride = overrideSourceModule !== null && overrideSourceModule !== undefined
         ? String(overrideSourceModule).trim()
@@ -512,11 +512,11 @@ export function promptJsonFileImport(onFileLoaded) {
     input.style.display = "none";
     document.body.appendChild(input);
 
-    input.addEventListener("change", (ev) => {
-        const file = ev.target?.files?.[0];
+    input.addEventListener("change", (ev: any) => {
+        const file = (ev.target as HTMLInputElement)?.files?.[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = (e: any) => {
                 const text = e.target?.result;
                 if (typeof text === "string") {
                     onFileLoaded(text);

@@ -81,8 +81,8 @@ export class BaseCrosshairMenuApplication extends HandlebarsApplicationMixin(App
      * @param {object} options - Rendering options.
      * @returns {void}
      */
-    _onRender(context, options) {
-        super._onRender(context, options);
+    protected override _onRender(context: any, options: any): any {
+        super._onRender?.(context, options);
         const root = this._normalizeElement(this.element);
         if (!root) return;
 

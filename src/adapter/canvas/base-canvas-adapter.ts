@@ -5,11 +5,20 @@ import { log } from "../../lib/logger.js";
  * Isolates canvas grid metrics, coordinates, highlighting, stage lifecycle, and placeable layer interactions.
  */
 export class BaseCanvasAdapter {
+    version: any;
+
     /**
      * Initialize the base canvas adapter.
      */
     constructor() {
-        this.version = 0;
+        this.version = "base";
+    }
+
+    /**
+     * Replaced at runtime by initializeCanvasAdapter on prototype.
+     */
+    initialize(): any {
+        return this;
     }
 
     /**
@@ -138,8 +147,8 @@ export class BaseCanvasAdapter {
      * Active canvas grid highlight layers collection.
      * @type {Object}
      */
-    get highlightLayers() {
-        return canvas?.interface?.grid?.highlightLayers ?? canvas?.grid?.highlightLayers ?? {};
+    get highlightLayers(): any {
+        return (canvas?.interface as any)?.grid?.highlightLayers ?? (canvas?.grid as any)?.highlightLayers ?? {};
     }
 
     /**
@@ -147,7 +156,7 @@ export class BaseCanvasAdapter {
      * @param {string} id - The identifier of the highlight layer to add.
      * @returns {void}
      */
-    addHighlightLayer(id) {
+    addHighlightLayer(id: string): void {
         if (!id) {
             log.debug("BaseCanvasAdapter.addHighlightLayer | Called with invalid or empty identifier.");
             return;
@@ -155,7 +164,7 @@ export class BaseCanvasAdapter {
         const cleanId = id.trim();
         if (!cleanId) return;
 
-        const gridApi = canvas?.interface?.grid ?? canvas?.grid;
+        const gridApi: any = canvas?.interface?.grid ?? canvas?.grid;
         if (gridApi?.addHighlightLayer) {
             try { return gridApi.addHighlightLayer(cleanId); } catch (e) {}
         }
@@ -167,7 +176,7 @@ export class BaseCanvasAdapter {
      * @param {string} id - Identifier of the highlight layer
      * @returns {Object|null}
      */
-    getHighlightLayer(id) {
+    getHighlightLayer(id: string): any {
         if (!id) {
             log.debug("BaseCanvasAdapter.getHighlightLayer | Called with invalid or empty identifier.");
             return null;
@@ -175,11 +184,11 @@ export class BaseCanvasAdapter {
         const cleanId = id.trim();
         if (!cleanId) return null;
 
-        const gridApi = canvas?.interface?.grid ?? canvas?.grid;
+        const gridApi: any = canvas?.interface?.grid ?? canvas?.grid;
         if (gridApi?.getHighlightLayer) {
             try { return gridApi.getHighlightLayer(cleanId); } catch (e) {}
         }
-        return canvas?.grid?.highlightLayers?.[cleanId] ?? null;
+        return (canvas?.grid as any)?.highlightLayers?.[cleanId] ?? null;
     }
 
     /**
@@ -187,7 +196,7 @@ export class BaseCanvasAdapter {
      * @param {string} id - Identifier of the highlight layer
      * @returns {void}
      */
-    clearHighlightLayer(id) {
+    clearHighlightLayer(id: string): void {
         if (!id) {
             log.debug("BaseCanvasAdapter.clearHighlightLayer | Called with invalid or empty identifier.");
             return;
@@ -195,12 +204,12 @@ export class BaseCanvasAdapter {
         const cleanId = id.trim();
         if (!cleanId) return;
 
-        const gridApi = canvas?.interface?.grid ?? canvas?.grid;
+        const gridApi: any = canvas?.interface?.grid ?? canvas?.grid;
         if (gridApi?.clearHighlightLayer) {
             try { return gridApi.clearHighlightLayer(cleanId); } catch (e) {}
         }
 
-        const legacyLayer = canvas?.grid?.highlightLayers?.[cleanId];
+        const legacyLayer: any = (canvas?.grid as any)?.highlightLayers?.[cleanId];
         if (legacyLayer?.clear) {
             try { legacyLayer.clear(); return; } catch (e) {}
         }
@@ -213,22 +222,22 @@ export class BaseCanvasAdapter {
      * @param {string} id - Identifier of the highlight layer
      * @returns {void}
      */
-    destroyHighlightLayer(id) {
+    destroyHighlightLayer(id: string): void {
         if (!id) return;
         const cleanId = id.trim();
         if (!cleanId) return;
 
-        const gridApi = canvas?.interface?.grid ?? canvas?.grid;
+        const gridApi: any = canvas?.interface?.grid ?? canvas?.grid;
         if (gridApi?.destroyHighlightLayer) {
             try { gridApi.destroyHighlightLayer(cleanId); } catch (e) {}
         }
 
-        const legacyLayer = canvas?.grid?.highlightLayers?.[cleanId];
+        const legacyLayer: any = (canvas?.grid as any)?.highlightLayers?.[cleanId];
         if (legacyLayer?.destroy) {
             try { legacyLayer.destroy({ children: true }); } catch (e) {}
         }
-        if (canvas?.grid?.highlightLayers && cleanId in canvas.grid.highlightLayers) {
-            try { delete canvas.grid.highlightLayers[cleanId]; } catch (e) {}
+        if ((canvas?.grid as any)?.highlightLayers && cleanId in (canvas!.grid as any).highlightLayers) {
+            try { delete (canvas!.grid as any).highlightLayers[cleanId]; } catch (e) {}
         }
     }
 
@@ -238,17 +247,17 @@ export class BaseCanvasAdapter {
      * @param {Object} [options={}] - Highlight parameters (x, y, color, border, shape)
      * @returns {void}
      */
-    highlightPosition(id, options = {}) {
+    highlightPosition(id: string, options: any = {}): void {
         if (!id) return;
         const cleanId = id.trim();
         if (!cleanId) return;
 
-        const gridApi = canvas?.interface?.grid ?? canvas?.grid;
+        const gridApi: any = canvas?.interface?.grid ?? canvas?.grid;
         if (gridApi?.highlightPosition) {
             try { return gridApi.highlightPosition(cleanId, options); } catch (e) {}
         }
-        if (canvas?.grid?.highlightGridPosition) {
-            try { return canvas.grid.highlightGridPosition(cleanId, options); } catch (e) {}
+        if ((canvas?.grid as any)?.highlightGridPosition) {
+            try { return (canvas!.grid as any).highlightGridPosition(cleanId, options); } catch (e) {}
         }
     }
 
@@ -256,8 +265,8 @@ export class BaseCanvasAdapter {
      * Safely clears region layer highlights across versions.
      * @returns {void}
      */
-    clearRegionsHighlight() {
-        try { canvas?.regions?.highlight?.clear?.(); } catch (e) {}
+    clearRegionsHighlight(): void {
+        try { (canvas?.regions as any)?.highlight?.clear?.(); } catch (e) {}
     }
 
     /**
@@ -276,16 +285,16 @@ export class BaseCanvasAdapter {
      * @param {{x?: number, y?: number, i?: number, j?: number}} coords - Coordinates object
      * @returns {{x: number, y: number}} The center coordinates
      */
-    getCenterPoint(coords) {
+    getCenterPoint(coords: any): any {
         if (canvas?.grid?.getCenterPoint) {
             try {
                 const pt = canvas.grid.getCenterPoint(coords);
                 if (pt && Number.isFinite(pt.x) && Number.isFinite(pt.y)) return { x: pt.x, y: pt.y };
             } catch (e) {}
         }
-        if (canvas?.grid?.getCenter) {
+        if ((canvas?.grid as any)?.getCenter) {
             try {
-                const [cx, cy] = canvas.grid.getCenter(coords?.x ?? 0, coords?.y ?? 0);
+                const [cx, cy] = (canvas?.grid as any)?.getCenter?.(coords?.x ?? 0, coords?.y ?? 0) ?? [0, 0];
                 return { x: cx, y: cy };
             } catch (e) {}
         }
@@ -297,16 +306,16 @@ export class BaseCanvasAdapter {
      * @param {{x?: number, y?: number, i?: number, j?: number}} coords - Coordinates object
      * @returns {{x: number, y: number}} The top-left coordinates
      */
-    getTopLeftPoint(coords) {
+    getTopLeftPoint(coords: any): any {
         if (canvas?.grid?.getTopLeftPoint) {
             try {
                 const pt = canvas.grid.getTopLeftPoint(coords);
                 if (pt && Number.isFinite(pt.x) && Number.isFinite(pt.y)) return { x: pt.x, y: pt.y };
             } catch (e) {}
         }
-        if (canvas?.grid?.getTopLeft) {
+        if ((canvas?.grid as any)?.getTopLeft) {
             try {
-                const [x, y] = canvas.grid.getTopLeft(coords?.x ?? coords?.i ?? 0, coords?.y ?? coords?.j ?? 0);
+                const [x, y] = (canvas?.grid as any)?.getTopLeft?.(coords?.x ?? coords?.i ?? 0, coords?.y ?? coords?.j ?? 0) ?? [0, 0];
                 return { x, y };
             } catch (e) {}
         }
@@ -319,18 +328,18 @@ export class BaseCanvasAdapter {
      * @param {Object} [options={}] - Snapping options ({ mode })
      * @returns {{x: number, y: number}|null} Snapped point or null
      */
-    getSnappedPoint(point, options = {}) {
+    getSnappedPoint(point: any, options: any = {}): any {
         if (canvas?.grid?.getSnappedPoint) {
             try {
-                const snapped = canvas.grid.getSnappedPoint(point, options);
+                const snapped = canvas.grid.getSnappedPoint(point, options as any);
                 if (snapped && Number.isFinite(snapped.x) && Number.isFinite(snapped.y)) {
                     return { x: snapped.x, y: snapped.y };
                 }
             } catch (e) {}
         }
-        if (canvas?.grid?.getSnappedPosition) {
+        if ((canvas?.grid as any)?.getSnappedPosition) {
             try {
-                const snapped = canvas.grid.getSnappedPosition(point.x, point.y, options.mode);
+                const snapped = (canvas?.grid as any)?.getSnappedPosition?.(point.x, point.y, options.mode);
                 if (snapped && Number.isFinite(snapped.x) && Number.isFinite(snapped.y)) {
                     return { x: snapped.x, y: snapped.y };
                 }
@@ -344,7 +353,7 @@ export class BaseCanvasAdapter {
      * @param {Object} bounds - Bounding rectangle { x, y, width, height }
      * @returns {number[]|null} [i0, j0, i1, j1] Grid offset range or null
      */
-    getOffsetRange(bounds) {
+    getOffsetRange(bounds: any): any {
         if (canvas?.grid?.getOffsetRange) {
             try { return canvas.grid.getOffsetRange(bounds); } catch (e) {}
         }
@@ -357,15 +366,15 @@ export class BaseCanvasAdapter {
      * @param {{x: number, y: number}} target - Target point
      * @returns {number} Measured distance in grid units
      */
-    measureDistance(origin, target) {
-        if (canvas?.grid?.measurePath) {
+    measureDistance(origin: any, target: any): number {
+        if ((canvas?.grid as any)?.measurePath) {
             try {
-                const measured = canvas.grid.measurePath([origin, target]);
+                const measured = (canvas?.grid as any)?.measurePath?.([origin, target]);
                 if (measured && Number.isFinite(measured.distance)) return measured.distance;
             } catch (e) {}
         }
-        if (canvas?.grid?.measureDistance) {
-            try { return Math.round(canvas.grid.measureDistance(origin, target) * 10) / 10; } catch (e) {}
+        if ((canvas?.grid as any)?.measureDistance) {
+            try { return Math.round(((canvas?.grid as any)?.measureDistance?.(origin, target) ?? 0) * 10) / 10; } catch (e) {}
         }
         const dx = (target?.x ?? 0) - (origin?.x ?? 0);
         const dy = (target?.y ?? 0) - (origin?.y ?? 0);
@@ -382,7 +391,7 @@ export class BaseCanvasAdapter {
      * @param {string|number|boolean} [mode="all"] - Snap mode (all, center, corner, edges, etc.)
      * @returns {{x: number, y: number}} Snapped coordinates
      */
-    snapCoordinates(x, y, mode = "all") {
+    snapCoordinates(x: number, y: number, mode: any = "all"): any {
         if (!canvas?.grid || mode === false || mode === "none" || mode === 0 || mode === "0") return { x, y };
 
         const size = this.gridSize;
@@ -429,14 +438,14 @@ export class BaseCanvasAdapter {
      * @param {string|number} mode - Mode name or numeric bitmask
      * @returns {number} Numeric bitmask mode
      */
-    _getGridSnapMode(mode) {
+    _getGridSnapMode(mode: any): number {
         if (Number.isFinite(mode)) return mode;
         const modes = CONST?.GRID_SNAPPING_MODES;
         if (!modes) return 0;
         switch (mode) {
             case "center": return modes.CENTER ?? 1;
             case "edge":
-            case "edges": return modes.EDGE ?? 4;
+            case "edges": return (modes as any)?.EDGE ?? (modes as any)?.SIDE_MIDPOINT ?? (modes as any)?.SIDE ?? 4;
             case "corner":
             case "corners":
             case "vertex":
@@ -444,8 +453,8 @@ export class BaseCanvasAdapter {
             case "corner-center":
             case "vertex-center": return (modes.VERTEX ?? 2) | (modes.CENTER ?? 1);
             case "corner-edge":
-            case "vertex-edge": return (modes.VERTEX ?? 2) | (modes.EDGE ?? 4);
-            case "all": return (modes.VERTEX ?? 2) | (modes.EDGE ?? 4) | (modes.CENTER ?? 1);
+            case "vertex-edge": return (modes.VERTEX ?? 2) | ((modes as any)?.EDGE ?? (modes as any)?.SIDE_MIDPOINT ?? (modes as any)?.SIDE ?? 4);
+            case "all": return (modes.VERTEX ?? 2) | ((modes as any)?.EDGE ?? (modes as any)?.SIDE_MIDPOINT ?? (modes as any)?.SIDE ?? 4) | (modes.CENTER ?? 1);
             default: return 0;
         }
     }

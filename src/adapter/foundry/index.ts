@@ -19,7 +19,7 @@ export let crosshairAdapter = new BaseFoundryVTTAdapter();
  */
 export function initializeFoundryAdapter() {
     const generation = game?.release?.generation;
-    if (generation >= 14) {
+    if (generation !== undefined && generation >= 14) {
         crosshairAdapter = new FoundryVTTV14Adapter();
     } else if (generation === 13) {
         crosshairAdapter = new FoundryVTTV13Adapter();
@@ -37,4 +37,4 @@ export function initializeFoundryAdapter() {
     return crosshairAdapter;
 }
 
-BaseFoundryVTTAdapter.prototype.initialize = initializeFoundryAdapter;
+(BaseFoundryVTTAdapter.prototype as any).initialize = initializeFoundryAdapter;

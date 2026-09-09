@@ -24,7 +24,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @returns {void}
      */
     _patchRefreshState() {
-        const classesToPatch = [
+        const classesToPatch: any[] = [
             CONFIG?.MeasuredTemplate?.objectClass,
             CONFIG?.Region?.objectClass
         ].filter(cls => Boolean(cls?.prototype));
@@ -42,15 +42,15 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
             cls.prototype._bbcRefreshStatePatched = true;
 
             const orig = cls.prototype._refreshState;
-            cls.prototype._refreshState = function (...args) {
-                const gridApi = canvas?.interface?.grid ?? canvas?.grid;
+            cls.prototype._refreshState = function (this: any, ...args: any[]) {
+                const gridApi: any = canvas?.interface?.grid ?? canvas?.grid;
                 if (gridApi?.getHighlightLayer && this.highlightId) {
                     const hl = gridApi.getHighlightLayer(this.highlightId);
                     if (!hl && gridApi.addHighlightLayer) {
                         try { gridApi.addHighlightLayer(this.highlightId); } catch (e) {}
                     }
                 }
-                const fallbackContainer = {
+                const fallbackContainer: any = {
                     position: { x: 0, y: 0, set: () => {} },
                     visible: false,
                     renderable: false,
@@ -153,19 +153,19 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {Object} [sysAdapter=systemAdapter] - Active System Adapter instance
      * @returns {Array<{event: string, handler: Function, category: string, targetName: string}>} Array of generated hook descriptor objects
      */
-    generatePlacementHooks(callbacks = {}, sysAdapter = systemAdapter) {
+    generatePlacementHooks(callbacks: any = {}, sysAdapter: any = systemAdapter): any[] {
         const targetSysAdapter = sysAdapter ?? systemAdapter;
         if (targetSysAdapter && !(targetSysAdapter instanceof BaseSystemAdapter)) {
             throw new Error(`generatePlacementHooks requires a valid BaseSystemAdapter instance, received: ${targetSysAdapter}`);
         }
-        const onDrawPreview = callbacks?.onDrawPreview ?? ((placeable) => this.handleDrawPreview(placeable));
-        const onPreCreate = callbacks?.onPreCreate ?? ((doc, _data, _options, userId) => this.handlePreCreate(doc, _data, _options, userId));
-        const onCreate = callbacks?.onCreate ?? ((doc, _options, userId) => this.handleCreateDocument(doc, _options, userId));
-        const onUpdate = callbacks?.onUpdate ?? ((doc, changed, _options, userId) => this.handleUpdateDocument(doc, changed, _options, userId));
-        const onDelete = callbacks?.onDelete ?? ((doc, _options, userId) => this.handleDeleteDocument(doc, _options, userId));
+        const onDrawPreview = callbacks?.onDrawPreview ?? ((placeable: any) => this.handleDrawPreview(placeable));
+        const onPreCreate = callbacks?.onPreCreate ?? ((doc: any, _data: any, _options: any, userId?: string) => this.handlePreCreate(doc, _data, _options, userId));
+        const onCreate = callbacks?.onCreate ?? ((doc: any, _options: any, userId?: string) => this.handleCreateDocument(doc, _options, userId));
+        const onUpdate = callbacks?.onUpdate ?? ((doc: any, changed: any, _options: any, userId?: string) => this.handleUpdateDocument(doc, changed, _options, userId));
+        const onDelete = callbacks?.onDelete ?? ((doc: any, _options: any, userId?: string) => this.handleDeleteDocument(doc, _options, userId));
         const basePlaceables = this.supportedBasePlaceables;
         const customPlaceables = targetSysAdapter?.getCustomPlaceableClassNames?.() ?? [];
-        const dynamicPlaceables = [];
+        const dynamicPlaceables: any[] = [];
 
         if (CONFIG) {
             for (const base of basePlaceables) {
@@ -179,12 +179,12 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
         const drawPlaceables = new Set([...basePlaceables, ...customPlaceables, ...dynamicPlaceables]);
         const drawHooks = Array.from(drawPlaceables).flatMap((placeableName) => [
             { event: `draw${placeableName}`, handler: onDrawPreview, category: "draw", targetName: placeableName },
-            { event: `refresh${placeableName}`, handler: (template) => this.handleMeasuredTemplateRefresh(template), category: "refresh", targetName: placeableName }
+            { event: `refresh${placeableName}`, handler: (template: any) => this.handleMeasuredTemplateRefresh(template), category: "refresh", targetName: placeableName }
         ]);
 
         const baseDocumentTypes = this.supportedDocumentTypes;
         const customDocumentTypes = targetSysAdapter?.getCustomDocumentTypes?.() ?? [];
-        const dynamicDocumentTypes = [];
+        const dynamicDocumentTypes: any[] = [];
 
         if (CONFIG) {
             for (const docType of baseDocumentTypes) {
@@ -267,8 +267,8 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {Object} [config={}] - Optional sequence placement configuration
      * @returns {{x: number, y: number, direction: number, rotation: number, distance: number|undefined, radius: number|undefined, width: number|undefined, sticky: boolean, type: string, originalType: string|undefined, t: string}} Formatted placement coordinates payload
      */
-    formatPlacementCoordinates(x, y, direction, config = {}) {
-        const shapeTypeMap = {
+    formatPlacementCoordinates(x: number, y: number, direction: number, config: any = {}): any {
+        const shapeTypeMap: Record<string, string> = {
             circle: "circle",
             cone: "cone",
             ray: "ray",
@@ -319,14 +319,13 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @returns {boolean} False for rect and square, true for circle, cone, ray
      */
     supportsShapeRotation(shapeType) {
-        if (shapeType === "rect" || shapeType === "square") {
-            return false;
-        }
-        return true;
+        if (!shapeType) return true;
+        const lower = String(shapeType).toLowerCase();
+        return lower !== "rect" && lower !== "square";
     }
 
     /**
-     * Return template pixel multiplier factor for V13 (legacy pixel sizing).
+     * Return template pixel multiplier factor and gridUnits mode for Sequencer effects in V13.
      * @returns {{factor: number, gridUnits: boolean}} Template pixel multiplier factor and gridUnits mode
      */
     getTemplatePixelFactor() {
@@ -339,7 +338,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {{x?: number, y?: number, direction?: number, distance?: number, width?: number, angle?: number, type?: string, originalType?: string, t?: string, sticky?: boolean, token?: Token}} coords - Destination preview coordinates
      * @returns {void}
      */
-    updatePreviewShape(previewDoc, coords) {
+    updatePreviewShape(previewDoc: any, coords: any): void {
         if (!previewDoc || !coords) return;
         const targetDoc = previewDoc.document ?? previewDoc;
         const tmpl = previewDoc._object ?? (previewDoc.document ? previewDoc : null);
@@ -374,7 +373,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
             targetDoc.width = w;
             targetDoc.direction = diagAngle;
 
-            const updateObj = {
+            const updateObj: Record<string, any> = {
                 t: "rect",
                 distance: diagDist,
                 width: w,
@@ -403,7 +402,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
                 tmpl.applyRenderFlags?.();
             }
         } else {
-            const updateObj = {};
+            const updateObj: Record<string, any> = {};
             if (coords.x !== undefined) {
                 targetDoc.x = Math.round(coords.x);
                 updateObj.x = Math.round(coords.x);
@@ -458,12 +457,12 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {Object|null} [data=null] - Document update payload
      * @returns {void}
      */
-    applyDocumentPlacement(doc, coords = {}, config = {}, data = null) {
+    applyDocumentPlacement(doc: any, coords: any = {}, config: any = {}, data: any = null): void {
         if (!doc) return;
         const targetDoc = doc.document ?? doc;
         const styling = this.extractPlacedStylingFlags(config);
         const isRect = targetDoc.t === "rect" || coords.type === "square" || coords.type === "rect" || coords.originalType === "square" || config.originalType === "square" || coords.t === "rect" || config.t === "rect" || config.type === "square" || config.type === "rect";
-        const updateData = {
+        const updateData: Record<string, any> = {
             flags: styling.flags
         };
 
@@ -636,7 +635,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
                 doc.direction = effectiveDirection;
                 if (targetX !== undefined) doc.x = targetX;
                 if (targetY !== undefined) doc.y = targetY;
-                const updateData = { direction: effectiveDirection };
+                const updateData: Record<string, any> = { direction: effectiveDirection };
                 if (isRect) {
                     updateData.distance = doc.distance;
                     updateData.width = doc.width;
@@ -783,7 +782,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
                             }
 
                             if (this.document) {
-                                const updateData = {};
+                                const updateData: Record<string, any> = {};
                                 if (targetX !== undefined) {
                                     this.document.x = targetX;
                                     updateData.x = targetX;

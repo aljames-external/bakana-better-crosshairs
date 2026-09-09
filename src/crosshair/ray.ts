@@ -118,7 +118,7 @@ async function play(placeable, config = {}) {
  * @param {string} [options.id="Ray Crosshair"] - The identifier of the effect to end
  * @returns {Promise<void>} A promise resolving when the matching crosshair effects have been terminated
  */
-async function stop(token, options = {}) {
+async function stop(token: any, options: { id?: string; [key: string]: any } = {}) {
     const targetToken = adapter.crosshair.toToken(token);
     const opts = options ?? {};
     const id = opts.id ?? "Ray Crosshair";

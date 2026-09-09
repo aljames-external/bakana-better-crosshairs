@@ -20,7 +20,7 @@ export class Pf1SystemAdapter extends BaseSystemAdapter {
      * Return list of custom PlaceableObject subclass names introduced by Pathfinder 1e.
      * @returns {string[]} Array of custom placeable class names
      */
-    getCustomPlaceableClassNames() {
+    getCustomPlaceableClassNames(): string[] {
         return ["MeasuredTemplatePF", "MeasuredTemplatePF1"];
     }
 
@@ -30,7 +30,7 @@ export class Pf1SystemAdapter extends BaseSystemAdapter {
      * @param {Object} [baseContext={}] - Initial calling context (`{ item, itemName, itemId }`)
      * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}} Refined calling context object
      */
-    extractCallingContext(doc, baseContext = {}) {
+    extractCallingContext(doc: any, baseContext: any = {}) {
         let itemObj = baseContext?.item ?? null;
 
         // In PF1e, template origins are stored in document.flags.pf1.origin or document.flags.pf.origin
@@ -62,12 +62,12 @@ export class Pf1SystemAdapter extends BaseSystemAdapter {
      * Determine the Pathfinder 1e system default for whether a crosshair shape should stick to its source token
      * when no explicit override is configured (stickToToken === "default").
      * Checks the authoritative Pathfinder 1e spell/ability system defaults first (e.g. Burning Hands, Lightning Bolt, Fireball).
-     * If completely unrecognized, defaults to detached (false).
+     * If not found in the dataset, falls back to standard shape defaults (cones and rays/lines stick to token).
      * @param {string} shapeType - The template or crosshair shape (`"cone"`, `"circle"`, `"ray"`, `"rect"`, `"square"`)
      * @param {object} [config={}] - Optional crosshair configuration or calling context object
      * @returns {boolean} Whether the crosshair shape defaults to sticking to the token in Pathfinder 1e
      */
-    getDefaultStickToToken(shapeType, config = {}) {
+    getDefaultStickToToken(shapeType: string, config: any = {}): boolean {
         const itemDefault = this.getSystemDefault(config);
         if (itemDefault !== null && itemDefault !== undefined) {
             return Boolean(itemDefault);
@@ -86,7 +86,7 @@ export class Pf1SystemAdapter extends BaseSystemAdapter {
      * @param {Object} [options={}] - Execution dependencies (`{ crosshairAdapter, pendingPlacements, placementKey }`)
      * @returns {void} No return value
      */
-    handleProgrammaticPlacement(scene, doc, placeable, coords = {}, options = {}) {
+    handleProgrammaticPlacement(scene: any, doc: any, placeable: any, coords: any = {}, options: any = {}): void {
         return;
     }
 }

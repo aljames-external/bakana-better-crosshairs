@@ -5,12 +5,103 @@ import { getUserColor } from "../lib/utils.js";
  * Canonical domain model representing a fully resolved crosshair placement and animation configuration.
  * Enforces strict property schema contracts and authoritative normalization across all layers.
  */
+export interface CrosshairSourceData {
+    itemName?: string;
+    id?: string;
+    isDefault?: boolean;
+    isCustom?: boolean;
+    enabled?: boolean;
+    options?: Record<string, any>;
+    broadcast?: boolean;
+    file?: Record<string, any>;
+    preview?: Record<string, any>;
+    placed?: Record<string, any>;
+    macro?: Record<string, any>;
+    circleFile?: string;
+    coneFile?: string;
+    rayFile?: string;
+    rectangleFile?: string;
+    squareFile?: string;
+    lineFile?: string;
+    stickToToken?: string;
+    showLine?: boolean;
+    showRange?: boolean;
+    showItemIcon?: boolean;
+    limitRange?: boolean;
+    borderPlayerColor?: boolean;
+    borderColor?: string;
+    borderAlpha?: number;
+    fillPlayerColor?: boolean;
+    fillColor?: string;
+    fillAlpha?: number;
+    placedFillPlayerColor?: boolean;
+    placedFillColor?: string;
+    placedFillAlpha?: number;
+    placedBorderPlayerColor?: boolean;
+    placedBorderColor?: string;
+    placedBorderAlpha?: number;
+    persist?: boolean;
+    concurrentCode?: string;
+    postPlacementCode?: string;
+    enablePrePlacement?: boolean;
+    enableAnimation?: boolean;
+    enablePreviewPlacement?: boolean;
+    enablePlacedStyling?: boolean;
+    enablePostPlacement?: boolean;
+    item?: any;
+    activity?: any;
+    sourceModule?: string;
+    module?: string;
+    isCrosshairConfiguration?: boolean;
+}
+
 export class CrosshairConfiguration {
+    isCrosshairConfiguration: boolean;
+    itemName: string;
+    id: string;
+    isDefault: boolean;
+    isCustom: boolean;
+    enabled: boolean;
+    broadcast: boolean;
+    circleFile: string;
+    coneFile: string;
+    rayFile: string;
+    rectangleFile: string;
+    lineFile: string;
+    stickToToken: string;
+    showLine: boolean;
+    showRange: boolean;
+    showItemIcon: boolean;
+    limitRange: boolean;
+    borderPlayerColor: boolean;
+    borderColor: string;
+    borderAlpha: number;
+    fillPlayerColor: boolean;
+    fillColor: string;
+    fillAlpha: number;
+    placedFillPlayerColor: boolean;
+    placedFillColor: string;
+    placedFillAlpha: number;
+    placedBorderPlayerColor: boolean;
+    placedBorderColor: string;
+    placedBorderAlpha: number;
+    persist: boolean;
+    concurrentCode: string;
+    postPlacementCode: string;
+    enablePrePlacement: boolean;
+    enableAnimation: boolean;
+    enablePreviewPlacement: boolean;
+    enablePlacedStyling: boolean;
+    enablePostPlacement: boolean;
+    item: any;
+    activity: any;
+    sourceModule: string;
+
     /**
      * Construct a new CrosshairConfiguration instance with strict normalization against schema defaults.
-     * @param {Object} [source={}] - Partial or complete source configuration dictionary
+     * @param {CrosshairSourceData} [source={}] - Partial or complete source configuration dictionary
      */
-    constructor(source = {}) {
+    constructor(source: CrosshairSourceData = {}) {
         this.isCrosshairConfiguration = true;
         const defaults = DEFAULT_AUTOREC_ENTRY;
 
@@ -128,21 +219,21 @@ export class CrosshairConfiguration {
 
     /**
      * Create a normalized CrosshairConfiguration instance from any raw source object.
-     * @param {Object} [source={}] - Raw configuration object
+     * @param {CrosshairSourceData | CrosshairConfiguration} [source={}] - Raw configuration object
      * @returns {CrosshairConfiguration} Normalized configuration instance
      */
-    static fromSource(source = {}) {
-        if (source?.isCrosshairConfiguration) return source;
+    static fromSource(source: CrosshairSourceData | CrosshairConfiguration = {}): CrosshairConfiguration {
+        if ("isCrosshairConfiguration" in source && source.isCrosshairConfiguration) return source as CrosshairConfiguration;
         return new CrosshairConfiguration(source);
     }
 
     /**
      * Layer a custom override configuration onto this base configuration.
      * Respects granular section enablement flags (`enableAnimation`, `enablePrePlacement`, etc.).
-     * @param {Object} [customSource={}] - Custom configuration object (e.g. from item flags)
+     * @param {CrosshairSourceData} [customSource={}] - Custom configuration object (e.g. from item flags)
      * @returns {CrosshairConfiguration} New merged CrosshairConfiguration instance
      */
-    overrideWith(customSource = {}) {
+    overrideWith(customSource: CrosshairSourceData = {}): CrosshairConfiguration {
         if (!customSource) {
             return this;
         }

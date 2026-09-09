@@ -7,10 +7,18 @@ import { adapter } from "../adapter/index.js";
  * Manages periodic socket broadcasting of local crosshair state to connected peer clients.
  */
 export class CrosshairBroadcaster {
+    shape: any;
+    timer: any;
+    placementId: string | null;
+    lastState: any;
+    lastBroadcastTime: number;
+    intervalMs: number;
+    heartbeatIntervalMs: number;
+
     /**
      * @param {object} shape - The owning BaseCrosshairShape instance
      */
-    constructor(shape) {
+    constructor(shape: any) {
         this.shape = shape;
         this.timer = null;
         this.placementId = null;
@@ -214,7 +222,7 @@ export class CrosshairBroadcaster {
             socketlib.emit({
                 type: "CROSSHAIR_END",
                 placementId: this.placementId,
-                senderUserId: game.user.id,
+                senderUserId: game.user?.id ?? "",
                 reason,
                 originX: finalOriginX,
                 originY: finalOriginY,

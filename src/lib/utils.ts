@@ -37,7 +37,7 @@ export const version = {
      * @param {string} [max] - Optional maximum allowed version string
      * @returns {boolean} True if current is between min and max inclusive, false otherwise.
      */
-    clamp(current, min, max) {
+    clamp(current: string, min: string, max?: string): boolean {
         if (!current || !min) return false;
         const isNewer = foundry?.utils?.isNewerVersion;
         if (!isNewer) return false;

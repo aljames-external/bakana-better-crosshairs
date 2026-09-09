@@ -19,18 +19,18 @@ export function registerModuleSettings() {
         label: 'BBC.settings.autorecMenu.label',
         hint: 'BBC.settings.autorecMenu.hint',
         icon: 'fa-solid fa-wand-magic-sparkles',
-        type: AutorecMenuApplication,
+        type: AutorecMenuApplication as any,
         restricted: true
-    });
+    } as any);
 
     game.settings.registerMenu(MODULE_ID, 'autorecExchangeMenu', {
         name: 'BBC.settings.autorecExchangeMenu.name',
         label: 'BBC.settings.autorecExchangeMenu.label',
         hint: 'BBC.settings.autorecExchangeMenu.hint',
         icon: 'fa-solid fa-file-import',
-        type: AutorecExchangeMenuApplication,
+        type: AutorecExchangeMenuApplication as any,
         restricted: true
-    });
+    } as any);
 
     game.settings.register(MODULE_ID, 'registeredTemplates', {
         name: 'BBC.settings.registeredTemplates.name',
@@ -45,9 +45,9 @@ export function registerModuleSettings() {
          * @returns {void}
          */
         onChange: (savedRegistrations) => {
-            autorecManager.loadSavedRegistrations(savedRegistrations ?? {});
+            autorecManager.loadSavedRegistrations((savedRegistrations as any) ?? {});
         }
-    });
+    } as any);
 
     game.settings.register(MODULE_ID, 'enableCrosshairBroadcasting', {
         name: 'BBC.settings.enableCrosshairBroadcasting.name',
@@ -57,7 +57,7 @@ export function registerModuleSettings() {
         restricted: true,
         type: Boolean,
         default: true
-    });
+    } as any);
 
     game.settings.register(MODULE_ID, 'showOtherPlayersCrosshairs', {
         name: 'BBC.settings.showOtherPlayersCrosshairs.name',
@@ -67,7 +67,7 @@ export function registerModuleSettings() {
         restricted: false,
         type: Boolean,
         default: true
-    });
+    } as any);
 
     game.settings.register(MODULE_ID, 'logVerbosity', {
         name: 'BBC.settings.logVerbosity.name',
@@ -153,7 +153,7 @@ export function injectSettingsHeaders(html, _app = null) {
     ];
 
     for (const section of sections) {
-        let targetEl = null;
+        let targetEl: Element | null = null;
         for (const key of section.keys) {
             const selector = [
                 `[data-setting-id="${MODULE_ID}.${key}"]`,
@@ -178,10 +178,10 @@ export function injectSettingsHeaders(html, _app = null) {
         if (!formGroup || !parent) continue;
 
         // Ensure we don't insert duplicate headers
-        const existing = parent.querySelector?.(`.bbc-settings-section-header[data-scope="${section.scope}"]`);
+        const existing = (parent as any).querySelector?.(`.bbc-settings-section-header[data-scope="${section.scope}"]`);
         if (existing) continue;
 
-        const prev = formGroup.previousElementSibling;
+        const prev = formGroup.previousElementSibling as any;
         if (prev?.classList?.contains('bbc-settings-section-header') && prev?.dataset?.scope === section.scope) {
             continue;
         }
@@ -194,7 +194,7 @@ export function injectSettingsHeaders(html, _app = null) {
     }
 }
 
-Hooks.on('renderSettingsConfig', (app, html) => {
+Hooks.on('renderSettingsConfig', (app: any, html: any) => {
     injectSettingsHeaders(html, app);
 });
 

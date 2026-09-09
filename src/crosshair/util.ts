@@ -5,7 +5,13 @@ import { TokenGeometry } from "../lib/tokenGeometry.js";
 import { rotationListener } from "./rotationListener.js";
 import { ScriptRunner } from "../lib/scriptRunner.js";
 
-export const activePlacementTracker = {
+export const activePlacementTracker: {
+    placeable: any;
+    dimensions: any;
+    crosshair: any;
+    config: any;
+    sticky: boolean;
+} = {
     placeable: null,
     dimensions: null,
     crosshair: null,
@@ -126,7 +132,7 @@ export function rotateCrosshairInstance(crosshair, newDirDeg, config = {}) {
  * @param {number} rad - Current rotation angle in radians
  * @returns {void}
  */
-export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
+export function alignCrosshairAndEffects(crosshair: any, config: Record<string, any> = {}, rad: number = 0) {
     const deg = config.currentDirection ?? config.direction ?? (rad * (180 / Math.PI));
     rotateCrosshairInstance(crosshair, deg, config);
 
@@ -230,15 +236,15 @@ export function alignCrosshairAndEffects(crosshair, config = {}, rad = 0) {
  * @param {object} [config={}] - Crosshair placement configuration
  * @returns {number} Snapping mode bitmask integer
  */
-export function getGridSnapMode(config = {}) {
+export function getGridSnapMode(config: Record<string, any> = {}) {
     if (config.snapToGrid === false || config.snapToGrid === "none" || config.snapToGrid === 0 || config.snapToGrid === "0") return 0;
     if (typeof config.snapToGrid === "number") return config.snapToGrid;
     if (config.snapToGrid === "center") return CONST?.GRID_SNAPPING_MODES?.CENTER ?? 1;
     if (config.snapToGrid === "corner" || config.snapToGrid === "vertex" || config.snapToGrid === "corners") return CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2;
-    if (config.snapToGrid === "side" || config.snapToGrid === "edge" || config.snapToGrid === "edges") return CONST?.GRID_SNAPPING_MODES?.SIDE_MIDPOINT ?? CONST?.GRID_SNAPPING_MODES?.SIDE ?? 4;
+    if (config.snapToGrid === "side" || config.snapToGrid === "edge" || config.snapToGrid === "edges") return CONST?.GRID_SNAPPING_MODES?.SIDE_MIDPOINT ?? (CONST?.GRID_SNAPPING_MODES as any)?.SIDE ?? 4;
     return (CONST?.GRID_SNAPPING_MODES?.CENTER ?? 1) |
            (CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2) |
-           (CONST?.GRID_SNAPPING_MODES?.SIDE_MIDPOINT ?? CONST?.GRID_SNAPPING_MODES?.SIDE ?? 4);
+           (CONST?.GRID_SNAPPING_MODES?.SIDE_MIDPOINT ?? (CONST?.GRID_SNAPPING_MODES as any)?.SIDE ?? 4);
 }
 
 /**
@@ -248,7 +254,7 @@ export function getGridSnapMode(config = {}) {
  * @param {...*} extraArgs - Additional arguments passed by placement callback
  * @returns {object} Formatted placement coordinates and direction `{ x, y, direction }`
  */
-export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) {
+export function resolveCrosshairPlacement(crosshair: any, config: Record<string, any> = {}, ...extraArgs: any[]) {
     detachWheelRotation();
     log.debug("resolveCrosshairPlacement | Inspecting arguments passed to PLACED callback:", crosshair, config, extraArgs);
 
@@ -286,7 +292,7 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
         }
     }
 
-    const mousePos = adapter.crosshair.mousePosition ?? {};
+    const mousePos = (adapter.crosshair.mousePosition ?? {}) as any;
     const clickX = mousePos.x ?? 0;
     const clickY = mousePos.y ?? 0;
 
@@ -341,8 +347,8 @@ export function resolveCrosshairPlacement(crosshair, config = {}, ...extraArgs) 
  * @param {string|number|boolean} [mode="all"] - Snapping mode ("all", "center", "corner", "edges", bitmask integer)
  * @returns {object} Snapped coordinates `{ x, y }`
  */
-export function snapCoordinates(x, y, mode = "all") {
-    return adapter.crosshair.snapCoordinates(x, y, mode);
+export function snapCoordinates(x: number, y: number, mode: string | number | boolean = "all") {
+    return adapter.crosshair.snapCoordinates(x, y, mode as any);
 }
 
 /**
@@ -353,7 +359,7 @@ export function snapCoordinates(x, y, mode = "all") {
  * @param {boolean} [sticky=false] - Whether to snap to 8-way sticky perimeter points
  * @returns {object} Edge point coordinates and angle `{ x, y, direction }`
  */
-export function getTokenEdgePoint(tok, targetX, targetY, sticky = false) {
+export function getTokenEdgePoint(tok: any, targetX: number, targetY: number, sticky: boolean = false) {
     const token = adapter.crosshair.toToken(tok);
     return TokenGeometry.getTokenEdgePoint(token, targetX, targetY, sticky);
 }
@@ -366,7 +372,7 @@ export function getTokenEdgePoint(tok, targetX, targetY, sticky = false) {
  * @param {object|null} [crosshairSequence=null] - Active Sequencer crosshair sequence instance
  * @returns {Promise<void>}
  */
-export async function runConcurrentScript(token, config = {}, crosshairSequence = null) {
+export async function runConcurrentScript(token: any, config: Record<string, any> = {}, crosshairSequence: any = null) {
     const code = config.concurrentCode;
     if (!code || typeof code !== "string" || !code.trim()) return;
 

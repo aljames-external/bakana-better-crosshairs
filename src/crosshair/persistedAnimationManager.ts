@@ -70,7 +70,7 @@ export class PersistedAnimationManager {
             }
         }
 
-        const detected = adapter.crosshair.detectProperties(doc);
+        const detected = adapter.crosshair.detectProperties(doc) as any;
         const shapeType = detected.type ?? "circle";
         const { factor, gridUnits } = adapter.crosshair.getTemplatePixelFactor();
         const pxPerFoot = adapter.crosshair.pixelsPerDistance;

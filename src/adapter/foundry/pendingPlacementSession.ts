@@ -6,6 +6,22 @@ import { activePlacementTracker } from "../../crosshair/util.js";
  * handling deferred document creation, programmatic placement delegation, and cancellation.
  */
 export class PendingPlacementSession {
+    adapter: any;
+    placementKey: string;
+    pending: any;
+    doc: any;
+    placeable: any;
+    x?: number;
+    y?: number;
+    distance?: number;
+    direction?: number;
+    t?: string;
+    radius?: number;
+    rotation?: number;
+    type?: string;
+    cancelled: boolean;
+    resolved: boolean;
+
     /**
      * @param {object} adapter - The active Foundry version adapter
      * @param {string} placementKey - The unique key identifying this pending placement
@@ -13,7 +29,7 @@ export class PendingPlacementSession {
      * @param {Document} doc - Target Foundry Document being placed
      * @param {PlaceableObject} placeable - Target canvas placeable preview object
      */
-    constructor(adapter, placementKey, pending, doc, placeable) {
+    constructor(adapter: any, placementKey: string, pending: any, doc: any, placeable: any) {
         this.adapter = adapter;
         this.placementKey = placementKey;
         this.pending = pending;

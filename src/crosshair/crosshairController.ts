@@ -8,7 +8,12 @@ import { getPeerCursorPosition } from "./remoteCrosshairManager.js";
  * Unified Controller managing crosshair animation, snapping, position updates, and visual rendering
  * for both Local interactive placement and Remote peer player visual tracking.
  */
-let shapeClasses = null;
+let shapeClasses: {
+    CircleCrosshairShape: any;
+    ConeCrosshairShape: any;
+    RayCrosshairShape: any;
+    SquareCrosshairShape: any;
+} | null = null;
 
 /**
  * Lazy async loader for shape subclass models to prevent circular ES module import dependency loops.
@@ -27,20 +32,34 @@ export async function getShapeClasses() {
     return shapeClasses;
 }
 
+export interface CrosshairControllerOptions {
+    updateTrigger?: "event" | "ticker";
+    intervalMs?: number;
+}
+
 /**
  * Unified Controller managing crosshair animation, snapping, position updates, and visual rendering
  * for both Local interactive placement and Remote peer player visual tracking.
  */
 export class CrosshairController {
+    shape: any;
+    config: Record<string, any>;
+    getCursorPositionFn: (token?: any, config?: any) => { x: number; y: number } | null;
+    updateTrigger: "event" | "ticker";
+    intervalMs: number;
+    lastRenderTime: number;
+    isDestroyed: boolean;
+    started: boolean;
+    private _onPointerMoveBound: any;
+    private _onTickerBound: any;
+
     /**
      * @param {import("./base.js").BaseCrosshairShape} shape - Crosshair shape instance
      * @param {Object} config - Configuration options
      * @param {Function} getCursorPositionFn - Callback function returning live {x, y} coordinates
-     * @param {Object} [options={}] - Execution options
-     * @param {string} [options.updateTrigger="event"] - Update mode ("event" | "ticker")
-     * @param {number} [options.intervalMs=200] - Ticker throttle interval in milliseconds
+     * @param {CrosshairControllerOptions} [options={}] - Execution options
      */
-    constructor(shape, config = {}, getCursorPositionFn, options = {}) {
+    constructor(shape: any, config: Record<string, any> = {}, getCursorPositionFn?: any, options: CrosshairControllerOptions = {}) {
         this.shape = shape;
         this.config = config;
         this.getCursorPositionFn = getCursorPositionFn;
@@ -48,6 +67,7 @@ export class CrosshairController {
         this.intervalMs = options.intervalMs ?? BROADCAST_INTERVAL_MS;
         this.lastRenderTime = 0;
         this.isDestroyed = false;
+        this.started = false;
         this._onPointerMoveBound = this._onPointerMove.bind(this);
         this._onTickerBound = this._onTicker.bind(this);
     }
@@ -180,10 +200,10 @@ export class CrosshairController {
      * @param {object} [options={}] - Options containing effect id or options
      * @returns {Promise<void>}
      */
-    static async hide(sourceToken, options = {}) {
+    static async hide(sourceToken: any, options: { id?: string; [key: string]: any } = {}) {
         const token = adapter.crosshair.toToken(sourceToken);
         const effectId = options.id ?? "Crosshair";
-        if (game.modules.get("sequencer")?.active) {
+        if (game?.modules?.get("sequencer")?.active) {
             try {
                 await Sequencer.EffectManager.endEffects({ name: effectId, object: token });
                 await Sequencer.EffectManager.endEffects({ name: `${effectId}-line`, object: token });
@@ -197,7 +217,7 @@ export class CrosshairController {
     /**
      * Alias for CrosshairController.hide
      */
-    static async stop(sourceToken, options = {}) {
+    static async stop(sourceToken: any, options: { id?: string; [key: string]: any } = {}) {
         return CrosshairController.hide(sourceToken, options);
     }
 }
@@ -214,10 +234,17 @@ export class CrosshairController {
  * @param {object} [options={}] - Additional configuration and visual execution options
  * @returns {Promise<object>} Controller handle object with { shape, controller, token, start, update, stop, hide }
  */
-export async function attachCrosshairToToken(sourceToken, shape, size, getCursorPositionFn, cancelFn, options = {}) {
+export async function attachCrosshairToToken(
+    sourceToken: any,
+    shape: any,
+    size: any,
+    getCursorPositionFn?: any,
+    cancelFn?: any,
+    options: Record<string, any> = {}
+) {
     const token = adapter.crosshair.toToken(sourceToken);
 
-    const extractUserId = (val) => val?.id ?? val ?? "";
+    const extractUserId = (val: any) => val?.id ?? val ?? "";
 
     const callingUserId =
         extractUserId(options.callingUserId) ||
@@ -231,7 +258,7 @@ export async function attachCrosshairToToken(sourceToken, shape, size, getCursor
         options.senderUserId = callingUserId;
     }
 
-    let sizeConfig = {};
+    let sizeConfig: Record<string, any> = {};
     if (Number.isFinite(size)) {
         sizeConfig = { distance: size, radius: size };
     } else if (size) {
@@ -243,7 +270,7 @@ export async function attachCrosshairToToken(sourceToken, shape, size, getCursor
             ? () => getPeerCursorPosition(options.senderUserId)
             : () => (adapter.crosshair.mousePosition ?? null));
 
-    let resolvedCancelFn = null;
+    let resolvedCancelFn: any = null;
     if (cancelFn?.cancel) {
         resolvedCancelFn = () => cancelFn.cancel();
     } else if (cancelFn) {
@@ -258,7 +285,7 @@ export async function attachCrosshairToToken(sourceToken, shape, size, getCursor
         context: cancelFn?.cancel ? cancelFn : options.context
     };
 
-    let shapeInstance = null;
+    let shapeInstance: any = null;
     if (shape?.move && shape?.rotate) {
         shapeInstance = shape;
         if (token) shapeInstance.token = token;
@@ -269,18 +296,18 @@ export async function attachCrosshairToToken(sourceToken, shape, size, getCursor
         const shapeType = String(shape ?? options.type ?? "circle").toLowerCase();
         const classes = await getShapeClasses();
         const previewPlaceable = adapter.crosshair.createUnpersistedPreviewPlaceable(mergedConfig);
-        if (shapeType === "cone" && classes.ConeCrosshairShape) {
+        if (shapeType === "cone" && classes?.ConeCrosshairShape) {
             shapeInstance = new classes.ConeCrosshairShape(previewPlaceable, mergedConfig);
-        } else if (shapeType === "ray" && classes.RayCrosshairShape) {
+        } else if (shapeType === "ray" && classes?.RayCrosshairShape) {
             shapeInstance = new classes.RayCrosshairShape(previewPlaceable, mergedConfig);
-        } else if ((shapeType === "square" || shapeType === "rect") && classes.SquareCrosshairShape) {
+        } else if ((shapeType === "square" || shapeType === "rect") && classes?.SquareCrosshairShape) {
             shapeInstance = new classes.SquareCrosshairShape(previewPlaceable, mergedConfig);
-        } else if (classes.CircleCrosshairShape) {
+        } else if (classes?.CircleCrosshairShape) {
             shapeInstance = new classes.CircleCrosshairShape(previewPlaceable, mergedConfig);
         }
     }
 
-    const controllerOptions = {
+    const controllerOptions: CrosshairControllerOptions = {
         updateTrigger: options.updateTrigger ?? (options.isRemote ? "ticker" : "event"),
         intervalMs: options.intervalMs ?? BROADCAST_INTERVAL_MS
     };
@@ -290,7 +317,7 @@ export async function attachCrosshairToToken(sourceToken, shape, size, getCursor
         shapeInstance.controller = controller;
     }
 
-    const handle = {
+    const handle: Record<string, any> = {
         shape: shapeInstance,
         controller,
         token,
@@ -318,7 +345,7 @@ export async function attachCrosshairToToken(sourceToken, shape, size, getCursor
             controller.stop();
             shapeInstance?.stopBroadcasting?.(reason);
             const effectId = shapeInstance?.id ?? options.id ?? "Crosshair";
-            if (game.modules.get("sequencer")?.active) {
+            if (game?.modules?.get("sequencer")?.active) {
                 try {
                     await Sequencer.EffectManager.endEffects({ name: effectId, object: token });
                     await Sequencer.EffectManager.endEffects({ name: `${effectId}-line`, object: token });
@@ -337,7 +364,17 @@ export async function attachCrosshairToToken(sourceToken, shape, size, getCursor
             }
         },
         hide: async () => {
-            await handle.stop("hidden");
+            shapeInstance?.hide?.();
+            const effectId = shapeInstance?.id ?? options.id ?? "Crosshair";
+            if (game?.modules?.get("sequencer")?.active) {
+                try {
+                    await Sequencer.EffectManager.endEffects({ name: effectId, object: token });
+                    await Sequencer.EffectManager.endEffects({ name: `${effectId}-line`, object: token });
+                    await Sequencer.EffectManager.endEffects({ name: `${effectId}-icon`, object: token });
+                } catch (e) {
+                    log.debug("attachCrosshairToToken.hide | Exception ending Sequencer effects:", e);
+                }
+            }
         }
     };
 

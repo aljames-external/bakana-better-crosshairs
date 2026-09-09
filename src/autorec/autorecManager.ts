@@ -96,6 +96,13 @@ export function computeRegistrationKey(itemName, activityName = "", activityId =
  * Encapsulated as a class instead of free-floating module-level functions.
  */
 export class AutorecManager {
+    registeredHandlers: Map<string, Record<string, any>>;
+    fastLookupMap: Map<string, any>;
+    persistedItemNames: Set<string>;
+    readySyncInitialized: boolean;
+    _onRegisterCallback: ((entry: any) => void) | null;
+    getDefault: () => Record<string, any>;
+
     /**
      * Initialize the AutorecManager instance with default registrations and bind methods.
      * @returns {void}
@@ -380,7 +387,7 @@ export class AutorecManager {
     getEntriesForItem(itemName) {
         if (!itemName) return [];
         const cleanName = String(itemName).trim().toLowerCase();
-        const candidates = [];
+        const candidates: Array<Record<string, any>> = [];
         for (const entry of this.registeredHandlers.values()) {
             if (entry.isDefault || !entry.enabled) continue;
             if ((entry.itemName ?? "").trim().toLowerCase() === cleanName) {
@@ -567,7 +574,7 @@ export class AutorecManager {
             }
         }
 
-        for (const [itemName, rawConfig] of Object.entries(savedRegistrations)) {
+        for (const [itemName, rawConfig] of Object.entries(savedRegistrations) as [string, any][]) {
             const baseConfig = rawConfig?.handler ?? rawConfig;
             const config = autorecCompatibilityUpdate(baseConfig);
             const current = this.registeredHandlers.get(itemName);
@@ -593,9 +600,9 @@ export class AutorecManager {
      * @param {boolean} [options.local=false] - Whether this registration should only exist locally on this client and not persist or sync
      * @returns {void}
      */
-    register(itemName, handlerOrConfig = {}, { persist = true, local = false, sourceModule = null, isHydration = false, isImport = false, suppressWarn = false } = {}) {
+    register(itemName: string, handlerOrConfig: any = {}, { persist = true, local = false, sourceModule = null, isHydration = false, isImport = false, suppressWarn = false }: Record<string, any> = {}) {
         if (this._onRegisterCallback) {
-            this._onRegisterCallback();
+            (this._onRegisterCallback as any)(handlerOrConfig);
         }
         const isLocal = Boolean(local || handlerOrConfig?.local || (!persist && !isHydration));
         if (isLocal && typeof handlerOrConfig === "object" && handlerOrConfig !== null) {
@@ -684,7 +691,7 @@ export class AutorecManager {
         const targetHash = cleanName.includes(" | ")
             ? computeRegistrationKey(cleanName.split(" | ")[0].trim(), cleanName.split(" | ").slice(1).join(" | ").trim()).toLowerCase()
             : null;
-        const matchingKeys = [];
+        const matchingKeys: string[] = [];
         for (const [key, handler] of this.registeredHandlers.entries()) {
             const lowerKey = key.toLowerCase();
             const handlerItemName = String(handler?.itemName ?? key).trim().toLowerCase();
@@ -725,9 +732,9 @@ export class AutorecManager {
      * @param {boolean} [options.local=false] - Whether to only unregister locally
      * @returns {Promise<void>}
      */
-    async unregisterMany(itemNames, { persist = true, local = false } = {}) {
+    async unregisterMany(itemNames: string[], { persist = true, local = false }: { persist?: boolean; local?: boolean } = {}) {
         if (!Array.isArray(itemNames)) return;
-        const matchingKeys = new Set();
+        const matchingKeys = new Set<string>();
         for (const rawName of itemNames) {
             const cleanName = String(rawName ?? "").trim();
             if (!cleanName) continue;
@@ -794,9 +801,9 @@ export class AutorecManager {
             const isGM = Boolean(game.user?.isGM);
             if (isGM) {
                 try {
-                    const saved = adapter.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") ?? {});
+                    const saved = adapter.deepClone(game.settings?.get(MODULE_ID, "registeredTemplates") ?? {});
                     Object.assign(saved, toPersist);
-                    await game.settings.set(MODULE_ID, "registeredTemplates", saved);
+                    await game.settings?.set(MODULE_ID, "registeredTemplates", saved);
                     this.broadcastSync();
                 } catch (e) {
                     log.error("AutorecManager.registerMany | Failed to batch persist template registrations:", e);
@@ -814,11 +821,11 @@ export class AutorecManager {
      * @param {Object<string, Object>} [persistedDict={}] - Entire dictionary of configurations to save
      * @returns {Promise<void>}
      */
-    async overwrite(persistedDict = {}) {
+    async overwrite(persistedDict: Record<string, any> = {}) {
         const isGM = Boolean(game.user?.isGM);
         if (isGM) {
             try {
-                await game.settings.set(MODULE_ID, "registeredTemplates", persistedDict);
+                await game.settings?.set(MODULE_ID, "registeredTemplates", persistedDict);
                 this.persistedItemNames.clear();
                 for (const itemName of Object.keys(persistedDict)) {
                     this.persistedItemNames.add(itemName);
@@ -869,12 +876,12 @@ export class AutorecManager {
      * @returns {Array<Object>} Array of UI-formatted autorec entry dictionaries
      */
     getAllEntries() {
-        const results = [];
+        const results: any[] = [];
         for (const [itemName, handlerOrConfig] of this.registeredHandlers.entries()) {
             let type = "Auto-Detect";
             let file = "";
             let isCustomFunction = false;
-            let config = {};
+            let config: any = {};
 
             let rawType = "Auto-Detect";
             if (typeof handlerOrConfig === "function") {
@@ -883,13 +890,13 @@ export class AutorecManager {
                 type = localize("BBC.Autorec.Type.CustomScript", "Custom Script");
                 file = localize("BBC.Autorec.File.FunctionHandler", "Function Handler");
             } else {
-                config = handlerOrConfig ?? {};
+                config = (handlerOrConfig ?? {}) as any;
                 rawType = config.type ?? "Auto-Detect";
                 type = rawType === "Auto-Detect" ? localize("BBC.Autorec.Type.AutoDetect", "Auto-Detect") : rawType;
                 file = config.file ?? "";
             }
 
-            const isLocal = Boolean(handlerOrConfig?.local) || !this.persistedItemNames.has(itemName);
+            const isLocal = Boolean((handlerOrConfig as any)?.local) || !this.persistedItemNames.has(itemName);
 
             const isDefault = Boolean(config.isDefault);
             const circleFile = config.circleFile ?? DEFAULT_AUTOREC_ENTRY.circleFile;
@@ -1050,8 +1057,8 @@ export class AutorecManager {
      * @param {Array<Object>|null} [options.entriesInput=null] - Optional pre-filtered entries list
      * @returns {Object} Exchange package object conforming to AUTOREC_EXCHANGE_VERSION
      */
-    exportAutorecs({ sourceModule = "world", includeDefault = false, description = "", entriesInput = null } = {}) {
-        let rawEntries = entriesInput;
+    exportAutorecs({ sourceModule = "world", includeDefault = false, description = "", entriesInput = null }: any = {}) {
+        let rawEntries: any[] | null = entriesInput;
         if (!Array.isArray(rawEntries)) {
             rawEntries = [];
             for (const [regKey, handler] of this.registeredHandlers.entries()) {
@@ -1123,7 +1130,7 @@ export class AutorecManager {
         const validatedPkg = this.validateImportPackage(jsonOrString, { overrideSourceModule });
         const diffAnalysis = this.analyzeImportDiff(validatedPkg, { defaultSourceModule: sourceModule, overrideSourceModule });
 
-        let selectedEntries = null;
+        let selectedEntries: any[] | null = null;
 
         const canShowDialog = Boolean(interactive && game?.user?.isGM);
         if (canShowDialog) {
@@ -1133,7 +1140,7 @@ export class AutorecManager {
                 return null;
             }
         } else {
-            const list = [];
+            const list: any[] = [];
             for (const item of diffAnalysis.newEntries) {
                 list.push(item);
             }
@@ -1232,9 +1239,9 @@ export class AutorecManager {
             const isGM = Boolean(game?.user?.isGM);
             if (isGM) {
                 try {
-                    const saved = adapter.deepClone(game.settings.get(MODULE_ID, "registeredTemplates") ?? {});
+                    const saved = adapter.deepClone(game?.settings?.get?.(MODULE_ID, "registeredTemplates") ?? {});
                     Object.assign(saved, toPersist);
-                    await game.settings.set(MODULE_ID, "registeredTemplates", saved);
+                    await (game?.settings as any)?.set?.(MODULE_ID, "registeredTemplates", saved);
                     this.broadcastSync();
                 } catch (e) {
                     log.error("AutorecManager.mergeImportedEntries | Failed to persist imported registrations to world setting:", e);
@@ -1277,14 +1284,18 @@ export function makeCallableManager(managerInstance) {
     });
 }
 
-rawAutorecManager.ModuleAutorecManager = ModuleAutorecManager;
-rawAutorecManager.Module = ModuleAutorecManager;
+(rawAutorecManager as any).ModuleAutorecManager = ModuleAutorecManager;
+(rawAutorecManager as any).Module = ModuleAutorecManager;
+
+export type CallableAutorecManager = ((moduleId: string) => ModuleAutorecManager) & AutorecManager & {
+    ModuleAutorecManager: typeof ModuleAutorecManager;
+    Module: typeof ModuleAutorecManager;
+};
 
 /**
  * Callable singleton instance of AutorecManager.
  * Can be called as a function `autorecManager("module-id")` or used as a standard manager object.
- * @type {Function & AutorecManager}
  */
-export const autorecManager = makeCallableManager(rawAutorecManager);
+export const autorecManager: CallableAutorecManager = makeCallableManager(rawAutorecManager) as any;
 autorecManager.ModuleAutorecManager = ModuleAutorecManager;
 autorecManager.Module = ModuleAutorecManager;

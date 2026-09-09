@@ -109,11 +109,16 @@ function inspectScopeCustomState(customConfig) {
  * Extends BaseCrosshairMenuApplication for ApplicationV2 and template method compliance.
  */
 export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication {
+    item: any;
+    selectedScope: string;
+    isEditMode: boolean;
+    hasCustom?: boolean;
+
     /**
      * Default application configuration options.
      * @type {object}
      */
-    static DEFAULT_OPTIONS = {
+    static override DEFAULT_OPTIONS: any = {
         id: "bbc-item-crosshair-config",
         tag: "form",
         form: {
@@ -140,7 +145,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
      * @param {FormData} formData - Form submission payload
      * @returns {Promise<void>}
      */
-    static async #onSubmitForm(event, form, formData) {
+    static async #onSubmitForm(this: any, event: any, form: any, formData: any) {
         await this._saveConfiguration(form);
     }
 
@@ -148,7 +153,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
      * Application rendering template parts.
      * @type {object}
      */
-    static PARTS = {
+    static override PARTS: any = {
         main: {
             template: `modules/${MODULE_ID}/src/autorec/itemConfigMenu.html`
         }
@@ -160,7 +165,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
      * @param {object} [options={}] - Application instantiation options containing target item
      * @returns {ItemCrosshairConfigApplication} Form application instance
      */
-    constructor(options = {}) {
+    constructor(options: any = {}) {
         const itemDoc = options.item?.document ?? options.item ?? null;
         super({
             ...options,
@@ -177,7 +182,7 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
      * @param {object} options - Application rendering options
      * @returns {Promise<object>} Context data object passed to the Handlebars template
      */
-    async _prepareContext(options) {
+    protected override async _prepareContext(options: any): Promise<any> {
         const item = this.item;
         const itemName = item?.name ?? "Unknown Item";
         const itemImg = item?.img ?? null;
@@ -383,8 +388,6 @@ export class ItemCrosshairConfigApplication extends BaseCrosshairMenuApplication
             usePlayerColor: localize("BBC.autorecMenu.labels.usePlayerColor", "Player Color"),
             persistEffect: localize("BBC.autorecMenu.labels.persistEffect", "Persistent Animation"),
             alphaLabel: localize("BBC.autorecMenu.labels.alpha", "Alpha:"),
-            workflowDetails: localize("BBC.autorecMenu.sections.workflowDetails", "Workflow Details"),
-            workflowEnabled: localize("BBC.autorecMenu.labels.workflowEnabled", "Workflow Enabled"),
             broadcastCrosshairs: localize("BBC.autorecMenu.labels.broadcastCrosshairs", "Broadcast to Players"),
             enabledPill: localize("BBC.autorecMenu.pills.enabled", "Enabled"),
             disabledPill: localize("BBC.autorecMenu.pills.disabled", "Disabled"),

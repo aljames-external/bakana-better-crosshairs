@@ -113,7 +113,7 @@ function _versionMessageAppend(dependency, version) {
  * @param {string} [warnMessage] - Optional warning message prefix to log if not activated.
  * @returns {boolean} Whether the dependency is activated.
  */
-function isActivated(dependency, warnMessage) {
+function isActivated(dependency: any, warnMessage?: string) {
     if (!dependency?.id) return false;
     const valid = _isActivated(dependency);
     if (!valid && warnMessage) {
@@ -137,7 +137,7 @@ function isActivated(dependency, warnMessage) {
  * @param {string} [warnMessage] - Optional warning message prefix to log if not installed.
  * @returns {boolean} Whether the dependency is installed.
  */
-function isInstalled(dependency, warnMessage) {
+function isInstalled(dependency: any, warnMessage?: string) {
     if (!dependency?.id) return false;
     const valid = _isInstalled(dependency);
     if (!valid && warnMessage) {

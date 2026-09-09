@@ -9,11 +9,16 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
  * Displays conflicts ("will cause overwrites") vs brand new entries with granular checkboxes.
  */
 export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV2) {
+    diffAnalysis: any;
+    selectedIndices: Set<number>;
+    _resolvePromise: any;
+    promise: Promise<any>;
+
     /**
      * Application rendering options configuration.
      * @type {object}
      */
-    static DEFAULT_OPTIONS = {
+    static override DEFAULT_OPTIONS: any = {
         id: "bbc-autorec-import-dialog",
         tag: "div",
         window: {
@@ -33,7 +38,7 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
      * Handlebars partial templates specification.
      * @type {object}
      */
-    static PARTS = {
+    static override PARTS: any = {
         main: {
             template: `modules/${MODULE_ID}/src/autorec/autorecImportDialog.html`
         }
@@ -44,7 +49,7 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
      * @param {Object} diffAnalysis - Output from `analyzeImportDiff`
      * @param {Object} [options={}] - Application options
      */
-    constructor(diffAnalysis, options = {}) {
+    constructor(diffAnalysis: any, options: any = {}) {
         super(options);
         this.diffAnalysis = diffAnalysis;
         this.selectedIndices = new Set();
@@ -71,13 +76,13 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
      * @param {object} options - Application rendering options
      * @returns {Promise<object>} Template parameters data
      */
-    async _prepareContext(options) {
-        const newEntries = (this.diffAnalysis.newEntries ?? []).map(e => ({
+    protected override async _prepareContext(options: any): Promise<any> {
+        const newEntries = (this.diffAnalysis.newEntries ?? []).map((e: any) => ({
             ...e,
             selectedByDefault: this.selectedIndices.has(e.importIndex)
         }));
 
-        const conflictEntries = (this.diffAnalysis.conflictEntries ?? []).map(e => ({
+        const conflictEntries = (this.diffAnalysis.conflictEntries ?? []).map((e: any) => ({
             ...e,
             selectedByDefault: this.selectedIndices.has(e.importIndex)
         }));
@@ -134,8 +139,8 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
      * @param {object} options - Rendering options
      * @returns {void}
      */
-    _onRender(context, options) {
-        super._onRender?.(context, options);
+    protected override async _onRender(context: any, options: any): Promise<void> {
+        await super._onRender?.(context, options);
         const rootEl = this.element;
         if (!rootEl) return;
         this._attachCustomEventListeners(rootEl, context, options);
@@ -144,17 +149,17 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
     /**
      * Bind application UI click and checkbox change event handlers.
      * @protected
-     * @param {HTMLElement} root - Root HTML element of application
+     * @param {HTMLElement} rootEl - Root HTML element of application
      * @param {object} context - Prepared rendering context
      * @param {object} options - Options
      * @returns {void}
      */
-    _attachCustomEventListeners(root, context, options) {
-        if (!root || typeof root.querySelectorAll !== "function") return;
+    _attachCustomEventListeners(rootEl: any, context: any, options: any) {
+        if (!rootEl || typeof rootEl.querySelectorAll !== "function") return;
 
         // Checkbox modification
-        root.querySelectorAll(".bbc-entry-checkbox").forEach(chk => {
-            chk.addEventListener("change", (ev) => {
+        rootEl.querySelectorAll(".bbc-entry-checkbox").forEach((chk: any) => {
+            chk.addEventListener("change", (ev: any) => {
                 const idxStr = ev.currentTarget.dataset.importIndex;
                 const idx = parseInt(idxStr, 10);
                 if (isNaN(idx)) return;
@@ -283,7 +288,7 @@ export class AutorecImportDialog extends HandlebarsApplicationMixin(ApplicationV
      * Clean window close callback.
      * @override
      */
-    _onClose(options) {
+    protected override _onClose(options: any): void {
         super._onClose(options);
         if (this._resolvePromise) {
             this._resolvePromise(null);

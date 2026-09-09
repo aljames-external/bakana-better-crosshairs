@@ -5,10 +5,13 @@ import { adapter } from "../adapter/index.js";
  * Encapsulates live canvas grid distance measurement text beneath an active crosshair reticle.
  */
 export class CrosshairRangeOverlay {
+    shape: any;
+    textElement: any;
+
     /**
      * @param {object} shape - The owning BaseCrosshairShape instance
      */
-    constructor(shape) {
+    constructor(shape: any) {
         this.shape = shape;
         this.textElement = null;
     }
@@ -57,7 +60,7 @@ export class CrosshairRangeOverlay {
                 };
             if (style) style.align = "center";
             try {
-                this.textElement = new TextClass(labelStr, style);
+                this.textElement = new TextClass(labelStr, style as any);
                 this.textElement.anchor?.set?.(0.5, 1);
                 const parentContainer = shape.sequencerCrosshair.parent ?? adapter.crosshair.controls ?? adapter.crosshair.stage ?? shape.sequencerCrosshair;
                 parentContainer?.addChild?.(this.textElement);

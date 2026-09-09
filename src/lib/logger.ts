@@ -20,12 +20,32 @@ export const NOTIFICATION_LABELS = Object.freeze({
     info: ""
 });
 
+interface GroupEntry {
+    message: string;
+    level: string;
+    groupArgs: any[];
+    forceCollapse: boolean | null;
+    started: boolean;
+    enabled: boolean;
+}
+
 /**
  * Unified Logger and UI notification dispatcher for Bakana's Better Crosshairs.
  * Encapsulates console output (error, warn, info, debug, grouping) and debounced,
  * coalesced UI toast notifications.
  */
 export class Logger {
+    private _cachedVerbosity: number | null;
+    private _groupStack: GroupEntry[];
+    private _queues: Record<string, string[]>;
+    private _flushTimeout: any;
+    private _batchWindowMs: number;
+    notify: {
+        info: (message: string) => void;
+        warn: (message: string) => void;
+        error: (message: string) => void;
+    };
+
     constructor() {
         this._cachedVerbosity = null;
         this._groupStack = [];
@@ -38,9 +58,9 @@ export class Logger {
         this._batchWindowMs = 50;
 
         this.notify = Object.freeze({
-            info: (message) => this._enqueueNotification("info", message),
-            warn: (message) => this._enqueueNotification("warn", message),
-            error: (message) => this._enqueueNotification("error", message)
+            info: (message: string) => this._enqueueNotification("info", message),
+            warn: (message: string) => this._enqueueNotification("warn", message),
+            error: (message: string) => this._enqueueNotification("error", message)
         });
 
         this.error = this.error.bind(this);
@@ -60,14 +80,14 @@ export class Logger {
      * Defaults to 'warn' if the setting is not yet registered or unavailable.
      * @returns {number} The current numeric verbosity level.
      */
-    getVerbosityLevel() {
+    getVerbosityLevel(): number {
         if (this._cachedVerbosity !== null) return this._cachedVerbosity;
 
         try {
             if (game?.settings) {
-                const setting = game.settings.get(MODULE_ID, "logVerbosity");
-                this._cachedVerbosity = VERBOSITY_LEVELS[setting] ?? VERBOSITY_LEVELS.warn;
-                return this._cachedVerbosity;
+                const setting = game.settings.get(MODULE_ID, "logVerbosity") as string;
+                this._cachedVerbosity = (VERBOSITY_LEVELS as any)[setting] ?? VERBOSITY_LEVELS.warn;
+                return this._cachedVerbosity ?? VERBOSITY_LEVELS.warn;
             }
         } catch (e) {
             // Settings not yet registered or game not fully initialized
@@ -81,8 +101,8 @@ export class Logger {
      * @param {'error'|'warn'|'info'|'debug'} level - The new verbosity level key.
      * @returns {void}
      */
-    setVerbosity(level) {
-        this._cachedVerbosity = VERBOSITY_LEVELS[level] ?? VERBOSITY_LEVELS.warn;
+    setVerbosity(level: string) {
+        this._cachedVerbosity = (VERBOSITY_LEVELS as any)[level] ?? VERBOSITY_LEVELS.warn;
     }
 
     /**
@@ -93,7 +113,7 @@ export class Logger {
     _ensureGroupsStarted() {
         for (const entry of this._groupStack) {
             if (entry.enabled && !entry.started) {
-                const style = GROUP_STYLES[entry.level] ?? GROUP_STYLES.info;
+                const style = (GROUP_STYLES as any)[entry.level] ?? GROUP_STYLES.info;
                 const shouldCollapse = entry.forceCollapse ?? (entry.level === "debug" || entry.level === "info");
                 const consoleFn = (shouldCollapse && console.groupCollapsed) ? console.groupCollapsed : console.group;
                 consoleFn(`%c${MODULE_TLA} | ${entry.message}`, style, ...entry.groupArgs);
@@ -112,14 +132,14 @@ export class Logger {
      * @param {...*} args Optional verbosity level as first argument, followed by group payload
      * @private
      */
-    _createGroup(forceCollapse, message, ...args) {
+    _createGroup(forceCollapse: boolean | null, message: string, ...args: any[]) {
         let level = "info";
         let groupArgs = args;
-        if (args.length > 0 && VERBOSITY_LEVELS[args[0]] !== undefined) {
+        if (args.length > 0 && (VERBOSITY_LEVELS as any)[args[0]] !== undefined) {
             level = args[0];
             groupArgs = args.slice(1);
         }
-        const enabled = this.getVerbosityLevel() >= VERBOSITY_LEVELS[level];
+        const enabled = this.getVerbosityLevel() >= ((VERBOSITY_LEVELS as any)[level] ?? VERBOSITY_LEVELS.info);
         this._groupStack.push({
             message,
             level,

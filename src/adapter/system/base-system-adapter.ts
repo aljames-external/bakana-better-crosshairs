@@ -7,6 +7,11 @@ import { slugify } from "../../lib/utils.js";
  * Makes no assumptions about placeable document types (template vs region).
  */
 export class BaseSystemAdapter {
+    systemId: string;
+    supportsActivities: boolean;
+    defaultsMap: Map<string, any>;
+    declare _rawBaseDefaults?: any;
+
     /**
      * Initialize base system adapter properties (`systemId`, `supportsActivities`, and `defaultsMap`).
      */
@@ -17,10 +22,17 @@ export class BaseSystemAdapter {
     }
 
     /**
+     * Replaced at runtime by initializeSystemAdapter on prototype.
+     */
+    initialize(): any {
+        return this;
+    }
+
+    /**
      * Return list of custom PlaceableObject subclass names introduced by this game system.
      * @returns {string[]} Array of custom placeable class names
      */
-    getCustomPlaceableClassNames() {
+    getCustomPlaceableClassNames(): string[] {
         return [];
     }
 
@@ -28,7 +40,7 @@ export class BaseSystemAdapter {
      * Return list of custom Document type names introduced by this game system for placement creation hooks.
      * @returns {string[]} Array of custom document type names
      */
-    getCustomDocumentTypes() {
+    getCustomDocumentTypes(): string[] {
         return [];
     }
 
@@ -38,7 +50,7 @@ export class BaseSystemAdapter {
      * @param {Object} callbacks - Placement hook callbacks (`{ onDrawPreview, onPreCreate, onCreate }`)
      * @returns {Array<{event: string, handler: Function, category: string, targetName: string}>} Modified or filtered array of hook descriptor objects
      */
-    modifyPlacementHooks(hooks, callbacks) {
+    modifyPlacementHooks(hooks: any, callbacks: any): any {
         return hooks;
     }
 
@@ -47,7 +59,7 @@ export class BaseSystemAdapter {
      * Base implementation returns false (normal mouse wheel scrolling rotates crosshair unless overridden by system).
      * @returns {boolean} True if the Control / Command key must be held to rotate the crosshair via mouse wheel.
      */
-    requiresWheelModifier() {
+    requiresWheelModifier(): boolean {
         return false;
     }
 
@@ -58,7 +70,7 @@ export class BaseSystemAdapter {
      * @param {Object} [baseContext={}] - Initial calling context (`{ item, itemName, itemId, activity, activityName, activityId }`)
      * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}} Refined calling context object
      */
-    extractCallingContext(doc, baseContext = {}) {
+    extractCallingContext(doc: any, baseContext: any = {}) {
         const itemObj = baseContext?.item ?? null;
         const activityObj = baseContext?.activity ?? null;
 
@@ -143,7 +155,7 @@ export class BaseSystemAdapter {
         log.debug(`BaseSystemAdapter.refreshLocalizedDefaults | [Trigger: ${trigger}] Refreshing localized defaults from game.i18n for "${this.systemId}"...`);
 
         if (game?.i18n?.translations) {
-            const activeTranslations = game.i18n.translations?.BBC?.defaults?.[this.systemId];
+            const activeTranslations = (game.i18n.translations as any)?.BBC?.defaults?.[this.systemId];
             if (activeTranslations && typeof activeTranslations === "object") {
                 const countBefore = this.defaultsMap.size;
                 this.registerLocalizedDefaults(activeTranslations, baseDefaults);
@@ -186,12 +198,12 @@ export class BaseSystemAdapter {
      * @param {Object<string, boolean>} baseDefaults - Canonical slug to boolean stickiness map
      * @returns {Promise<void>}
      */
-    async loadAllSystemLanguages(baseDefaults) {
+    async loadAllSystemLanguages(baseDefaults: any) {
         if (!baseDefaults || typeof baseDefaults !== "object") return;
 
         // 1. Immediately register active language translations from game.i18n if available
         if (game?.i18n?.translations) {
-            const activeTranslations = game.i18n.translations?.BBC?.defaults?.[this.systemId];
+            const activeTranslations = (game.i18n.translations as any)?.BBC?.defaults?.[this.systemId];
             if (activeTranslations && typeof activeTranslations === "object") {
                 this.registerLocalizedDefaults(activeTranslations, baseDefaults);
                 log.debug(`BaseSystemAdapter.loadAllSystemLanguages | Registered ${Object.keys(activeTranslations).length} translations directly from active game.i18n.`);
@@ -199,7 +211,7 @@ export class BaseSystemAdapter {
         }
 
         const targetSuffix = `/${this.systemId}.json`;
-        const candidatePaths = new Set();
+        const candidatePaths = new Set<string>();
 
         // 2. Discover registered language bundle paths explicitly declared in module metadata
         if (game?.modules) {
@@ -380,7 +392,7 @@ export class BaseSystemAdapter {
      * @param {Object|null} [activity=null] - Calling activity document or object
      * @returns {number|null} Max range in canvas distance units, or null if unrestricted/touch/self
      */
-    getItemMaxRange(item, activity = null) {
+    getItemMaxRange(item: any, activity: any = null): number | null {
         const rawVal = activity?.system?.range?.value ?? activity?.range?.value ?? item?.system?.range?.value;
         if (rawVal === undefined || rawVal === null || rawVal === "") return null;
         let num = NaN;
@@ -405,7 +417,7 @@ export class BaseSystemAdapter {
      * @param {Object} [options={}] - Execution dependencies (`{ crosshairAdapter, pendingPlacements, placementKey }`)
      * @returns {void} No return value
      */
-    handleProgrammaticPlacement(scene, doc, placeable, coords = {}, options = {}) {
+    handleProgrammaticPlacement(scene: any, doc: any, placeable: any, coords: any = {}, options: any = {}): void {
         return;
     }
 
@@ -578,24 +590,24 @@ export class BaseSystemAdapter {
      */
     registerItemSheetHooks() {
         if (!Hooks?.on) return;
-        const itemSheetHandler = (app, controls) => this.addItemSheetHeaderControl(app, controls);
-            for (const hookName of this._getItemSheetHookNames()) {
-                Hooks.on(hookName, itemSheetHandler);
-            }
+        const itemSheetHandler = (app: any, controls: any) => this.addItemSheetHeaderControl(app, controls);
+        for (const hookName of this._getItemSheetHookNames()) {
+            Hooks.on(hookName as any, itemSheetHandler as any);
+        }
 
-            const activitySheetHandler = (app, controls) => this.addActivitySheetHeaderControl(app, controls);
-            for (const hookName of this._getActivitySheetHookNames()) {
-                Hooks.on(hookName, activitySheetHandler);
-            }
+        const activitySheetHandler = (app: any, controls: any) => this.addActivitySheetHeaderControl(app, controls);
+        for (const hookName of this._getActivitySheetHookNames()) {
+            Hooks.on(hookName as any, activitySheetHandler as any);
+        }
 
-            const itemContextHandler = (item, options) => this.addItemContextOption(item, options);
-            for (const hookName of this._getItemContextHookNames()) {
-                Hooks.on(hookName, itemContextHandler);
-            }
+        const itemContextHandler = (item: any, options: any) => this.addItemContextOption(item, options);
+        for (const hookName of this._getItemContextHookNames()) {
+            Hooks.on(hookName as any, itemContextHandler as any);
+        }
 
-            const activityContextHandler = (activity, options) => this.addActivityContextOption(activity, options);
-            for (const hookName of this._getActivityContextHookNames()) {
-                Hooks.on(hookName, activityContextHandler);
-            }
+        const activityContextHandler = (activity: any, options: any) => this.addActivityContextOption(activity, options);
+        for (const hookName of this._getActivityContextHookNames()) {
+            Hooks.on(hookName as any, activityContextHandler as any);
+        }
     }
 }

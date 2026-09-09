@@ -15,6 +15,9 @@ import { canvasAdapter } from "../canvas/index.js";
  * Base abstract class for Foundry VTT version-specific adapters.
  */
 export class BaseFoundryVTTAdapter {
+    version: number;
+    pendingPlacements: Map<string, PendingPlacementSession>;
+
     /**
      * Initialize the base Foundry VTT adapter.
      */
@@ -22,6 +25,13 @@ export class BaseFoundryVTTAdapter {
         this.version = 0;
         this.pendingPlacements = new Map();
         this._patchDeprecations();
+    }
+
+    /**
+     * Replaced at runtime by initializeFoundryAdapter on prototype.
+     */
+    initialize(): any {
+        return this;
     }
 
     /**
@@ -145,7 +155,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Object} [options={}] - Highlight parameters (x, y, color, border, shape)
      * @returns {void}
      */
-    highlightPosition(id, options = {}) {
+    highlightPosition(id: string, options: any = {}): void {
         return this.canvasAdapter.highlightPosition(id, options);
     }
 
@@ -199,7 +209,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Object} [options={}] - Merge options
      * @returns {Object} Merged object
      */
-    mergeObject(original, other = {}, options = {}) {
+    mergeObject(original: any, other: any = {}, options: any = {}): any {
         return foundry.utils.mergeObject(original, other, options);
     }
 
@@ -217,7 +227,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string} uuid - The document UUID
      * @returns {Document|null} The resolved document or null
      */
-    fromUuidSync(uuid, options = {}) {
+    fromUuidSync(uuid: string, options: any = {}): any {
         return foundry.utils.fromUuidSync(uuid, options);
     }
 
@@ -236,7 +246,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string[]} paths - Array of template paths to preload
      * @returns {Promise<Function[]>}
      */
-    async loadTemplates(paths) {
+    async loadTemplates(paths: any): Promise<any> {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement loadTemplates(paths).");
     }
 
@@ -266,7 +276,7 @@ export class BaseFoundryVTTAdapter {
      * @param {number|null} [fallback=null] - Fallback value
      * @returns {Color|number|null} Color instance, numeric value, or fallback
      */
-    parseColor(col, fallback = null) {
+    parseColor(col: any, fallback: any = null): any {
         if (col === null || col === undefined || col === "") return fallback;
         if (typeof col === "number" && !Number.isNaN(col)) return col;
         const ColorClass = this.Color;
@@ -437,7 +447,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Object} [options={}] - Snapping options ({ mode })
      * @returns {{x: number, y: number}|null} Snapped point or null
      */
-    getSnappedPoint(point, options = {}) {
+    getSnappedPoint(point: any, options: any = {}): any {
         return this.canvasAdapter.getSnappedPoint(point, options);
     }
 
@@ -484,7 +494,7 @@ export class BaseFoundryVTTAdapter {
         if (paddedBounds.bottom === undefined) paddedBounds.bottom = paddedBounds.y + paddedBounds.height;
 
         let i0 = 0, j0 = 0, i1 = 0, j1 = 0;
-        const res = this.getOffsetRange(paddedBounds);
+        const res: any = this.getOffsetRange(paddedBounds);
         if (res?.length >= 4) {
             [i0, j0, i1, j1] = res;
         }
@@ -516,7 +526,7 @@ export class BaseFoundryVTTAdapter {
      * @abstract
      * @returns {string} The localized or canonical document type term
      */
-    get documentTerm() {
+    get documentTerm(): string {
         throw new Error("Subclass must implement documentTerm getter");
     }
 
@@ -525,7 +535,7 @@ export class BaseFoundryVTTAdapter {
      * @abstract
      * @returns {string} Section header text
      */
-    get prePlacementTitle() {
+    get prePlacementTitle(): string {
         throw new Error("Subclass must implement prePlacementTitle getter");
     }
 
@@ -534,7 +544,7 @@ export class BaseFoundryVTTAdapter {
      * @abstract
      * @returns {string} Section header text
      */
-    get previewPlacementSectionTitle() {
+    get previewPlacementSectionTitle(): string {
         throw new Error("Subclass must implement previewPlacementSectionTitle getter");
     }
 
@@ -543,7 +553,7 @@ export class BaseFoundryVTTAdapter {
      * @abstract
      * @returns {string} Section header text
      */
-    get placementSectionTitle() {
+    get placementSectionTitle(): string {
         throw new Error("Subclass must implement placementSectionTitle getter");
     }
 
@@ -552,7 +562,7 @@ export class BaseFoundryVTTAdapter {
      * @abstract
      * @returns {string} Section header text
      */
-    get postPlacementTitle() {
+    get postPlacementTitle(): string {
         throw new Error("Subclass must implement postPlacementTitle getter");
     }
 
@@ -631,7 +641,7 @@ export class BaseFoundryVTTAdapter {
 
         // 2. Query registered Autorec entries
         const callingItemName = context.itemName.trim().toLowerCase();
-        const candidateEntries = [];
+        const candidateEntries: any[] = [];
         for (const entry of entries.values()) {
             if (entry.isDefault) continue;
             if ((entry.itemName ?? "").trim().toLowerCase() === callingItemName) {
@@ -925,7 +935,7 @@ export class BaseFoundryVTTAdapter {
                             }
 
                             if (this.document) {
-                                const updateData = {};
+                                const updateData: Record<string, any> = {};
                                 if (targetX !== undefined) updateData.x = targetX;
                                 if (targetY !== undefined) updateData.y = targetY;
                                 if (targetDir !== undefined) updateData.direction = targetDir;
@@ -1049,8 +1059,8 @@ export class BaseFoundryVTTAdapter {
         candidateIds.add("Template.preview");
         const rawLayers = this.highlightLayers;
         if (rawLayers) {
-            const layerKeys = rawLayers.keys
-                ? Array.from(rawLayers.keys())
+            const layerKeys: any[] = (rawLayers as any).keys
+                ? Array.from((rawLayers as any).keys())
                 : Object.keys(rawLayers);
 
             for (const key of layerKeys) {
@@ -1058,7 +1068,7 @@ export class BaseFoundryVTTAdapter {
                 const lower = String(key).toLowerCase();
                 if (lower === "preview" || lower.includes(".preview") || lower.includes("preview")) {
                     candidateIds.add(key);
-                } else if (pId && (key.endsWith(`.${pId}`) || key === pId)) {
+                } else if (pId && (String(key).endsWith(`.${pId}`) || key === pId)) {
                     candidateIds.add(key);
                 }
             }
@@ -1086,9 +1096,9 @@ export class BaseFoundryVTTAdapter {
             if (stg?.listeners && stg?.off) {
                 for (const evName of eventNames) {
                     try {
-                        const lns = stg.listeners(evName) ?? [];
+                        const lns: any[] = stg.listeners(evName) ?? [];
                         for (const fn of lns) {
-                            if (fn && (fn.context === placeable || (fn.name && (fn.name.includes("mousemove") || fn.name.includes("pointermove") || fn.name.includes("pointerdown") || fn.name.includes("mousedown") || fn.name.includes("click") || fn.name.includes("preview") || fn.name.includes("template") || fn.name.includes("region"))))) {
+                            if (fn && ((fn as any).context === placeable || (fn.name && (fn.name.includes("mousemove") || fn.name.includes("pointermove") || fn.name.includes("pointerdown") || fn.name.includes("mousedown") || fn.name.includes("click") || fn.name.includes("preview") || fn.name.includes("template") || fn.name.includes("region"))))) {
                                 stg.off(evName, fn);
                             }
                         }
@@ -1187,7 +1197,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Object} [config={}] - Workflow placement configuration options
      * @returns {{placedFillColor?: string, placedFillAlpha?: number, placedBorderColor?: string, placedBorderAlpha?: number, flags: Object}} Extracted placement styling properties and flags
      */
-    extractPlacedStylingFlags(config = {}) {
+    extractPlacedStylingFlags(config: any = {}) {
         const userColor = getUserColor("#000000");
         const hasExplicitDisable = config.enablePlacedStyling === false;
         const hasExplicitPlacedFillColor = config.placedFillColor !== undefined && config.placedFillColor !== null;
@@ -1241,7 +1251,7 @@ export class BaseFoundryVTTAdapter {
      * @abstract
      * @returns {string[]} Base placeable type names (`e.g. ["MeasuredTemplate"]`)
      */
-    get supportedBasePlaceables() {
+    get supportedBasePlaceables(): any[] {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement supportedBasePlaceables getter.");
     }
 
@@ -1250,7 +1260,7 @@ export class BaseFoundryVTTAdapter {
      * @abstract
      * @returns {string[]} Document type names (`e.g. ["MeasuredTemplate"]`)
      */
-    get supportedDocumentTypes() {
+    get supportedDocumentTypes(): string[] {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement supportedDocumentTypes getter.");
     }
 
@@ -1262,7 +1272,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Object} [sysAdapter=systemAdapter] - Active System Adapter instance
      * @returns {Array<{event: string, handler: Function, category: string, targetName: string}>} Array of generated hook descriptor objects
      */
-    generatePlacementHooks(callbacks, sysAdapter = systemAdapter) {
+    generatePlacementHooks(callbacks: any, sysAdapter: any = systemAdapter): any[] {
         const targetSysAdapter = sysAdapter ?? systemAdapter;
         if (targetSysAdapter && !(targetSysAdapter instanceof BaseSystemAdapter)) {
             throw new Error(`generatePlacementHooks requires a valid BaseSystemAdapter instance, received: ${targetSysAdapter}`);
@@ -1278,7 +1288,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Object} [sysAdapter=systemAdapter] - Active System Adapter instance
      * @returns {Array<{event: string, handler: Function, category: string, targetName: string}>} Array of registered hook descriptor objects
      */
-    registerPlacementHooks(callbacks, sysAdapter = systemAdapter) {
+    registerPlacementHooks(callbacks: any, sysAdapter: any = systemAdapter): any[] {
         const targetSysAdapter = sysAdapter ?? systemAdapter;
         if (targetSysAdapter && !(targetSysAdapter instanceof BaseSystemAdapter)) {
             throw new Error(`registerPlacementHooks requires a valid BaseSystemAdapter instance, received: ${targetSysAdapter}`);
@@ -1306,7 +1316,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Document} doc - MeasuredTemplate or Region document
      * @returns {{type: string, distance: number, width: number, angle: number, x: number, y: number}} Detected geometric properties including type, distance, width, angle, and coordinates
      */
-    detectProperties(doc) {
+    detectProperties(doc: any): any {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement detectProperties(doc).");
     }
 
@@ -1318,7 +1328,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Object} [config={}] - Optional placement configuration
      * @returns {{x: number, y: number, direction: number}} Formatted placement coordinates object
      */
-    formatPlacementCoordinates(x, y, direction, config = {}) {
+    formatPlacementCoordinates(x: number, y: number, direction: number, config: any = {}): any {
         return { x, y, direction, type: config.originalType ?? config.type, originalType: config.originalType };
     }
 
@@ -1327,7 +1337,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Object} [config={}] - Placement configuration
      * @returns {PlaceableObject|null} Created placeable or null
      */
-    createUnpersistedPreviewPlaceable(config = {}) {
+    createUnpersistedPreviewPlaceable(config: any = {}): any {
         if (!this.scene) return null;
         try {
             const docClass = CONFIG?.MeasuredTemplate?.documentClass;
@@ -1336,7 +1346,7 @@ export class BaseFoundryVTTAdapter {
 
             const shapeType = config.type ?? config.t ?? "circle";
             const isRect = shapeType === "rect" || shapeType === "square";
-            const data = {
+            const data: Record<string, any> = {
                 t: isRect ? "rect" : (shapeType === "cone" ? "cone" : (shapeType === "ray" ? "ray" : "circle")),
                 user: game?.user?.id,
                 x: config.x ?? 0,
@@ -1365,7 +1375,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Object} coords - New placement coordinates
      * @returns {void}
      */
-    updatePreviewShape(previewDoc, coords) {
+    updatePreviewShape(previewDoc: any, coords: any): void {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement updatePreviewShape(previewDoc, coords).");
     }
 
@@ -1377,7 +1387,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Object|null} [data=null] - Document update payload
      * @returns {void}
      */
-    applyDocumentPlacement(doc, coords = {}, config = {}, data = null) {
+    applyDocumentPlacement(doc: any, coords: any = {}, config: any = {}, data: any = null): void {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement applyDocumentPlacement(doc, coords, config, data).");
     }
 
@@ -1388,7 +1398,7 @@ export class BaseFoundryVTTAdapter {
      * @param {number} direction - The current direction/rotation in degrees
      * @returns {void}
      */
-    refreshTemplateHighlights(tmpl, direction) {
+    refreshTemplateHighlights(tmpl: any, direction: any): void {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement refreshTemplateHighlights(tmpl, direction).");
     }
 
@@ -1401,7 +1411,7 @@ export class BaseFoundryVTTAdapter {
      * @param {Object} [config={}] - Optional configuration
      * @returns {Promise<void>} Resolves when deferred document creation completes
      */
-    async createDeferredDocument(scene, deferredData, coords, documentName, config = {}) {
+    async createDeferredDocument(scene: any, deferredData: any, coords: any, documentName: string, config: any = {}): Promise<void> {
         if (!scene || !deferredData || !coords) return;
         const cloned = this.deepClone(deferredData);
         const { id, _id, _source, ...data } = cloned;
@@ -1411,7 +1421,7 @@ export class BaseFoundryVTTAdapter {
         this.applyDocumentPlacement(data, coords, config, data);
 
         if (data.shapes) {
-            data.shapes = data.shapes.map(s => {
+            data.shapes = data.shapes.map((s: any) => {
                 const shapeObj = s?.toObject ? s.toObject() : s;
                 const { id: sId, _id: sUnderscoreId, _source: sSource, ...cleanShape } = shapeObj;
                 return cleanShape;
@@ -1431,11 +1441,11 @@ export class BaseFoundryVTTAdapter {
         }
     }
 
-    _getDeferredDocumentName(data, documentName) {
+    _getDeferredDocumentName(data: any, documentName: any): string {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement _getDeferredDocumentName(data, documentName).");
     }
 
-    _applyDeferredCoordinates(data, coords, docName) {
+    _applyDeferredCoordinates(data: any, coords: any, docName: any): any {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement _applyDeferredCoordinates(data, coords, docName).");
     }
 
@@ -1448,17 +1458,17 @@ export class BaseFoundryVTTAdapter {
         if (typeof snapToGrid === "number") return snapToGrid;
         if (snapToGrid === "center") return CONST?.GRID_SNAPPING_MODES?.CENTER ?? 1;
         if (snapToGrid === "corner" || snapToGrid === "vertex" || snapToGrid === "corners") return CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2;
-        if (snapToGrid === "side" || snapToGrid === "edge" || snapToGrid === "edges") return CONST?.GRID_SNAPPING_MODES?.SIDE_MIDPOINT ?? CONST?.GRID_SNAPPING_MODES?.SIDE ?? 4;
+        if (snapToGrid === "side" || snapToGrid === "edge" || snapToGrid === "edges") return (CONST?.GRID_SNAPPING_MODES as any)?.SIDE_MIDPOINT ?? (CONST?.GRID_SNAPPING_MODES as any)?.SIDE ?? 4;
         return (CONST?.GRID_SNAPPING_MODES?.CENTER ?? 1) |
                (CONST?.GRID_SNAPPING_MODES?.VERTEX ?? 2) |
-               (CONST?.GRID_SNAPPING_MODES?.SIDE_MIDPOINT ?? CONST?.GRID_SNAPPING_MODES?.SIDE ?? 4);
+               ((CONST?.GRID_SNAPPING_MODES as any)?.SIDE_MIDPOINT ?? (CONST?.GRID_SNAPPING_MODES as any)?.SIDE ?? 4);
     }
 
-    _snapPoint(x, y, numMode) {
+    _snapPoint(x: any, y: any, numMode: any): any {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement _snapPoint(x, y, numMode).");
     }
 
-    _getGridCenterPoint(x, y) {
+    _getGridCenterPoint(x: any, y: any): any {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement _getGridCenterPoint(x, y).");
     }
 
@@ -1470,7 +1480,7 @@ export class BaseFoundryVTTAdapter {
      * @param {{x?: number, y?: number}} [clickCoords={}] - Optional mouse click coordinates
      * @returns {{x: number, y: number, direction: number}} Resolved anchor placement coordinates and facing direction
      */
-    resolveAnchorPlacement(targetTok, clickCoords = {}) {
+    resolveAnchorPlacement(targetTok: any, clickCoords: any = {}): any {
         const tok = this.toToken(targetTok);
         return TokenGeometry.resolveAnchorPlacement(tok, clickCoords);
     }
@@ -1529,7 +1539,7 @@ export class BaseFoundryVTTAdapter {
             return;
         }
 
-        const entry = autorecManager.getEntryForDocument(doc);
+        const entry: any = autorecManager.getEntryForDocument(doc);
         if (!entry) {
             return;
         }
@@ -1558,7 +1568,7 @@ export class BaseFoundryVTTAdapter {
 
         const placementKey = `${entry.itemName}_${game?.user?.id}`;
         const entryConfig = typeof entry.handler === "object" && entry.handler !== null ? entry.handler : entry;
-        const pending = {
+        const pending: any = {
             itemName: entry.itemName,
             resolved: false,
             cancelled: false,
@@ -1630,7 +1640,7 @@ export class BaseFoundryVTTAdapter {
                 await builder.play(placeable, finalConfig);
             }
 
-        } catch (err) {
+        } catch (err: any) {
             const msg = err?.message ?? String(err ?? "Failed to play Sequencer crosshair effect");
             log.error(`BaseFoundryVTTAdapter.handleDrawPreview | Error running sequencer sequence for "${entry.itemName}":`, err);
             notify.error(msg);
@@ -1656,9 +1666,9 @@ export class BaseFoundryVTTAdapter {
             return true;
         }
 
-        let entry = autorecManager.getEntryForDocument(doc);
-        let placementKey = null;
-        let pending = null;
+        let entry: any = autorecManager.getEntryForDocument(doc);
+        let placementKey: string | null = null;
+        let pending: any = null;
 
         if (entry) {
             placementKey = `${entry.itemName}_${game?.user?.id}`;
@@ -1666,17 +1676,18 @@ export class BaseFoundryVTTAdapter {
         } else {
             // Fallback: match any active uncancelled pending placement for the local user
             for (const [key, val] of this.pendingPlacements.entries()) {
-                if (key.endsWith(`_${game?.user?.id}`) && !val.cancelled) {
-                    pending = val;
+                const session: any = val;
+                if (key.endsWith(`_${game?.user?.id}`) && !session.cancelled) {
+                    pending = session;
                     placementKey = key;
-                    entry = { itemName: val.itemName, handler: val.config };
+                    entry = { itemName: session.itemName, handler: session.config };
                     break;
                 }
             }
         }
 
 
-        if (!entry || !pending) {
+        if (!entry || !pending || !placementKey) {
             return true;
         }
 
@@ -1764,12 +1775,12 @@ export class BaseFoundryVTTAdapter {
      * @param {string} [userId] - User ID triggering update
      * @returns {Promise<void>}
      */
-    async handleUpdateDocument(target, changed = {}, _options = {}, userId) {
+    async handleUpdateDocument(target: any, changed: any = {}, _options: any = {}, userId?: string): Promise<void> {
         if (!target) return;
         const doc = target.document ?? target;
 
         if (doc.flags?.bbc && (!userId || userId === game?.user?.id)) {
-            const flagUpdates = {};
+            const flagUpdates: Record<string, any> = {};
             if (changed.fillColor !== undefined) flagUpdates.placedFillColor = changed.fillColor;
             if (changed.color !== undefined) flagUpdates.placedFillColor = changed.color;
             if (changed.borderColor !== undefined) flagUpdates.placedBorderColor = changed.borderColor;
@@ -1795,7 +1806,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string} [userId] - User ID triggering deletion
      * @returns {void}
      */
-    handleDeleteDocument(target, _options = {}, userId) {
+    handleDeleteDocument(target: any, _options: any = {}, userId?: string): void {
         if (!target) return;
         const doc = target.document ?? target;
         if (!userId || userId === game?.user?.id) {

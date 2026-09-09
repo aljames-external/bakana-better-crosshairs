@@ -15,12 +15,50 @@ import { DEFAULT_AUTOREC_ENTRY } from "../autorec/autorecManager.js";
  * and independent anchor point calculations for visual effects and Foundry placeable shapes.
  */
 export class BaseCrosshairShape {
+    placeable: any;
+    config: Record<string, any>;
+    doc: any;
+    token: any;
+    radius: number;
+    distance: number;
+    width: number;
+    angle: number;
+    id: string;
+    type: string;
+    stickToToken: boolean;
+    context: any;
+    enablePreviewPlacement: boolean;
+    borderPlayerColor: boolean;
+    borderColor: string;
+    borderAlpha: number;
+    fillPlayerColor: boolean;
+    fillColor: string;
+    fillAlpha: number;
+    showLine: boolean;
+    private _rawLineFile: string;
+    showItemIcon: boolean;
+    broadcast: boolean;
+    icon: string | null;
+    sequencerCrosshair: any;
+    broadcastTimer: any;
+    placementId: string | null;
+    x: number;
+    y: number;
+    cursorX: number;
+    cursorY: number;
+    direction: number;
+    animationAnchor: { x: number; y: number };
+    shapeAnchor: { x: number; y: number };
+    rangeOverlay: CrosshairRangeOverlay;
+    broadcaster: CrosshairBroadcaster;
+    controller: any;
+
     /**
      * Create a new crosshair shape instance.
      * @param {PlaceableObject|Document} placeable - Target template preview placeable or document
      * @param {object} [config={}] - Configuration options for the crosshair shape
      */
-    constructor(placeable, config = {}) {
+    constructor(placeable: any, config: Record<string, any> = {}) {
         this.placeable = placeable;
         this.config = config;
 
@@ -50,7 +88,7 @@ export class BaseCrosshairShape {
         this.token = adapter.crosshair.toToken(rawToken);
 
         // Normalize config properties using adapter properties extraction
-        const docProps = doc ? adapter.crosshair.detectProperties(doc) : {};
+        const docProps = (doc ? adapter.crosshair.detectProperties(doc) : {}) as any;
         config.radius = config.radius ?? docProps.radius ?? 20;
         config.distance = config.distance ?? docProps.distance ?? 30;
         config.width = config.width ?? docProps.width ?? 5;
@@ -107,7 +145,7 @@ export class BaseCrosshairShape {
             if (document?.item?.img) return document.item.img;
             const origin = document?.flags?.dnd5e?.origin ?? document?.flags?.["midi-qol"]?.origin;
             if (origin) {
-                const fromUuid = adapter.crosshair.fromUuidSync(origin);
+                const fromUuid = adapter.crosshair.fromUuidSync(origin) as any;
                 if (fromUuid?.img) return fromUuid.img;
             }
             return null;
@@ -241,7 +279,7 @@ export class BaseCrosshairShape {
      * @param {object} [dimensions={}] - Sizing dimensions (`{ widthPx, heightPx }`) of the shape in canvas pixels
      * @returns {{x: number, y: number}} Corrected placement coordinate for the Foundry placeable shape
      */
-    getRotatedShapeCoordinates(cursorX, cursorY, directionDeg, dimensions = {}) {
+    getRotatedShapeCoordinates(cursorX: number, cursorY: number, directionDeg: number, dimensions: { widthPx?: number; heightPx?: number } = {}) {
         const widthPx = dimensions.widthPx ?? 0;
         const heightPx = dimensions.heightPx ?? widthPx;
 
@@ -427,7 +465,7 @@ export class BaseCrosshairShape {
         } else if (this.config?.isRemote) {
             crosshairSeq.location({ x: this.x, y: this.y });
         } else {
-            const locationOpts = {};
+            const locationOpts: Record<string, any> = {};
             if (this.token && this.config.showRange !== false) {
                 locationOpts.showRange = true;
             }
@@ -450,11 +488,11 @@ export class BaseCrosshairShape {
         }
 
         crosshairSeq
-            .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async (crosshair) => {
+            .callback(Sequencer.Crosshair.CALLBACKS.SHOW, async (crosshair: any) => {
                 await this.onShowCallback(crosshair);
             })
-            .callback(Sequencer.Crosshair.CALLBACKS.PLACED, async (...args) => {
-                await this.onPlacedCallback(...args);
+            .callback(Sequencer.Crosshair.CALLBACKS.PLACED, async (...args: any[]) => {
+                await (this.onPlacedCallback as any)(...args);
             })
             .callback(Sequencer.Crosshair.CALLBACKS.CANCEL, () => {
                 this.onCancelCallback();
@@ -697,7 +735,7 @@ export class BaseCrosshairShape {
      * @param {string} [options.id] - The identifier of the effect to end
      * @returns {Promise<void>} A promise resolving when matching effects have been terminated
      */
-    static async stop(token, options = {}) {
+    static async stop(token: any, options: { id?: string } = {}) {
         const id = options?.id ?? "Crosshair";
         await Sequencer.EffectManager.endEffects({ name: id, object: token });
         await Sequencer.EffectManager.endEffects({ name: `${id}-line`, object: token });
@@ -892,7 +930,7 @@ export class BaseCrosshairShape {
         const doc = this.doc;
         if (doc) {
             const dims = this.placeable?.dimensions ?? doc.dimensions ?? activePlacementTracker.dimensions;
-            const docProps = adapter.crosshair.detectProperties(doc);
+            const docProps = adapter.crosshair.detectProperties(doc) as any;
             const initialDist = dims?.distance ?? docProps.distance;
             const initialWidth = dims?.width ?? docProps.width;
             const isGridUnits = dims?.gridUnits ?? true;

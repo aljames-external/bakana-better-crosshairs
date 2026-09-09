@@ -83,7 +83,7 @@ export function migrateV1ToV2Entry(legacyEntry) {
     const preMacro = String(macroObj.pre ?? legacyEntry.concurrentCode ?? "").trim();
     const postMacro = String(macroObj.post ?? legacyEntry.postPlacementCode ?? "").trim();
 
-    const migrated = {
+    const migrated: Record<string, any> = {
         itemName,
         activityId,
         activityName,

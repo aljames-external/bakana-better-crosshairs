@@ -20,7 +20,7 @@ export let canvasAdapter = new BaseCanvasAdapter();
  */
 export function initializeCanvasAdapter() {
     const generation = game?.release?.generation;
-    if (generation >= 14) {
+    if (generation !== undefined && generation >= 14) {
         canvasAdapter = new CanvasV14Adapter();
     } else if (generation === 13) {
         canvasAdapter = new CanvasV13Adapter();
@@ -39,5 +39,5 @@ export function initializeCanvasAdapter() {
     return canvasAdapter;
 }
 
-BaseCanvasAdapter.prototype.initialize = initializeCanvasAdapter;
+(BaseCanvasAdapter.prototype as any).initialize = initializeCanvasAdapter;
 

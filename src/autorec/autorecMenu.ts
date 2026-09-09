@@ -13,11 +13,14 @@ const { DialogV2 } = foundry.applications.api;
  * Extends the BaseCrosshairMenuApplication API with Handlebars template rendering.
  */
 export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
+    _editModeActive?: boolean;
+    _selectedItemName?: string | null;
+
     /**
      * Default application configuration options.
      * @type {object}
      */
-    static DEFAULT_OPTIONS = {
+    static override DEFAULT_OPTIONS: any = {
         id: "bbc-autorec-menu",
         tag: "form",
         window: {
@@ -36,7 +39,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
      * Template parts rendered by the application.
      * @type {object}
      */
-    static PARTS = {
+    static override PARTS: any = {
         main: {
             template: `modules/${MODULE_ID}/src/autorec/autorecMenu.html`
         }
@@ -47,10 +50,10 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
      * @param {object} options - Application rendering options.
      * @returns {Promise<object>} Context data object passed to the Handlebars template.
      */
-    async _prepareContext(options) {
-        const rawEntries = autorecManager.getAllEntries();
+    protected override async _prepareContext(options: any): Promise<any> {
+        const rawEntries: any[] = autorecManager.getAllEntries();
         const defaultUserColor = getUserColor("#000000");
-        const entries = rawEntries.map(e => ({
+        const entries = rawEntries.map((e: any) => ({
             ...e,
             broadcast: Boolean(e.broadcast),
             circleFile: e.circleFile ?? DEFAULT_AUTOREC_ENTRY.circleFile,
@@ -214,11 +217,11 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
         const addWorkflowBtn = rootEl.querySelector(".bbc-add-workflow-btn");
         if (addWorkflowBtn) {
             addWorkflowBtn.addEventListener("click", async () => {
-                let result = null;
+                let result: any = null;
                 const supportsActivities = adapter.system.supportsActivities;
 
                 try {
-                    result = await DialogV2.prompt({
+                    result = await (DialogV2 as any).prompt({
                         window: { title: localize("BBC.autorecMenu.addWorkflow.title", "Add New Crosshair Workflow") },
                         content: `
                             <form>
@@ -235,7 +238,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
                         `,
                         ok: {
                             label: localize("BBC.autorecMenu.addWorkflow.label", "Add Workflow"),
-                            callback: (event, button, html) => {
+                            callback: (event: any, button: any, html: any) => {
                                 const formEl = button.form ?? html;
                                 const itemInput = formEl?.querySelector?.("input[name='workflowName']") ?? null;
                                 const actInput = supportsActivities ? (formEl?.querySelector?.("input[name='activityName']") ?? null) : null;
@@ -280,8 +283,8 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
                     notify.warn(localize("BBC.autorecMenu.notify.selectRemove", "Please select one or more workflows to remove."));
                     return;
                 }
-                const names = [];
-                checked.forEach(el => {
+                const names: string[] = [];
+                checked.forEach((el: any) => {
                     const name = el.dataset.itemName;
                     if (name) names.push(name);
                 });
@@ -309,9 +312,9 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
                         if (res) {
                             this.render(false);
                         }
-                    } catch (err) {
+                    } catch (err: any) {
                         log.error("AutorecMenuApplication | Import JSON failed:", err);
-                        notify.error(localize("BBC.autorecExchange.notify.importError", `Import failed: ${err.message}`));
+                        notify.error(localize("BBC.autorecExchange.notify.importError", `Import failed: ${err?.message ?? err}`));
                     }
                 });
             });

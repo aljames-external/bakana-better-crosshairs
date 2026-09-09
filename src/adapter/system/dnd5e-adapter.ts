@@ -20,7 +20,7 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * Return list of custom PlaceableObject subclass names introduced by DnD5e.
      * @returns {string[]} Array of custom placeable class names
      */
-    getCustomPlaceableClassNames() {
+    getCustomPlaceableClassNames(): string[] {
         return ["MeasuredTemplate5e"];
     }
 
@@ -30,7 +30,7 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * @param {Object} [baseContext={}] - Initial calling context (`{ item, itemName, itemId, activity, activityName, activityId }`)
      * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}} Normalized calling context containing item and activity references and identifiers
      */
-    extractCallingContext(doc, baseContext = {}) {
+    extractCallingContext(doc: any, baseContext: any = {}) {
         let itemObj = baseContext?.item ?? null;
         let activityObj = baseContext?.activity ?? null;
 
@@ -45,8 +45,8 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
 
         const actIdentifier = doc?.flags?.dnd5e?.activity;
         if (!activityObj && actIdentifier) {
-            if (uuidResolver && actIdentifier?.includes?.(".")) {
-                try { activityObj = uuidResolver(actIdentifier); } catch (e) {}
+            if (actIdentifier?.includes?.(".")) {
+                try { activityObj = crosshairAdapter.fromUuidSync(actIdentifier); } catch (e) {}
             }
             if (!activityObj && itemObj?.system?.activities) {
                 activityObj = itemObj.system.activities.get?.(actIdentifier) ?? null;
