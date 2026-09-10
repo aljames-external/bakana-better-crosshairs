@@ -364,17 +364,7 @@ export async function attachCrosshairToToken(
             }
         },
         hide: async () => {
-            shapeInstance?.hide?.();
-            const effectId = shapeInstance?.id ?? options.id ?? "Crosshair";
-            if (game?.modules?.get("sequencer")?.active) {
-                try {
-                    await Sequencer.EffectManager.endEffects({ name: effectId, object: token });
-                    await Sequencer.EffectManager.endEffects({ name: `${effectId}-line`, object: token });
-                    await Sequencer.EffectManager.endEffects({ name: `${effectId}-icon`, object: token });
-                } catch (e) {
-                    log.debug("attachCrosshairToToken.hide | Exception ending Sequencer effects:", e);
-                }
-            }
+            await handle.stop("hidden");
         }
     };
 
