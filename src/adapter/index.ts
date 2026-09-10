@@ -104,7 +104,7 @@ const adapter: any = {
     setProperty(obj: any, path: string, value: any) { return (crosshairAdapter as any).setProperty?.(obj, path, value) ?? foundry.utils.setProperty(obj, path, value); },
     randomID(length?: number) { return crosshairAdapter.randomID(length); },
     isEmpty(obj: any) { return (crosshairAdapter as any).isEmpty?.(obj) ?? foundry.utils.isEmpty(obj); },
-    isNewerVersion(a: string, b: string) { return (crosshairAdapter as any).isNewerVersion?.(a, b) ?? foundry.utils.isNewerVersion(a, b); },
+    isNewerVersion(v1: string | number, v0: string | number, options?: { majorOnly?: boolean }): boolean { return (crosshairAdapter as any).isNewerVersion?.(v1, v0, options) ?? foundry.utils.isNewerVersion(v1, v0, options); },
     loadTemplates(paths: any) { return crosshairAdapter.loadTemplates(paths); }
 };
 
