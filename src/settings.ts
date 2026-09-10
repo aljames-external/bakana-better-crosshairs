@@ -98,7 +98,7 @@ export function registerModuleSettings() {
  * @param {HTMLElement|jQuery} html - The settings config DOM element
  * @param {object} [_app=null] - The settings application instance
  */
-export function injectSettingsHeaders(html: HTMLElement | JQuery | unknown, _app: unknown = null) {
+export function injectSettingsHeaders(html: HTMLElement | JQuery, _app: unknown = null) {
     const root = (html as any)?.querySelector ? (html as HTMLElement) : (html as any)?.[0];
     if (!root?.querySelector) return;
 
@@ -194,7 +194,7 @@ export function injectSettingsHeaders(html: HTMLElement | JQuery | unknown, _app
     }
 }
 
-Hooks.on('renderSettingsConfig', (_app: unknown, html: HTMLElement | JQuery | unknown) => {
+Hooks.on('renderSettingsConfig', (_app: unknown, html: HTMLElement | JQuery) => {
     injectSettingsHeaders(html, _app);
 });
 
