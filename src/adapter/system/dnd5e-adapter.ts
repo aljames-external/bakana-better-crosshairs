@@ -1,7 +1,6 @@
 import { BaseSystemAdapter } from "./base-system-adapter.js";
 import { log } from "../../lib/logger.js";
 import { crosshairAdapter } from "../foundry/index.js";
-import type { Item5e, Dnd5eActivity } from "../../types/systems.js";
 
 /**
  * System Adapter for DnD5e.

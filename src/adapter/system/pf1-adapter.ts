@@ -1,7 +1,6 @@
 import { BaseSystemAdapter } from "./base-system-adapter.js";
 import { log } from "../../lib/logger.js";
 import { crosshairAdapter } from "../foundry/index.js";
-import type { ItemPF } from "../../types/systems.js";
 
 /**
  * System Adapter encapsulating Pathfinder 1st Edition (pf1 / pf) item context resolution and template placement behaviors.

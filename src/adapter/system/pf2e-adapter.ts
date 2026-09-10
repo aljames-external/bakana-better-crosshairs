@@ -1,7 +1,6 @@
 import { BaseSystemAdapter } from "./base-system-adapter.js";
 import { log } from "../../lib/logger.js";
 import { crosshairAdapter } from "../foundry/index.js";
-import type { ItemPF2e } from "../../types/systems.js";
 
 /**
  * System Adapter encapsulating Pathfinder 2e (pf2e) item context resolution and template placement behaviors.
