@@ -75,7 +75,7 @@ export class PersistedAnimationManager {
         const { factor, gridUnits } = adapter.crosshair.getTemplatePixelFactor();
         const pxPerFoot = adapter.crosshair.pixelsPerDistance;
 
-        let effectFile = "";
+        let effectFile: string | undefined = "";
         let widthPx = 100;
         let heightPx = 100;
         let anchor = { x: 0.5, y: 0.5 };

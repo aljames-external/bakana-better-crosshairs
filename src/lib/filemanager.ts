@@ -60,7 +60,7 @@ function bestFit(modulePrefix: any, ...categories: any[]) {
  * @param {string} path - The path to the file, using dot notation (e.g., 'jb2a.fireball.blue').
  * @returns {string|undefined} The resolved file path, or undefined if no path categories exist.
  */
-export function closest(path: any) {
+export function closest(path: string | null | undefined): string | undefined {
     if (typeof path !== 'string' || !path.trim()) return undefined;
 
     // Support http:// and https:// addresses
@@ -126,7 +126,7 @@ export function closest(path: any) {
  * @param {string} configPath - The configuration path to resolve.
  * @returns {string|undefined} The absolute file path, or undefined if empty.
  */
-export function absolutePath(configPath: any) {
+export function absolutePath(configPath: string | null | undefined): string | undefined {
     if (typeof configPath !== 'string' || !configPath.trim()) return undefined;
     const resolvedConfig = closest(configPath);
     if (!resolvedConfig) return resolvedConfig;
