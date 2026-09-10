@@ -4,9 +4,9 @@
  * @param {string} [fallback=key] - The fallback string if the key is not found (defaults to key)
  * @returns {string} The localized string or fallback
  */
-export function localize(key: any, fallback = key) {
-    if (typeof key !== "string" || !key) return fallback ?? "";
-    return game?.i18n?.has(key) ? game.i18n.localize(key) : fallback;
+export function localize(key: string, fallback = key): string {
+    if (!key) return fallback ?? "";
+    return game.i18n?.has(key) ? game.i18n.localize(key) : fallback;
 }
 
 /**
@@ -15,8 +15,8 @@ export function localize(key: any, fallback = key) {
  * @param {string} str - Raw input string name
  * @returns {string} Normalized lowercase hyphenated slug
  */
-export function slugify(str: any) {
-    if (typeof str !== "string" || !str) return "";
+export function slugify(str: string): string {
+    if (!str) return "";
     return str
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
@@ -54,7 +54,7 @@ export const version = {
  * @param {string} [fallback="#000000"] - Fallback hex color if user color is unavailable
  * @returns {string} Hex color string
  */
-export function getUserColor(fallback = "#000000") {
+export function getUserColor(fallback = "#000000"): string {
     const rawColor = game?.user?.color;
     if (!rawColor) return fallback;
     const str = rawColor?.css ?? rawColor?.toString?.() ?? String(rawColor);

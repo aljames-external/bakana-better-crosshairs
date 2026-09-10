@@ -278,7 +278,7 @@ export class BaseSystemAdapter {
      * @param {Object<string, boolean>} [baseDefaults={}] - Canonical slug to boolean stickiness map
      * @returns {void}
      */
-    registerLocalizedDefaults(translations: any, baseDefaults: Record<string, any> = {}) {
+    registerLocalizedDefaults(translations: Record<string, string> | any, baseDefaults: Record<string, any> = {}) {
         if (!translations || typeof translations !== "object") return;
         for (const [slug, localizedName] of Object.entries(translations)) {
             if (!slug || !localizedName) continue;
@@ -286,8 +286,9 @@ export class BaseSystemAdapter {
             const rawStick = baseDefaults[cleanSlug] ?? baseDefaults[slug] ?? this.defaultsMap.get(cleanSlug) ?? this.defaultsMap.get(slug);
             if (rawStick === undefined || rawStick === null) continue;
             const boolStick = Boolean(rawStick);
-            const rawLower = String(localizedName).trim().toLowerCase();
-            const localizedSlug = slugify(localizedName);
+            const strLocalized = String(localizedName);
+            const rawLower = strLocalized.trim().toLowerCase();
+            const localizedSlug = slugify(strLocalized);
 
             this._setDefaultsEntry(rawLower, boolStick, cleanSlug);
             if (localizedSlug && localizedSlug !== rawLower) {

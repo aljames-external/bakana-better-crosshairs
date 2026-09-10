@@ -1,6 +1,15 @@
 import { log } from "./logger.js";
 import { localize } from "./utils.js";
 
+export interface DependencyConfig {
+    id: string;
+    min?: string;
+    max?: string;
+    ref?: string;
+    active?: boolean;
+    version?: string;
+}
+
 /**
  * Checks if the versions are in ascending order.
  * @param {string} [min] - The minimum version.
@@ -9,24 +18,23 @@ import { localize } from "./utils.js";
  * @returns {boolean} Whether the versions are in ascending order.
  * @private
  */
-function _isAscending(min: any, version: any, max: any) {
+function _isAscending(min?: string, version?: string, max?: string): boolean {
     if ((Boolean(min) || Boolean(max)) && !version) return false;
     let isValidVersion = true;
     const isNewer = foundry?.utils?.isNewerVersion;
     if (!isNewer) return false;
-    if (min) isValidVersion = isValidVersion && !isNewer(min, version);
-    if (max) isValidVersion = isValidVersion && !isNewer(version, max);
+    if (min && version) isValidVersion = isValidVersion && !isNewer(min, version);
+    if (max && version) isValidVersion = isValidVersion && !isNewer(version, max);
     return Boolean(isValidVersion);
 }
 
 /**
  * Retrieves the dependency entity from game modules or Foundry game instance.
- * @param {object} dependency - The dependency object to look up.
- * @param {string} dependency.id - The identifier of the dependency.
+ * @param {DependencyConfig} [dependency] - The dependency object to look up.
  * @returns {object|undefined} The module or game object if found.
  * @private
  */
-function _getEntity(dependency: any) {
+function _getEntity(dependency?: DependencyConfig): any {
     const depId = dependency?.id;
     if (!depId) return undefined;
     if (depId === "foundry") return game;
@@ -35,25 +43,22 @@ function _getEntity(dependency: any) {
 
 /**
  * Extracts the current version string for a dependency entity.
- * @param {object} dependency - The dependency object.
+ * @param {DependencyConfig} [dependency] - The dependency object.
  * @param {object} [entity] - Optional pre-resolved dependency entity.
  * @returns {string|undefined} The version string if present.
  * @private
  */
-function _getVersion(dependency: any, entity = _getEntity(dependency)) {
+function _getVersion(dependency?: DependencyConfig, entity = _getEntity(dependency)): string | undefined {
     return entity?.version ?? (dependency?.id === "foundry" ? game?.version : undefined);
 }
 
 /**
  * Checks if the dependency is installed.
- * @param {object} dependency - The dependency object to check.
- * @param {string} dependency.id - The identifier of the dependency.
- * @param {string} [dependency.min] - Minimum allowable version.
- * @param {string} [dependency.max] - Maximum allowable version.
+ * @param {DependencyConfig} [dependency] - The dependency object to check.
  * @returns {boolean} Whether the dependency is installed and within the valid version range.
  * @private
  */
-function _isInstalled(dependency: any) {
+function _isInstalled(dependency?: DependencyConfig): boolean {
     if (!dependency?.id) return false;
     const entity = _getEntity(dependency);
     if (!entity) return false;
@@ -63,14 +68,11 @@ function _isInstalled(dependency: any) {
 
 /**
  * Checks if the dependency is installed and activated.
- * @param {object} dependency - The dependency object to check.
- * @param {string} dependency.id - The identifier of the dependency.
- * @param {string} [dependency.min] - Minimum allowable version.
- * @param {string} [dependency.max] - Maximum allowable version.
+ * @param {DependencyConfig} [dependency] - The dependency object to check.
  * @returns {boolean} Whether the dependency is activated and within the valid version range.
  * @private
  */
-function _isActivated(dependency: any) {
+function _isActivated(dependency?: DependencyConfig): boolean {
     if (!dependency?.id) return false;
     const entity = _getEntity(dependency);
     if (!entity) return false;
@@ -80,14 +82,12 @@ function _isActivated(dependency: any) {
 
 /**
  * Appends version information to a message.
- * @param {object} dependency - The dependency to get version information from.
- * @param {string} [dependency.min] - Minimum allowable version.
- * @param {string} [dependency.max] - Maximum allowable version.
+ * @param {DependencyConfig} [dependency] - The dependency to get version information from.
  * @param {string} [version] - The current version of the dependency.
  * @returns {string} The message with version information appended.
  * @private
  */
-function _versionMessageAppend(dependency: any, version: any) {
+function _versionMessageAppend(dependency?: DependencyConfig, version?: string): string {
     let msg = "";
     if (dependency?.min) msg += `\n\t${localize("BBC.Dependency.MinVersion", "Minimum version: ")}${dependency.min}`;
     if (dependency?.max) msg += `\n\t${localize("BBC.Dependency.MaxVersion", "Maximum version: ")}${dependency.max}`;
@@ -107,13 +107,11 @@ function _versionMessageAppend(dependency: any, version: any) {
 
 /**
  * Checks if a dependency is activated and optionally logs a warning if it is not.
- * @param {object} dependency - The dependency to check.
- * @param {string} dependency.id - The identifier of the dependency.
- * @param {string} [dependency.ref] - Optional human-readable reference name.
+ * @param {DependencyConfig} dependency - The dependency to check.
  * @param {string} [warnMessage] - Optional warning message prefix to log if not activated.
  * @returns {boolean} Whether the dependency is activated.
  */
-function isActivated(dependency: any, warnMessage?: string) {
+function isActivated(dependency: DependencyConfig, warnMessage?: string): boolean {
     if (!dependency?.id) return false;
     const valid = _isActivated(dependency);
     if (!valid && warnMessage) {
@@ -131,13 +129,11 @@ function isActivated(dependency: any, warnMessage?: string) {
 
 /**
  * Checks if a dependency is installed and optionally logs a warning if it is not.
- * @param {object} dependency - The dependency to check.
- * @param {string} dependency.id - The identifier of the dependency.
- * @param {string} [dependency.ref] - Optional human-readable reference name.
+ * @param {DependencyConfig} dependency - The dependency to check.
  * @param {string} [warnMessage] - Optional warning message prefix to log if not installed.
  * @returns {boolean} Whether the dependency is installed.
  */
-function isInstalled(dependency: any, warnMessage?: string) {
+function isInstalled(dependency: DependencyConfig, warnMessage?: string): boolean {
     if (!dependency?.id) return false;
     const valid = _isInstalled(dependency);
     if (!valid && warnMessage) {
@@ -159,17 +155,17 @@ function isInstalled(dependency: any, warnMessage?: string) {
  * @param {string} dependency.id - The identifier of the dependency.
  * @returns {boolean} Whether the dependency is activated.
  */
-function hasRecommended(dependency: any) {
+function hasRecommended(dependency: DependencyConfig): boolean {
     if (!dependency?.id) return false;
     return isActivated(dependency, localize("BBC.Dependency.RecommendInstalling", "Recommend installing the following:"));
 }
 
 /**
  * Checks if at least one of a list of recommended dependencies is activated.
- * @param {Array<object>} dependencyList - The list of dependencies to check.
+ * @param {Array<DependencyConfig>} dependencyList - The list of dependencies to check.
  * @returns {boolean} Whether at least one dependency is activated.
  */
-function hasSomeRecommended(dependencyList: any) {
+function hasSomeRecommended(dependencyList: DependencyConfig[]): boolean {
     if (!dependencyList?.length) return false;
     for (const dependency of dependencyList) {
         if (isActivated(dependency)) return true;
@@ -187,10 +183,10 @@ function hasSomeRecommended(dependencyList: any) {
 
 /**
  * Checks if a required dependency is activated and throws an error if it is not.
- * @param {Array<object>} [dependencyList=[]] - The list of dependencies to check.
+ * @param {Array<DependencyConfig>} [dependencyList=[]] - The list of dependencies to check.
  * @returns {void} Throws an error if any required dependency is missing.
  */
-function required(dependencyList: any[] = []) {
+function required(dependencyList: DependencyConfig[] = []): void {
     let errorMsg = localize("BBC.Dependency.RequiresAll", "Requires all of the following to be installed and activated:\n");
     let dependencyMet = true;
 
@@ -213,10 +209,10 @@ function required(dependencyList: any[] = []) {
 
 /**
  * Checks if at least one of a list of required dependencies is activated and throws an error if not.
- * @param {Array<object>} dependencyList - The list of dependencies to check.
+ * @param {Array<DependencyConfig>} dependencyList - The list of dependencies to check.
  * @returns {void} Throws an error if no required dependency is activated.
  */
-function someRequired(dependencyList: any) {
+function someRequired(dependencyList: DependencyConfig[]): void {
     if (!dependencyList?.length) {
         throw new Error("No dependencies specified for someRequired.\n");
     }

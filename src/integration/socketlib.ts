@@ -9,10 +9,10 @@ import { adapter } from "../adapter/index.js";
 export const socketlib = {
     /**
      * Emit a structured payload over the module socket channel to all other connected clients.
-     * @param {Object} payload - Socket message dictionary (`{ type: string, ... }`)
+     * @param {unknown} payload - Socket message dictionary (`{ type: string, ... }`)
      * @returns {void}
      */
-    emit(payload: any) {
+    emit(payload: unknown): void {
         if (!payload || typeof payload !== "object") return;
         if (!game?.socket) return;
         game.socket.emit(`module.${MODULE_ID}`, payload);
@@ -23,7 +23,7 @@ export const socketlib = {
      * @param {Function} handler - Callback function invoked when a module socket payload is received
      * @returns {void}
      */
-    on(handler: any) {
+    on(handler: (payload: any) => void): void {
         if (typeof handler !== "function") return;
         if (!game?.socket) return;
         game.socket.on(`module.${MODULE_ID}`, handler);
@@ -34,14 +34,14 @@ export const socketlib = {
      * @param {Function} handler - Callback function to remove
      * @returns {void}
      */
-    off(handler: any) {
+    off(handler: (payload: any) => void): void {
         if (typeof handler !== "function") return;
         if (!game?.socket) return;
         game.socket.off(`module.${MODULE_ID}`, handler);
     }
 };
 
-const tileTrackers = new Map();
+const tileTrackers = new Map<string, { expected: Set<string>; received: Set<string>; resolve: () => void }>();
 
 /**
  * Wait for a created tile to replicate to all other active connected peer clients.
@@ -50,7 +50,7 @@ const tileTrackers = new Map();
  * @param {number} [timeoutMs=5000] - Safety timeout in milliseconds
  * @returns {Promise<void>}
  */
-export async function waitForTileReplication(tileId: any, timeoutMs = 5000) {
+export async function waitForTileReplication(tileId: string, timeoutMs = 5000): Promise<void> {
     if (!tileId || !game?.users || !game?.socket) return;
     const activeUsers = game.users.filter((u) => u.active && !u.isSelf);
     if (activeUsers.length === 0) return;
@@ -85,10 +85,10 @@ export async function waitForTileReplication(tileId: any, timeoutMs = 5000) {
 
 /**
  * Internal listener for socket messages handling peer replication handshakes and crosshair synchronization.
- * @param {Object} payload - Received socket payload
+ * @param {Record<string, any>} payload - Received socket payload
  * @returns {void}
  */
-export function handleSocketMessage(payload: any) {
+export function handleSocketMessage(payload: Record<string, any>): void {
     if (!payload || typeof payload !== "object") return;
 
     const type = String(payload.type ?? "");

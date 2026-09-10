@@ -278,7 +278,7 @@ export class FoundryVTTV14Adapter extends FoundryVTTV13Adapter {
      * @param {string} shapeType - The shape type identifier
      * @returns {boolean} Always true in V14
      */
-    supportsShapeRotation(shapeType: any) {
+    supportsShapeRotation(shapeType: string): boolean {
         return true;
     }
 

@@ -318,7 +318,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {string} shapeType - The shape type identifier
      * @returns {boolean} False for rect and square, true for circle, cone, ray
      */
-    supportsShapeRotation(shapeType: any) {
+    supportsShapeRotation(shapeType: string): boolean {
         if (!shapeType) return true;
         const lower = String(shapeType).toLowerCase();
         return lower !== "rect" && lower !== "square";
@@ -899,8 +899,9 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {string[]} paths - Array of template paths to preload
      * @returns {Promise<Function[]>}
      */
-    async loadTemplates(paths: any) {
-        return foundry.applications.handlebars.loadTemplates(paths);
+    async loadTemplates(paths: string | string[]): Promise<Function[]> {
+        const pathList = Array.isArray(paths) ? paths : [paths];
+        return foundry.applications.handlebars.loadTemplates(pathList);
     }
 }
 

@@ -44,8 +44,8 @@ export function registerModuleSettings() {
          * @param {Object<string, Object>} savedRegistrations - The updated dictionary of saved template registrations.
          * @returns {void}
          */
-        onChange: (savedRegistrations: any) => {
-            autorecManager.loadSavedRegistrations((savedRegistrations as any) ?? {});
+        onChange: (savedRegistrations: Record<string, any>) => {
+            autorecManager.loadSavedRegistrations(savedRegistrations ?? {});
         }
     } as any);
 
@@ -98,8 +98,8 @@ export function registerModuleSettings() {
  * @param {HTMLElement|jQuery} html - The settings config DOM element
  * @param {object} [_app=null] - The settings application instance
  */
-export function injectSettingsHeaders(html: any, _app = null) {
-    const root = html?.querySelector ? html : html?.[0];
+export function injectSettingsHeaders(html: HTMLElement | JQuery | unknown, _app: unknown = null) {
+    const root = (html as any)?.querySelector ? (html as HTMLElement) : (html as any)?.[0];
     if (!root?.querySelector) return;
 
     // 1. Ensure logVerbosity (Client Setting) is placed after showOtherPlayersCrosshairs (User Setting)
@@ -194,7 +194,7 @@ export function injectSettingsHeaders(html: any, _app = null) {
     }
 }
 
-Hooks.on('renderSettingsConfig', (app: any, html: any) => {
-    injectSettingsHeaders(html, app);
+Hooks.on('renderSettingsConfig', (_app: unknown, html: HTMLElement | JQuery | unknown) => {
+    injectSettingsHeaders(html, _app);
 });
 

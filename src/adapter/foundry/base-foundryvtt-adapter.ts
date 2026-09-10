@@ -87,7 +87,7 @@ export class BaseFoundryVTTAdapter {
      * @param {{x: number, y: number}} target - Ray target point
      * @returns {Ray|null} Instantiated Ray object or null
      */
-    createRay(origin: any, target: any) {
+    createRay(origin: { x: number; y: number }, target: { x: number; y: number }) {
         const RayClass = this.Ray;
         return RayClass ? new RayClass(origin, target) : null;
     }
@@ -100,7 +100,7 @@ export class BaseFoundryVTTAdapter {
      * @param {number} dist - Ray distance
      * @returns {Ray|null} Instantiated Ray object or null
      */
-    createRayFromAngle(x: any, y: any, rad: any, dist: any) {
+    createRayFromAngle(x: number, y: number, rad: number, dist: number) {
         const RayClass = this.Ray;
         return RayClass?.fromAngle ? RayClass.fromAngle(x, y, rad, dist) : null;
     }
@@ -118,7 +118,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string} id - The identifier of the highlight layer to add.
      * @returns {void}
      */
-    addHighlightLayer(id: any) {
+    addHighlightLayer(id: string): void {
         return this.canvasAdapter.addHighlightLayer(id);
     }
 
@@ -127,7 +127,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string} id - The identifier of the highlight layer to get.
      * @returns {Object|null} The highlight layer or null
      */
-    getHighlightLayer(id: any) {
+    getHighlightLayer(id: string): any {
         return this.canvasAdapter.getHighlightLayer(id);
     }
 
@@ -136,7 +136,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string} id - The identifier of the highlight layer to clear.
      * @returns {void}
      */
-    clearHighlightLayer(id: any) {
+    clearHighlightLayer(id: string): void {
         return this.canvasAdapter.clearHighlightLayer(id);
     }
 
@@ -145,7 +145,7 @@ export class BaseFoundryVTTAdapter {
      * @param {string} id - The identifier of the highlight layer to destroy.
      * @returns {void}
      */
-    destroyHighlightLayer(id: any) {
+    destroyHighlightLayer(id: string): void {
         return this.canvasAdapter.destroyHighlightLayer(id);
     }
 
@@ -241,12 +241,63 @@ export class BaseFoundryVTTAdapter {
     }
 
     /**
+     * Asynchronously resolves a document from a UUID across Foundry versions.
+     * @param {string} uuid - The document UUID
+     * @param {Object} [options={}] - Options passed to fromUuid
+     * @returns {Promise<any>} The resolved document or null
+     */
+    async fromUuid(uuid: string, options: any = {}): Promise<any> {
+        return foundry.utils.fromUuid(uuid, options);
+    }
+
+    /**
+     * Retrieve a property from an object using a dot-delimited path.
+     * @param {Object} obj - The target object
+     * @param {string} path - The dot-delimited property path
+     * @returns {*} The resolved property value
+     */
+    getProperty(obj: any, path: string): any {
+        return foundry.utils.getProperty(obj, path);
+    }
+
+    /**
+     * Set a property on an object using a dot-delimited path.
+     * @param {Object} obj - The target object
+     * @param {string} path - The dot-delimited property path
+     * @param {*} value - The value to assign
+     * @returns {boolean} True if the property was set successfully
+     */
+    setProperty(obj: any, path: string, value: any): boolean {
+        return foundry.utils.setProperty(obj, path, value);
+    }
+
+    /**
+     * Check whether an object or collection is empty.
+     * @param {Object} obj - The object to test
+     * @returns {boolean} True if the object is empty
+     */
+    isEmpty(obj: any): boolean {
+        return foundry.utils.isEmpty(obj);
+    }
+
+    /**
+     * Compare two semantic version strings.
+     * @param {string|number} v1 - The candidate version
+     * @param {string|number} v0 - The baseline version
+     * @param {Object} [options] - Options
+     * @returns {boolean} True if v1 is newer than v0
+     */
+    isNewerVersion(v1: string | number, v0: string | number, options?: { majorOnly?: boolean }): boolean {
+        return foundry.utils.isNewerVersion(v1, v0, options);
+    }
+
+    /**
      * Preload Handlebars templates across Foundry generations.
      * @abstract
-     * @param {string[]} paths - Array of template paths to preload
+     * @param {string|string[]} paths - Array of template paths to preload
      * @returns {Promise<Function[]>}
      */
-    async loadTemplates(paths: any): Promise<any> {
+    async loadTemplates(paths: string | string[]): Promise<Function[]> {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement loadTemplates(paths).");
     }
 
@@ -517,7 +568,7 @@ export class BaseFoundryVTTAdapter {
      * @param {{x: number, y: number}} target - Target point
      * @returns {number} Measured distance in grid units
      */
-    measureDistance(origin: any, target: any) {
+    measureDistance(origin: { x: number; y: number }, target: { x: number; y: number }): number {
         return this.canvasAdapter.measureDistance(origin, target);
     }
 
@@ -572,8 +623,132 @@ export class BaseFoundryVTTAdapter {
      * @param {string} shapeType - The shape type identifier ("circle", "cone", "ray", "rect", "square")
      * @returns {boolean} True if the shape type can be rotated in this Foundry version
      */
-    supportsShapeRotation(shapeType: any) {
+    supportsShapeRotation(shapeType: string): boolean {
         return true;
+    }
+
+    /**
+     * Resolves the { x, y } center coordinates of a placeable, document, or coordinate object.
+     * @param {PlaceableObject|Document|{x: number, y: number}|null} target - Target placeable, document, or coordinate point
+     * @returns {{ x: number, y: number } | null} Center coordinates
+     */
+    getCenter(target: any): { x: number; y: number } | null {
+        if (!target) return null;
+        if (target.center && typeof target.center.x === "number" && typeof target.center.y === "number") {
+            return { x: target.center.x, y: target.center.y };
+        }
+        if (target.object?.center && typeof target.object.center.x === "number" && typeof target.object.center.y === "number") {
+            return { x: target.object.center.x, y: target.object.center.y };
+        }
+        if (typeof target.x === "number" && typeof target.y === "number" && !target.document && !target.object && target.width === undefined && target.height === undefined) {
+            return { x: target.x, y: target.y };
+        }
+        const doc = target.document ? target.document : target;
+        const isRegion = doc.documentName === "Region" || Boolean(doc.shapes) || Boolean(target.shapes) || (Boolean(doc.bounds) && !doc.texture);
+        if (isRegion && target.bounds?.center) {
+            return { x: target.bounds.center.x, y: target.bounds.center.y };
+        }
+        const gridSize = this.gridSize;
+        const width = (doc.width ?? 1) * gridSize;
+        const height = (doc.height ?? 1) * gridSize;
+        return {
+            x: (doc.x ?? 0) + width / 2,
+            y: (doc.y ?? 0) + height / 2
+        };
+    }
+
+    /**
+     * Extracts normalized pixel dimensions, grid unit spans, and pixel radius for a token placeable.
+     * @param {Token} token - Target token placeable
+     * @returns {{ widthPx: number, heightPx: number, widthUnits: number, heightUnits: number, radiusPx: number }}
+     */
+    getTokenDimensions(token: Token): { widthPx: number; heightPx: number; widthUnits: number; heightUnits: number; radiusPx: number } {
+        if (!token) return { widthPx: 0, heightPx: 0, widthUnits: 1, heightUnits: 1, radiusPx: 0 };
+        const gridSize = this.gridSize;
+        const widthUnits = token.document.width ?? 1;
+        const heightUnits = token.document.height ?? 1;
+        const widthPx = token.w ?? (widthUnits * gridSize);
+        const heightPx = token.h ?? (heightUnits * gridSize);
+        const radiusPx = Math.max(widthPx, heightPx) / 2;
+        return {
+            widthPx,
+            heightPx,
+            widthUnits,
+            heightUnits,
+            radiusPx
+        };
+    }
+
+    /**
+     * Extracts the authoritative rotation in degrees for a token placeable.
+     * @param {Token|null|undefined} token - Target token placeable
+     * @returns {number} Rotation angle in degrees (0 to 360)
+     */
+    getTokenRotation(token: Token | null | undefined): number {
+        if (!token) return 0;
+        return token.document.rotation ?? 0;
+    }
+
+    /**
+     * Calculates the 3D distance between two tokens in scene units (e.g. feet/meters), rounded up.
+     * @param {Token} t1 - The source token placeable
+     * @param {Token} t2 - The target token placeable
+     * @returns {number} Distance in scene units, rounded up
+     */
+    getDistance(t1: Token, t2: Token): number {
+        if (!t1 || !t2) return 0;
+        const p1 = this.getCenter(t1);
+        const p2 = this.getCenter(t2);
+        if (!p1 || !p2) return 0;
+        const dist2DPx = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+
+        const gridSize = this.gridSize;
+        const gridDistance = this.gridDistance;
+        const dist2DUnits = (dist2DPx / gridSize) * gridDistance;
+
+        const el1 = t1.document.elevation ?? 0;
+        const el2 = t2.document.elevation ?? 0;
+        const elDiff = el1 - el2;
+
+        const dist3DUnits = Math.hypot(dist2DUnits, elDiff);
+        return Math.ceil(dist3DUnits);
+    }
+
+    /**
+     * Finds the center point of the square in target token's footprint closest to source token.
+     * @param {Token} token - Source token placeable
+     * @param {Token} target - Target token placeable
+     * @returns {{x: number, y: number}|null} Coordinate of nearest square center
+     */
+    getNearestSquareCenter(token: Token, target: Token): { x: number; y: number } | null {
+        if (!token || !target) return null;
+        const gs = this.gridSize;
+        const srcCenter = this.getCenter(token);
+        if (!srcCenter) return null;
+
+        const w = target.document.width ?? 1;
+        const h = target.document.height ?? 1;
+
+        let bestPoint: { x: number; y: number } | null = null;
+        let bestDist2 = Infinity;
+
+        for (let gx = 0; gx < w; gx++) {
+            for (let gy = 0; gy < h; gy++) {
+                const cx = target.x + (gx + 0.5) * gs;
+                const cy = target.y + (gy + 0.5) * gs;
+
+                const dx = cx - srcCenter.x;
+                const dy = cy - srcCenter.y;
+                const d2 = dx * dx + dy * dy;
+
+                if (d2 < bestDist2) {
+                    bestDist2 = d2;
+                    bestPoint = { x: cx, y: cy };
+                }
+            }
+        }
+
+        return bestPoint ?? this.getCenter(target);
     }
 
     /**
@@ -1039,7 +1214,7 @@ export class BaseFoundryVTTAdapter {
         const isRegion = doc?.documentName === "Region" || Boolean(placeable.shapes || doc?.shapes);
         const primaryHId = placeable.highlightId ?? placeable._bbcHighlightId ?? doc?.highlightId ?? doc?._bbcHighlightId;
 
-        const candidateIds = new Set();
+        const candidateIds = new Set<string>();
         const pId = String(placeable.id ?? doc?.id ?? "").trim();
         if (pId) {
             candidateIds.add(pId);
