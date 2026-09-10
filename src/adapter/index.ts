@@ -110,7 +110,7 @@ const adapter: any = {
     randomID(length?: number) { return crosshairAdapter.randomID(length); },
     isEmpty(obj: any) { return crosshairAdapter.isEmpty(obj); },
     isNewerVersion(v1: string | number, v0: string | number, options?: { majorOnly?: boolean }): boolean { return crosshairAdapter.isNewerVersion(v1, v0, options); },
-    loadTemplates(paths: string | string[]): Promise<Function[]> { return crosshairAdapter.loadTemplates(paths); }
+    loadTemplates(paths: string[]): Promise<Function[]> { return crosshairAdapter.loadTemplates(paths); }
 };
 
 export {

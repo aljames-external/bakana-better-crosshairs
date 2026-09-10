@@ -899,9 +899,8 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {string[]} paths - Array of template paths to preload
      * @returns {Promise<Function[]>}
      */
-    async loadTemplates(paths: string | string[]): Promise<Function[]> {
-        const pathList = Array.isArray(paths) ? paths : [paths];
-        return foundry.applications.handlebars.loadTemplates(pathList);
+    async loadTemplates(paths: string[]): Promise<Function[]> {
+        return foundry.applications.handlebars.loadTemplates(paths);
     }
 }
 

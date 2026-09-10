@@ -294,10 +294,10 @@ export class BaseFoundryVTTAdapter {
     /**
      * Preload Handlebars templates across Foundry generations.
      * @abstract
-     * @param {string|string[]} paths - Array of template paths to preload
+     * @param {string[]} paths - Array of template paths to preload
      * @returns {Promise<Function[]>}
      */
-    async loadTemplates(paths: string | string[]): Promise<Function[]> {
+    async loadTemplates(paths: string[]): Promise<Function[]> {
         throw new Error("Subclasses of BaseFoundryVTTAdapter must implement loadTemplates(paths).");
     }
 
