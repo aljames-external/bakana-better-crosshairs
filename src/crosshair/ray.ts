@@ -11,7 +11,7 @@ export class RayCrosshairShape extends BaseCrosshairShape {
      * Get the default shape type string for this crosshair.
      * @returns {string} The ray type (`"ray"`)
      */
-    get defaultShapeType() {
+    override get defaultShapeType() {
         return "ray";
     }
 
@@ -19,7 +19,7 @@ export class RayCrosshairShape extends BaseCrosshairShape {
      * Get the default identifier string for this ray sequence effect.
      * @returns {string} Default ray effect identifier (`"Ray Crosshair"`)
      */
-    getDefaultId() {
+    override getDefaultId() {
         return "Ray Crosshair";
     }
 
@@ -27,7 +27,7 @@ export class RayCrosshairShape extends BaseCrosshairShape {
      * Get the default normalized animation anchor coordinates (`{ x: 0, y: 0.5 }`).
      * @returns {{x: number, y: number}} Origin midpoint anchor on left side
      */
-    get defaultAnimationAnchor() {
+    override get defaultAnimationAnchor() {
         return { x: 0, y: 0.5 };
     }
 
@@ -35,7 +35,7 @@ export class RayCrosshairShape extends BaseCrosshairShape {
      * Get the default normalized Foundry shape anchor coordinates (`{ x: 0, y: 0.5 }`).
      * @returns {{x: number, y: number}} Origin midpoint anchor on left side
      */
-    get defaultShapeAnchor() {
+    override get defaultShapeAnchor() {
         return { x: 0, y: 0.5 };
     }
 
@@ -45,7 +45,7 @@ export class RayCrosshairShape extends BaseCrosshairShape {
      * @param {Sequence} crosshairSeq - The Sequencer crosshair builder instance
      * @returns {void}
      */
-    _configureCrosshairShape(crosshairSeq: any) {
+    override _configureCrosshairShape(crosshairSeq: any) {
         const distance = Math.round(this.config.distance ?? 30);
         const width = Math.round(this.config.width ?? 5);
         log.debug("RayCrosshairShape._configureCrosshairShape | Configuring ray distance and width.", { distance, width });
@@ -57,7 +57,7 @@ export class RayCrosshairShape extends BaseCrosshairShape {
      * @protected
      * @returns {{widthPx: number, heightPx: number, factor: number, gridUnits: boolean}} Calculated pixel and scale dimensions
      */
-    _getGraphicDimensions() {
+    override _getGraphicDimensions() {
         const distance = Math.round(this.config.distance ?? 30);
         const width = Math.round(this.config.width ?? 5);
         const gridDist = adapter.crosshair.gridDistance;
@@ -74,7 +74,7 @@ export class RayCrosshairShape extends BaseCrosshairShape {
      * @protected
      * @returns {string} Resolved file path or key
      */
-    _getGraphicFile() {
+    override _getGraphicFile() {
         const rawFile = String(this.config.file ?? "").trim();
         if (Boolean(rawFile)) {
             return closest(rawFile);

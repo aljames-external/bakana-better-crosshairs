@@ -20,7 +20,7 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * Return list of custom PlaceableObject subclass names introduced by DnD5e.
      * @returns {string[]} Array of custom placeable class names
      */
-    getCustomPlaceableClassNames(): string[] {
+    override getCustomPlaceableClassNames(): string[] {
         return ["MeasuredTemplate5e"];
     }
 
@@ -30,7 +30,7 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * @param {Object} [baseContext={}] - Initial calling context (`{ item, itemName, itemId, activity, activityName, activityId }`)
      * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}} Normalized calling context containing item and activity references and identifiers
      */
-    extractCallingContext(doc: any, baseContext: any = {}) {
+    override extractCallingContext(doc: any, baseContext: any = {}) {
         let itemObj = baseContext?.item ?? null;
         let activityObj = baseContext?.activity ?? null;
 
@@ -80,7 +80,7 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * @param {Object} entry - Registered autorec entry configuration
      * @returns {boolean} True if the calling context matches item and activity rules
      */
-    isMatch(context: any, entry: any) {
+    override isMatch(context: any, entry: any) {
         if (!super.isMatch(context, entry)) return false;
         if (entry.isDefault) {
             log.debug("Dnd5eSystemAdapter.isMatch | Candidate entry is canonical default fallback (isDefault: true) -> MATCHED");
@@ -117,7 +117,7 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * @param {object} [config={}] - Optional crosshair configuration or calling context object
      * @returns {boolean} Whether the crosshair shape defaults to sticking to the token in D&D 5e
      */
-    getDefaultStickToToken(shapeType: any, config = {}) {
+    override getDefaultStickToToken(shapeType: any, config = {}) {
         const itemDefault = this.getSystemDefault(config);
         if (itemDefault !== null && itemDefault !== undefined) {
             return Boolean(itemDefault);
@@ -136,7 +136,7 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * @param {Object} [options={}] - Execution dependencies (`{ crosshairAdapter, pendingPlacements, placementKey }`)
      * @returns {void} No return value
      */
-    handleProgrammaticPlacement(scene: any, doc: any, placeable: any, coords = {}, options = {}) {
+    override handleProgrammaticPlacement(scene: any, doc: any, placeable: any, coords = {}, options = {}) {
     }
 
     /**
@@ -146,7 +146,7 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * @override
      * @returns {string[]} Array of hook names
      */
-    _getItemSheetHookNames() {
+    override _getItemSheetHookNames() {
         return ["getHeaderControlsItemSheet5e", "getHeaderControlsItemSheet5e2"];
     }
 
@@ -157,7 +157,7 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * @override
      * @returns {string[]} Array of hook names
      */
-    _getActivitySheetHookNames() {
+    override _getActivitySheetHookNames() {
         return [
             "getHeaderControlsActivitySheet",
             "getHeaderControlsActivitySheet5e",

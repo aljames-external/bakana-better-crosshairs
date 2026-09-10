@@ -94,7 +94,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * Return canonical document terminology string ("template").
      * @returns {string} The localized or canonical document type term
      */
-    get documentTerm() {
+    override get documentTerm() {
         return "template";
     }
 
@@ -102,7 +102,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * Return section title header for pre-placement configuration.
      * @returns {string} Section header text
      */
-    get prePlacementTitle() {
+    override get prePlacementTitle() {
         return localize("BBC.autorecMenu.preTemplatePlacement", "Pre-Template Placement");
     }
 
@@ -110,7 +110,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * Return section title header for template preview placement configuration.
      * @returns {string} Section header text
      */
-    get previewPlacementSectionTitle() {
+    override get previewPlacementSectionTitle() {
         return localize("BBC.autorecMenu.templatePreviewPlacementConfig", "Template Preview Placement Configuration");
     }
 
@@ -118,7 +118,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * Return section title header for placement configuration.
      * @returns {string} Section header text
      */
-    get placementSectionTitle() {
+    override get placementSectionTitle() {
         return localize("BBC.autorecMenu.templatePlacementConfig", "Template Placement Configuration");
     }
 
@@ -126,7 +126,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * Return section title header for post-placement configuration.
      * @returns {string} Section header text
      */
-    get postPlacementTitle() {
+    override get postPlacementTitle() {
         return localize("BBC.autorecMenu.postTemplatePlacement", "Post-Template Placement");
     }
 
@@ -134,7 +134,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * Return supported base canvas PlaceableObject type names for Foundry VTT v13.
      * @returns {string[]} Base placeable type names
      */
-    get supportedBasePlaceables() {
+    override get supportedBasePlaceables() {
         return ["MeasuredTemplate"];
     }
 
@@ -142,7 +142,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * Return supported document creation type names (`preCreate`/`create` hook suffixes) for Foundry VTT v13.
      * @returns {string[]} Document type names
      */
-    get supportedDocumentTypes() {
+    override get supportedDocumentTypes() {
         return ["MeasuredTemplate"];
     }
 
@@ -153,7 +153,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {Object} [sysAdapter=systemAdapter] - Active System Adapter instance
      * @returns {Array<{event: string, handler: Function, category: string, targetName: string}>} Array of generated hook descriptor objects
      */
-    generatePlacementHooks(callbacks: any = {}, sysAdapter: any = systemAdapter): any[] {
+    override generatePlacementHooks(callbacks: any = {}, sysAdapter: any = systemAdapter): any[] {
         const targetSysAdapter = sysAdapter ?? systemAdapter;
         if (targetSysAdapter && !(targetSysAdapter instanceof BaseSystemAdapter)) {
             throw new Error(`generatePlacementHooks requires a valid BaseSystemAdapter instance, received: ${targetSysAdapter}`);
@@ -220,7 +220,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {Document} doc - MeasuredTemplate document
      * @returns {{type: string, distance: number, radius: number, width: number, angle: number, direction: number, rotation: number, x: number, y: number, elevation: number}} Detected shape properties and dimensions
      */
-    detectProperties(doc: any) {
+    override detectProperties(doc: any) {
         const targetDoc = doc?.document ? doc.document : doc;
         if (!targetDoc) {
             return { type: "circle", t: "circle", distance: 0, radius: 0, width: 5, angle: 360, direction: 0, rotation: 0, x: 0, y: 0, elevation: 0 };
@@ -267,7 +267,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {Object} [config={}] - Optional sequence placement configuration
      * @returns {{x: number, y: number, direction: number, rotation: number, distance: number|undefined, radius: number|undefined, width: number|undefined, sticky: boolean, type: string, originalType: string|undefined, t: string}} Formatted placement coordinates payload
      */
-    formatPlacementCoordinates(x: number, y: number, direction: number, config: any = {}): any {
+    override formatPlacementCoordinates(x: number, y: number, direction: number, config: any = {}): any {
         const shapeTypeMap: Record<string, string> = {
             circle: "circle",
             cone: "cone",
@@ -318,7 +318,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {string} shapeType - The shape type identifier
      * @returns {boolean} False for rect and square, true for circle, cone, ray
      */
-    supportsShapeRotation(shapeType: string): boolean {
+    override supportsShapeRotation(shapeType: string): boolean {
         if (!shapeType) return true;
         const lower = String(shapeType).toLowerCase();
         return lower !== "rect" && lower !== "square";
@@ -328,7 +328,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * Return template pixel multiplier factor and gridUnits mode for Sequencer effects in V13.
      * @returns {{factor: number, gridUnits: boolean}} Template pixel multiplier factor and gridUnits mode
      */
-    getTemplatePixelFactor() {
+    override getTemplatePixelFactor() {
         return { factor: 1, gridUnits: false };
     }
 
@@ -338,7 +338,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {{x?: number, y?: number, direction?: number, distance?: number, width?: number, angle?: number, type?: string, originalType?: string, t?: string, sticky?: boolean, token?: Token}} coords - Destination preview coordinates
      * @returns {void}
      */
-    updatePreviewShape(previewDoc: any, coords: any): void {
+    override updatePreviewShape(previewDoc: any, coords: any): void {
         if (!previewDoc || !coords) return;
         const targetDoc = previewDoc.document ? previewDoc.document : previewDoc;
         const tmpl = previewDoc._object ? previewDoc._object : (previewDoc.document ? previewDoc : null);
@@ -457,7 +457,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {Object|null} [data=null] - Document update payload
      * @returns {void}
      */
-    applyDocumentPlacement(doc: any, coords: any = {}, config: any = {}, data: any = null): void {
+    override applyDocumentPlacement(doc: any, coords: any = {}, config: any = {}, data: any = null): void {
         if (!doc) return;
         const targetDoc = doc.document ? doc.document : doc;
         const styling = this.extractPlacedStylingFlags(config);
@@ -534,7 +534,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {string} [documentName] - Explicit document type name
      * @returns {string} Always "MeasuredTemplate" in V13
      */
-    _getDeferredDocumentName(data: any, documentName: any) {
+    override _getDeferredDocumentName(data: any, documentName: any) {
         return "MeasuredTemplate";
     }
 
@@ -545,7 +545,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {string} docName - Document type name
      * @protected
      */
-    _applyDeferredCoordinates(data: any, coords: any, docName: any) {
+    override _applyDeferredCoordinates(data: any, coords: any, docName: any) {
         if (coords.x !== undefined) data.x = Math.round(coords.x);
         if (coords.y !== undefined) data.y = Math.round(coords.y);
         const isRect = data.t === "rect" || coords.type === "square" || coords.type === "rect" || coords.originalType === "square" || coords.t === "rect";
@@ -581,7 +581,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {number} direction - The current direction in degrees
      * @returns {void}
      */
-    refreshTemplateHighlights(tmpl: any, direction: any) {
+    override refreshTemplateHighlights(tmpl: any, direction: any) {
         this._patchRefreshState();
         if (!tmpl || tmpl._bbcRefreshingHighlights) return;
         tmpl._bbcRefreshingHighlights = true;
@@ -714,7 +714,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {PlaceableObject} placeable - Preview placeable
      * @returns {void}
      */
-    _wrapHighlightGrid(placeable: any) {
+    override _wrapHighlightGrid(placeable: any) {
         this._patchRefreshState();
         if (!placeable || placeable._bbcHighlightGridWrapped) return;
         placeable._bbcHighlightGridWrapped = true;
@@ -869,7 +869,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {PlaceableObject} placeable - Preview placeable
      * @returns {Promise<void>}
      */
-    async handleDrawPreview(placeable: any) {
+    override async handleDrawPreview(placeable: any) {
         this._patchRefreshState();
         return super.handleDrawPreview(placeable);
     }
@@ -881,15 +881,15 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {string} userId - ID of the user creating the document
      * @returns {Promise<void>} Resolves when post-placement execution completes
      */
-    async handleCreateDocument(doc: any, _options: any, userId: any) {
+    override async handleCreateDocument(doc: any, _options: any, userId: any) {
         await super.handleCreateDocument(doc, _options, userId);
     }
 
-    _snapPoint(x: any, y: any, numMode: any) {
+    override _snapPoint(x: any, y: any, numMode: any) {
         return this.getSnappedPoint({ x, y }, { mode: numMode });
     }
 
-    _getGridCenterPoint(x: any, y: any) {
+    override _getGridCenterPoint(x: any, y: any) {
         return this.getCenterPoint({ x, y });
     }
 
@@ -899,7 +899,7 @@ export class FoundryVTTV13Adapter extends BaseFoundryVTTAdapter {
      * @param {string[]} paths - Array of template paths to preload
      * @returns {Promise<Function[]>}
      */
-    async loadTemplates(paths: string[]): Promise<Function[]> {
+    override async loadTemplates(paths: string[]): Promise<Function[]> {
         return foundry.applications.handlebars.loadTemplates(paths);
     }
 }

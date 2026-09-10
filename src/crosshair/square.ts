@@ -14,7 +14,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * Get the default shape type string for this crosshair.
      * @returns {string} The rect type (`"rect"`)
      */
-    get defaultShapeType() {
+    override get defaultShapeType() {
         return "rect";
     }
 
@@ -22,7 +22,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * Get the default identifier string for this square sequence effect.
      * @returns {string} Default square effect identifier (`"Square Crosshair"`)
      */
-    getDefaultId() {
+    override getDefaultId() {
         return "Square Crosshair";
     }
 
@@ -38,7 +38,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * Get the default normalized animation anchor coordinates (`{ x: 0, y: 0 }` for grid squares, `{ x: 0, y: 0.5 }` when attached to token).
      * @returns {{x: number, y: number}} Top-left corner anchor or left-middle origin anchor
      */
-    get defaultAnimationAnchor() {
+    override get defaultAnimationAnchor() {
         return this.isAttached ? { x: 0, y: 0.5 } : { x: 0, y: 0 };
     }
 
@@ -46,7 +46,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * Get the default normalized Foundry shape anchor coordinates (`{ x: 0, y: 0 }` for grid squares, `{ x: 0, y: 0.5 }` when attached to token).
      * @returns {{x: number, y: number}} Top-left corner anchor or left-middle origin anchor
      */
-    get defaultShapeAnchor() {
+    override get defaultShapeAnchor() {
         return this.isAttached ? { x: 0, y: 0.5 } : { x: 0, y: 0 };
     }
 
@@ -56,7 +56,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * @param {Sequence} crosshairSeq - The Sequencer crosshair builder instance
      * @returns {void}
      */
-    _configureCrosshairShape(crosshairSeq: any) {
+    override _configureCrosshairShape(crosshairSeq: any) {
         const distance = Math.round(this.config.distance ?? 30);
         const width = Math.round(this.config.width ?? 30);
         log.debug("SquareCrosshairShape._configureCrosshairShape | Configuring square distance and width.", { distance, width });
@@ -68,7 +68,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * @protected
      * @returns {{widthPx: number, heightPx: number, factor: number, gridUnits: boolean}} Calculated pixel and scale dimensions
      */
-    _getGraphicDimensions() {
+    override _getGraphicDimensions() {
         const rawDistance = Math.round(this.config.distance ?? 30);
         const rawWidth = Math.round(this.config.width ?? 30);
         let distance = rawDistance;
@@ -92,7 +92,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * @protected
      * @returns {string} Resolved file path or key
      */
-    _getGraphicFile() {
+    override _getGraphicFile() {
         const rawFile = String(this.config.rectangleFile ?? this.config.squareFile ?? this.config.file ?? "").trim();
         const rawDistance = Math.round(this.config.distance ?? 30);
         const rawWidth = Math.round(this.config.width ?? 30);
@@ -109,7 +109,7 @@ export class SquareCrosshairShape extends BaseCrosshairShape {
      * Create and configure the square sequence. Converts to an equivalent ray object when attached to a token.
      * @returns {Promise<Array<*>>} Sequence and targets array
      */
-    async create() {
+    override async create() {
         if (this.isAttached) {
             log.debug("SquareCrosshairShape.create | Attached square detected. Converting to equivalent ray object.");
             const rayConfig = {

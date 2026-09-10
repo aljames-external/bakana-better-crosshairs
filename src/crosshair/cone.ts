@@ -11,7 +11,7 @@ export class ConeCrosshairShape extends BaseCrosshairShape {
      * Get the default shape type string for this crosshair.
      * @returns {string} The cone type (`"cone"`)
      */
-    get defaultShapeType() {
+    override get defaultShapeType() {
         return "cone";
     }
 
@@ -19,7 +19,7 @@ export class ConeCrosshairShape extends BaseCrosshairShape {
      * Get the default identifier string for this cone sequence effect.
      * @returns {string} Default cone effect identifier (`"Cone Crosshair"`)
      */
-    getDefaultId() {
+    override getDefaultId() {
         return "Cone Crosshair";
     }
 
@@ -27,7 +27,7 @@ export class ConeCrosshairShape extends BaseCrosshairShape {
      * Get the default normalized animation anchor coordinates (`{ x: 0, y: 0.5 }`).
      * @returns {{x: number, y: number}} Tip anchor on left-middle
      */
-    get defaultAnimationAnchor() {
+    override get defaultAnimationAnchor() {
         return { x: 0, y: 0.5 };
     }
 
@@ -35,7 +35,7 @@ export class ConeCrosshairShape extends BaseCrosshairShape {
      * Get the default normalized Foundry shape anchor coordinates (`{ x: 0, y: 0.5 }`).
      * @returns {{x: number, y: number}} Tip anchor on left-middle
      */
-    get defaultShapeAnchor() {
+    override get defaultShapeAnchor() {
         return { x: 0, y: 0.5 };
     }
 
@@ -45,7 +45,7 @@ export class ConeCrosshairShape extends BaseCrosshairShape {
      * @param {Sequence} crosshairSeq - The Sequencer crosshair builder instance
      * @returns {void}
      */
-    _configureCrosshairShape(crosshairSeq: any) {
+    override _configureCrosshairShape(crosshairSeq: any) {
         const distance = Math.round(this.config.distance ?? 30);
         const angle = this.config.angle ?? 53.13;
         log.debug("ConeCrosshairShape._configureCrosshairShape | Configuring cone distance and angle.", { distance, angle });
@@ -57,7 +57,7 @@ export class ConeCrosshairShape extends BaseCrosshairShape {
      * @protected
      * @returns {{widthPx: number, heightPx: number, factor: number, gridUnits: boolean}} Calculated pixel and scale dimensions
      */
-    _getGraphicDimensions() {
+    override _getGraphicDimensions() {
         const distance = Math.round(this.config.distance ?? 30);
         const angle = this.config.angle ?? 53.13;
         const gridDist = adapter.crosshair.gridDistance;
@@ -75,7 +75,7 @@ export class ConeCrosshairShape extends BaseCrosshairShape {
      * @protected
      * @returns {string} Resolved file path or key
      */
-    _getGraphicFile() {
+    override _getGraphicFile() {
         const rawFile = String(this.config.file ?? "").trim();
         if (Boolean(rawFile)) {
             return closest(rawFile);

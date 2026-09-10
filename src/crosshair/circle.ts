@@ -13,7 +13,7 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
      * Get the default shape type string for this crosshair.
      * @returns {string} The circle type (`"circle"`)
      */
-    get defaultShapeType() {
+    override get defaultShapeType() {
         return "circle";
     }
 
@@ -21,7 +21,7 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
      * Get the default identifier string for this circle sequence effect.
      * @returns {string} Default circle effect identifier (`"Circle Crosshair"`)
      */
-    getDefaultId() {
+    override getDefaultId() {
         return "Circle Crosshair";
     }
 
@@ -29,7 +29,7 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
      * Get the default normalized animation anchor coordinates (`{ x: 0.5, y: 0.5 }`).
      * @returns {{x: number, y: number}} Center anchor
      */
-    get defaultAnimationAnchor() {
+    override get defaultAnimationAnchor() {
         return { x: 0.5, y: 0.5 };
     }
 
@@ -37,7 +37,7 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
      * Get the default normalized Foundry shape anchor coordinates (`{ x: 0.5, y: 0.5 }`).
      * @returns {{x: number, y: number}} Center anchor
      */
-    get defaultShapeAnchor() {
+    override get defaultShapeAnchor() {
         return { x: 0.5, y: 0.5 };
     }
 
@@ -47,7 +47,7 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
      * @param {Sequence} crosshairSeq - The Sequencer crosshair builder instance
      * @returns {void}
      */
-    _configureCrosshairShape(crosshairSeq: any) {
+    override _configureCrosshairShape(crosshairSeq: any) {
         const radius = Math.round(this.config.radius ?? 20);
         log.debug("CircleCrosshairShape._configureCrosshairShape | Configuring circle distance.", { radius });
         crosshairSeq.distance(radius);
@@ -58,7 +58,7 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
      * @protected
      * @returns {{widthPx: number, heightPx: number, factor: number, gridUnits: boolean}} Calculated pixel and scale dimensions
      */
-    _getGraphicDimensions() {
+    override _getGraphicDimensions() {
         const radius = Math.round(this.config.radius ?? 20);
         const gridDist = adapter.crosshair.gridDistance;
         const gridSize = adapter.crosshair.gridSize;
@@ -73,7 +73,7 @@ export class CircleCrosshairShape extends BaseCrosshairShape {
      * @protected
      * @returns {string} Resolved file path or key
      */
-    _getGraphicFile() {
+    override _getGraphicFile() {
         const rawFile = String(this.config.file ?? "").trim();
         const radius = Math.round(this.config.radius ?? 20);
         return resolveCircleAsset(rawFile, radius);

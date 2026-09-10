@@ -19,7 +19,7 @@ export class Pf2eSystemAdapter extends BaseSystemAdapter {
      * Return list of custom PlaceableObject subclass names introduced by Pathfinder 2e.
      * @returns {string[]} Array of custom placeable class names
      */
-    getCustomPlaceableClassNames(): string[] {
+    override getCustomPlaceableClassNames(): string[] {
         return ["MeasuredTemplatePF2e", "RegionPF2e"];
     }
 
@@ -32,7 +32,7 @@ export class Pf2eSystemAdapter extends BaseSystemAdapter {
      * @param {object} [config={}] - Optional crosshair configuration or calling context object
      * @returns {boolean} Whether the crosshair shape defaults to sticking to the token in Pathfinder 2e
      */
-    getDefaultStickToToken(shapeType: string, config: any = {}): boolean {
+    override getDefaultStickToToken(shapeType: string, config: any = {}): boolean {
         const itemDefault = this.getSystemDefault(config);
         if (itemDefault !== null && itemDefault !== undefined) {
             return Boolean(itemDefault);
@@ -45,7 +45,7 @@ export class Pf2eSystemAdapter extends BaseSystemAdapter {
      * In Pathfinder 2e, rotating a region/template requires holding Ctrl + mousewheel, so normal mousewheel zooms the canvas.
      * @returns {boolean} True (Pathfinder 2e requires Control key for crosshair wheel rotation)
      */
-    requiresWheelModifier(): boolean {
+    override requiresWheelModifier(): boolean {
         return true;
     }
 
@@ -55,7 +55,7 @@ export class Pf2eSystemAdapter extends BaseSystemAdapter {
      * @param {Object} [baseContext={}] - Initial calling context (`{ item, itemName, itemId }`)
      * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}} Refined calling context object
      */
-    extractCallingContext(doc: any, baseContext: any = {}) {
+    override extractCallingContext(doc: any, baseContext: any = {}) {
         let itemObj = baseContext?.item ?? null;
 
         // In PF2e, template origins are stored inside document.flags.pf2e.origin (or flags.pf2e.item)
@@ -102,7 +102,7 @@ export class Pf2eSystemAdapter extends BaseSystemAdapter {
      * @param {Object} [options={}] - Execution dependencies (`{ crosshairAdapter, pendingPlacements, placementKey }`)
      * @returns {void} No return value
      */
-    handleProgrammaticPlacement(scene: any, doc: any, placeable: any, coords: any = {}, options: any = {}): void {
+    override handleProgrammaticPlacement(scene: any, doc: any, placeable: any, coords: any = {}, options: any = {}): void {
         if (!doc || !scene) return;
         const docName = doc.documentName ?? "MeasuredTemplate";
         const { crosshairAdapter: optAdapter, pendingPlacements, placementKey } = options;

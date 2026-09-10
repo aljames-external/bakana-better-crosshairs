@@ -193,7 +193,7 @@ export class AutorecMenuApplication extends BaseCrosshairMenuApplication {
      * @param {object} options - Render options.
      * @returns {void}
      */
-    _attachCustomEventListeners(root: any, context: any, options: any) {
+    override _attachCustomEventListeners(root: any, context: any, options: any) {
         const rootEl = this._normalizeElement(root);
         if (!rootEl) return;
 
