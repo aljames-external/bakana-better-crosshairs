@@ -1,6 +1,7 @@
 import { BaseSystemAdapter } from "./base-system-adapter.js";
 import { log } from "../../lib/logger.js";
 import { crosshairAdapter } from "../foundry/index.js";
+import type { ItemPF } from "../../types/systems.js";
 
 /**
  * System Adapter encapsulating Pathfinder 1st Edition (pf1 / pf) item context resolution and template placement behaviors.
@@ -31,7 +32,7 @@ export class Pf1SystemAdapter extends BaseSystemAdapter {
      * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}} Refined calling context object
      */
     override extractCallingContext(doc: any, baseContext: any = {}) {
-        let itemObj = baseContext?.item ?? null;
+        let itemObj: ItemPF | any = baseContext?.item ?? null;
 
         // In PF1e, template origins are stored in document.flags.pf1.origin or document.flags.pf.origin
         const pf1Flags = doc?.flags?.[this.systemId] ?? doc?.flags?.pf1 ?? doc?.flags?.pf ?? {};

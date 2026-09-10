@@ -1,6 +1,7 @@
 import { BaseSystemAdapter } from "./base-system-adapter.js";
 import { log } from "../../lib/logger.js";
 import { crosshairAdapter } from "../foundry/index.js";
+import type { Item5e, Dnd5eActivity } from "../../types/systems.js";
 
 /**
  * System Adapter for DnD5e.
@@ -31,11 +32,11 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
      * @returns {{item: Item|null, itemName: string, itemId: string, activity: Object|null, activityName: string, activityId: string}} Normalized calling context containing item and activity references and identifiers
      */
     override extractCallingContext(doc: any, baseContext: any = {}) {
-        let itemObj = baseContext?.item ?? null;
-        let activityObj = baseContext?.activity ?? null;
+        let itemObj: Item5e | any = baseContext?.item ?? null;
+        let activityObj: Dnd5eActivity | any = baseContext?.activity ?? null;
 
         if (!itemObj && doc?.flags?.dnd5e?.origin) {
-            try { itemObj = crosshairAdapter.fromUuidSync(doc.flags.dnd5e.origin); } catch (e) {}
+            try { itemObj = crosshairAdapter.fromUuidSync(doc.flags.dnd5e.origin) as Item5e | null; } catch (e) {}
         }
 
         if (itemObj && (itemObj.item || (itemObj.parent && itemObj.parent.documentName === "Item"))) {
@@ -49,7 +50,8 @@ export class Dnd5eSystemAdapter extends BaseSystemAdapter {
                 try { activityObj = crosshairAdapter.fromUuidSync(actIdentifier); } catch (e) {}
             }
             if (!activityObj && itemObj?.system?.activities) {
-                activityObj = itemObj.system.activities.get?.(actIdentifier) ?? null;
+                const activities = itemObj.system.activities;
+                activityObj = (typeof activities.get === 'function' ? activities.get(actIdentifier) : activities[actIdentifier]) ?? null;
             }
         }
 
