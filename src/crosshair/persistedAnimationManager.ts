@@ -13,7 +13,7 @@ export class PersistedAnimationManager {
      * @param {Document|string} docOrId - Target document or document ID
      * @returns {string} Unique effect name
      */
-    static getEffectName(target: any): string {
+    static getEffectName(target: { id?: string | null } | string | null | undefined): string {
         const id = typeof target === "string" ? target : (target?.id ?? "");
         return `bbc-persisted-${id}`;
     }
@@ -153,7 +153,7 @@ export class PersistedAnimationManager {
      * @param {Document|string} docOrId - Target document or document ID
      * @returns {void}
      */
-    static endPersistedAnimation(target: any) {
+    static endPersistedAnimation(target: { id?: string | null } | string | null | undefined): void {
         const id = typeof target === "string" ? target : (target?.id ?? "");
         if (!id) return;
         const effectName = this.getEffectName(id);

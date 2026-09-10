@@ -9,7 +9,7 @@ import { localize } from './utils.js';
  * @param {...string} categories - The categories to traverse.
  * @returns {string} The best-fit path in the Sequencer database.
  */
-function bestFit(modulePrefix: any, ...categories: any[]) {
+function bestFit(modulePrefix: any, ...categories: string[]): string {
     let diverged = false;
     let currentPath = modulePrefix;
     const originalPath = `${modulePrefix}.${categories.join('.')}`;
@@ -21,7 +21,7 @@ function bestFit(modulePrefix: any, ...categories: any[]) {
      * @param {string} component - The path component to inspect.
      * @returns {boolean} True if the component is enclosed in mustache braces, false otherwise.
      */
-    function isMustache(component: any) {
+    function isMustache(component: string | undefined): boolean {
         return Boolean(component?.startsWith?.('{{') && component?.endsWith?.('}}'));
     }
 

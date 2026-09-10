@@ -39,7 +39,7 @@ export function _calculateAngleFromOrigin(origin: { x: number; y: number }, targ
  * @param {object|null} crosshair - Active crosshair instance
  * @param {Event|null} [event=null] - Triggering event if any
  */
-function _refreshPreviewHighlights(currentDirection: any, rad: any, crosshair: any, event = null) {
+function _refreshPreviewHighlights(currentDirection: number, rad: number, crosshair: any, event: Event | null = null): void {
     rotationListener.refreshAllActiveHighlights(currentDirection, rad, crosshair, event);
 }
 
@@ -70,7 +70,7 @@ function _notifyPlacementResult(result: any, config: any, crosshair: any, extraA
  * @param {object} [sysAdapter=adapter.system] - The active system adapter
  * @returns {boolean} Whether the crosshair should stick to the token
  */
-export function shouldStickToToken(config: any, shapeType = "circle", sysAdapter = adapter.system) {
+export function shouldStickToToken(config: any, shapeType: string = "circle", sysAdapter: any = adapter.system): boolean {
     if (adapter.crosshair?.supportsShapeRotation && !adapter.crosshair.supportsShapeRotation(shapeType)) {
         return false;
     }
@@ -91,7 +91,7 @@ export function shouldStickToToken(config: any, shapeType = "circle", sysAdapter
  * @param {Event|null} [wheelEvent=null] - Optional wheel event
  * @returns {void}
  */
-function refreshTemplateHighlights(tmpl: any, newDirDeg: any, rad: any, wheelEvent = null) {
+function refreshTemplateHighlights(tmpl: any, newDirDeg: number, rad: number, wheelEvent: WheelEvent | null = null): void {
     rotationListener.refreshTemplateHighlights(tmpl, newDirDeg, rad, wheelEvent);
 }
 
@@ -120,7 +120,7 @@ export function attachWheelRotation(shape: any, config: any = {}) {
  * @param {object} [config={}] - Crosshair placement configuration
  * @returns {void}
  */
-export function rotateCrosshairInstance(crosshair: any, newDirDeg: any, config: any = {}) {
+export function rotateCrosshairInstance(crosshair: any, newDirDeg: number, config: any = {}): void {
     rotationListener.rotateCrosshairInstance(crosshair, newDirDeg, config);
 }
 
@@ -236,7 +236,7 @@ export function alignCrosshairAndEffects(crosshair: any, config: Record<string, 
  * @param {object} [config={}] - Crosshair placement configuration
  * @returns {number} Snapping mode bitmask integer
  */
-export function getGridSnapMode(config: Record<string, any> = {}) {
+export function getGridSnapMode(config: Record<string, any> = {}): number {
     if (config.snapToGrid === false || config.snapToGrid === "none" || config.snapToGrid === 0 || config.snapToGrid === "0") return 0;
     if (typeof config.snapToGrid === "number") return config.snapToGrid;
     if (config.snapToGrid === "center") return CONST?.GRID_SNAPPING_MODES?.CENTER ?? 1;
@@ -347,7 +347,7 @@ export function resolveCrosshairPlacement(crosshair: any, config: Record<string,
  * @param {string|number|boolean} [mode="all"] - Snapping mode ("all", "center", "corner", "edges", bitmask integer)
  * @returns {object} Snapped coordinates `{ x, y }`
  */
-export function snapCoordinates(x: number, y: number, mode: string | number | boolean = "all") {
+export function snapCoordinates(x: number, y: number, mode: string | number | boolean = "all"): { x: number; y: number } {
     return adapter.crosshair.snapCoordinates(x, y, mode as any);
 }
 
@@ -359,7 +359,7 @@ export function snapCoordinates(x: number, y: number, mode: string | number | bo
  * @param {boolean} [sticky=false] - Whether to snap to 8-way sticky perimeter points
  * @returns {object} Edge point coordinates and angle `{ x, y, direction }`
  */
-export function getTokenEdgePoint(tok: any, targetX: number, targetY: number, sticky: boolean = false) {
+export function getTokenEdgePoint(tok: any, targetX: number, targetY: number, sticky: boolean = false): { x: number; y: number; direction: number } {
     const token = adapter.crosshair.toToken(tok);
     return TokenGeometry.getTokenEdgePoint(token, targetX, targetY, sticky);
 }

@@ -105,7 +105,7 @@ export class TokenGeometry {
         }
 
         if (!intersection) {
-            const clamp = (val: any, min: any, max: any) => Math.max(min, Math.min(max, val));
+            const clamp = (val: number, min: number, max: number): number => Math.max(min, Math.min(max, val));
             intersection = {
                 x: clamp(targetMouse.x, tx, tx + w),
                 y: clamp(targetMouse.y, ty, ty + h)
@@ -137,7 +137,7 @@ export class TokenGeometry {
      * @param {boolean} [sticky=false] - Whether to snap to 8-way perimeter sectors
      * @returns {{x: number, y: number, direction: number}} Edge coordinates and direction
      */
-    static getTokenEdgePoint(token: any, targetX: any, targetY: any, sticky = false) {
+    static getTokenEdgePoint(token: any, targetX: number, targetY: number, sticky: boolean = false): { x: number; y: number; direction: number } {
         if (!token) return { x: targetX, y: targetY, direction: 0 };
         const { w, h, center } = this.getBounds(token);
         const cx = center.x;
