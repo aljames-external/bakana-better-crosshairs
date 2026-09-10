@@ -22,7 +22,7 @@ export class CrosshairRangeOverlay {
      * @param {{x: number, y: number}} target - Crosshair target coordinates
      * @returns {string} Formatted distance label string (e.g. "30 ft")
      */
-    measureDistance(origin: any, target: any) {
+    measureDistance(origin: { x: number; y: number }, target: { x: number; y: number }): string {
         const distance = adapter.crosshair.measureDistance(origin, target);
         const units = adapter.crosshair.gridUnits;
         return `${distance} ${units}`;

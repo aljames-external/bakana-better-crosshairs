@@ -24,11 +24,11 @@ export const activePlacementTracker: {
  * @param {number} angleDeg - Raw angle in degrees
  * @returns {number} Normalized angle in degrees between 0 and 360
  */
-export function _normalizeAngleDegrees(angleDeg: any) {
+export function _normalizeAngleDegrees(angleDeg: number): number {
     return TokenGeometry.normalizeAngle(angleDeg);
 }
 
-export function _calculateAngleFromOrigin(origin: any, target: any) {
+export function _calculateAngleFromOrigin(origin: { x: number; y: number }, target: { x: number; y: number }): { rad: number; deg: number } {
     return TokenGeometry.calculateAngle(origin, target);
 }
 

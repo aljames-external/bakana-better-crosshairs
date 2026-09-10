@@ -10,7 +10,7 @@ export class TokenGeometry {
      * @param {number} angleDeg - Raw angle in degrees
      * @returns {number} Normalized angle in degrees [0, 360)
      */
-    static normalizeAngle(angleDeg: any) {
+    static normalizeAngle(angleDeg: number): number {
         if (typeof angleDeg !== "number" || !Number.isFinite(angleDeg)) return 0;
         let norm = angleDeg % 360;
         if (norm < 0) norm += 360;
@@ -23,7 +23,7 @@ export class TokenGeometry {
      * @param {{x: number, y: number}} target - Target point
      * @returns {{rad: number, deg: number}} Calculated angle
      */
-    static calculateAngle(origin: any, target: any) {
+    static calculateAngle(origin: { x: number; y: number }, target: { x: number; y: number }): { rad: number; deg: number } {
         const dx = target.x - origin.x;
         const dy = target.y - origin.y;
         const rad = Math.atan2(dy, dx);
